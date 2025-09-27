@@ -1,0 +1,138 @@
+.categories-section {
+  background: #fff;
+  padding: 30px 0;
+  margin-bottom: 20px;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.section-titlee {
+  font-size: 24px;
+  font-weight: bold;
+  color: #297d4e;
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.category-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border: 1px solid transparent;
+}
+
+.category-item:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.category-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: #297d4e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 15px;
+  transition: transform 0.3s ease;
+}
+
+.category-item:hover .category-icon {
+  transform: scale(1.1);
+}
+
+.category-icon span {
+  font-size: 24px;
+  filter: grayscale(100%) brightness(0) invert(1);
+}
+
+.category-name {
+  font-size: 14px;
+  text-align: center;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.category-item:hover .category-name {
+  color: #297d4e;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .categories-section {
+    padding: 20px 0;
+  }
+
+  .categories-grid {
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 15px;
+  }
+
+  .category-item {
+    padding: 15px 8px;
+  }
+
+  .category-icon {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 10px;
+  }
+
+  .category-icon span {
+    font-size: 20px;
+  }
+
+  .category-name {
+    font-size: 12px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .categories-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+
+  .category-item {
+    padding: 10px 5px;
+  }
+
+  .category-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .category-icon span {
+    font-size: 16px;
+  }
+
+  .category-name {
+    font-size: 11px;
+  }
+}

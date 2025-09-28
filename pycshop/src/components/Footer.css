@@ -1,0 +1,218 @@
+.footer {
+  background: #fff;
+  border-top: 1px solid #ebebeb;
+  margin-top: 40px;
+}
+
+.footer-main {
+  padding: 40px 0;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 40px;
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.footer-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 20px 0;
+  text-transform: uppercase;
+}
+
+.footer-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-links li {
+  margin-bottom: 12px;
+}
+
+.footer-links a {
+  color: #666;
+  text-decoration: none;
+  font-size: 13px;
+  line-height: 1.4;
+  transition: color 0.2s;
+}
+
+.footer-links a:hover {
+  color: #ee4d2d;
+}
+
+/* Payment & Shipping Methods */
+.payment-methods,
+.shipping-methods {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.payment-item,
+.shipping-item {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #666;
+  border: 1px solid #ebebeb;
+}
+
+/* App Download */
+.app-download {
+  display: flex;
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.qr-code {
+  width: 80px;
+  height: 80px;
+}
+
+.qr-placeholder {
+  width: 100%;
+  height: 100%;
+  background: #f8f9fa;
+  border: 1px solid #ebebeb;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #666;
+}
+
+.download-links {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  background: #f8f9fa;
+  border: 1px solid #ebebeb;
+  border-radius: 4px;
+  text-decoration: none;
+  color: #666;
+  font-size: 12px;
+  transition: all 0.2s;
+}
+
+.download-btn:hover {
+  background: #ee4d2d;
+  color: #fff;
+  border-color: #ee4d2d;
+}
+
+/* Footer Bottom */
+.footer-bottom {
+  background: #f8f9fa;
+  border-top: 1px solid #ebebeb;
+  padding: 20px 0;
+}
+
+.footer-bottom-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.copyright p,
+.location p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.location {
+  max-width: 600px;
+}
+
+.footer-info {
+  border-top: 1px solid #ebebeb;
+  padding-top: 20px;
+}
+
+.company-info h4 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 15px 0;
+}
+
+.company-info p {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 10px 0;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .footer-content {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+  }
+  
+  .app-download {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-main {
+    padding: 30px 0;
+  }
+  
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+  }
+  
+  .footer-bottom-content {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .payment-methods,
+  .shipping-methods {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .footer-main {
+    padding: 20px 0;
+  }
+  
+  .company-info p {
+    font-size: 11px;
+  }
+  
+  .location {
+    max-width: 100%;
+  }
+}

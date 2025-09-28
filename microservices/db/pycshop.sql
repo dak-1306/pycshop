@@ -30,21 +30,6 @@ create table ThongBao (
     constraint fk_thongbao_nguoi_dung foreign key (ID_NguoiNhan) references NguoiDung(ID_NguoiDung) on delete cascade 
 );
 
-
-create table BaoCao (
-	ID_BaoCao bigint auto_increment primary key,
-    ID_NguoiBC bigint not null,
-    ID_NguoiBiBC bigint,
-    ID_SpBiBC bigint,
-    LoaiBaoCao enum('User', 'Product') not null,
-    LiDo text not null,
-    TrangThai enum('in_progress','resolved') not null default 'in_progress',
-    ThoiGianTao timestamp default current_timestamp,
-    constraint fk_baocao_nguoibc foreign key (ID_NguoiBC) references NguoiDung(ID_NguoiDung) on delete cascade ,
-    constraint fk_baocao_nguoibibc foreign key (ID_NguoiBiBC) references NguoiDung(ID_NguoiDung) on delete cascade ,
-    constraint fk_baocao_sanpham foreign key (ID_SpBiBC) references SanPham(ID_SanPham) on delete cascade 
-);
-
 create table SanPham (
 	ID_SanPham bigint auto_increment primary key,
     ID_NguoiBan bigint not null,
@@ -83,6 +68,22 @@ create table AnhSanPham (
     Upload_at timestamp default current_timestamp,
     constraint fk_anhsp_sp foreign key (ID_SanPham) references SanPham(ID_SanPham) on delete cascade 
 );
+
+create table BaoCao (
+	ID_BaoCao bigint auto_increment primary key,
+    ID_NguoiBC bigint not null,
+    ID_NguoiBiBC bigint,
+    ID_SpBiBC bigint,
+    LoaiBaoCao enum('User', 'Product') not null,
+    LiDo text not null,
+    TrangThai enum('in_progress','resolved') not null default 'in_progress',
+    ThoiGianTao timestamp default current_timestamp,
+    constraint fk_baocao_nguoibc foreign key (ID_NguoiBC) references NguoiDung(ID_NguoiDung) on delete cascade ,
+    constraint fk_baocao_nguoibibc foreign key (ID_NguoiBiBC) references NguoiDung(ID_NguoiDung) on delete cascade ,
+    constraint fk_baocao_sanpham foreign key (ID_SpBiBC) references SanPham(ID_SanPham) on delete cascade 
+);
+
+
 
 create table NhatKyThayDoiTonKho (
 	ID_NhatKy bigint auto_increment primary key,

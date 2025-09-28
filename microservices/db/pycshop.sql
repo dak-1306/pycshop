@@ -30,6 +30,12 @@ create table ThongBao (
     constraint fk_thongbao_nguoi_dung foreign key (ID_NguoiNhan) references NguoiDung(ID_NguoiDung) on delete cascade 
 );
 
+create table DanhMuc (
+	ID_DanhMuc int auto_increment primary key,
+    TenDanhMuc varchar(150) not null,
+    MoTa text
+);
+
 create table SanPham (
 	ID_SanPham bigint auto_increment primary key,
     ID_NguoiBan bigint not null,
@@ -44,11 +50,6 @@ create table SanPham (
     constraint fk_sanpham_danhmuc foreign key (ID_DanhMuc) references DanhMuc(ID_DanhMuc) on delete cascade 
 );
 
-create table DanhMuc (
-	ID_DanhMuc int auto_increment primary key,
-    TenDanhMuc varchar(150) not null,
-    MoTa text
-);
 
 create table DanhGiaSanPham (
 	ID_DanhGia bigint auto_increment primary key,

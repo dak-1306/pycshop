@@ -1,0 +1,41 @@
+/* Pycshop Logo Gradient Style */
+.pycshop-gradient {
+  background: linear-gradient(45deg, #ff6a00 0%, #ffd54f 50%, #ffffff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  font-weight: bold;
+  display: inline-block;
+}
+
+/* Fallback for browsers that don't support background-clip: text */
+@supports not (-webkit-background-clip: text) {
+  .pycshop-gradient {
+    background: none;
+    color: #ff6b35;
+    -webkit-text-fill-color: initial;
+  }
+}
+
+/* Animation hiệu ứng cho logo */
+.pycshop-gradient:hover {
+  animation: gradientShift 2s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Đảm bảo gradient có kích thước phù hợp */
+.pycshop-gradient {
+  background-size: 200% 200%;
+}

@@ -1,8 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "../../assets/css/logo.css";
 
 const SellerLayout = ({ children, title = "Dashboard" }) => {
+  const location = useLocation();
   const [activeMenu, setActiveMenu] = useState("dashboard");
+
+  useEffect(() => {
+    const path = location.pathname;
+    if (path.includes("/dashboard")) setActiveMenu("dashboard");
+    else if (path.includes("/manage-product")) setActiveMenu("manageProduct");
+    else if (path.includes("/order")) setActiveMenu("order");
+    else if (path.includes("/shop-page")) setActiveMenu("shopPage");
+  }, [location.pathname]);
 
   const menuItems = [
     {
@@ -152,18 +162,14 @@ const SellerLayout = ({ children, title = "Dashboard" }) => {
           <nav className="mt-8">
             <div className="px-4 space-y-2">
               {menuItems.map((item) => (
-                <a
+                <Link
                   key={item.id}
-                  href={item.href}
+                  to={item.href}
                   className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
                     activeMenu === item.id
                       ? "bg-gray-100 text-gray-900"
                       : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                   }`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setActiveMenu(item.id);
-                  }}
                 >
                   <span
                     className={`mr-3 ${
@@ -173,7 +179,7 @@ const SellerLayout = ({ children, title = "Dashboard" }) => {
                     {getIcon(item.icon)}
                   </span>
                   {item.name}
-                </a>
+                </Link>
               ))}
             </div>
           </nav>

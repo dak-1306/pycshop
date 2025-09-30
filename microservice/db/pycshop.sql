@@ -1,210 +1,712 @@
-create database pycshop;
-use pycshop;
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Máy chủ: 127.0.0.1
+-- Thời gian đã tạo: Th9 30, 2025 lúc 10:46 AM
+-- Phiên bản máy phục vụ: 10.4.32-MariaDB
+-- Phiên bản PHP: 8.0.30
 
-create table NguoiDung (
-    ID_NguoiDung bigint auto_increment primary key,
-    VaiTro enum('seller', 'buyer') not null default 'buyer',
-    HoTen varchar(200) not null,
-    Email varchar(255) not null unique,
-    MatKhau varchar(255) not null,
-    SoDienThoai varchar(50),
-    DiaChi text,
-    TrangThai enum('active','block') not null default 'active',
-    ThoiGianTao timestamp DEFAULT current_timestamp,
-    AvatarUrl varchar(500) default null
-);
-
-create table Admin (
-	ID_NguoiDung int auto_increment primary key,
-    HoTen varchar(200) not null,
-    Email varchar(255) not null unique,
-    MatKhau varchar(255) not null
-);
-
-create table ThongBao (
-	ID_ThongBao bigint auto_increment primary key,
-    ID_NguoiNhan bigint not null,
-    Loai enum('order','payment','report') not null default 'order',
-    NoiDung text,
-    ThoiGianGui timestamp DEFAULT current_timestamp,
-    constraint fk_thongbao_nguoi_dung foreign key (ID_NguoiNhan) references NguoiDung(ID_NguoiDung) on delete cascade 
-);
-
-create table DanhMuc (
-	ID_DanhMuc int auto_increment primary key,
-    TenDanhMuc varchar(150) not null,
-    MoTa text
-);
-
-create table SanPham (
-	ID_SanPham bigint auto_increment primary key,
-    ID_NguoiBan bigint not null,
-    ID_DanhMuc int not null,
-    TenSanPham varchar(300) not null,
-    MoTa text ,	
-    Gia decimal(12,2) not null check (Gia >= 0),
-    TonKho int not null default 0 check (TonKho >= 0),
-    TrangThai enum('active','inactive','out_of_stock') not null default 'active',
-    CapNhat timestamp default current_timestamp on update current_timestamp,
-	constraint fk_sanpham_nguoiban foreign key (ID_NguoiBan) references NguoiDung(ID_NguoiDung) on delete cascade ,
-    constraint fk_sanpham_danhmuc foreign key (ID_DanhMuc) references DanhMuc(ID_DanhMuc) on delete cascade 
-);
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
 
-create table DanhGiaSanPham (
-	ID_DanhGia bigint auto_increment primary key,
-    ID_SanPham bigint not null,
-    ID_NguoiMua bigint not null,
-    BinhLuan text,
-    TyLe int not null,
-    ThoiGian timestamp default current_timestamp,
-    constraint fk_danhgiasp_nguoimua foreign key (ID_NguoiMua) references NguoiDung(ID_NguoiDung) on delete cascade ,
-    constraint fk_danhgiasp_sp foreign key (ID_SanPham) references SanPham(ID_SanPham) on delete cascade 
-);
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
-create table AnhSanPham (
-	ID_Anh bigint auto_increment primary key,
-    ID_SanPham bigint not null,
-    Url text not null,
-    Upload_at timestamp default current_timestamp,
-    constraint fk_anhsp_sp foreign key (ID_SanPham) references SanPham(ID_SanPham) on delete cascade 
-);
+--
+-- Cơ sở dữ liệu: `pycshop`
+--
 
-create table BaoCao (
-	ID_BaoCao bigint auto_increment primary key,
-    ID_NguoiBC bigint not null,
-    ID_NguoiBiBC bigint,
-    ID_SpBiBC bigint,
-    LoaiBaoCao enum('User', 'Product') not null,
-    LiDo text not null,
-    TrangThai enum('in_progress','resolved') not null default 'in_progress',
-    ThoiGianTao timestamp default current_timestamp,
-    constraint fk_baocao_nguoibc foreign key (ID_NguoiBC) references NguoiDung(ID_NguoiDung) on delete cascade ,
-    constraint fk_baocao_nguoibibc foreign key (ID_NguoiBiBC) references NguoiDung(ID_NguoiDung) on delete cascade ,
-    constraint fk_baocao_sanpham foreign key (ID_SpBiBC) references SanPham(ID_SanPham) on delete cascade 
-);
+-- --------------------------------------------------------
 
+--
+-- Cấu trúc bảng cho bảng `admin`
+--
 
+CREATE TABLE `admin` (
+  `ID_NguoiDung` int(11) NOT NULL,
+  `HoTen` varchar(200) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `MatKhau` varchar(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-create table NhatKyThayDoiTonKho (
-	ID_NhatKy bigint auto_increment primary key,
-    ID_SanPham bigint not null,
-    SoLuongThayDoi int not null,
-    HanhDong enum('import','export') not null default 'export',
-    ThoiGian timestamp default current_timestamp,
-    constraint fk_nhatky_sp foreign key (ID_SanPham) references SanPham(ID_SanPham)
-);
+-- --------------------------------------------------------
 
-create table HoiThoai (
-	ID_HoiThoai bigint auto_increment primary key,
-    ID_NguoiBan bigint not null,
-    ID_NguoiMua bigint not null,
-    ThoiGianTao timestamp default current_timestamp,
-    constraint fk_hoithoai_nguoimua foreign key (ID_NguoiMua) references NguoiDung(ID_NguoiDung) on delete cascade,
-    constraint fk_hoithoai_nguoiban foreign key (ID_NguoiBan) references NguoiDung(ID_NguoiDung) on delete cascade 
-);
+--
+-- Cấu trúc bảng cho bảng `anhsanpham`
+--
 
-create table TinNhan (
-	ID_TinNhan bigint auto_increment primary key,
-    ID_HoiThoai bigint not null,
-    ID_NguoiGui bigint not null,
-    NoiDung text,
-    ThoiGianGui timestamp default current_timestamp,
-    constraint fk_tinnhan_hoithoai foreign key (ID_HoiThoai) references HoiThoai(ID_HoiThoai) on delete cascade,
-    constraint fk_tinnhan_nguoidung foreign key (ID_NguoiGui) references NguoiDung(ID_NguoiDung) on delete cascade
-);
+CREATE TABLE `anhsanpham` (
+  `ID_Anh` bigint(20) NOT NULL,
+  `ID_SanPham` bigint(20) NOT NULL,
+  `Url` text NOT NULL,
+  `Upload_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-create table TinNhanAnh (
-	ID_Anh bigint auto_increment primary key,
-    ID_TinNhan bigint not null,
-    AnhUrl text not null,
-    ThoiGianGui timestamp default current_timestamp,
-    constraint fk_tinnhananh_tinnhan foreign key (ID_TinNhan) references TinNhan(ID_TinNhan) on delete cascade
-);
+-- --------------------------------------------------------
 
-create table GioHang (
-	ID_GioHang bigint auto_increment primary key,
-    ID_NguoiMua bigint not null,
-    ThoiGianTao timestamp default current_timestamp,
-    constraint fk_giohang_nguoimua foreign key (ID_NguoiMua) references NguoiDung(ID_NguoiDung) on delete cascade
-);
+--
+-- Cấu trúc bảng cho bảng `apma`
+--
 
-create table SanPhamTrongGio (
-    ID_MatHang bigint auto_increment primary key,
-    ID_GioHang bigint not null,
-    ID_SanPham bigint not null,
-    SoLuong int not null check (SoLuong > 0),
-    ThemLuc timestamp default current_timestamp,
-    unique(ID_GioHang, ID_SanPham),
-    constraint fk_sptronggio_giohang foreign key (ID_GioHang) references GioHang(ID_GioHang) on delete cascade,
-    constraint fk_sptronggio_sanpham foreign key (ID_SanPham) references SanPham(ID_SanPham) on delete cascade
-);
+CREATE TABLE `apma` (
+  `ID_ApMa` bigint(20) NOT NULL,
+  `ID_Phieu` bigint(20) NOT NULL,
+  `ID_NguoiDung` bigint(20) NOT NULL,
+  `ID_DonHang` bigint(20) NOT NULL,
+  `SuDungLuc` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-create table DonHang (
-	ID_DonHang bigint auto_increment primary key,
-    ID_NguoiMua bigint not null,
-    TongGia decimal(12,2) not null check (TongGia >= 0),
-    ThoiGianTao timestamp default current_timestamp,
-    TrangThai enum('pending','confirmed', 'shipped', 'cancelled') not null default 'pending',
-    constraint fk_donhang_nguoimua foreign key (ID_NguoiMua) references NguoiDung(ID_NguoiDung) on delete cascade
-);
+-- --------------------------------------------------------
 
-create table ThanhToan (
-	ID_ThanhToan bigint auto_increment primary key,
-    ID_DonHang bigint not null,
-    PhuongThuc enum('COD','CBS') not null default 'COD',
-    TrangThai enum('paid','unpaid') not null default 'unpaid',
-	ThoiGianTao timestamp default current_timestamp,
-    constraint fk_thanhtoan_donhang foreign key (ID_DonHang) references DonHang(ID_DonHang) on delete cascade
-);
+--
+-- Cấu trúc bảng cho bảng `baocao`
+--
 
-create table ChiTietDonHang (
-	ID_ChiTietDH bigint auto_increment primary key,
-    ID_DonHang bigint not null,
-    ID_SanPham bigint not null,
-    DonGia decimal(12,2) not null check (DonGia >= 0),
-    SoLuong int not null ,
-    constraint fk_chitiet_donhang foreign key (ID_DonHang) references DonHang(ID_DonHang) on delete cascade,
-    constraint fk_chitiet_sanpham foreign key (ID_SanPham) references SanPham(ID_SanPham)
-);
+CREATE TABLE `baocao` (
+  `ID_BaoCao` bigint(20) NOT NULL,
+  `ID_NguoiBC` bigint(20) NOT NULL,
+  `ID_NguoiBiBC` bigint(20) DEFAULT NULL,
+  `ID_SpBiBC` bigint(20) DEFAULT NULL,
+  `LoaiBaoCao` enum('User','Product') NOT NULL,
+  `LiDo` text NOT NULL,
+  `TrangThai` enum('in_progress','resolved') NOT NULL DEFAULT 'in_progress',
+  `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-create table GiaoHang (
-	ID_GiaoHang bigint auto_increment primary key,
-    ID_DonHang bigint not null,
-    DiaChi text not null,
-    TrangThai enum('undelivery','out_for_delivery','delivered'),
-    NgayVanChuyen timestamp,
-    NgayGiaoToi timestamp,
-    constraint fk_giaohang_donhang foreign key (ID_DonHang) references DonHang(ID_DonHang)
-);
+-- --------------------------------------------------------
 
-create table PhieuGiamGia (
-	ID_Phieu bigint auto_increment primary key,
-    MaGiam varchar(100) not null unique,
-    PhanTramGiam decimal(5,2),
-    SoLanDungDuoc int not null default 1,
-    SoLanDaDung  int not null default 0,
-    GiaTriDonHangToiThieu decimal(12,2),
-    NgayHieuLuc date not null,
-    NgayHetHan date not null
-);
+--
+-- Cấu trúc bảng cho bảng `chitietdonhang`
+--
 
-create table ApMa (
-	ID_ApMa bigint auto_increment primary key,
-    ID_Phieu bigint not null,
-    ID_NguoiDung bigint not null,
-    ID_DonHang bigint not null,
-    SuDungLuc timestamp default current_timestamp,
-    unique(ID_Phieu, ID_NguoiDung),
-    constraint fk_apma_phieu foreign key (ID_Phieu) references PhieuGiamGia(ID_Phieu),
-    constraint fk_apma_nguoidung foreign key (ID_NguoiDung) references NguoiDung(ID_NguoiDung),
-    constraint fk_apma_donhang foreign key (ID_DonHang) references DonHang(ID_DonHang)
-);
+CREATE TABLE `chitietdonhang` (
+  `ID_ChiTietDH` bigint(20) NOT NULL,
+  `ID_DonHang` bigint(20) NOT NULL,
+  `ID_SanPham` bigint(20) NOT NULL,
+  `DonGia` decimal(12,2) NOT NULL CHECK (`DonGia` >= 0),
+  `SoLuong` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
 
+--
+-- Cấu trúc bảng cho bảng `danhgiasanpham`
+--
 
+CREATE TABLE `danhgiasanpham` (
+  `ID_DanhGia` bigint(20) NOT NULL,
+  `ID_SanPham` bigint(20) NOT NULL,
+  `ID_NguoiMua` bigint(20) NOT NULL,
+  `BinhLuan` text DEFAULT NULL,
+  `TyLe` int(11) NOT NULL,
+  `ThoiGian` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
 
+--
+-- Cấu trúc bảng cho bảng `danhmuc`
+--
 
+CREATE TABLE `danhmuc` (
+  `ID_DanhMuc` int(11) NOT NULL,
+  `TenDanhMuc` varchar(150) NOT NULL,
+  `MoTa` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
 
+--
+-- Cấu trúc bảng cho bảng `donhang`
+--
+
+CREATE TABLE `donhang` (
+  `ID_DonHang` bigint(20) NOT NULL,
+  `ID_NguoiMua` bigint(20) NOT NULL,
+  `TongGia` decimal(12,2) NOT NULL CHECK (`TongGia` >= 0),
+  `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `TrangThai` enum('pending','confirmed','shipped','cancelled') NOT NULL DEFAULT 'pending'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `giaohang`
+--
+
+CREATE TABLE `giaohang` (
+  `ID_GiaoHang` bigint(20) NOT NULL,
+  `ID_DonHang` bigint(20) NOT NULL,
+  `DiaChi` text NOT NULL,
+  `TrangThai` enum('undelivery','out_for_delivery','delivered') DEFAULT NULL,
+  `NgayVanChuyen` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `NgayGiaoToi` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `giohang`
+--
+
+CREATE TABLE `giohang` (
+  `ID_GioHang` bigint(20) NOT NULL,
+  `ID_NguoiMua` bigint(20) NOT NULL,
+  `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `hoithoai`
+--
+
+CREATE TABLE `hoithoai` (
+  `ID_HoiThoai` bigint(20) NOT NULL,
+  `ID_NguoiBan` bigint(20) NOT NULL,
+  `ID_NguoiMua` bigint(20) NOT NULL,
+  `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `nguoidung`
+--
+
+CREATE TABLE `nguoidung` (
+  `ID_NguoiDung` bigint(20) NOT NULL,
+  `VaiTro` enum('seller','buyer') NOT NULL DEFAULT 'buyer',
+  `HoTen` varchar(200) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `MatKhau` varchar(255) NOT NULL,
+  `SoDienThoai` varchar(50) DEFAULT NULL,
+  `DiaChi` text DEFAULT NULL,
+  `TrangThai` enum('active','block') NOT NULL DEFAULT 'active',
+  `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp(),
+  `AvatarUrl` varchar(500) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `nguoidung`
+--
+
+INSERT INTO `nguoidung` (`ID_NguoiDung`, `VaiTro`, `HoTen`, `Email`, `MatKhau`, `SoDienThoai`, `DiaChi`, `TrangThai`, `ThoiGianTao`, `AvatarUrl`) VALUES
+(3, 'buyer', 'Nguyễn Văn Test', 'test@gmail.com', '$2b$10$kyTNrvfNiY2YcWIsctNm8O6Z08YJVJRNdIwNmgjlgGANAq7kNjrjm', '0123456789', '123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'active', '2025-09-29 10:46:02', NULL),
+(4, 'buyer', 'Trần Tuấn Anh', 'anh@gmail.com', '$2b$10$.nBUefCG4ZtzVCSUhbjb5.tcqiyZfpzfRENMJBdVqu.e.mvrDEJ3W', '01234567689', '357 Điện Biên Phủ, Phường 15, Quận Bình Thạnh, TP.HCM', 'active', '2025-09-30 07:25:46', NULL),
+(5, 'buyer', 'Phạm Văn Bành', 'banh@gmail.com', '$2b$10$zdiHx0ziAUGVrMslqzUP9.cw93BaTIzSdAVOId9yQ3B9bg.DAGDZu', '0123456789', '147 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM', 'active', '2025-09-30 07:31:08', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `nhatkythaydoitonkho`
+--
+
+CREATE TABLE `nhatkythaydoitonkho` (
+  `ID_NhatKy` bigint(20) NOT NULL,
+  `ID_SanPham` bigint(20) NOT NULL,
+  `SoLuongThayDoi` int(11) NOT NULL,
+  `HanhDong` enum('import','export') NOT NULL DEFAULT 'export',
+  `ThoiGian` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `phieugiamgia`
+--
+
+CREATE TABLE `phieugiamgia` (
+  `ID_Phieu` bigint(20) NOT NULL,
+  `MaGiam` varchar(100) NOT NULL,
+  `PhanTramGiam` decimal(5,2) DEFAULT NULL,
+  `SoLanDungDuoc` int(11) NOT NULL DEFAULT 1,
+  `SoLanDaDung` int(11) NOT NULL DEFAULT 0,
+  `GiaTriDonHangToiThieu` decimal(12,2) DEFAULT NULL,
+  `NgayHieuLuc` date NOT NULL,
+  `NgayHetHan` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `sanpham`
+--
+
+CREATE TABLE `sanpham` (
+  `ID_SanPham` bigint(20) NOT NULL,
+  `ID_NguoiBan` bigint(20) NOT NULL,
+  `ID_DanhMuc` int(11) NOT NULL,
+  `TenSanPham` varchar(300) NOT NULL,
+  `MoTa` text DEFAULT NULL,
+  `Gia` decimal(12,2) NOT NULL CHECK (`Gia` >= 0),
+  `TonKho` int(11) NOT NULL DEFAULT 0 CHECK (`TonKho` >= 0),
+  `TrangThai` enum('active','inactive','out_of_stock') NOT NULL DEFAULT 'active',
+  `CapNhat` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `sanphamtronggio`
+--
+
+CREATE TABLE `sanphamtronggio` (
+  `ID_MatHang` bigint(20) NOT NULL,
+  `ID_GioHang` bigint(20) NOT NULL,
+  `ID_SanPham` bigint(20) NOT NULL,
+  `SoLuong` int(11) NOT NULL CHECK (`SoLuong` > 0),
+  `ThemLuc` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `thanhtoan`
+--
+
+CREATE TABLE `thanhtoan` (
+  `ID_ThanhToan` bigint(20) NOT NULL,
+  `ID_DonHang` bigint(20) NOT NULL,
+  `PhuongThuc` enum('COD','CBS') NOT NULL DEFAULT 'COD',
+  `TrangThai` enum('paid','unpaid') NOT NULL DEFAULT 'unpaid',
+  `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `thongbao`
+--
+
+CREATE TABLE `thongbao` (
+  `ID_ThongBao` bigint(20) NOT NULL,
+  `ID_NguoiNhan` bigint(20) NOT NULL,
+  `Loai` enum('order','payment','report') NOT NULL DEFAULT 'order',
+  `NoiDung` text DEFAULT NULL,
+  `ThoiGianGui` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `tinnhan`
+--
+
+CREATE TABLE `tinnhan` (
+  `ID_TinNhan` bigint(20) NOT NULL,
+  `ID_HoiThoai` bigint(20) NOT NULL,
+  `ID_NguoiGui` bigint(20) NOT NULL,
+  `NoiDung` text DEFAULT NULL,
+  `ThoiGianGui` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `tinnhananh`
+--
+
+CREATE TABLE `tinnhananh` (
+  `ID_Anh` bigint(20) NOT NULL,
+  `ID_TinNhan` bigint(20) NOT NULL,
+  `AnhUrl` text NOT NULL,
+  `ThoiGianGui` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Chỉ mục cho các bảng đã đổ
+--
+
+--
+-- Chỉ mục cho bảng `admin`
+--
+ALTER TABLE `admin`
+  ADD PRIMARY KEY (`ID_NguoiDung`),
+  ADD UNIQUE KEY `Email` (`Email`);
+
+--
+-- Chỉ mục cho bảng `anhsanpham`
+--
+ALTER TABLE `anhsanpham`
+  ADD PRIMARY KEY (`ID_Anh`),
+  ADD KEY `fk_anhsp_sp` (`ID_SanPham`);
+
+--
+-- Chỉ mục cho bảng `apma`
+--
+ALTER TABLE `apma`
+  ADD PRIMARY KEY (`ID_ApMa`),
+  ADD UNIQUE KEY `ID_Phieu` (`ID_Phieu`,`ID_NguoiDung`),
+  ADD KEY `fk_apma_nguoidung` (`ID_NguoiDung`),
+  ADD KEY `fk_apma_donhang` (`ID_DonHang`);
+
+--
+-- Chỉ mục cho bảng `baocao`
+--
+ALTER TABLE `baocao`
+  ADD PRIMARY KEY (`ID_BaoCao`),
+  ADD KEY `fk_baocao_nguoibc` (`ID_NguoiBC`),
+  ADD KEY `fk_baocao_nguoibibc` (`ID_NguoiBiBC`),
+  ADD KEY `fk_baocao_sanpham` (`ID_SpBiBC`);
+
+--
+-- Chỉ mục cho bảng `chitietdonhang`
+--
+ALTER TABLE `chitietdonhang`
+  ADD PRIMARY KEY (`ID_ChiTietDH`),
+  ADD KEY `fk_chitiet_donhang` (`ID_DonHang`),
+  ADD KEY `fk_chitiet_sanpham` (`ID_SanPham`);
+
+--
+-- Chỉ mục cho bảng `danhgiasanpham`
+--
+ALTER TABLE `danhgiasanpham`
+  ADD PRIMARY KEY (`ID_DanhGia`),
+  ADD KEY `fk_danhgiasp_nguoimua` (`ID_NguoiMua`),
+  ADD KEY `fk_danhgiasp_sp` (`ID_SanPham`);
+
+--
+-- Chỉ mục cho bảng `danhmuc`
+--
+ALTER TABLE `danhmuc`
+  ADD PRIMARY KEY (`ID_DanhMuc`);
+
+--
+-- Chỉ mục cho bảng `donhang`
+--
+ALTER TABLE `donhang`
+  ADD PRIMARY KEY (`ID_DonHang`),
+  ADD KEY `fk_donhang_nguoimua` (`ID_NguoiMua`);
+
+--
+-- Chỉ mục cho bảng `giaohang`
+--
+ALTER TABLE `giaohang`
+  ADD PRIMARY KEY (`ID_GiaoHang`),
+  ADD KEY `fk_giaohang_donhang` (`ID_DonHang`);
+
+--
+-- Chỉ mục cho bảng `giohang`
+--
+ALTER TABLE `giohang`
+  ADD PRIMARY KEY (`ID_GioHang`),
+  ADD KEY `fk_giohang_nguoimua` (`ID_NguoiMua`);
+
+--
+-- Chỉ mục cho bảng `hoithoai`
+--
+ALTER TABLE `hoithoai`
+  ADD PRIMARY KEY (`ID_HoiThoai`),
+  ADD KEY `fk_hoithoai_nguoimua` (`ID_NguoiMua`),
+  ADD KEY `fk_hoithoai_nguoiban` (`ID_NguoiBan`);
+
+--
+-- Chỉ mục cho bảng `nguoidung`
+--
+ALTER TABLE `nguoidung`
+  ADD PRIMARY KEY (`ID_NguoiDung`),
+  ADD UNIQUE KEY `Email` (`Email`);
+
+--
+-- Chỉ mục cho bảng `nhatkythaydoitonkho`
+--
+ALTER TABLE `nhatkythaydoitonkho`
+  ADD PRIMARY KEY (`ID_NhatKy`),
+  ADD KEY `fk_nhatky_sp` (`ID_SanPham`);
+
+--
+-- Chỉ mục cho bảng `phieugiamgia`
+--
+ALTER TABLE `phieugiamgia`
+  ADD PRIMARY KEY (`ID_Phieu`),
+  ADD UNIQUE KEY `MaGiam` (`MaGiam`);
+
+--
+-- Chỉ mục cho bảng `sanpham`
+--
+ALTER TABLE `sanpham`
+  ADD PRIMARY KEY (`ID_SanPham`),
+  ADD KEY `fk_sanpham_nguoiban` (`ID_NguoiBan`),
+  ADD KEY `fk_sanpham_danhmuc` (`ID_DanhMuc`);
+
+--
+-- Chỉ mục cho bảng `sanphamtronggio`
+--
+ALTER TABLE `sanphamtronggio`
+  ADD PRIMARY KEY (`ID_MatHang`),
+  ADD UNIQUE KEY `ID_GioHang` (`ID_GioHang`,`ID_SanPham`),
+  ADD KEY `fk_sptronggio_sanpham` (`ID_SanPham`);
+
+--
+-- Chỉ mục cho bảng `thanhtoan`
+--
+ALTER TABLE `thanhtoan`
+  ADD PRIMARY KEY (`ID_ThanhToan`),
+  ADD KEY `fk_thanhtoan_donhang` (`ID_DonHang`);
+
+--
+-- Chỉ mục cho bảng `thongbao`
+--
+ALTER TABLE `thongbao`
+  ADD PRIMARY KEY (`ID_ThongBao`),
+  ADD KEY `fk_thongbao_nguoi_dung` (`ID_NguoiNhan`);
+
+--
+-- Chỉ mục cho bảng `tinnhan`
+--
+ALTER TABLE `tinnhan`
+  ADD PRIMARY KEY (`ID_TinNhan`),
+  ADD KEY `fk_tinnhan_hoithoai` (`ID_HoiThoai`),
+  ADD KEY `fk_tinnhan_nguoidung` (`ID_NguoiGui`);
+
+--
+-- Chỉ mục cho bảng `tinnhananh`
+--
+ALTER TABLE `tinnhananh`
+  ADD PRIMARY KEY (`ID_Anh`),
+  ADD KEY `fk_tinnhananh_tinnhan` (`ID_TinNhan`);
+
+--
+-- AUTO_INCREMENT cho các bảng đã đổ
+--
+
+--
+-- AUTO_INCREMENT cho bảng `admin`
+--
+ALTER TABLE `admin`
+  MODIFY `ID_NguoiDung` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `anhsanpham`
+--
+ALTER TABLE `anhsanpham`
+  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `apma`
+--
+ALTER TABLE `apma`
+  MODIFY `ID_ApMa` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `baocao`
+--
+ALTER TABLE `baocao`
+  MODIFY `ID_BaoCao` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `chitietdonhang`
+--
+ALTER TABLE `chitietdonhang`
+  MODIFY `ID_ChiTietDH` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `danhgiasanpham`
+--
+ALTER TABLE `danhgiasanpham`
+  MODIFY `ID_DanhGia` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `danhmuc`
+--
+ALTER TABLE `danhmuc`
+  MODIFY `ID_DanhMuc` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `donhang`
+--
+ALTER TABLE `donhang`
+  MODIFY `ID_DonHang` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `giaohang`
+--
+ALTER TABLE `giaohang`
+  MODIFY `ID_GiaoHang` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `giohang`
+--
+ALTER TABLE `giohang`
+  MODIFY `ID_GioHang` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `hoithoai`
+--
+ALTER TABLE `hoithoai`
+  MODIFY `ID_HoiThoai` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `nguoidung`
+--
+ALTER TABLE `nguoidung`
+  MODIFY `ID_NguoiDung` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT cho bảng `nhatkythaydoitonkho`
+--
+ALTER TABLE `nhatkythaydoitonkho`
+  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `phieugiamgia`
+--
+ALTER TABLE `phieugiamgia`
+  MODIFY `ID_Phieu` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `sanpham`
+--
+ALTER TABLE `sanpham`
+  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `sanphamtronggio`
+--
+ALTER TABLE `sanphamtronggio`
+  MODIFY `ID_MatHang` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `thanhtoan`
+--
+ALTER TABLE `thanhtoan`
+  MODIFY `ID_ThanhToan` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `thongbao`
+--
+ALTER TABLE `thongbao`
+  MODIFY `ID_ThongBao` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `tinnhan`
+--
+ALTER TABLE `tinnhan`
+  MODIFY `ID_TinNhan` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `tinnhananh`
+--
+ALTER TABLE `tinnhananh`
+  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT;
+
+--
+-- Các ràng buộc cho các bảng đã đổ
+--
+
+--
+-- Các ràng buộc cho bảng `anhsanpham`
+--
+ALTER TABLE `anhsanpham`
+  ADD CONSTRAINT `fk_anhsp_sp` FOREIGN KEY (`ID_SanPham`) REFERENCES `sanpham` (`ID_SanPham`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `apma`
+--
+ALTER TABLE `apma`
+  ADD CONSTRAINT `fk_apma_donhang` FOREIGN KEY (`ID_DonHang`) REFERENCES `donhang` (`ID_DonHang`),
+  ADD CONSTRAINT `fk_apma_nguoidung` FOREIGN KEY (`ID_NguoiDung`) REFERENCES `nguoidung` (`ID_NguoiDung`),
+  ADD CONSTRAINT `fk_apma_phieu` FOREIGN KEY (`ID_Phieu`) REFERENCES `phieugiamgia` (`ID_Phieu`);
+
+--
+-- Các ràng buộc cho bảng `baocao`
+--
+ALTER TABLE `baocao`
+  ADD CONSTRAINT `fk_baocao_nguoibc` FOREIGN KEY (`ID_NguoiBC`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_baocao_nguoibibc` FOREIGN KEY (`ID_NguoiBiBC`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_baocao_sanpham` FOREIGN KEY (`ID_SpBiBC`) REFERENCES `sanpham` (`ID_SanPham`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `chitietdonhang`
+--
+ALTER TABLE `chitietdonhang`
+  ADD CONSTRAINT `fk_chitiet_donhang` FOREIGN KEY (`ID_DonHang`) REFERENCES `donhang` (`ID_DonHang`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_chitiet_sanpham` FOREIGN KEY (`ID_SanPham`) REFERENCES `sanpham` (`ID_SanPham`);
+
+--
+-- Các ràng buộc cho bảng `danhgiasanpham`
+--
+ALTER TABLE `danhgiasanpham`
+  ADD CONSTRAINT `fk_danhgiasp_nguoimua` FOREIGN KEY (`ID_NguoiMua`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_danhgiasp_sp` FOREIGN KEY (`ID_SanPham`) REFERENCES `sanpham` (`ID_SanPham`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `donhang`
+--
+ALTER TABLE `donhang`
+  ADD CONSTRAINT `fk_donhang_nguoimua` FOREIGN KEY (`ID_NguoiMua`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `giaohang`
+--
+ALTER TABLE `giaohang`
+  ADD CONSTRAINT `fk_giaohang_donhang` FOREIGN KEY (`ID_DonHang`) REFERENCES `donhang` (`ID_DonHang`);
+
+--
+-- Các ràng buộc cho bảng `giohang`
+--
+ALTER TABLE `giohang`
+  ADD CONSTRAINT `fk_giohang_nguoimua` FOREIGN KEY (`ID_NguoiMua`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `hoithoai`
+--
+ALTER TABLE `hoithoai`
+  ADD CONSTRAINT `fk_hoithoai_nguoiban` FOREIGN KEY (`ID_NguoiBan`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_hoithoai_nguoimua` FOREIGN KEY (`ID_NguoiMua`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `nhatkythaydoitonkho`
+--
+ALTER TABLE `nhatkythaydoitonkho`
+  ADD CONSTRAINT `fk_nhatky_sp` FOREIGN KEY (`ID_SanPham`) REFERENCES `sanpham` (`ID_SanPham`);
+
+--
+-- Các ràng buộc cho bảng `sanpham`
+--
+ALTER TABLE `sanpham`
+  ADD CONSTRAINT `fk_sanpham_danhmuc` FOREIGN KEY (`ID_DanhMuc`) REFERENCES `danhmuc` (`ID_DanhMuc`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_sanpham_nguoiban` FOREIGN KEY (`ID_NguoiBan`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `sanphamtronggio`
+--
+ALTER TABLE `sanphamtronggio`
+  ADD CONSTRAINT `fk_sptronggio_giohang` FOREIGN KEY (`ID_GioHang`) REFERENCES `giohang` (`ID_GioHang`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_sptronggio_sanpham` FOREIGN KEY (`ID_SanPham`) REFERENCES `sanpham` (`ID_SanPham`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `thanhtoan`
+--
+ALTER TABLE `thanhtoan`
+  ADD CONSTRAINT `fk_thanhtoan_donhang` FOREIGN KEY (`ID_DonHang`) REFERENCES `donhang` (`ID_DonHang`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `thongbao`
+--
+ALTER TABLE `thongbao`
+  ADD CONSTRAINT `fk_thongbao_nguoi_dung` FOREIGN KEY (`ID_NguoiNhan`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `tinnhan`
+--
+ALTER TABLE `tinnhan`
+  ADD CONSTRAINT `fk_tinnhan_hoithoai` FOREIGN KEY (`ID_HoiThoai`) REFERENCES `hoithoai` (`ID_HoiThoai`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_tinnhan_nguoidung` FOREIGN KEY (`ID_NguoiGui`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `tinnhananh`
+--
+ALTER TABLE `tinnhananh`
+  ADD CONSTRAINT `fk_tinnhananh_tinnhan` FOREIGN KEY (`ID_TinNhan`) REFERENCES `tinnhan` (`ID_TinNhan`) ON DELETE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

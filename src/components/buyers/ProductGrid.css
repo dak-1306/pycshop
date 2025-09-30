@@ -11,10 +11,11 @@
 .section-title {
   font-size: 24px;
   font-weight: bold;
-  color: #297d4e;
+  color: #0f5132;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-family: "Roboto", sans-serif;
 }
 
 .products-grid {
@@ -85,6 +86,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   height: 40px;
+  font-family: "Inter", sans-serif;
 }
 
 .product-price {
@@ -160,8 +162,8 @@
 
 .load-more-btn {
   background: #fff;
-  border: 1px solid #ee4d2d;
-  color: #ee4d2d;
+  border: 1px solid #0f5132;
+  color: #0f5132;
   padding: 12px 40px;
   border-radius: 4px;
   font-size: 14px;
@@ -170,7 +172,7 @@
 }
 
 .load-more-btn:hover {
-  background: #ee4d2d;
+  background: #297d4e;
   color: #fff;
   transform: translateY(-1px);
 }

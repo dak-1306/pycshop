@@ -1,9 +1,9 @@
 import React from "react";
-import Header from "../../components/Header";
-import Banner from "../../components/Banner";
-import Categories from "../../components/Categories";
-import ProductGrid from "../../components/ProductGrid";
-import Footer from "../../components/Footer";
+import Header from "../components/Header";
+import Banner from "../components/Banner";
+import Categories from "../components/Categories";
+import ProductGrid from "../components/ProductGrid";
+import Footer from "../components/Footer";
 
 const HomePage = () => {
   return (

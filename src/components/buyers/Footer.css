@@ -25,6 +25,7 @@
   color: #333;
   margin: 0 0 20px 0;
   text-transform: uppercase;
+  font-family: "Roboto", sans-serif;
 }
 
 .footer-links {
@@ -43,10 +44,11 @@
   font-size: 13px;
   line-height: 1.4;
   transition: color 0.2s;
+  font-family: "Inter", sans-serif;
 }
 
 .footer-links a:hover {
-  color: #ee4d2d;
+  color: #0f5132;
 }
 
 /* Payment & Shipping Methods */
@@ -114,9 +116,9 @@
 }
 
 .download-btn:hover {
-  background: #ee4d2d;
+  background: #0f5132;
   color: #fff;
-  border-color: #ee4d2d;
+  border-color: #0c8f52;
 }
 
 /* Footer Bottom */
@@ -169,7 +171,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 30px;
   }
-  
+
   .app-download {
     flex-direction: column;
     align-items: flex-start;
@@ -180,18 +182,18 @@
   .footer-main {
     padding: 30px 0;
   }
-  
+
   .footer-content {
     grid-template-columns: repeat(2, 1fr);
     gap: 25px;
   }
-  
+
   .footer-bottom-content {
     flex-direction: column;
     gap: 15px;
     text-align: center;
   }
-  
+
   .payment-methods,
   .shipping-methods {
     grid-template-columns: 1fr;
@@ -203,15 +205,15 @@
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .footer-main {
     padding: 20px 0;
   }
-  
+
   .company-info p {
     font-size: 11px;
   }
-  
+
   .location {
     max-width: 100%;
   }

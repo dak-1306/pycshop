@@ -9,13 +9,14 @@
   margin-bottom: 30px;
 }
 
-.section-titlee {
+.section-title {
   font-size: 24px;
-  font-weight: bold;
-  color: #297d4e;
+  font-weight: 500;
+  color: #0f5132;
   margin: 0;
   text-transform: uppercase;
   letter-spacing: 1px;
+  font-family: "Roboto", sans-serif;
 }
 
 .categories-grid {
@@ -73,6 +74,7 @@
   font-weight: 500;
   line-height: 1.4;
   margin: 0;
+  font-family: "Inter", sans-serif;
 }
 
 .category-item:hover .category-name {

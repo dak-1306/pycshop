@@ -1,6 +1,7 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import "./Header.css";
-
+import logoImage from "../../images/logo.png";
 const Header = () => {
   return (
     <header className="header">
@@ -9,17 +10,29 @@ const Header = () => {
         <div className="container">
           <div className="header-top-left">
             <a href="#" className="header-link">
+              <i className="fa-solid fa-shop"></i>
               Kênh Người Bán
             </a>
             <span className="divider">|</span>
             <a href="#" className="header-link">
+              Trở thành Người bán Pycshop
+            </a>
+            <span className="divider">|</span>
+            <a href="#" className="header-link">
+              Tải ứng dụng
+            </a>
+            <span className="divider">|</span>
+            <a href="#" className="header-link">
+              <i className="fa-solid fa-link"></i>
               Kết nối
             </a>
             <div className="social-links">
               <a href="#" className="social-link">
+                <i className="fa-brands fa-facebook"></i>
                 Facebook
               </a>
               <a href="#" className="social-link">
+                <i className="fa-brands fa-instagram"></i>
                 Instagram
               </a>
             </div>
@@ -34,13 +47,6 @@ const Header = () => {
             <a href="#" className="header-link">
               Tiếng Việt
             </a>
-            <a href="#" className="header-link">
-              Đăng ký
-            </a>
-            <span className="divider">|</span>
-            <a href="#" className="header-link">
-              Đăng nhập
-            </a>
           </div>
         </div>
       </div>
@@ -53,7 +59,8 @@ const Header = () => {
             <div className="logo">
               <a href="/">
                 <img
-                  src="/logo-shopee.svg"
+                  // src="/logo-shopee.svg"
+                  src={logoImage}
                   alt="PycShop"
                   className="logo-img"
                 />
@@ -69,12 +76,7 @@ const Header = () => {
                   className="search-input"
                 />
                 <button className="search-btn">
-                  <svg width="20" height="20" viewBox="0 0 19 19">
-                    <g fillRule="evenodd">
-                      <path d="m7.5 1c3.6 0 6.5 2.9 6.5 6.5s-2.9 6.5-6.5 6.5-6.5-2.9-6.5-6.5 2.9-6.5 6.5-6.5zm0 1c-3 0-5.5 2.5-5.5 5.5s2.5 5.5 5.5 5.5 5.5-2.5 5.5-5.5-2.5-5.5-5.5-5.5z" />
-                      <path d="m12.3 12.3c.3-.3.8-.3 1.1 0l3.6 3.6c.3.3.3.8 0 1.1-.3.3-.8.3-1.1 0l-3.6-3.6c-.3-.3-.3-.8 0-1.1" />
-                    </g>
-                  </svg>
+                  <i className="fas fa-search"></i>
                 </button>
               </div>
             </div>
@@ -82,34 +84,19 @@ const Header = () => {
             {/* Cart */}
             <div className="cart">
               <div className="cart-icon">
-                <svg width="26" height="26" viewBox="0 0 26 26">
-                  <g fill="none" fillRule="evenodd">
-                    <circle cx="13" cy="13" r="13" />
-                    <path
-                      d="M6.5 5.5h.9c.4 0 .8.3.9.7l1.8 7.2c.1.4.5.7.9.7h7.5c.4 0 .8-.3.9-.7l1.1-4.4H9.5"
-                      stroke="#fff"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                    />
-                    <circle
-                      cx="11"
-                      cy="20.5"
-                      r="1.5"
-                      stroke="#fff"
-                      strokeWidth="2"
-                    />
-                    <circle
-                      cx="18"
-                      cy="20.5"
-                      r="1.5"
-                      stroke="#fff"
-                      strokeWidth="2"
-                    />
-                  </g>
-                </svg>
+                <i className="fas fa-shopping-cart"></i>
                 <span className="cart-count">0</span>
               </div>
+            </div>
+            {/* Auth Buttons */}
+            <div className="auth-buttons">
+              <button className="auth-btn register-btn">
+                <a href="../pages/Login.jsx">Đăng ký</a>
+              </button>
+              {/*  */}
+              <Link to="/login" className="auth-btn login-btn">
+                Đăng nhập
+              </Link>
             </div>
           </div>
         </div>

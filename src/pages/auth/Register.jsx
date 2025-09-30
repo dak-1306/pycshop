@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./Register.css";
 import signupGif from "../../images/signup.gif";
 
@@ -15,6 +16,8 @@ const Register = () => {
 
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({ title: "", content: "" });
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -27,6 +30,22 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Register data:", formData);
+    
+    // Giả lập đăng ký thành công
+    // Trong thực tế, bạn sẽ gọi API và kiểm tra response
+    if (formData.email && formData.password && formData.fullName && formData.agreeTerms) {
+      // Tạo mock user data
+      const userData = {
+        id: 1,
+        name: formData.fullName,
+        email: formData.email,
+        avatar: null
+      };
+      
+      login(userData);
+      // Chuyển hướng về trang chủ sau khi đăng ký thành công
+      navigate("/");
+    }
   };
 
   const openTermsModal = () => {

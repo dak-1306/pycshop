@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import "./Login.css"; // Giữ một số custom styles
 
 const Login = () => {
@@ -9,6 +10,8 @@ const Login = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -20,6 +23,22 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Login data:", formData);
+    
+    // Giả lập đăng nhập thành công
+    // Trong thực tế, bạn sẽ gọi API và kiểm tra response
+    if (formData.email && formData.password) {
+      // Tạo mock user data
+      const userData = {
+        id: 1,
+        name: "Người dùng PycShop",
+        email: formData.email,
+        avatar: null
+      };
+      
+      login(userData);
+      // Chuyển hướng về trang chủ sau khi đăng nhập thành công
+      navigate("/");
+    }
   };
 
   const togglePasswordVisibility = () => {

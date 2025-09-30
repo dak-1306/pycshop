@@ -7,7 +7,7 @@ import morgan from "morgan";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { createProxyMiddleware } from "http-proxy-middleware";
-import setupRoutes from "./routes/index.js"; // Import routes
+import setupRoutes from "./routes.js"; // Import routes
 
 const app = express();
 

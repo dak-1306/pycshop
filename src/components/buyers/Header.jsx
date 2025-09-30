@@ -10,7 +10,7 @@ const Header = () => {
         <div className="container">
           <div className="header-top-left">
             <a href="#" className="header-link">
-              <i className="fa-solid fa-shop"></i>
+              <i className="fa-solid fa-shop" style={{ color: 'white' }}></i>
               Kênh Người Bán
             </a>
             <span className="divider">|</span>
@@ -23,16 +23,16 @@ const Header = () => {
             </a>
             <span className="divider">|</span>
             <a href="#" className="header-link">
-              <i className="fa-solid fa-link"></i>
+              <i className="fa-solid fa-link" style={{ color: 'white' }}></i>
               Kết nối
             </a>
             <div className="social-links">
               <a href="#" className="social-link">
-                <i className="fa-brands fa-facebook"></i>
+                <i className="fa-brands fa-facebook" style={{ color: 'white' }}></i>
                 Facebook
               </a>
               <a href="#" className="social-link">
-                <i className="fa-brands fa-instagram"></i>
+                <i className="fa-brands fa-instagram" style={{ color: 'white' }}></i>
                 Instagram
               </a>
             </div>
@@ -76,7 +76,7 @@ const Header = () => {
                   className="search-input"
                 />
                 <button className="search-btn">
-                  <i className="fas fa-search"></i>
+                  <i className="fas fa-search" style={{ color: 'white' }}></i>
                 </button>
               </div>
             </div>
@@ -84,16 +84,15 @@ const Header = () => {
             {/* Cart */}
             <div className="cart">
               <div className="cart-icon">
-                <i className="fas fa-shopping-cart"></i>
+                <i className="fas fa-shopping-cart" style={{ color: 'white' }}></i>
                 <span className="cart-count">0</span>
               </div>
             </div>
             {/* Auth Buttons */}
             <div className="auth-buttons">
-              <button className="auth-btn register-btn">
-                <a href="../pages/Login.jsx">Đăng ký</a>
-              </button>
-              {/*  */}
+              <Link to="/register" className="auth-btn register-btn">
+                Đăng ký
+              </Link>
               <Link to="/login" className="auth-btn login-btn">
                 Đăng nhập
               </Link>

@@ -8,6 +8,8 @@ const Login = () => {
     password: "",
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -18,6 +20,10 @@ const Login = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Login data:", formData);
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -42,7 +48,7 @@ const Login = () => {
               <i className="fas fa-arrow-left"></i>
               Về trang chủ
             </Link>
-            <h2 className="text-3xl font-bold text-gray-800 font-roboto">
+            <h2 className="text-3xl font-bold text-green-800 font-roboto">
               Đăng nhập
             </h2>
           </div>
@@ -55,26 +61,40 @@ const Login = () => {
                 placeholder="Email/Số điện thoại/Tên đăng nhập"
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-green-800 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all"
+                className="login-input"
                 required
               />
             </div>
 
-            <div>
+            <div className="relative">
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 name="password"
                 placeholder="Mật khẩu"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full px-4 py-3 border-2 border-green-800 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-emerald-400 outline-none transition-all"
+                className="login-input password-input"
                 required
               />
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="password-toggle"
+                title={showPassword ? "Ẩn mật khẩu" : "Hiện mật khẩu"}
+              >
+                <i
+                  className={`fas ${showPassword ? "fa-eye-slash" : "fa-eye"}`}
+                ></i>
+              </button>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-green-800 hover:bg-emerald-600 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg uppercase tracking-wide border-2 border-emerald-400"
+              className="w-full bg-green-800 hover:bg-emerald-600 
+              text-white font-semibold py-3 px-4 
+              rounded-lg transition-all duration-300 transform 
+              hover:-translate-y-0.5 hover:shadow-lg uppercase 
+              tracking-wide border-2 border-emerald-400"
             >
               Đăng nhập
             </button>
@@ -157,12 +177,12 @@ const Login = () => {
 
             <p className="text-center text-sm text-gray-600">
               Bạn mới biết đến PycShop?
-              <a
-                href="#"
+              <Link
+                to="/register"
                 className="text-green-800 hover:text-emerald-600 hover:underline ml-1 font-medium"
               >
                 Đăng ký
-              </a>
+              </Link>
             </p>
           </form>
         </div>

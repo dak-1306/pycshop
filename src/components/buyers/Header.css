@@ -33,7 +33,9 @@
   justify-content: space-between;
   align-items: center;
 }
-
+.header-top-left {
+  margin-left: 60px;
+}
 .header-top-left,
 .header-top-right {
   display: flex;

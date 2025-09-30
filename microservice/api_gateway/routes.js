@@ -1,4 +1,4 @@
-const { createProxyMiddleware } = require("http-proxy-middleware");
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 function setupRoutes(app) {
   console.log("[ROUTES] Setting up proxy routes...");
@@ -58,4 +58,4 @@ function setupRoutes(app) {
   );
 }
 
-module.exports = setupRoutes;
+export default setupRoutes;

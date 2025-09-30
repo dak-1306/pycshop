@@ -1,12 +1,13 @@
 // api-gateway/index.js
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const morgan = require("morgan");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
-const { createProxyMiddleware } = require("http-proxy-middleware");
-const setupRoutes = require("./routes"); // Import routes
+import dotenv from "dotenv";
+dotenv.config();
+import express from "express";
+import cors from "cors";
+import morgan from "morgan";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
+import { createProxyMiddleware } from "http-proxy-middleware";
+import setupRoutes from "./routes/index.js"; // Import routes
 
 const app = express();
 

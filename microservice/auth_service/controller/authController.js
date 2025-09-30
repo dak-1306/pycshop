@@ -1,8 +1,8 @@
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
-const User = require("../models/User");
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import User from "../models/User.js";
 
-exports.register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { name, email, password, phone, address } = req.body;
     console.log("🔍 [REGISTER] Extracted data:", {
@@ -45,7 +45,7 @@ exports.register = async (req, res) => {
   }
 };
 
-exports.login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     console.log(`[LOGIN] Attempting login for email: ${email}`);
@@ -112,7 +112,7 @@ exports.login = async (req, res) => {
   }
 };
 
-exports.logout = (req, res) => {
+export const logout = (req, res) => {
   // Logout FE thường xóa token phía client, BE chỉ cần confirm
   res.json({ message: "Logout successful" });
 };

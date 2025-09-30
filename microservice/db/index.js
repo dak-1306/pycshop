@@ -1,5 +1,6 @@
-const mysql = require("mysql2/promise");
-require("dotenv").config();
+import mysql from "mysql2/promise";
+import dotenv from "dotenv";
+dotenv.config();
 
 // Parse DB_URL từ .env
 // Format: mysql://user:password@host:port/database
@@ -64,4 +65,4 @@ async function testConnection() {
 // Chạy test khi import module này
 testConnection();
 
-module.exports = pool;
+export default pool;

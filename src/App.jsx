@@ -8,6 +8,7 @@ import Order from "./pages/seller/Order";
 import ShopPage from "./pages/seller/ShopPage";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import Profile from "./pages/buyer/Profile/Profile";
 import "./App.css";
 
 function App() {
@@ -22,6 +23,9 @@ function App() {
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+
+            {/* Buyer Routes */}
+            <Route path="/profile" element={<Profile />} />
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Dashboard />} />

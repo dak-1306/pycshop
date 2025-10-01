@@ -6,6 +6,8 @@ import Dashboard from "./pages/seller/Dashboard";
 import ManageProduct from "./pages/seller/ManageProduct";
 import Order from "./pages/seller/Order";
 import ShopPage from "./pages/seller/ShopPage";
+import Login from "./pages/auth/Login";
+import Register from "./pages/auth/Register";
 import "./App.css";
 
 function App() {
@@ -16,6 +18,10 @@ function App() {
           <Routes>
             {/* Main Homepage */}
             <Route path="/" element={<HomePage />} />
+
+            {/* Auth Routes */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Dashboard />} />

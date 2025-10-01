@@ -157,14 +157,25 @@
   background: #297d4e;
   border: none;
   margin: 3px 3px;
-  padding: 0 20px;
+  padding: 0 15px 0 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
 }
-
+.user-avatar .fa-user {
+  position: relative;
+  bottom: 6px;
+}
+.fa-shopping-bag {
+  position: relative;
+  bottom: 6px;
+}
+.fa-sign-out-alt {
+  position: relative;
+  bottom: 5px;
+}
 .search-btn i {
   color: #fff;
   font-size: 16px;
@@ -467,6 +478,7 @@
   cursor: pointer;
   transition: background 0.3s ease;
   font-size: 14px;
+  text-decoration: none;
 }
 
 .user-dropdown-item:first-child {
@@ -479,6 +491,7 @@
 
 .user-dropdown-item:hover {
   background: #f8f9fa;
+  color: #333;
 }
 
 .user-dropdown-item i {

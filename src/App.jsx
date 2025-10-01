@@ -17,6 +17,7 @@ import AdminUsers from "./pages/admin/Users";
 import AdminProducts from "./pages/admin/Products";
 import AdminOrders from "./pages/admin/Orders";
 import AdminTestPage from "./pages/AdminTestPage";
+import Profile from "./pages/buyer/Profile/Profile";
 import "./App.css";
 
 function App() {
@@ -32,6 +33,9 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin-test" element={<AdminTestPage />} />
+
+            {/* Buyer Routes */}
+            <Route path="/profile" element={<Profile />} />
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Dashboard />} />

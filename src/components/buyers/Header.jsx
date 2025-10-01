@@ -152,10 +152,10 @@ const Header = () => {
                     ></i>
                   </div>
                   <div className="user-dropdown">
-                    <div className="user-dropdown-item">
+                    <Link to="/profile" className="user-dropdown-item">
                       <i className="fas fa-user"></i>
                       Tài khoản của tôi
-                    </div>
+                    </Link>
                     <div className="user-dropdown-item">
                       <i className="fas fa-shopping-bag"></i>
                       Đơn mua

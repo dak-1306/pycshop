@@ -37,7 +37,7 @@ const corsOptions = {
   optionsSuccessStatus: 200, // Support legacy browsers
 };
 
-console.log("🔒 [GATEWAY] CORS allowed origins:", allowedOrigins);
+console.log("[GATEWAY] CORS allowed origins:", allowedOrigins);
 
 // Middleware cơ bản
 app.use(cors(corsOptions));
@@ -69,15 +69,19 @@ app.use(limiter);
 
 // Log incoming requests
 app.use((req, res, next) => {
-  console.log(`📥 [GATEWAY] Incoming ${req.method} ${req.originalUrl}`);
-  console.log(`📋 [GATEWAY] Request body:`, req.body);
+  console.log(`[GATEWAY] Incoming ${req.method} ${req.originalUrl}`);
+  console.log(`[GATEWAY] Request body:`, req.body);
   next();
 });
 
 // Middleware kiểm tra auth cho các routes protected
 app.use((req, res, next) => {
   // Routes không cần auth (public routes)
-  const publicRoutes = ["/auth/login", "/auth/register"];
+  const publicRoutes = [
+    "/auth/login",
+    "/auth/register",
+    "/products", // Cho phép xem sản phẩm không cần đăng nhập
+  ];
 
   // Kiểm tra nếu là public route
   const isPublicRoute = publicRoutes.some((route) =>
@@ -85,13 +89,13 @@ app.use((req, res, next) => {
   );
 
   if (isPublicRoute) {
-    console.log(`🔓 [GATEWAY] Public route: ${req.originalUrl}`);
+    console.log(`[GATEWAY] Public route: ${req.originalUrl}`);
     return next();
   }
 
   // Áp dụng auth middleware cho protected routes
   console.log(
-    `🔒 [GATEWAY] Protected route: ${req.originalUrl} - Checking token...`
+    `[GATEWAY] Protected route: ${req.originalUrl} - Checking token...`
   );
   authMiddleware(req, res, next);
 });

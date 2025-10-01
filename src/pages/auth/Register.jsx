@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { authService } from "../../services/authService";
 import "./Register.css";
 import signupGif from "../../images/signup.gif";
 
@@ -11,8 +12,12 @@ const Register = () => {
     confirmPassword: "",
     fullName: "",
     phone: "",
+    address: "",
     agreeTerms: false,
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [showModal, setShowModal] = useState(false);
   const [modalContent, setModalContent] = useState({ title: "", content: "" });
@@ -25,26 +30,88 @@ const Register = () => {
       ...formData,
       [name]: type === "checkbox" ? checked : value,
     });
+    // Xóa error khi user nhập lại
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Register data:", formData);
+    setLoading(true);
+    setError("");
     
-    // Giả lập đăng ký thành công
-    // Trong thực tế, bạn sẽ gọi API và kiểm tra response
-    if (formData.email && formData.password && formData.fullName && formData.agreeTerms) {
-      // Tạo mock user data
-      const userData = {
-        id: 1,
+    // Validation
+    if (!formData.fullName.trim()) {
+      setError("Vui lòng nhập họ tên");
+      setLoading(false);
+      return;
+    }
+    
+    if (!formData.email.trim()) {
+      setError("Vui lòng nhập email");
+      setLoading(false);
+      return;
+    }
+    
+    if (!formData.phone.trim()) {
+      setError("Vui lòng nhập số điện thoại");
+      setLoading(false);
+      return;
+    }
+    
+    if (!formData.address.trim()) {
+      setError("Vui lòng nhập địa chỉ");
+      setLoading(false);
+      return;
+    }
+    
+    if (!formData.password) {
+      setError("Vui lòng nhập mật khẩu");
+      setLoading(false);
+      return;
+    }
+    
+    if (formData.password.length < 6) {
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
+      setLoading(false);
+      return;
+    }
+    
+    if (formData.password !== formData.confirmPassword) {
+      setError("Mật khẩu xác nhận không khớp");
+      setLoading(false);
+      return;
+    }
+    
+    if (!formData.agreeTerms) {
+      setError("Vui lòng đồng ý với điều khoản sử dụng");
+      setLoading(false);
+      return;
+    }
+    
+    try {
+      // Gọi API đăng ký với vai trò buyer
+      const response = await authService.register({
         name: formData.fullName,
         email: formData.email,
-        avatar: null
-      };
+        password: formData.password,
+        phone: formData.phone,
+        address: formData.address,
+        role: "buyer" // Mặc định là buyer
+      });
       
-      login(userData);
+      console.log("Register successful:", response);
+      
+      // Đăng ký thành công, tự động đăng nhập luôn
+      const loginResponse = await authService.login(formData.email, formData.password);
+      login(loginResponse.user, loginResponse.token);
+      
       // Chuyển hướng về trang chủ sau khi đăng ký thành công
       navigate("/");
+    } catch (err) {
+      console.error("Register error:", err);
+      setError(err.message || "Đăng ký thất bại. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,6 +190,13 @@ const Register = () => {
           </div>
 
           <form onSubmit={handleSubmit} className="register-form">
+            {/* Hiển thị lỗi nếu có */}
+            {error && (
+              <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg mb-4">
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+
             {/* Full Name Input */}
             <div className="form-group">
               <input
@@ -152,6 +226,19 @@ const Register = () => {
                 name="phone"
                 placeholder="Số điện thoại"
                 value={formData.phone}
+                onChange={handleChange}
+                className="form-input"
+                required
+              />
+            </div>
+
+            {/* Address Input */}
+            <div className="form-group">
+              <input
+                type="text"
+                name="address"
+                placeholder="Địa chỉ"
+                value={formData.address}
                 onChange={handleChange}
                 className="form-input"
                 required
@@ -218,8 +305,12 @@ const Register = () => {
             </div>
 
             {/* Register Button */}
-            <button type="submit" className="register-button">
-              Đăng ký
+            <button 
+              type="submit" 
+              className="register-button"
+              disabled={loading}
+            >
+              {loading ? "Đang đăng ký..." : "Đăng ký"}
             </button>
 
             {/* Divider */}

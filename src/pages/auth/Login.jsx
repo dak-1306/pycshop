@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import { authService } from "../../services/authService";
 import "./Login.css"; // Giữ một số custom styles
 
 const Login = () => {
@@ -10,6 +11,8 @@ const Login = () => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -18,26 +21,31 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value,
     });
+    // Xóa error khi user nhập lại
+    if (error) setError("");
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login data:", formData);
+    setLoading(true);
+    setError("");
     
-    // Giả lập đăng nhập thành công
-    // Trong thực tế, bạn sẽ gọi API và kiểm tra response
-    if (formData.email && formData.password) {
-      // Tạo mock user data
-      const userData = {
-        id: 1,
-        name: "Người dùng PycShop",
-        email: formData.email,
-        avatar: null
-      };
+    try {
+      // Gọi API đăng nhập thực tế
+      const response = await authService.login(formData.email, formData.password);
       
-      login(userData);
+      console.log("Login successful:", response);
+      
+      // Lưu thông tin user vào context
+      login(response.user, response.token);
+      
       // Chuyển hướng về trang chủ sau khi đăng nhập thành công
       navigate("/");
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.message || "Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -107,15 +115,24 @@ const Login = () => {
               </button>
             </div>
 
+            {/* Hiển thị lỗi nếu có */}
+            {error && (
+              <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                <p className="text-sm">{error}</p>
+              </div>
+            )}
+
             <button
               type="submit"
+              disabled={loading}
               className="w-full bg-green-800 hover:bg-emerald-600 
               text-white font-semibold py-3 px-4 
               rounded-lg transition-all duration-300 transform 
               hover:-translate-y-0.5 hover:shadow-lg uppercase 
-              tracking-wide border-2 border-emerald-400"
+              tracking-wide border-2 border-emerald-400
+              disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Đăng nhập
+              {loading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
 
             <div className="flex justify-between text-sm">

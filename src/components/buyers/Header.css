@@ -407,7 +407,11 @@
 }
 .fa-user {
   position: relative;
-  left: 3.5px;
+  left: 4.5px;
+  bottom: 5px;
+}
+.fa-chevron-down {
+  position: relative;
   bottom: 5px;
 }
 .user-name {

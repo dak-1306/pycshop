@@ -16,10 +16,10 @@ const Header = () => {
       <div className="header-top">
         <div className="container">
           <div className="header-top-left">
-            <a href="#" className="header-link">
+            <Link to="/seller/dashboard" className="header-link">
               <i className="fa-solid fa-shop" style={{ color: "white" }}></i>
               Kênh Người Bán
-            </a>
+            </Link>
             <span className="divider">|</span>
             <a href="#" className="header-link">
               Trở thành Người bán Pycshop
@@ -141,10 +141,15 @@ const Header = () => {
                 <div className="user-menu">
                   <div className="user-info">
                     <div className="user-avatar">
-                      <i className="fas fa-user" style={{ color: 'white' }}></i>
+                      <i className="fas fa-user" style={{ color: "white" }}></i>
                     </div>
-                    <span className="user-name">{user?.name || user?.email}</span>
-                    <i className="fas fa-chevron-down" style={{ color: 'white', fontSize: '12px' }}></i>
+                    <span className="user-name">
+                      {user?.name || user?.email}
+                    </span>
+                    <i
+                      className="fas fa-chevron-down"
+                      style={{ color: "white", fontSize: "12px" }}
+                    ></i>
                   </div>
                   <div className="user-dropdown">
                     <div className="user-dropdown-item">

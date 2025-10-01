@@ -82,6 +82,26 @@ function setupRoutes(app) {
       pathRewrite: { "^/cart": "" },
     })
   );
+
+  // Dashboard/Analytics Service
+  app.use(
+    "/dashboard",
+    createProxyMiddleware({
+      target: process.env.DASHBOARD_SERVICE_URL || "http://localhost:5002",
+      changeOrigin: true,
+      pathRewrite: { "^/dashboard": "" },
+    })
+  );
+
+  // Orders Service
+  app.use(
+    "/orders",
+    createProxyMiddleware({
+      target: process.env.ORDER_SERVICE_URL || "http://localhost:5003",
+      changeOrigin: true,
+      pathRewrite: { "^/orders": "" },
+    })
+  );
 }
 
 export default setupRoutes;

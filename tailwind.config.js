@@ -1,8 +1,34 @@
-/** @type {import("tailwindcss").Config} */
+/** @type {import('tailwindcss').Config} */
 export default {
   content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
+      colors: {
+        primary: {
+          50: "#fef7ee",
+          100: "#fed7aa",
+          200: "#fed7aa",
+          300: "#fb923c",
+          400: "#f97316",
+          500: "#ea580c",
+          600: "#dc2626",
+          700: "#c2410c",
+          800: "#9a3412",
+          900: "#7c2d12",
+        },
+        secondary: {
+          50: "#f0f9ff",
+          100: "#e0f2fe",
+          200: "#bae6fd",
+          300: "#7dd3fc",
+          400: "#38bdf8",
+          500: "#0ea5e9",
+          600: "#0284c7",
+          700: "#0369a1",
+          800: "#075985",
+          900: "#0c4a6e",
+        },
+      },
       animation: {
         fadeIn: "fadeIn 0.3s ease-out",
         slideUp: "slideUp 0.4s ease-out",

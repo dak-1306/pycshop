@@ -1,5 +1,19 @@
-.App {
+* {
+  font-family: 'Roboto', sans-serif;
+}
+
+.app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  font-family: 'Roboto', sans-serif;
+}
+
+/* Global styles for consistent theming */
+:root {
+  --primary-green: #0f5132;
+  --secondary-green: #297d4e;
+  --accent-green: #34d399;
+  --light-green: #166534;
+  --success-green: #059669;
 }

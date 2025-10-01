@@ -28,7 +28,7 @@ const Categories = () => {
     <div className="categories-section">
       <div className="container">
         <div className="section-header">
-          <h2 className="section-titlee">Danh Mục</h2>
+          <h2 className="section-title">Danh Mục</h2>
         </div>
         <div className="categories-grid">
           {categories.map((category) => (

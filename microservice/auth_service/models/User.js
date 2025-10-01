@@ -2,13 +2,26 @@ import db from "../../db/index.js";
 import bcrypt from "bcryptjs";
 
 class User {
-  static async create({ name, email, password, phone, address }) {
+  static async create({
+    name,
+    email,
+    password,
+    phone,
+    address,
+    role = "buyer",
+  }) {
     console.log("[USER] Creating user with data:", {
       name,
       email,
       phone,
       address,
+      role,
     });
+
+    // Validate role
+    if (!["buyer", "seller"].includes(role)) {
+      throw new Error("Invalid role. Must be buyer or seller");
+    }
 
     try {
       console.log("[USER] Hashing password...");
@@ -17,8 +30,8 @@ class User {
 
       console.log("[USER] Executing SQL INSERT...");
       const result = await db.execute(
-        "INSERT INTO NguoiDung (HoTen, Email, MatKhau, SoDienThoai, DiaChi) VALUES (?, ?, ?, ?, ?)",
-        [name, email, hashedPassword, phone, address]
+        "INSERT INTO NguoiDung (HoTen, Email, MatKhau, SoDienThoai, DiaChi, VaiTro) VALUES (?, ?, ?, ?, ?, ?)",
+        [name, email, hashedPassword, phone, address, role]
       );
       console.log("[USER] SQL INSERT executed successfully:", result);
 

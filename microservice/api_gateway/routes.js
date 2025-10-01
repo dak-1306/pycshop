@@ -40,10 +40,36 @@ function setupRoutes(app) {
   // Product Service
   app.use(
     "/products",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /products route for ${req.method} ${req.originalUrl}`
+      );
+      next();
+    },
     createProxyMiddleware({
-      target: process.env.PRODUCT_SERVICE_URL,
+      target: process.env.PRODUCT_SERVICE_URL || "http://localhost:5002",
       changeOrigin: true,
       pathRewrite: { "^/products": "" },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Product Service`
+        );
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Product Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Product service error", details: err.message });
+        }
+      },
     })
   );
 

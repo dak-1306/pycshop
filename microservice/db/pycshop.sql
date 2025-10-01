@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 01, 2025 lúc 09:38 AM
+-- Thời gian đã tạo: Th10 01, 2025 lúc 05:04 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -125,6 +125,31 @@ CREATE TABLE `danhmuc` (
   `TenDanhMuc` varchar(150) NOT NULL,
   `MoTa` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `danhmuc`
+--
+
+INSERT INTO `danhmuc` (`ID_DanhMuc`, `TenDanhMuc`, `MoTa`) VALUES
+(1, 'Thời Trang Nam', 'Danh mục các sản phẩm thời trang dành cho nam'),
+(2, 'Thời Trang Nữ', 'Danh mục các sản phẩm thời trang dành cho nữ'),
+(3, 'Điện Thoại & Phụ Kiện', 'Danh mục điện thoại di động và phụ kiện đi kèm'),
+(4, 'Máy Tính & Laptop', 'Danh mục các loại máy tính để bàn và laptop'),
+(5, 'Máy Ảnh & Máy Quay Phim', 'Danh mục máy ảnh kỹ thuật số và máy quay phim'),
+(6, 'Đồng Hồ', 'Danh mục đồng hồ thời trang và đồng hồ thông minh'),
+(7, 'Giày Dép Nam', 'Danh mục giày dép dành cho nam giới'),
+(8, 'Giày Dép Nữ', 'Danh mục giày dép dành cho nữ giới'),
+(9, 'Túi Ví Nam', 'Danh mục túi xách, ví dành cho nam'),
+(10, 'Túi Ví Nữ', 'Danh mục túi xách, ví dành cho nữ'),
+(11, 'Thiết Bị Điện Tử', 'Danh mục các thiết bị điện tử khác'),
+(12, 'Ô Tô & Xe Máy & Xe Đạp', 'Danh mục phương tiện di chuyển: ô tô, xe máy, xe đạp'),
+(13, 'Nhà Cửa & Đời Sống', 'Danh mục đồ dùng cho nhà cửa và đời sống hằng ngày'),
+(14, 'Sắc Đẹp', 'Danh mục các sản phẩm làm đẹp và chăm sóc cá nhân'),
+(15, 'Sức Khỏe', 'Danh mục các sản phẩm chăm sóc sức khỏe'),
+(16, 'Giải Trí & Sở Thích', 'Danh mục đồ chơi, game, sản phẩm giải trí và sở thích'),
+(17, 'Mẹ & Bé', 'Danh mục các sản phẩm dành cho mẹ và bé'),
+(18, 'Nhà Sách Online', 'Danh mục sách, truyện, văn phòng phẩm'),
+(19, 'Bách Hóa Online', 'Danh mục các sản phẩm tiêu dùng hằng ngày');
 
 -- --------------------------------------------------------
 
@@ -256,6 +281,36 @@ CREATE TABLE `sanpham` (
   `TrangThai` enum('active','inactive','out_of_stock') NOT NULL DEFAULT 'active',
   `CapNhat` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `sanpham`
+--
+
+INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, `MoTa`, `Gia`, `TonKho`, `TrangThai`, `CapNhat`) VALUES
+(1, 4, 1, 'Áo ba lỗ', 'Sản phẩm thời trang nam: áo ba lỗ, áo thun', 150000.00, 50, 'active', '2025-10-01 09:27:57'),
+(2, 4, 2, 'Đầm váy', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 250000.00, 30, 'active', '2025-10-01 09:27:57'),
+(3, 4, 3, 'Ốp lưng điện thoại', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 12000000.00, 20, 'active', '2025-10-01 09:27:57'),
+(4, 4, 4, 'Laptop Asus', 'Sản phẩm máy tính xách tay: Asus, Dell', 15000000.00, 0, 'out_of_stock', '2025-10-01 10:30:33'),
+(5, 4, 5, 'Máy quay Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 10000000.00, 10, 'active', '2025-10-01 09:27:57'),
+(6, 4, 6, 'Đồng hồ Casio', 'Sản phẩm đồng hồ: Casio, đồng hồ thông minh', 2000000.00, 40, 'active', '2025-10-01 09:27:57'),
+(7, 4, 7, 'Giày sneaker nam', 'Sản phẩm giày dép nam: sneaker, giày da', 800000.00, 60, 'active', '2025-10-01 09:27:57'),
+(8, 4, 8, 'Giày cao gót', 'Sản phẩm giày dép nữ: cao gót, sandal', 600000.00, 70, 'active', '2025-10-01 09:27:57'),
+(9, 4, 9, 'Túi đeo chéo nam', 'Sản phẩm túi ví nam: túi đeo chéo, ví da', 500000.00, 50, 'active', '2025-10-01 09:27:57'),
+(10, 4, 10, 'Túi xách nữ', 'Sản phẩm túi ví nữ: túi xách, ví cầm tay', 700000.00, 40, 'active', '2025-10-01 09:27:57'),
+(11, 4, 11, 'Tai nghe Bluetooth', 'Sản phẩm thiết bị điện tử: tai nghe, loa', 1000000.00, 25, 'active', '2025-10-01 09:27:57'),
+(12, 4, 12, 'Xe máy điện', 'Sản phẩm phương tiện: xe đạp, xe máy điện', 5000000.00, 10, 'active', '2025-10-01 09:27:57'),
+(13, 4, 13, 'Bàn ghế gỗ', 'Sản phẩm nhà cửa đời sống: bàn ghế, chăn ga', 3000000.00, 20, 'active', '2025-10-01 09:27:57'),
+(14, 4, 14, 'Son môi', 'Sản phẩm làm đẹp: son môi, kem dưỡng da', 300000.00, 100, 'active', '2025-10-01 09:27:57'),
+(15, 4, 15, 'Vitamin A', 'Sản phẩm sức khỏe: thực phẩm chức năng, vitamin', 400000.00, 80, 'active', '2025-10-01 09:27:57'),
+(16, 4, 16, 'Máy chơi game PS5', 'Sản phẩm giải trí: PS5, Lego', 12000000.00, 5, 'active', '2025-10-01 09:27:57'),
+(17, 4, 17, 'Sữa bột trẻ em', 'Sản phẩm mẹ & bé: sữa bột, xe đẩy', 800000.00, 30, 'active', '2025-10-01 09:27:57'),
+(18, 4, 18, 'Sách Tiếng Việt lớp 4', 'Sản phẩm nhà sách online: sách giáo khoa, tiểu thuyết', 150000.00, 200, 'active', '2025-10-01 09:27:57'),
+(19, 4, 19, 'Mì Omachi tôm chua cay', 'Sản phẩm bách hóa online: mì gói, nước ngọt', 50000.00, 300, 'active', '2025-10-01 09:27:57'),
+(20, 4, 1, 'Áo thun', 'Sản phẩm thời trang nam: áo ba lỗ, áo thun', 119000.00, 50, 'active', '2025-10-01 10:44:11'),
+(21, 4, 2, 'Áo sơ mi nữ', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 299999.00, 30, 'active', '2025-10-01 10:44:11'),
+(22, 4, 3, 'iPhone 12', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 15000000.00, 20, 'active', '2025-10-01 10:44:11'),
+(23, 4, 4, 'Laptop Lenovo', 'Sản phẩm máy tính xách tay: Asus, Dell', 25000000.00, 15, 'active', '2025-10-01 10:44:11'),
+(24, 4, 5, 'Máy ảnh Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 9000000.00, 10, 'active', '2025-10-01 10:44:11');
 
 -- --------------------------------------------------------
 
@@ -523,7 +578,7 @@ ALTER TABLE `danhgiasanpham`
 -- AUTO_INCREMENT cho bảng `danhmuc`
 --
 ALTER TABLE `danhmuc`
-  MODIFY `ID_DanhMuc` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_DanhMuc` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
 
 --
 -- AUTO_INCREMENT cho bảng `donhang`
@@ -571,7 +626,7 @@ ALTER TABLE `phieugiamgia`
 -- AUTO_INCREMENT cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT cho bảng `sanphamtronggio`

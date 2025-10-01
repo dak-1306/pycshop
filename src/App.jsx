@@ -16,7 +16,7 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUsers from "./pages/admin/Users";
 import AdminProducts from "./pages/admin/Products";
 import AdminOrders from "./pages/admin/Orders";
-import AdminTestPage from "./pages/AdminTestPage";
+import AdminLogin from "./pages/admin/AdminLogin";
 import Profile from "./pages/buyer/Profile/Profile";
 import "./App.css";
 
@@ -32,7 +32,7 @@ function App() {
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/admin-test" element={<AdminTestPage />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
 
             {/* Buyer Routes */}
             <Route path="/profile" element={<Profile />} />

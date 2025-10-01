@@ -29,21 +29,27 @@ const Login = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     try {
       // Gọi API đăng nhập thực tế
-      const response = await authService.login(formData.email, formData.password);
-      
+      const response = await authService.login(
+        formData.email,
+        formData.password
+      );
+
       console.log("Login successful:", response);
-      
+
       // Lưu thông tin user vào context
       login(response.user, response.token);
-      
+
       // Chuyển hướng về trang chủ sau khi đăng nhập thành công
       navigate("/");
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.message || "Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.");
+      setError(
+        err.message ||
+          "Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu."
+      );
     } finally {
       setLoading(false);
     }
@@ -211,15 +217,39 @@ const Login = () => {
               </button>
             </div>
 
-            <p className="text-center text-sm text-gray-600">
-              Bạn mới biết đến PycShop?
-              <Link
-                to="/register"
-                className="text-green-800 hover:text-emerald-600 hover:underline ml-1 font-medium"
-              >
-                Đăng ký
-              </Link>
-            </p>
+            <div className="space-y-3">
+              <p className="text-center text-sm text-gray-600">
+                Bạn mới biết đến PycShop?
+                <Link
+                  to="/register"
+                  className="text-green-800 hover:text-emerald-600 hover:underline ml-1 font-medium"
+                >
+                  Đăng ký
+                </Link>
+              </p>
+
+              <div className="flex items-center justify-center pt-2 border-t border-gray-200">
+                <Link
+                  to="/admin/login"
+                  className="text-xs text-slate-500 hover:text-slate-700 transition-colors flex items-center space-x-1"
+                >
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                    />
+                  </svg>
+                  <span>Đăng nhập Admin</span>
+                </Link>
+              </div>
+            </div>
           </form>
         </div>
       </div>

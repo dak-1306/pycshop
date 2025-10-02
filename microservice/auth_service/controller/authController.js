@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
-import Seller from "../models/Seller.js";
 
 export const register = async (req, res) => {
   try {
@@ -220,118 +219,112 @@ export const logout = (req, res) => {
   res.json({ message: "Logout successful" });
 };
 
+// Become seller (just change role to seller)
 export const becomeSeller = async (req, res) => {
   try {
-    const { shopName, shopDescription, shopCategory, shopAddress, shopPhone } =
-      req.body;
+    console.log("🔍 [BECOME_SELLER] All headers:", req.headers);
 
-    // Get userId from token
-    const token = req.headers.authorization?.replace("Bearer ", "");
-    if (!token) {
-      console.log("[BECOME_SELLER] No authorization token provided");
-      return res.status(401).json({ message: "Authorization token required" });
+    // Get user info from headers (passed from API Gateway) or decode from token
+    let userId = req.headers["x-user-id"];
+    let userRole = req.headers["x-user-role"];
+
+    // If no headers, try to decode from authorization token
+    if (!userId) {
+      console.log(
+        "🔍 [BECOME_SELLER] No x-user-id header, trying to decode token..."
+      );
+      const authHeader = req.headers.authorization;
+      if (authHeader && authHeader.startsWith("Bearer ")) {
+        try {
+          const token = authHeader.slice(7);
+          const decoded = jwt.verify(token, process.env.JWT_SECRET);
+          userId = decoded.id;
+          userRole = decoded.role;
+          console.log(
+            `🔍 [BECOME_SELLER] Decoded from token: userId=${userId}, role=${userRole}`
+          );
+        } catch (tokenError) {
+          console.error(
+            "❌ [BECOME_SELLER] Token decode error:",
+            tokenError.message
+          );
+          return res.status(401).json({
+            success: false,
+            message: "Token không hợp lệ",
+          });
+        }
+      }
     }
 
-    let decoded;
-    try {
-      decoded = jwt.verify(token, process.env.JWT_SECRET);
-    } catch (tokenError) {
-      console.log("[BECOME_SELLER] Invalid token:", tokenError.message);
-      return res.status(401).json({ message: "Invalid authorization token" });
-    }
-
-    const userId = decoded.id;
     console.log(
-      `[BECOME_SELLER] Processing seller registration for user ID: ${userId}`
+      `🔄 [BECOME_SELLER] User ${userId} (current role: ${userRole}) requesting to become seller`
     );
 
-    // Validate required fields
-    if (
-      !shopName ||
-      !shopDescription ||
-      !shopCategory ||
-      !shopAddress ||
-      !shopPhone
-    ) {
-      console.log("[BECOME_SELLER] Missing required fields");
-      return res.status(400).json({
-        message:
-          "Missing required fields: shopName, shopDescription, shopCategory, shopAddress, shopPhone",
+    if (!userId) {
+      console.log("❌ [BECOME_SELLER] No userId found in headers or token");
+      return res.status(401).json({
+        success: false,
+        message: "Thông tin người dùng không hợp lệ",
       });
     }
 
-    // Check if user exists
-    console.log("[BECOME_SELLER] Checking if user exists...");
-    const existingUser = await User.findById(userId);
-    if (!existingUser) {
-      console.log("[BECOME_SELLER] User not found");
-      return res.status(404).json({ message: "User not found" });
+    // Get current user
+    const currentUser = await User.findById(userId);
+    if (!currentUser) {
+      return res.status(404).json({
+        success: false,
+        message: "Người dùng không tồn tại",
+      });
     }
 
-    // Check if user is already a seller
-    if (existingUser.VaiTro === "seller") {
-      console.log("[BECOME_SELLER] User is already a seller");
-      return res.status(400).json({ message: "User is already a seller" });
+    // Check if already seller
+    if (currentUser.VaiTro === "seller") {
+      return res.status(400).json({
+        success: false,
+        message: "Bạn đã là seller rồi",
+      });
     }
 
-    // Check if seller profile already exists
-    const existingSeller = await Seller.findByUserId(userId);
-    if (existingSeller) {
-      console.log("[BECOME_SELLER] Seller profile already exists");
-      return res.status(400).json({ message: "Seller profile already exists" });
+    // Update role to seller
+    const updated = await User.updateRole(userId, "seller");
+
+    if (!updated) {
+      return res.status(400).json({
+        success: false,
+        message: "Không thể cập nhật vai trò",
+      });
     }
 
-    // Update user role to seller
-    console.log("[BECOME_SELLER] Updating user role to seller...");
-    await User.updateRole(userId, "seller");
-
-    // Create seller profile in database
-    const sellerData = {
-      userId: userId,
-      shopName,
-      shopDescription,
-      shopCategory,
-      shopAddress,
-      shopPhone,
-      status: "active",
-    };
-
-    console.log("[BECOME_SELLER] Creating seller profile in database...");
-    const sellerResult = await Seller.create(sellerData);
-    console.log(
-      "[BECOME_SELLER] Seller profile created with ID:",
-      sellerResult.insertId
+    // Generate new token with seller role
+    const token = jwt.sign(
+      {
+        id: userId,
+        email: currentUser.Email,
+        role: "seller",
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
     );
 
-    // Get updated user info
-    const updatedUser = await User.findById(userId);
+    console.log(`✅ [BECOME_SELLER] User ${userId} is now a seller`);
 
-    console.log("[BECOME_SELLER] Seller registration completed successfully");
-
-    res.status(200).json({
-      message: "Successfully became a seller",
-      user: {
-        id: updatedUser.ID_NguoiDung,
-        email: updatedUser.Email,
-        name: updatedUser.HoTen,
-        role: updatedUser.VaiTro,
-        shopName: shopName,
-      },
-      // ✅ SỬA LỖI: Thay sellerProfile bằng object thực tế
-      sellerProfile: {
-        sellerId: sellerResult.insertId,
-        shopName,
-        shopDescription,
-        shopCategory,
-        shopAddress,
-        shopPhone,
-        status: "active",
-      },
+    res.json({
       success: true,
+      message: "Chúc mừng! Bạn đã trở thành seller thành công!",
+      token,
+      user: {
+        id: userId,
+        name: currentUser.HoTen,
+        email: currentUser.Email,
+        role: "seller",
+      },
     });
-  } catch (err) {
-    console.error("[BECOME_SELLER] Error occurred:", err);
-    console.error("[BECOME_SELLER] Error stack:", err.stack);
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error("❌ [BECOME_SELLER] Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi trở thành seller",
+      error: error.message,
+    });
   }
 };

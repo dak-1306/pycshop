@@ -63,13 +63,13 @@ class User {
     }
   }
 
-  static async findById(userId) {
-    console.log("[USER] Finding user by ID:", userId);
+  static async findById(id) {
+    console.log("[USER] Finding user by ID:", id);
 
     try {
       const [rows] = await db.execute(
         "SELECT * FROM NguoiDung WHERE ID_NguoiDung = ?",
-        [userId]
+        [id]
       );
       console.log(
         "[USER] Query result:",
@@ -83,24 +83,18 @@ class User {
     }
   }
 
+  // Update user role
   static async updateRole(userId, newRole) {
-    console.log(`[USER] Updating user ${userId} role to:`, newRole);
-
-    // Validate role
-    if (!["buyer", "seller", "admin"].includes(newRole)) {
-      throw new Error("Invalid role. Must be buyer, seller, or admin");
-    }
-
     try {
-      const result = await db.execute(
-        "UPDATE NguoiDung SET VaiTro = ? WHERE ID_NguoiDung = ?",
-        [newRole, userId]
-      );
-      console.log("[USER] Role updated successfully:", result);
+      console.log(`[USER] Updating role for user ${userId} to: ${newRole}`);
 
-      return result;
+      const query = "UPDATE nguoidung SET VaiTro = ? WHERE ID_NguoiDung = ?";
+      const [result] = await db.execute(query, [newRole, userId]);
+
+      console.log(`[USER] Role update result:`, result);
+      return result.affectedRows > 0;
     } catch (error) {
-      console.error("[USER] Error in updateRole:", error);
+      console.error("[USER] Error updating role:", error);
       throw error;
     }
   }

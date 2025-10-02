@@ -14,9 +14,6 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   : [
       "http://localhost:3000", // React dev server
       "http://localhost:5000", // API Gateway
-      "http://localhost:5173", // Vite dev server
-      "http://localhost:5174", // Vite dev server (backup port)
-      "http://localhost:5175", // Vite dev server (backup port)
       "http://127.0.0.1:5500", // Live Server
       "http://127.0.0.1:3000", // Alternative local
       "http://localhost:8080", // Alternative dev server

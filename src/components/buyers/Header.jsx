@@ -1,14 +1,32 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./Header.css";
 import logoImage from "../../images/logo.png";
 
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleSellerChannelClick = (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      // Chưa đăng nhập -> chuyển đến trang login
+      navigate("/login");
+    } else {
+      // Đã đăng nhập -> kiểm tra role
+      if (user?.role === "seller") {
+        // Đã là seller -> vào dashboard
+        navigate("/seller/dashboard");
+      } else {
+        // Chưa phải seller -> đăng ký trở thành seller
+        navigate("/become-seller");
+      }
+    }
   };
   return (
     <header className="header">
@@ -16,10 +34,14 @@ const Header = () => {
       <div className="header-top">
         <div className="container">
           <div className="header-top-left">
-            <Link to="/seller/dashboard" className="header-link">
+            <a
+              href="#"
+              onClick={handleSellerChannelClick}
+              className="header-link"
+            >
               <i className="fa-solid fa-shop" style={{ color: "white" }}></i>
               Kênh Người Bán
-            </Link>
+            </a>
             <span className="divider">|</span>
             <a href="#" className="header-link">
               Trở thành Người bán Pycshop

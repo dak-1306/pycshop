@@ -8,6 +8,7 @@ import Order from "./pages/seller/Order";
 import ShopPage from "./pages/seller/ShopPage";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
+import BecomeSeller from "./pages/seller/BecomeSeller";
 
 // Admin imports
 import AdminLayout from "./components/layout/AdminLayout";
@@ -33,6 +34,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/admin/login" element={<AdminLogin />} />
+            <Route path="/become-seller" element={<BecomeSeller />} />
 
             {/* Buyer Routes */}
             <Route path="/profile" element={<Profile />} />

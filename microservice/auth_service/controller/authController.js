@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
+import Seller from "../models/Seller.js";
 
 export const register = async (req, res) => {
   try {
@@ -217,4 +218,120 @@ export const registerAdmin = async (req, res) => {
 export const logout = (req, res) => {
   // Logout FE thường xóa token phía client, BE chỉ cần confirm
   res.json({ message: "Logout successful" });
+};
+
+export const becomeSeller = async (req, res) => {
+  try {
+    const { shopName, shopDescription, shopCategory, shopAddress, shopPhone } =
+      req.body;
+
+    // Get userId from token
+    const token = req.headers.authorization?.replace("Bearer ", "");
+    if (!token) {
+      console.log("[BECOME_SELLER] No authorization token provided");
+      return res.status(401).json({ message: "Authorization token required" });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET);
+    } catch (tokenError) {
+      console.log("[BECOME_SELLER] Invalid token:", tokenError.message);
+      return res.status(401).json({ message: "Invalid authorization token" });
+    }
+
+    const userId = decoded.id;
+    console.log(
+      `[BECOME_SELLER] Processing seller registration for user ID: ${userId}`
+    );
+
+    // Validate required fields
+    if (
+      !shopName ||
+      !shopDescription ||
+      !shopCategory ||
+      !shopAddress ||
+      !shopPhone
+    ) {
+      console.log("[BECOME_SELLER] Missing required fields");
+      return res.status(400).json({
+        message:
+          "Missing required fields: shopName, shopDescription, shopCategory, shopAddress, shopPhone",
+      });
+    }
+
+    // Check if user exists
+    console.log("[BECOME_SELLER] Checking if user exists...");
+    const existingUser = await User.findById(userId);
+    if (!existingUser) {
+      console.log("[BECOME_SELLER] User not found");
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Check if user is already a seller
+    if (existingUser.VaiTro === "seller") {
+      console.log("[BECOME_SELLER] User is already a seller");
+      return res.status(400).json({ message: "User is already a seller" });
+    }
+
+    // Check if seller profile already exists
+    const existingSeller = await Seller.findByUserId(userId);
+    if (existingSeller) {
+      console.log("[BECOME_SELLER] Seller profile already exists");
+      return res.status(400).json({ message: "Seller profile already exists" });
+    }
+
+    // Update user role to seller
+    console.log("[BECOME_SELLER] Updating user role to seller...");
+    await User.updateRole(userId, "seller");
+
+    // Create seller profile in database
+    const sellerData = {
+      userId: userId,
+      shopName,
+      shopDescription,
+      shopCategory,
+      shopAddress,
+      shopPhone,
+      status: "active",
+    };
+
+    console.log("[BECOME_SELLER] Creating seller profile in database...");
+    const sellerResult = await Seller.create(sellerData);
+    console.log(
+      "[BECOME_SELLER] Seller profile created with ID:",
+      sellerResult.insertId
+    );
+
+    // Get updated user info
+    const updatedUser = await User.findById(userId);
+
+    console.log("[BECOME_SELLER] Seller registration completed successfully");
+
+    res.status(200).json({
+      message: "Successfully became a seller",
+      user: {
+        id: updatedUser.ID_NguoiDung,
+        email: updatedUser.Email,
+        name: updatedUser.HoTen,
+        role: updatedUser.VaiTro,
+        shopName: shopName,
+      },
+      // ✅ SỬA LỖI: Thay sellerProfile bằng object thực tế
+      sellerProfile: {
+        sellerId: sellerResult.insertId,
+        shopName,
+        shopDescription,
+        shopCategory,
+        shopAddress,
+        shopPhone,
+        status: "active",
+      },
+      success: true,
+    });
+  } catch (err) {
+    console.error("[BECOME_SELLER] Error occurred:", err);
+    console.error("[BECOME_SELLER] Error stack:", err.stack);
+    res.status(500).json({ error: err.message });
+  }
 };

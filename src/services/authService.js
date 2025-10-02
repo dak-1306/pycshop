@@ -93,4 +93,21 @@ export const authService = {
     const user = authService.getCurrentUser();
     return user && user.role === "admin";
   },
+
+  // Đăng ký trở thành seller
+  becomeSeller: async (sellerData) => {
+    try {
+      const response = await api.post("/auth/become-seller", sellerData);
+
+      // Update user info in localStorage with new role
+      if (response.user) {
+        localStorage.setItem("user", JSON.stringify(response.user));
+      }
+
+      return response;
+    } catch (error) {
+      console.error("Become seller error:", error);
+      throw error;
+    }
+  },
 };

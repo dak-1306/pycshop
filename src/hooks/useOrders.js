@@ -201,6 +201,26 @@ export const useOrders = () => {
     handleCloseOrderModal();
   };
 
+  const handleCancelOrder = (orderId) => {
+    const order = orders.find((o) => o.id === orderId);
+    if (order && order.status !== "Hoàn tất" && order.status !== "Đã hủy") {
+      setOrderToDelete(order);
+      setShowDeleteModal(true);
+    }
+  };
+
+  const confirmCancelOrder = () => {
+    if (orderToDelete) {
+      const updatedOrders = orders.map((order) =>
+        order.id === orderToDelete.id ? { ...order, status: "Đã hủy" } : order
+      );
+      setOrders(updatedOrders);
+      setShowDeleteModal(false);
+      setOrderToDelete(null);
+      alert("🚫 Đã hủy đơn hàng thành công!");
+    }
+  };
+
   const handleDeleteOrder = (orderId) => {
     const order = orders.find((o) => o.id === orderId);
     setOrderToDelete(order);
@@ -305,6 +325,8 @@ export const useOrders = () => {
     handleAddOrder,
     handleEditOrder,
     handleSaveOrder,
+    handleCancelOrder,
+    confirmCancelOrder,
     handleDeleteOrder,
     confirmDeleteOrder,
     handleCloseOrderModal,

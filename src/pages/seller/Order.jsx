@@ -66,8 +66,8 @@ const Order = () => {
     handleAddOrder,
     handleEditOrder,
     handleSaveOrder,
-    handleDeleteOrder,
-    confirmDeleteOrder,
+    handleCancelOrder,
+    confirmCancelOrder,
     handleCloseOrderModal,
     handleCloseDetailModal,
     handleCloseDeleteModal,
@@ -103,6 +103,7 @@ const Order = () => {
           orders={orders}
           onViewOrder={handleViewOrder}
           onEditOrder={handleEditOrder}
+          onCancelOrder={handleCancelOrder}
           getStatusColor={getStatusColor}
         />
 
@@ -136,11 +137,11 @@ const Order = () => {
         <DeleteModal
           isOpen={showDeleteModal}
           onClose={handleCloseDeleteModal}
-          onConfirm={confirmDeleteOrder}
+          onConfirm={confirmCancelOrder}
           item={orderToDelete}
           itemType="đơn hàng"
-          title="Xác nhận xóa đơn hàng"
-          subtitle="Hành động này không thể hoàn tác"
+          title="Xác nhận hủy đơn hàng"
+          subtitle="Đơn hàng sẽ chuyển sang trạng thái 'Đã hủy'"
         />
       </div>
     </SellerLayout>

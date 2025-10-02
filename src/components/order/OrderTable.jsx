@@ -1,6 +1,12 @@
 import React from "react";
 
-const OrderTable = ({ orders, onViewOrder, onEditOrder, getStatusColor }) => {
+const OrderTable = ({
+  orders,
+  onViewOrder,
+  onEditOrder,
+  onCancelOrder,
+  getStatusColor,
+}) => {
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
@@ -134,6 +140,29 @@ const OrderTable = ({ orders, onViewOrder, onEditOrder, getStatusColor }) => {
                       />
                     </svg>
                   </button>
+
+                  {/* Nút hủy đơn hàng - chỉ hiển thị với các đơn chưa hoàn tất/hủy */}
+                  {order.status !== "Hoàn tất" && order.status !== "Đã hủy" && (
+                    <button
+                      onClick={() => onCancelOrder(order.id)}
+                      className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Hủy đơn hàng"
+                    >
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </td>
             </tr>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 01, 2025 lúc 05:04 PM
+-- Thời gian đã tạo: Th10 02, 2025 lúc 07:02 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -98,6 +98,29 @@ CREATE TABLE `chitietdonhang` (
   `DonGia` decimal(12,2) NOT NULL CHECK (`DonGia` >= 0),
   `SoLuong` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `cuahang`
+--
+
+CREATE TABLE `cuahang` (
+  `ID_CuaHang` bigint(20) NOT NULL,
+  `TenCuaHang` varchar(255) NOT NULL,
+  `ID_DanhMuc` int(11) NOT NULL,
+  `DiaChiCH` varchar(255) NOT NULL,
+  `SoDienThoaiCH` varchar(20) NOT NULL,
+  `NgayCapNhat` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `cuahang`
+--
+
+INSERT INTO `cuahang` (`ID_CuaHang`, `TenCuaHang`, `ID_DanhMuc`, `DiaChiCH`, `SoDienThoaiCH`, `NgayCapNhat`) VALUES
+(1, 'Thời Trang Nam Unisex', 1, '123 Lê Lợi, Quận 1, TP.HCM', '0901234567', '2025-10-02 20:30:56'),
+(3, 'Cửa hàng sách Hải Nam', 18, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-02 23:29:55');
 
 -- --------------------------------------------------------
 
@@ -221,17 +244,18 @@ CREATE TABLE `nguoidung` (
   `DiaChi` text DEFAULT NULL,
   `TrangThai` enum('active','block') NOT NULL DEFAULT 'active',
   `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp(),
-  `AvatarUrl` varchar(500) DEFAULT NULL
+  `AvatarUrl` varchar(500) DEFAULT NULL,
+  `ID_CuaHang` bigint(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `nguoidung`
 --
 
-INSERT INTO `nguoidung` (`ID_NguoiDung`, `VaiTro`, `HoTen`, `Email`, `MatKhau`, `SoDienThoai`, `DiaChi`, `TrangThai`, `ThoiGianTao`, `AvatarUrl`) VALUES
-(3, 'buyer', 'Nguyễn Văn Test', 'test@gmail.com', '$2b$10$kyTNrvfNiY2YcWIsctNm8O6Z08YJVJRNdIwNmgjlgGANAq7kNjrjm', '0123456789', '123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'active', '2025-09-29 10:46:02', NULL),
-(4, 'seller', 'Trần Tuấn Anh', 'anh@gmail.com', '$2b$10$.nBUefCG4ZtzVCSUhbjb5.tcqiyZfpzfRENMJBdVqu.e.mvrDEJ3W', '01234567689', '357 Điện Biên Phủ, Phường 15, Quận Bình Thạnh, TP.HCM', 'active', '2025-09-30 07:25:46', NULL),
-(5, 'buyer', 'Phạm Văn Bành', 'banh@gmail.com', '$2b$10$zdiHx0ziAUGVrMslqzUP9.cw93BaTIzSdAVOId9yQ3B9bg.DAGDZu', '0123456789', '147 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM', 'active', '2025-09-30 07:31:08', NULL);
+INSERT INTO `nguoidung` (`ID_NguoiDung`, `VaiTro`, `HoTen`, `Email`, `MatKhau`, `SoDienThoai`, `DiaChi`, `TrangThai`, `ThoiGianTao`, `AvatarUrl`, `ID_CuaHang`) VALUES
+(3, 'seller', 'Nguyễn Văn Test', 'test@gmail.com', '$2b$10$kyTNrvfNiY2YcWIsctNm8O6Z08YJVJRNdIwNmgjlgGANAq7kNjrjm', '0123456789', '123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'active', '2025-09-29 10:46:02', NULL, 3),
+(4, 'seller', 'Trần Tuấn Anh', 'anh@gmail.com', '$2b$10$.nBUefCG4ZtzVCSUhbjb5.tcqiyZfpzfRENMJBdVqu.e.mvrDEJ3W', '01234567689', '357 Điện Biên Phủ, Phường 15, Quận Bình Thạnh, TP.HCM', 'active', '2025-09-30 07:25:46', NULL, NULL),
+(5, 'buyer', 'Phạm Văn Bành', 'banh@gmail.com', '$2b$10$zdiHx0ziAUGVrMslqzUP9.cw93BaTIzSdAVOId9yQ3B9bg.DAGDZu', '0123456789', '147 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM', 'active', '2025-09-30 07:31:08', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -246,6 +270,13 @@ CREATE TABLE `nhatkythaydoitonkho` (
   `HanhDong` enum('import','export') NOT NULL DEFAULT 'export',
   `ThoiGian` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `nhatkythaydoitonkho`
+--
+
+INSERT INTO `nhatkythaydoitonkho` (`ID_NhatKy`, `ID_SanPham`, `SoLuongThayDoi`, `HanhDong`, `ThoiGian`) VALUES
+(1, 26, 10, 'import', '2025-10-02 17:01:35');
 
 -- --------------------------------------------------------
 
@@ -310,7 +341,9 @@ INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, 
 (21, 4, 2, 'Áo sơ mi nữ', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 299999.00, 30, 'active', '2025-10-01 10:44:11'),
 (22, 4, 3, 'iPhone 12', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 15000000.00, 20, 'active', '2025-10-01 10:44:11'),
 (23, 4, 4, 'Laptop Lenovo', 'Sản phẩm máy tính xách tay: Asus, Dell', 25000000.00, 15, 'active', '2025-10-01 10:44:11'),
-(24, 4, 5, 'Máy ảnh Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 9000000.00, 10, 'active', '2025-10-01 10:44:11');
+(24, 4, 5, 'Máy ảnh Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 9000000.00, 10, 'active', '2025-10-01 10:44:11'),
+(25, 3, 18, 'Sách huyền vũ yêu quái', 'Sách nói về 1 chàng trai không được bình thường và kỳ lạ, cuối cùng....', 10000.00, 12, 'active', '2025-10-02 16:41:54'),
+(26, 3, 18, 'Sách quỷ diệt hồn', 'Chuyện kể về 1 nhóm anh hùng chuyên trừ gian diệt ác', 200000.00, 30, 'active', '2025-10-02 17:01:35');
 
 -- --------------------------------------------------------
 
@@ -426,6 +459,13 @@ ALTER TABLE `chitietdonhang`
   ADD KEY `fk_chitiet_sanpham` (`ID_SanPham`);
 
 --
+-- Chỉ mục cho bảng `cuahang`
+--
+ALTER TABLE `cuahang`
+  ADD PRIMARY KEY (`ID_CuaHang`),
+  ADD KEY `fk_cuahang_danhmuc` (`ID_DanhMuc`);
+
+--
 -- Chỉ mục cho bảng `danhgiasanpham`
 --
 ALTER TABLE `danhgiasanpham`
@@ -473,7 +513,8 @@ ALTER TABLE `hoithoai`
 --
 ALTER TABLE `nguoidung`
   ADD PRIMARY KEY (`ID_NguoiDung`),
-  ADD UNIQUE KEY `Email` (`Email`);
+  ADD UNIQUE KEY `Email` (`Email`),
+  ADD KEY `fk_nguoidung_cuahang` (`ID_CuaHang`);
 
 --
 -- Chỉ mục cho bảng `nhatkythaydoitonkho`
@@ -569,6 +610,12 @@ ALTER TABLE `chitietdonhang`
   MODIFY `ID_ChiTietDH` bigint(20) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT cho bảng `cuahang`
+--
+ALTER TABLE `cuahang`
+  MODIFY `ID_CuaHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT cho bảng `danhgiasanpham`
 --
 ALTER TABLE `danhgiasanpham`
@@ -614,7 +661,7 @@ ALTER TABLE `nguoidung`
 -- AUTO_INCREMENT cho bảng `nhatkythaydoitonkho`
 --
 ALTER TABLE `nhatkythaydoitonkho`
-  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `phieugiamgia`
@@ -626,7 +673,7 @@ ALTER TABLE `phieugiamgia`
 -- AUTO_INCREMENT cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT cho bảng `sanphamtronggio`
@@ -692,6 +739,12 @@ ALTER TABLE `chitietdonhang`
   ADD CONSTRAINT `fk_chitiet_sanpham` FOREIGN KEY (`ID_SanPham`) REFERENCES `sanpham` (`ID_SanPham`);
 
 --
+-- Các ràng buộc cho bảng `cuahang`
+--
+ALTER TABLE `cuahang`
+  ADD CONSTRAINT `fk_cuahang_danhmuc` FOREIGN KEY (`ID_DanhMuc`) REFERENCES `danhmuc` (`ID_DanhMuc`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Các ràng buộc cho bảng `danhgiasanpham`
 --
 ALTER TABLE `danhgiasanpham`
@@ -722,6 +775,12 @@ ALTER TABLE `giohang`
 ALTER TABLE `hoithoai`
   ADD CONSTRAINT `fk_hoithoai_nguoiban` FOREIGN KEY (`ID_NguoiBan`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_hoithoai_nguoimua` FOREIGN KEY (`ID_NguoiMua`) REFERENCES `nguoidung` (`ID_NguoiDung`) ON DELETE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `nguoidung`
+--
+ALTER TABLE `nguoidung`
+  ADD CONSTRAINT `fk_nguoidung_cuahang` FOREIGN KEY (`ID_CuaHang`) REFERENCES `cuahang` (`ID_CuaHang`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Các ràng buộc cho bảng `nhatkythaydoitonkho`

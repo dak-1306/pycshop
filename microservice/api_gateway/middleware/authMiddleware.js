@@ -9,9 +9,15 @@ const authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
+      console.log(
+        `🚫 [AUTH] No token provided for request: ${req.originalUrl}`
+      );
       return res.status(401).json({
-        error: "Access denied",
-        message: "No token provided",
+        success: false,
+        error: "NO_TOKEN",
+        message: "Vui lòng đăng nhập để tiếp tục",
+        code: "NO_TOKEN",
+        requireLogin: true,
       });
     }
 
@@ -21,9 +27,15 @@ const authMiddleware = (req, res, next) => {
       : authHeader;
 
     if (!token) {
+      console.log(
+        `🚫 [AUTH] Invalid token format for request: ${req.originalUrl}`
+      );
       return res.status(401).json({
-        error: "Access denied",
-        message: "Invalid token format",
+        success: false,
+        error: "INVALID_TOKEN_FORMAT",
+        message: "Token không đúng định dạng. Vui lòng đăng nhập lại.",
+        code: "INVALID_TOKEN_FORMAT",
+        requireLogin: true,
       });
     }
 
@@ -37,23 +49,33 @@ const authMiddleware = (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {
+      console.log(`⏰ [AUTH] Token expired for request: ${req.originalUrl}`);
       return res.status(401).json({
-        error: "Token expired",
-        message: "Please login again",
+        success: false,
+        error: "TOKEN_EXPIRED",
+        message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+        code: "TOKEN_EXPIRED",
+        requireLogin: true,
       });
     }
 
     if (error.name === "JsonWebTokenError") {
+      console.log(`🔒 [AUTH] Invalid token for request: ${req.originalUrl}`);
       return res.status(401).json({
-        error: "Invalid token",
-        message: "Token verification failed",
+        success: false,
+        error: "INVALID_TOKEN",
+        message: "Token không hợp lệ. Vui lòng đăng nhập lại.",
+        code: "INVALID_TOKEN",
+        requireLogin: true,
       });
     }
 
     console.error("❌ [AUTH] Authentication error:", error);
     return res.status(500).json({
-      error: "Authentication error",
-      message: "Internal server error",
+      success: false,
+      error: "AUTHENTICATION_ERROR",
+      message: "Lỗi xác thực hệ thống",
+      code: "SERVER_ERROR",
     });
   }
 };

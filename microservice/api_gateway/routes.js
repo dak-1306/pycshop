@@ -41,6 +41,13 @@ function setupRoutes(app) {
         console.log(
           `[PROXY] Response ${proxyRes.statusCode} from Auth Service`
         );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
       },
       onError: (err, req, res) => {
         console.error(`[PROXY] Error:`, err.message);

@@ -21,27 +21,93 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
       "http://127.0.0.1:5500", // Live Server
       "http://127.0.0.1:3000", // Alternative local
       "http://localhost:8080", // Alternative dev server
+      "http://localhost:5173", // Vite dev server
+      "http://localhost:5174", // Vite dev server (backup port)
+      "http://localhost:5175", // Vite dev server (backup port)
     ];
 
 const corsOptions = {
-  origin: allowedOrigins,
+  origin: function (origin, callback) {
+    console.log(`[GATEWAY] Checking origin: ${origin}`);
+
+    // Allow requests with no origin (mobile apps, etc.)
+    if (!origin) {
+      console.log(`[GATEWAY] Allowing request with no origin`);
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      console.log(`[GATEWAY] Allowing origin: ${origin}`);
+      return callback(null, true);
+    } else {
+      console.log(`[GATEWAY] CORS blocked origin: ${origin}`);
+      return callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
   credentials: true, // Cho phép cookies/auth headers
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: [
     "Content-Type",
     "Authorization",
     "X-Requested-With",
     "Accept",
     "Origin",
+    "Access-Control-Request-Method",
+    "Access-Control-Request-Headers",
   ],
+  exposedHeaders: ["Authorization"],
   optionsSuccessStatus: 200, // Support legacy browsers
+  preflightContinue: false,
 };
 
 console.log("[GATEWAY] CORS allowed origins:", allowedOrigins);
 
 // Middleware cơ bản
-app.use(cors(corsOptions));
 app.use(helmet());
+
+// Log all requests first
+app.use((req, res, next) => {
+  console.log(
+    `[GATEWAY] ${req.method} ${req.originalUrl} from origin: ${req.headers.origin}`
+  );
+  next();
+});
+
+// Handle OPTIONS requests explicitly before CORS middleware
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.includes(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, DELETE, OPTIONS, PATCH"
+      );
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+      );
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      console.log(`[GATEWAY] Handled OPTIONS request for origin: ${origin}`);
+      return res.status(200).end();
+    }
+  }
+  next();
+});
+
+app.use(cors(corsOptions));
+
+// Additional CORS middleware to ensure headers are always set
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  console.log(`[GATEWAY] Setting CORS headers for origin: ${origin}`);
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    console.log(`[GATEWAY] CORS headers set for origin: ${origin}`);
+  }
+  next();
+});
 
 // Skip parsing for proxy routes giữ nguyên raw data cho proxy
 app.use((req, res, next) => {

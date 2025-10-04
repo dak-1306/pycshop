@@ -11,7 +11,7 @@ import {
   getCategories,
   addStock,
   getStockHistory,
-} from "../../controller/seller/sellerController.js";
+} from "../../controller/seller/SellerController.js";
 
 const router = express.Router();
 
@@ -31,6 +31,8 @@ router.post("/products/:id/stock", sellerAuthMiddleware, (req, res, next) => {
   console.log(
     `🔄 [SELLER_ROUTES] Handling POST /products/${req.params.id}/stock`
   );
+  console.log(`🔄 [SELLER_ROUTES] Request body:`, req.body);
+  console.log(`🔄 [SELLER_ROUTES] Request params:`, req.params);
   addStock(req, res, next);
 });
 router.get(

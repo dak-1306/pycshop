@@ -1,4 +1,4 @@
-import Seller from "../../models/seller/sellerModel.js";
+import Seller from "../../models/seller/SellerModel.js";
 import Product from "../../models/buyer/getProductModel.js";
 
 // Get seller shop information
@@ -427,27 +427,67 @@ export const addStock = async (req, res) => {
       });
     }
 
-    const result = await Seller.addStock(sellerId, productId, {
-      soLuongThayDoi: parseInt(soLuongThayDoi),
-      hanhDong: hanhDong || "import",
-    });
+    // Set timeout for this operation
+    const timeoutId = setTimeout(() => {
+      console.log(
+        `[SELLER_CONTROLLER] Operation timeout for product: ${productId}`
+      );
+      if (!res.headersSent) {
+        res.status(408).json({
+          success: false,
+          message: "Thao tác quá lâu, vui lòng thử lại",
+          error: "Request timeout",
+        });
+      }
+    }, 30000); // 30 seconds timeout
 
-    console.log(
-      `[SELLER_CONTROLLER] Stock added successfully: ${result.oldStock} -> ${result.newStock}`
-    );
+    try {
+      const result = await Seller.addStock(sellerId, productId, {
+        soLuongThayDoi: parseInt(soLuongThayDoi),
+        hanhDong: hanhDong || "import",
+      });
 
-    res.json({
-      success: true,
-      message: `Nhập thêm ${soLuongThayDoi} sản phẩm thành công`,
-      data: result,
-    });
+      clearTimeout(timeoutId);
+
+      console.log(
+        `[SELLER_CONTROLLER] Stock added successfully: ${result.oldStock} -> ${result.newStock}`
+      );
+
+      if (!res.headersSent) {
+        res.json({
+          success: true,
+          message: `Nhập thêm ${soLuongThayDoi} sản phẩm thành công`,
+          data: result,
+        });
+      }
+    } catch (dbError) {
+      clearTimeout(timeoutId);
+      throw dbError;
+    }
   } catch (error) {
     console.error("[SELLER_CONTROLLER] Error in addStock:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lỗi khi nhập thêm hàng",
-      error: error.message,
-    });
+
+    if (!res.headersSent) {
+      // Check for specific error types
+      if (
+        error.message.includes("Token") ||
+        error.message.includes("expired")
+      ) {
+        return res.status(401).json({
+          success: false,
+          message: "Phiên đăng nhập đã hết hạn",
+          error: "Token expired",
+          requireAuth: true,
+          tokenExpired: true,
+        });
+      }
+
+      res.status(500).json({
+        success: false,
+        message: "Lỗi khi nhập thêm hàng",
+        error: error.message,
+      });
+    }
   }
 };
 

@@ -286,17 +286,30 @@ WHERE n.ID_NguoiDung = ?;
 
   // Add stock to product (import goods)
   static async addStock(sellerId, productId, stockData) {
+    let connection;
     try {
+      console.log(
+        `[SELLER] Starting addStock for seller: ${sellerId}, product: ${productId}`
+      );
+
       const { soLuongThayDoi, hanhDong = "import" } = stockData;
 
-      // Verify product belongs to seller
-      const verifyQuery = `
-        SELECT p.ID_SanPham, p.TonKho, p.TenSanPham
-        FROM SanPham p 
-        WHERE p.ID_SanPham = ? AND p.ID_NguoiBan = ?
-      `;
+      // Get connection from pool
+      connection = await db.getConnection();
 
-      const [verifyRows] = await db.execute(verifyQuery, [productId, sellerId]);
+      // Set timeout for this connection to prevent hanging
+      await connection.query("SET SESSION innodb_lock_wait_timeout = 10");
+
+      // Start transaction
+      await connection.query("START TRANSACTION");
+
+      // Verify product belongs to seller and get current info
+      const [verifyRows] = await connection.execute(
+        `SELECT p.ID_SanPham, p.TonKho, p.TenSanPham
+         FROM SanPham p 
+         WHERE p.ID_SanPham = ? AND p.ID_NguoiBan = ?`,
+        [productId, sellerId]
+      );
 
       if (verifyRows.length === 0) {
         throw new Error(
@@ -312,43 +325,59 @@ WHERE n.ID_NguoiDung = ?;
         throw new Error("Số lượng tồn kho không thể âm.");
       }
 
-      // Start transaction
-      await db.query("START TRANSACTION");
+      // Update product stock
+      const [updateResult] = await connection.execute(
+        `UPDATE SanPham 
+         SET TonKho = ?, CapNhat = CURRENT_TIMESTAMP
+         WHERE ID_SanPham = ?`,
+        [newStock, productId]
+      );
 
-      try {
-        // Update product stock
-        const updateStockQuery = `
-          UPDATE SanPham 
-          SET TonKho = ?, CapNhat = CURRENT_TIMESTAMP
-          WHERE ID_SanPham = ?
-        `;
-
-        await db.execute(updateStockQuery, [newStock, productId]);
-
-        // Insert stock change log
-        const logQuery = `
-          INSERT INTO nhatkythaydoitonkho (ID_SanPham, SoLuongThayDoi, HanhDong, ThoiGian)
-          VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-        `;
-
-        await db.execute(logQuery, [productId, soLuongThayDoi, hanhDong]);
-
-        await db.query("COMMIT");
-
-        return {
-          success: true,
-          oldStock,
-          newStock,
-          change: soLuongThayDoi,
-          productName: currentProduct.TenSanPham,
-        };
-      } catch (error) {
-        await db.query("ROLLBACK");
-        throw error;
+      if (updateResult.affectedRows === 0) {
+        throw new Error("Không thể cập nhật tồn kho sản phẩm.");
       }
+
+      // Insert stock change log
+      await connection.execute(
+        `INSERT INTO nhatkythaydoitonkho (ID_SanPham, SoLuongThayDoi, HanhDong, ThoiGian)
+         VALUES (?, ?, ?, CURRENT_TIMESTAMP)`,
+        [productId, soLuongThayDoi, hanhDong]
+      );
+
+      // Commit transaction
+      await connection.query("COMMIT");
+
+      console.log(
+        `[SELLER] Stock updated successfully: ${oldStock} -> ${newStock}`
+      );
+
+      return {
+        success: true,
+        oldStock,
+        newStock,
+        change: soLuongThayDoi,
+        productName: currentProduct.TenSanPham,
+      };
     } catch (error) {
       console.error("[SELLER] Error in addStock:", error);
+
+      // Rollback transaction if connection exists
+      if (connection) {
+        try {
+          await connection.query("ROLLBACK");
+          console.log("[SELLER] Transaction rolled back");
+        } catch (rollbackError) {
+          console.error("[SELLER] Rollback error:", rollbackError);
+        }
+      }
+
       throw error;
+    } finally {
+      // Always release connection
+      if (connection) {
+        connection.release();
+        console.log("[SELLER] Database connection released");
+      }
     }
   }
 

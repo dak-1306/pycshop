@@ -109,8 +109,13 @@ function setupRoutes(app) {
     createProxyMiddleware({
       target: process.env.PRODUCT_SERVICE_URL || "http://localhost:5002",
       changeOrigin: true,
-      // Add /seller prefix back since Express strips it
-      pathRewrite: { "^/": "/seller/" },
+      // Keep /seller prefix - product service expects it
+      pathRewrite: (path, req) => {
+        const newPath = `/seller${path}`;
+        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
+        return newPath;
+      },
+      timeout: 60000, // 60 second timeout
       onProxyReq: (proxyReq, req, res) => {
         console.log(
           `[PROXY] Forwarding ${req.method} ${req.url} to ${
@@ -119,6 +124,12 @@ function setupRoutes(app) {
         );
         console.log(
           `[PROXY] Original URL: ${req.originalUrl} -> Target: ${proxyReq.path}`
+        );
+        console.log(`[PROXY] Headers:`, proxyReq.getHeaders());
+        console.log(
+          `[PROXY] Target URL: ${
+            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
+          }${proxyReq.path}`
         );
       },
       onProxyRes: (proxyRes, req, res) => {

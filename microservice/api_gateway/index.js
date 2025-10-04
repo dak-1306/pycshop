@@ -114,6 +114,7 @@ app.use((req, res, next) => {
   if (
     req.url.startsWith("/auth") ||
     req.url.startsWith("/products") ||
+    req.url.startsWith("/seller") ||
     req.url.startsWith("/cart")
   ) {
     console.log(`[GATEWAY] Skipping JSON parsing for proxy route: ${req.url}`);
@@ -132,6 +133,38 @@ const limiter = rateLimit({
 });
 
 app.use(limiter);
+
+// Add timeout middleware
+app.use((req, res, next) => {
+  // Set timeout for all requests
+  req.setTimeout(60000, () => {
+    console.log(
+      `[GATEWAY] Request timeout for ${req.method} ${req.originalUrl}`
+    );
+    if (!res.headersSent) {
+      res.status(408).json({
+        success: false,
+        message: "Request timeout",
+        error: "The request took too long to process",
+      });
+    }
+  });
+
+  res.setTimeout(60000, () => {
+    console.log(
+      `[GATEWAY] Response timeout for ${req.method} ${req.originalUrl}`
+    );
+    if (!res.headersSent) {
+      res.status(408).json({
+        success: false,
+        message: "Response timeout",
+        error: "The response took too long to send",
+      });
+    }
+  });
+
+  next();
+});
 
 // Log incoming requests
 app.use((req, res, next) => {

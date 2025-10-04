@@ -6,6 +6,7 @@ import morgan from "morgan";
 
 import productRoutes from "./routes/buyer/routeGetProduct.js";
 import sellerRoutes from "./routes/seller/SellerRoutes.js";
+import imageRoutes from "./routes/seller/ImageRoutes.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
       "http://127.0.0.1:5500",
       "http://127.0.0.1:3000",
       "http://localhost:8080",
+      "null", // file:// protocol shows as null origin
     ];
 
 const corsOptions = {
@@ -61,6 +63,7 @@ app.get("/health", (req, res) => {
 
 // Routes - Mount seller routes BEFORE buyer routes to avoid conflicts
 app.use("/seller", sellerRoutes);
+app.use("/images", imageRoutes);
 app.use("/", productRoutes);
 
 // 404 handler - sử dụng catch-all route thay vì wildcard *

@@ -62,13 +62,16 @@ const sellerAuthMiddleware = (req, res, next) => {
       return res.status(401).json({
         error: "Invalid token",
         message: "Token is malformed",
+        requireAuth: true,
       });
     }
 
     if (error.name === "TokenExpiredError") {
       return res.status(401).json({
         error: "Token expired",
-        message: "Please log in again",
+        message: "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.",
+        requireAuth: true,
+        tokenExpired: true,
       });
     }
 
@@ -79,4 +82,4 @@ const sellerAuthMiddleware = (req, res, next) => {
   }
 };
 
-export { sellerAuthMiddleware };
+export default sellerAuthMiddleware;

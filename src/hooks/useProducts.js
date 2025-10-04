@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { adminService } from "../services/adminService.js";
 
-// Mock data
+// Mock data for fallback
 const INITIAL_PRODUCTS = [
   {
     id: 1,
@@ -82,6 +83,8 @@ const INITIAL_FORM_STATE = {
 export const useProducts = () => {
   // Products state
   const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Form and modal states
   const [currentProduct, setCurrentProduct] = useState(INITIAL_FORM_STATE);
@@ -100,8 +103,30 @@ export const useProducts = () => {
 
   // Initialize products
   useEffect(() => {
-    setProducts(INITIAL_PRODUCTS);
-  }, []);
+    const loadProducts = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response = await adminService.getProducts({
+          page: currentPage,
+          limit: 10,
+          search: searchTerm,
+          category: selectedCategory,
+          status: selectedStatus,
+        });
+        setProducts(response.data || []);
+      } catch (error) {
+        console.error("Error loading products:", error);
+        setError("Failed to load products");
+        // Fallback to mock data
+        setProducts(INITIAL_PRODUCTS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, [currentPage, searchTerm, selectedCategory, selectedStatus]);
 
   // Product operations
   const handleViewProduct = (productId) => {
@@ -225,7 +250,7 @@ export const useProducts = () => {
     }
   };
 
-  const handleSaveProduct = () => {
+  const handleSaveProduct = async () => {
     if (
       !currentProduct.name ||
       !currentProduct.price ||
@@ -236,40 +261,44 @@ export const useProducts = () => {
       return;
     }
 
-    if (modalMode === "add") {
-      const newProduct = {
-        id: products.length + 1,
-        name: currentProduct.name,
-        price: Number(currentProduct.price).toLocaleString(),
-        quantity: Number(currentProduct.quantity),
-        category: currentProduct.category,
-        status: currentProduct.quantity > 0 ? "Còn hàng" : "Hết hàng",
-        images: currentProduct.images || [],
-        imageFiles: currentProduct.imageFiles || [],
-        description: currentProduct.description || "",
-        actions: ["view", "edit", "delete"],
-      };
-      setProducts([...products, newProduct]);
-      alert("🎉 Thêm sản phẩm thành công!");
-    } else {
-      const updatedProducts = products.map((product) =>
-        product.id === currentProduct.id
-          ? {
-              ...currentProduct,
-              price: Number(currentProduct.price).toLocaleString(),
-              quantity: Number(currentProduct.quantity),
-              status:
-                Number(currentProduct.quantity) > 0 ? "Còn hàng" : "Hết hàng",
-              images: currentProduct.images || [],
-              imageFiles: currentProduct.imageFiles || [],
-            }
-          : product
-      );
-      setProducts(updatedProducts);
-      alert("🎉 Cập nhật sản phẩm thành công!");
-    }
+    try {
+      if (modalMode === "add") {
+        await adminService.createProduct({
+          name: currentProduct.name,
+          price: Number(currentProduct.price),
+          quantity: Number(currentProduct.quantity),
+          category: currentProduct.category,
+          description: currentProduct.description || "",
+          images: currentProduct.images || [],
+        });
+        alert("🎉 Thêm sản phẩm thành công!");
+      } else {
+        await adminService.updateProduct(currentProduct.id, {
+          name: currentProduct.name,
+          price: Number(currentProduct.price),
+          quantity: Number(currentProduct.quantity),
+          category: currentProduct.category,
+          description: currentProduct.description || "",
+          images: currentProduct.images || [],
+        });
+        alert("🎉 Cập nhật sản phẩm thành công!");
+      }
 
-    handleCloseProductModal();
+      // Reload products
+      const response = await adminService.getProducts({
+        page: currentPage,
+        limit: 10,
+        search: searchTerm,
+        category: selectedCategory,
+        status: selectedStatus,
+      });
+      setProducts(response.data || []);
+
+      handleCloseProductModal();
+    } catch (error) {
+      console.error("Error saving product:", error);
+      alert("❌ Lỗi khi lưu sản phẩm: " + (error.message || "Unknown error"));
+    }
   };
 
   const handleDeleteProduct = (productId) => {
@@ -280,15 +309,28 @@ export const useProducts = () => {
     }
   };
 
-  const confirmDeleteProduct = () => {
+  const confirmDeleteProduct = async () => {
     if (productToDelete) {
-      const updatedProducts = products.filter(
-        (product) => product.id !== productToDelete.id
-      );
-      setProducts(updatedProducts);
-      setShowDeleteModal(false);
-      setProductToDelete(null);
-      alert("🗑️ Đã xóa sản phẩm thành công!");
+      try {
+        await adminService.deleteProduct(productToDelete.id);
+
+        // Reload products
+        const response = await adminService.getProducts({
+          page: currentPage,
+          limit: 10,
+          search: searchTerm,
+          category: selectedCategory,
+          status: selectedStatus,
+        });
+        setProducts(response.data || []);
+
+        setShowDeleteModal(false);
+        setProductToDelete(null);
+        alert("🗑️ Đã xóa sản phẩm thành công!");
+      } catch (error) {
+        console.error("Error deleting product:", error);
+        alert("❌ Lỗi khi xóa sản phẩm: " + (error.message || "Unknown error"));
+      }
     }
   };
 
@@ -390,6 +432,8 @@ export const useProducts = () => {
     setSelectedPrice,
     currentPage,
     setCurrentPage,
+    isLoading,
+    error,
 
     // Actions
     handleViewProduct,

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { adminService } from "../services/adminService.js";
 
-// Mock data
+// Mock data for fallback
 const MOCK_SELLERS = [
   {
     id: 1,
@@ -156,9 +157,11 @@ export const useAdminSellers = () => {
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [verificationFilter, setVerificationFilter] = useState("all");
   const [shopTypeFilter, setShopTypeFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Modal states
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -171,14 +174,33 @@ export const useAdminSellers = () => {
   useEffect(() => {
     const loadSellers = async () => {
       setIsLoading(true);
+      setError(null);
       try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 800));
+        const response = await adminService.getSellers({
+          search: searchTerm,
+          status: statusFilter,
+          verification: verificationFilter,
+        });
+        setSellers(response.data || []);
 
+        // Get seller stats from dashboard API
+        const dashboardData = await adminService.getDashboardStats();
+        setSellersStats({
+          totalSellers: dashboardData.stats.totalSellers || 0,
+          activeSellers: dashboardData.stats.activeSellers || 0,
+          blockedSellers: dashboardData.stats.blockedSellers || 0,
+          pendingVerification: dashboardData.stats.pendingVerification || 0,
+          totalShops: dashboardData.stats.totalShops || 0,
+          activeShops: dashboardData.stats.activeShops || 0,
+          totalProducts: dashboardData.stats.totalProducts || 0,
+          totalOrders: dashboardData.stats.totalOrders || 0,
+        });
+      } catch (error) {
+        console.error("Error loading sellers:", error);
+        setError("Failed to load sellers");
+        // Fallback to mock data
         setSellers(MOCK_SELLERS);
-
-        // Calculate stats
-        const stats = {
+        setSellersStats({
           totalSellers: MOCK_SELLERS.length,
           activeSellers: MOCK_SELLERS.filter((s) => s.status === "active")
             .length,
@@ -197,17 +219,14 @@ export const useAdminSellers = () => {
             (sum, s) => sum + s.shop.totalOrders,
             0
           ),
-        };
-        setSellersStats(stats);
-      } catch (error) {
-        console.error("Error loading sellers:", error);
+        });
       } finally {
         setIsLoading(false);
       }
     };
 
     loadSellers();
-  }, []);
+  }, [searchTerm, statusFilter, verificationFilter]);
 
   // Filter sellers based on search and filters
   const filteredSellers = sellers.filter((seller) => {
@@ -465,11 +484,14 @@ export const useAdminSellers = () => {
     setSearchTerm,
     statusFilter,
     setStatusFilter,
+    verificationFilter,
+    setVerificationFilter,
     shopTypeFilter,
     setShopTypeFilter,
     currentPage,
     setCurrentPage,
     isLoading,
+    error,
 
     // Modals
     showDetailModal,

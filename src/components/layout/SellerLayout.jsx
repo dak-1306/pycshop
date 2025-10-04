@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CollaboratorModal from "../modals/CollaboratorModal";
+import { useNotifications } from "../../hooks/useNotifications";
+import NotificationPanel from "../common/NotificationPanel";
 import "../../assets/css/logo.css";
 
 const SellerLayout = ({ children }) => {
@@ -11,6 +13,22 @@ const SellerLayout = ({ children }) => {
     name: "",
     email: "",
   });
+
+  // Notification system
+  const {
+    notifications,
+    isOpen: notificationsOpen,
+    unreadCount,
+    toggleNotifications,
+    closeNotifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearAllNotifications,
+    getRelativeTime,
+    getPriorityColor,
+    getNotificationIcon,
+  } = useNotifications("seller");
 
   const handleAddCollaborator = () => {
     setShowCollaboratorModal(true);
@@ -142,18 +160,54 @@ const SellerLayout = ({ children }) => {
 
             {/* User Actions */}
             <div className="flex items-center space-x-2">
-              <button
-                className="p-2 hover:bg-green-600 rounded-lg transition-colors"
-                title="Thông báo"
-              >
-                <svg
-                  className="w-5 h-5"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
+              {/* Notifications */}
+              <div className="relative">
+                <button
+                  onClick={toggleNotifications}
+                  className="relative p-2 text-white hover:bg-green-600 rounded-lg transition-colors"
+                  title="Thông báo"
                 >
-                  <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
-                </svg>
-              </button>
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M15 17h5l-5 5v-5zM10.07 2.82l-.9 1.46A9.949 9.949 0 0112 4a9.949 9.949 0 012.83.28l-.9-1.46A11.947 11.947 0 0010.07 2.82z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9z"
+                    />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                      {unreadCount > 99 ? "99+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+
+                <NotificationPanel
+                  notifications={notifications}
+                  isOpen={notificationsOpen}
+                  unreadCount={unreadCount}
+                  onToggle={toggleNotifications}
+                  onClose={closeNotifications}
+                  onMarkAsRead={markAsRead}
+                  onMarkAllAsRead={markAllAsRead}
+                  onDelete={deleteNotification}
+                  onClearAll={clearAllNotifications}
+                  getRelativeTime={getRelativeTime}
+                  getPriorityColor={getPriorityColor}
+                  getNotificationIcon={getNotificationIcon}
+                />
+              </div>
 
               {/* Add Collaborator Button */}
               <button

@@ -116,7 +116,7 @@ const Sellers = () => {
       </div>
 
       {/* Sellers Statistics */}
-      <SellersStats stats={sellersStats} />
+      <SellersStats stats={sellersStats} isLoading={isLoading} />
 
       {/* Filters */}
       <SellersFilters
@@ -126,7 +126,10 @@ const Sellers = () => {
         setStatusFilter={setStatusFilter}
         shopTypeFilter={shopTypeFilter}
         setShopTypeFilter={setShopTypeFilter}
-        onResetFilters={handleResetFilters}
+        onReset={handleResetFilters}
+        onExport={handleExport}
+        onRefresh={refreshData}
+        isLoading={isLoading}
       />
 
       {/* Sellers Table */}

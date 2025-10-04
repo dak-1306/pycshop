@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./Header.css";
@@ -7,9 +7,27 @@ import logoImage from "../../images/logo.png";
 const Header = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   const handleLogout = () => {
     logout();
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchKeyword.trim()) {
+      navigate(`/search?keyword=${encodeURIComponent(searchKeyword.trim())}`);
+    }
+  };
+
+  const handleSearchInputChange = (e) => {
+    setSearchKeyword(e.target.value);
+  };
+
+  const handleSearchKeyPress = (e) => {
+    if (e.key === "Enter") {
+      handleSearch(e);
+    }
   };
 
   const handleSellerChannelClick = (e) => {
@@ -104,16 +122,19 @@ const Header = () => {
 
             {/* Search Bar */}
             <div className="search-container">
-              <div className="search-box">
+              <form onSubmit={handleSearch} className="search-box">
                 <input
                   type="text"
-                  placeholder="Tìm kiếm trong Shop"
+                  placeholder="Tìm kiếm sản phẩm..."
                   className="search-input"
+                  value={searchKeyword}
+                  onChange={handleSearchInputChange}
+                  onKeyPress={handleSearchKeyPress}
                 />
-                <button className="search-btn">
+                <button type="submit" className="search-btn">
                   <i className="fas fa-search" style={{ color: "white" }}></i>
                 </button>
-              </div>
+              </form>
             </div>
 
             {/* Cart */}

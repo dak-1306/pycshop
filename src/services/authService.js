@@ -99,7 +99,10 @@ export const authService = {
     try {
       const response = await api.post("/auth/become-seller", sellerData);
 
-      // Update user info in localStorage with new role
+      // Update user info and token in localStorage with new role
+      if (response.token) {
+        localStorage.setItem("token", response.token);
+      }
       if (response.user) {
         localStorage.setItem("user", JSON.stringify(response.user));
       }

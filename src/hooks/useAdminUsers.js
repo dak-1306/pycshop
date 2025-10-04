@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { adminService } from "../services/adminService.js";
+import adminService from "../services/adminService.js";
 import {
   MOCK_USERS,
   DEFAULT_USER_STATS,

@@ -2,6 +2,7 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
+import db from "../../db/index.js";
 
 export const register = async (req, res) => {
   try {
@@ -219,10 +220,28 @@ export const logout = (req, res) => {
   res.json({ message: "Logout successful" });
 };
 
-// Become seller (just change role to seller)
+// Become seller (change role to seller and create shop)
 export const becomeSeller = async (req, res) => {
   try {
     console.log("🔍 [BECOME_SELLER] All headers:", req.headers);
+    console.log("🔍 [BECOME_SELLER] Request body:", req.body);
+
+    const { shopName, shopDescription, shopCategory, shopAddress, shopPhone } =
+      req.body;
+
+    // Validate required shop data
+    if (
+      !shopName ||
+      !shopDescription ||
+      !shopCategory ||
+      !shopAddress ||
+      !shopPhone
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng điền đầy đủ thông tin cửa hàng",
+      });
+    }
 
     // Get user info from headers (passed from API Gateway) or decode from token
     let userId = req.headers["x-user-id"];
@@ -285,40 +304,91 @@ export const becomeSeller = async (req, res) => {
       });
     }
 
-    // Update role to seller
-    const updated = await User.updateRole(userId, "seller");
-
-    if (!updated) {
-      return res.status(400).json({
-        success: false,
-        message: "Không thể cập nhật vai trò",
-      });
-    }
-
-    // Generate new token with seller role
-    const token = jwt.sign(
-      {
-        id: userId,
-        email: currentUser.Email,
-        role: "seller",
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "24h" }
+    // Find category ID by name
+    const [categoryResult] = await db.execute(
+      "SELECT ID_DanhMuc FROM danhmuc WHERE TenDanhMuc = ?",
+      [shopCategory]
     );
 
-    console.log(`✅ [BECOME_SELLER] User ${userId} is now a seller`);
+    let categoryId = 1; // Default category
+    if (categoryResult.length > 0) {
+      categoryId = categoryResult[0].ID_DanhMuc;
+    }
 
-    res.json({
-      success: true,
-      message: "Chúc mừng! Bạn đã trở thành seller thành công!",
-      token,
-      user: {
-        id: userId,
-        name: currentUser.HoTen,
-        email: currentUser.Email,
-        role: "seller",
-      },
-    });
+    // Get a connection for transaction
+    const connection = await db.getConnection();
+
+    try {
+      // Begin transaction
+      await connection.beginTransaction();
+
+      // Update user role to seller first
+      const updated = await User.updateRole(userId, "seller");
+      if (!updated) {
+        throw new Error("Không thể cập nhật vai trò");
+      }
+
+      // Create shop using existing logic
+      const insertShopQuery = `
+        INSERT INTO cuahang (TenCuaHang, ID_DanhMuc, DiaChiCH, SoDienThoaiCH, NgayCapNhat)
+        VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `;
+
+      const [shopResult] = await connection.execute(insertShopQuery, [
+        shopName,
+        categoryId,
+        shopAddress,
+        shopPhone,
+      ]);
+
+      const shopId = shopResult.insertId;
+      console.log(`✅ [BECOME_SELLER] Created shop with ID: ${shopId}`);
+
+      // Update user with shop ID
+      await connection.execute(
+        "UPDATE nguoidung SET ID_CuaHang = ? WHERE ID_NguoiDung = ?",
+        [shopId, userId]
+      );
+
+      // Commit transaction
+      await connection.commit();
+
+      // Release connection
+      connection.release();
+
+      // Generate new token with seller role
+      const token = jwt.sign(
+        {
+          id: userId,
+          email: currentUser.Email,
+          role: "seller",
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "24h" }
+      );
+
+      console.log(
+        `✅ [BECOME_SELLER] User ${userId} is now a seller with shop ${shopId}`
+      );
+
+      res.json({
+        success: true,
+        message: "Chúc mừng! Bạn đã trở thành seller thành công!",
+        token,
+        user: {
+          id: userId,
+          name: currentUser.HoTen,
+          email: currentUser.Email,
+          role: "seller",
+          shopId: shopId,
+        },
+      });
+    } catch (transactionError) {
+      // Rollback on error
+      await connection.rollback();
+      connection.release();
+      throw transactionError;
+    }
   } catch (error) {
     console.error("❌ [BECOME_SELLER] Error:", error);
     res.status(500).json({

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import adminService from "../services/adminService.js";
 import {
   MOCK_USERS,
   DEFAULT_USER_STATS,
@@ -8,9 +9,10 @@ import {
 
 export const useAdminUsers = () => {
   // State management
-  const [users, setUsers] = useState(MOCK_USERS);
+  const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(DEFAULT_USER_STATS);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Filter states
   const [searchValue, setSearchValue] = useState("");
@@ -21,23 +23,37 @@ export const useAdminUsers = () => {
   useEffect(() => {
     const initializeUsers = async () => {
       setIsLoading(true);
+      setError(null);
 
-      // Simulate API calls
       try {
-        // In real app, these would be API calls
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate loading
+        const response = await adminService.getUsers({
+          search: searchValue,
+          role: roleFilter,
+          status: statusFilter,
+        });
+        setUsers(response.data || []);
 
-        setUsers(MOCK_USERS);
-        setStats(DEFAULT_USER_STATS);
+        // Get user stats from dashboard API
+        const dashboardData = await adminService.getDashboardStats();
+        setStats({
+          total: dashboardData.stats.totalUsers || 0,
+          active: dashboardData.stats.activeUsers || 0,
+          inactive: dashboardData.stats.inactiveUsers || 0,
+          newThisMonth: dashboardData.stats.newUsersThisMonth || 0,
+        });
       } catch (error) {
         console.error("Error loading users data:", error);
+        setError("Failed to load users data");
+        // Fallback to mock data
+        setUsers(MOCK_USERS);
+        setStats(DEFAULT_USER_STATS);
       } finally {
         setIsLoading(false);
       }
     };
 
     initializeUsers();
-  }, []);
+  }, [searchValue, roleFilter, statusFilter]);
 
   // Utility functions
   const formatNumber = (number) => {
@@ -58,19 +74,45 @@ export const useAdminUsers = () => {
     // Implement view user logic
   };
 
-  const handleEditUser = (user) => {
-    console.log("Edit user:", user);
-    // Implement edit user logic
+  const handleEditUser = async (user) => {
+    try {
+      await adminService.updateUserStatus(user.id, {
+        status: user.status === "active" ? "inactive" : "active",
+      });
+      // Reload users
+      const response = await adminService.getUsers({
+        search: searchValue,
+        role: roleFilter,
+        status: statusFilter,
+      });
+      setUsers(response.data || []);
+      console.log("User status updated:", user);
+    } catch (error) {
+      console.error("Error updating user:", error);
+      setError("Failed to update user");
+    }
   };
 
-  const handleDeleteUser = (user) => {
-    console.log("Delete user:", user);
-    // Implement delete user logic
+  const handleDeleteUser = async (user) => {
+    try {
+      await adminService.deleteUser(user.id);
+      // Reload users
+      const response = await adminService.getUsers({
+        search: searchValue,
+        role: roleFilter,
+        status: statusFilter,
+      });
+      setUsers(response.data || []);
+      console.log("User deleted:", user);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      setError("Failed to delete user");
+    }
   };
 
   const handleAddUser = () => {
     console.log("Add new user");
-    // Implement add user logic
+    // Implement add user logic - could open modal
   };
 
   // Processed stats
@@ -106,6 +148,7 @@ export const useAdminUsers = () => {
     users,
     stats: processedStats,
     isLoading,
+    error,
 
     // Filter states
     searchValue,

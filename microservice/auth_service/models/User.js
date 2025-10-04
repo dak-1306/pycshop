@@ -30,7 +30,7 @@ class User {
 
       console.log("[USER] Executing SQL INSERT...");
       const result = await db.execute(
-        "INSERT INTO NguoiDung (HoTen, Email, MatKhau, SoDienThoai, DiaChi, VaiTro) VALUES (?, ?, ?, ?, ?, ?)",
+        "INSERT INTO nguoidung (HoTen, Email, MatKhau, SoDienThoai, DiaChi, VaiTro) VALUES (?, ?, ?, ?, ?, ?)",
         [name, email, hashedPassword, phone, address, role]
       );
       console.log("[USER] SQL INSERT executed successfully:", result);
@@ -48,7 +48,7 @@ class User {
 
     try {
       const [rows] = await db.execute(
-        "SELECT * FROM NguoiDung WHERE Email = ?",
+        "SELECT * FROM nguoidung WHERE Email = ?",
         [email]
       );
       console.log(
@@ -68,7 +68,7 @@ class User {
 
     try {
       const [rows] = await db.execute(
-        "SELECT * FROM NguoiDung WHERE ID_NguoiDung = ?",
+        "SELECT * FROM nguoidung WHERE ID_NguoiDung = ?",
         [id]
       );
       console.log(

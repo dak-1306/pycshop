@@ -1,9 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
+import apiService from "../../services/apiService";
 
 const BecomeSeller = () => {
   const navigate = useNavigate();
+
+  // Check if user is logged in
+  useEffect(() => {
+    if (!authService.isAuthenticated()) {
+      alert("Vui lòng đăng nhập trước khi đăng ký seller");
+      navigate("/auth/login");
+      return;
+    }
+  }, [navigate]);
 
   const [formData, setFormData] = useState({
     shopName: "",
@@ -14,17 +24,42 @@ const BecomeSeller = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
 
-  const categories = [
-    "Điện tử",
-    "Thời trang",
-    "Sách",
-    "Đồ gia dụng",
-    "Thể thao",
-    "Làm đẹp",
-    "Mẹ và bé",
-    "Khác",
-  ];
+  // Load categories from API
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await apiService.get("/products/categories");
+        if (response && response.data) {
+          setCategories(response.data);
+        } else {
+          // Fallback categories if API fails
+          setCategories([
+            { ID_DanhMuc: 1, TenDanhMuc: "Thời Trang Nam" },
+            { ID_DanhMuc: 2, TenDanhMuc: "Thời Trang Nữ" },
+            { ID_DanhMuc: 3, TenDanhMuc: "Điện Thoại & Phụ Kiện" },
+            { ID_DanhMuc: 4, TenDanhMuc: "Máy Tính & Laptop" },
+            { ID_DanhMuc: 18, TenDanhMuc: "Nhà Sách Online" },
+            { ID_DanhMuc: 19, TenDanhMuc: "Bách Hóa Online" },
+          ]);
+        }
+      } catch (error) {
+        console.error("Error loading categories:", error);
+        // Fallback categories
+        setCategories([
+          { ID_DanhMuc: 1, TenDanhMuc: "Thời Trang Nam" },
+          { ID_DanhMuc: 2, TenDanhMuc: "Thời Trang Nữ" },
+          { ID_DanhMuc: 3, TenDanhMuc: "Điện Thoại & Phụ Kiện" },
+          { ID_DanhMuc: 4, TenDanhMuc: "Máy Tính & Laptop" },
+          { ID_DanhMuc: 18, TenDanhMuc: "Nhà Sách Online" },
+          { ID_DanhMuc: 19, TenDanhMuc: "Bách Hóa Online" },
+        ]);
+      }
+    };
+
+    loadCategories();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -73,7 +108,12 @@ const BecomeSeller = () => {
     setIsLoading(true);
 
     try {
+      console.log("Sending data to becomeSeller:", formData);
+      console.log("Current user:", authService.getCurrentUser());
+      console.log("Is authenticated:", authService.isAuthenticated());
+
       const result = await authService.becomeSeller(formData);
+      console.log("becomeSeller result:", result);
 
       if (result.success) {
         alert("Đăng ký thành seller thành công!");
@@ -84,6 +124,7 @@ const BecomeSeller = () => {
       }
     } catch (error) {
       console.error("Become seller error:", error);
+      console.error("Error details:", error);
       alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
     } finally {
       setIsLoading(false);
@@ -161,8 +202,11 @@ const BecomeSeller = () => {
             >
               <option value="">Chọn danh mục shop</option>
               {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+                <option
+                  key={category.ID_DanhMuc || category}
+                  value={category.TenDanhMuc || category}
+                >
+                  {category.TenDanhMuc || category}
                 </option>
               ))}
             </select>

@@ -22,6 +22,7 @@ import AdminReports from "./pages/admin/Reports";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Profile from "./pages/buyer/Profile/Profile";
 import ProductDetail from "./pages/buyer/Products/ProductDetail";
+import SearchResults from "./pages/buyer/Products/SearchResults";
 import "./App.css";
 
 function App() {
@@ -32,6 +33,9 @@ function App() {
           <Routes>
             {/* Main Homepage */}
             <Route path="/" element={<HomePage />} />
+
+            {/* Search Results */}
+            <Route path="/search" element={<SearchResults />} />
 
             {/* Auth Routes */}
             <Route path="/login" element={<Login />} />

@@ -52,6 +52,7 @@ const AdminUsers = () => {
           onStatusChange={setStatusFilter}
           onAddUser={handleAddUser}
         />
+
         <AdminUserTable
           users={users}
           onViewUser={handleViewUser}

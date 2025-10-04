@@ -16,6 +16,24 @@ export const useAdminOrders = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("");
 
+  // Modal states
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
+
+  // Form state for order modal
+  const [orderForm, setOrderForm] = useState({
+    customer: "",
+    email: "",
+    total: "",
+    items: "",
+    status: "pending",
+    paymentStatus: "pending",
+    seller: "",
+  });
+
   // Initialize data
   useEffect(() => {
     const initializeOrders = async () => {
@@ -54,25 +72,174 @@ export const useAdminOrders = () => {
     return number.toLocaleString();
   };
 
-  // Event handlers
+  // Filtered orders based on search and filters
+  const filteredOrders = orders.filter((order) => {
+    const matchesSearch =
+      order.customer.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.id.toLowerCase().includes(searchValue.toLowerCase()) ||
+      order.email.toLowerCase().includes(searchValue.toLowerCase());
+
+    const matchesStatus = !statusFilter || order.status === statusFilter;
+    const matchesPayment =
+      !paymentFilter || order.paymentStatus === paymentFilter;
+
+    return matchesSearch && matchesStatus && matchesPayment;
+  });
+
+  // CRUD Operations
+  const handleAddOrder = () => {
+    setModalMode("add");
+    setOrderForm({
+      customer: "",
+      email: "",
+      total: "",
+      items: "",
+      status: "pending",
+      paymentStatus: "pending",
+      seller: "",
+    });
+    setSelectedOrder(null);
+    setShowOrderModal(true);
+  };
+
+  const handleEditOrder = (order) => {
+    setModalMode("edit");
+    setOrderForm({
+      customer: order.customer,
+      email: order.email,
+      total: order.total,
+      items: order.items,
+      status: order.status,
+      paymentStatus: order.paymentStatus,
+      seller: order.seller,
+    });
+    setSelectedOrder(order);
+    setShowOrderModal(true);
+  };
+
   const handleViewOrder = (order) => {
-    console.log("View order:", order);
-    // Implement view order logic
+    setSelectedOrder(order);
+    setShowDetailModal(true);
   };
 
-  const handleUpdateOrder = (order) => {
-    console.log("Update order:", order);
-    // Implement update order logic
+  const handleDeleteOrder = (order) => {
+    setSelectedOrder(order);
+    setShowDeleteModal(true);
   };
 
-  const handleCancelOrder = (order) => {
-    console.log("Cancel order:", order);
-    // Implement cancel order logic
+  const confirmDeleteOrder = () => {
+    if (selectedOrder) {
+      setOrders(orders.filter((order) => order.id !== selectedOrder.id));
+      // Update stats
+      setStats((prev) => ({
+        ...prev,
+        totalOrders: prev.totalOrders - 1,
+        completedOrders:
+          selectedOrder.status === "completed"
+            ? prev.completedOrders - 1
+            : prev.completedOrders,
+      }));
+      setShowDeleteModal(false);
+      setSelectedOrder(null);
+    }
+  };
+
+  const handleSaveOrder = () => {
+    // Basic validation
+    if (!orderForm.customer || !orderForm.email || !orderForm.total) {
+      alert("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
+
+    if (modalMode === "add") {
+      const newOrder = {
+        id: `ORD-${Date.now()}`,
+        ...orderForm,
+        createdDate: new Date().toISOString().split("T")[0],
+      };
+      setOrders([...orders, newOrder]);
+      setStats((prev) => ({
+        ...prev,
+        totalOrders: prev.totalOrders + 1,
+        pendingOrders:
+          orderForm.status === "pending"
+            ? prev.pendingOrders + 1
+            : prev.pendingOrders,
+      }));
+    } else if (modalMode === "edit" && selectedOrder) {
+      setOrders(
+        orders.map((order) =>
+          order.id === selectedOrder.id ? { ...order, ...orderForm } : order
+        )
+      );
+    }
+
+    setShowOrderModal(false);
+    setSelectedOrder(null);
+  };
+
+  const handleUpdateOrderStatus = (orderId, newStatus) => {
+    setOrders(
+      orders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
+
+    // Update stats
+    setStats((prev) => {
+      const order = orders.find((o) => o.id === orderId);
+      if (!order) return prev;
+
+      const newStats = { ...prev };
+
+      // Remove from old status count
+      if (order.status === "completed") newStats.completedOrders--;
+      else if (order.status === "pending") newStats.pendingOrders--;
+
+      // Add to new status count
+      if (newStatus === "completed") newStats.completedOrders++;
+      else if (newStatus === "pending") newStats.pendingOrders++;
+
+      return newStats;
+    });
   };
 
   const handleExport = () => {
-    console.log("Export orders");
-    // Implement export logic
+    // Mock export functionality
+    const csvContent = [
+      [
+        "ID",
+        "Khách hàng",
+        "Email",
+        "Tổng tiền",
+        "Số lượng",
+        "Trạng thái",
+        "Thanh toán",
+        "Ngày tạo",
+        "Người bán",
+      ],
+      ...filteredOrders.map((order) => [
+        order.id,
+        order.customer,
+        order.email,
+        order.total,
+        order.items,
+        order.status,
+        order.paymentStatus,
+        order.createdDate,
+        order.seller,
+      ]),
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
+
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `orders_${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   };
 
   // Processed stats
@@ -105,7 +272,7 @@ export const useAdminOrders = () => {
 
   return {
     // State
-    orders,
+    orders: filteredOrders,
     stats: processedStats,
     isLoading,
 
@@ -117,15 +284,33 @@ export const useAdminOrders = () => {
     paymentFilter,
     setPaymentFilter,
 
+    // Modal states
+    showOrderModal,
+    setShowOrderModal,
+    showDetailModal,
+    setShowDetailModal,
+    showDeleteModal,
+    setShowDeleteModal,
+    selectedOrder,
+    modalMode,
+
+    // Form state
+    orderForm,
+    setOrderForm,
+
     // Utility functions
     formatCurrency,
     getStatusColor,
     formatNumber,
 
-    // Event handlers
+    // CRUD handlers
+    handleAddOrder,
+    handleEditOrder,
     handleViewOrder,
-    handleUpdateOrder,
-    handleCancelOrder,
+    handleDeleteOrder,
+    handleSaveOrder,
+    handleUpdateOrderStatus,
+    confirmDeleteOrder,
     handleExport,
   };
 };

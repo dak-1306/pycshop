@@ -1,10 +1,45 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import CollaboratorModal from "../modals/CollaboratorModal";
 import "../../assets/css/logo.css";
 
-const SellerLayout = ({ children, title = "Dashboard" }) => {
+const SellerLayout = ({ children }) => {
   const location = useLocation();
   const [activeMenu, setActiveMenu] = useState("dashboard");
+  const [showCollaboratorModal, setShowCollaboratorModal] = useState(false);
+  const [collaboratorForm, setCollaboratorForm] = useState({
+    name: "",
+    email: "",
+  });
+
+  const handleAddCollaborator = () => {
+    setShowCollaboratorModal(true);
+  };
+
+  const handleCloseCollaboratorModal = () => {
+    setShowCollaboratorModal(false);
+    setCollaboratorForm({ name: "", email: "" });
+  };
+
+  const handleSaveCollaborator = () => {
+    if (!collaboratorForm.name || !collaboratorForm.email) {
+      alert("Vui lòng điền đầy đủ thông tin!");
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(collaboratorForm.email)) {
+      alert("Email không hợp lệ!");
+      return;
+    }
+
+    // TODO: Call API to save collaborator
+    alert(
+      `Đã thêm người cộng tác: ${collaboratorForm.name} (${collaboratorForm.email})`
+    );
+    handleCloseCollaboratorModal();
+  };
 
   useEffect(() => {
     const path = location.pathname;
@@ -120,6 +155,40 @@ const SellerLayout = ({ children, title = "Dashboard" }) => {
                 </svg>
               </button>
 
+              {/* Add Collaborator Button */}
+              <button
+                onClick={handleAddCollaborator}
+                className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg transition-all text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105"
+                title="Thêm người cộng tác"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                  />
+                </svg>
+              </button>
+
               {/* Return to Buyer Page Button */}
               <Link
                 to="/"
@@ -178,6 +247,15 @@ const SellerLayout = ({ children, title = "Dashboard" }) => {
         {/* Main Content */}
         <main className="flex-1">{children}</main>
       </div>
+
+      {/* Collaborator Modal */}
+      <CollaboratorModal
+        isOpen={showCollaboratorModal}
+        onClose={handleCloseCollaboratorModal}
+        collaboratorForm={collaboratorForm}
+        onCollaboratorFormChange={setCollaboratorForm}
+        onSave={handleSaveCollaborator}
+      />
     </div>
   );
 };

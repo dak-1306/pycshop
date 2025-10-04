@@ -2,6 +2,9 @@ import React from "react";
 import OrderStats from "../../components/order/OrderStats";
 import AdminOrderFilters from "../../components/order/AdminOrderFilters";
 import AdminOrderTable from "../../components/order/AdminOrderTable";
+import OrderModal from "../../components/modals/OrderModal";
+import OrderDetailModal from "../../components/modals/OrderDetailModal";
+import DeleteModal from "../../components/modals/DeleteModal";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
 
 const AdminOrders = () => {
@@ -15,9 +18,23 @@ const AdminOrders = () => {
     setStatusFilter,
     paymentFilter,
     setPaymentFilter,
+    showOrderModal,
+    setShowOrderModal,
+    showDetailModal,
+    setShowDetailModal,
+    showDeleteModal,
+    setShowDeleteModal,
+    selectedOrder,
+    modalMode,
+    orderForm,
+    setOrderForm,
+    handleAddOrder,
+    handleEditOrder,
     handleViewOrder,
-    handleUpdateOrder,
-    handleCancelOrder,
+    handleDeleteOrder,
+    handleSaveOrder,
+    handleUpdateOrderStatus,
+    confirmDeleteOrder,
     handleExport,
   } = useAdminOrders();
 
@@ -49,14 +66,47 @@ const AdminOrders = () => {
           paymentFilter={paymentFilter}
           onPaymentChange={setPaymentFilter}
           onExport={handleExport}
+          onAddOrder={handleAddOrder}
         />
         <AdminOrderTable
           orders={orders}
           onViewOrder={handleViewOrder}
-          onUpdateOrder={handleUpdateOrder}
-          onCancelOrder={handleCancelOrder}
+          onEditOrder={handleEditOrder}
+          onDeleteOrder={handleDeleteOrder}
+          onUpdateStatus={handleUpdateOrderStatus}
         />
       </div>
+
+      {/* Order Modal */}
+      <OrderModal
+        isOpen={showOrderModal}
+        onClose={() => setShowOrderModal(false)}
+        mode={modalMode}
+        order={selectedOrder}
+        orderForm={orderForm}
+        onOrderFormChange={setOrderForm}
+        onSave={handleSaveOrder}
+      />
+
+      {/* Order Detail Modal */}
+      <OrderDetailModal
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
+        order={selectedOrder}
+        onEdit={() => {
+          setShowDetailModal(false);
+          handleEditOrder(selectedOrder);
+        }}
+      />
+
+      {/* Delete Confirmation Modal */}
+      <DeleteModal
+        isOpen={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={confirmDeleteOrder}
+        title="Xóa đơn hàng"
+        message={`Bạn có chắc chắn muốn xóa đơn hàng ${selectedOrder?.id} của khách hàng ${selectedOrder?.customer}? Hành động này không thể hoàn tác.`}
+      />
     </div>
   );
 };

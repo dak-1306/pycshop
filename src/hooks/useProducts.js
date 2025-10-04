@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 const INITIAL_PRODUCTS = [
   {
     id: 1,
-    image: null,
+    images: [],
+    imageFiles: [],
     name: "iPhone 15 Pro Max",
     price: "29,990,000",
     quantity: 50,
@@ -16,7 +17,8 @@ const INITIAL_PRODUCTS = [
   },
   {
     id: 2,
-    image: null,
+    images: [],
+    imageFiles: [],
     name: "Samsung Galaxy S24 Ultra",
     price: "26,990,000",
     quantity: 30,
@@ -28,7 +30,8 @@ const INITIAL_PRODUCTS = [
   },
   {
     id: 3,
-    image: null,
+    images: [],
+    imageFiles: [],
     name: "MacBook Air M3",
     price: "32,990,000",
     quantity: 0,
@@ -40,7 +43,8 @@ const INITIAL_PRODUCTS = [
   },
   {
     id: 4,
-    image: null,
+    images: [],
+    imageFiles: [],
     name: "iPad Pro 12.9",
     price: "24,990,000",
     quantity: 15,
@@ -70,7 +74,8 @@ const INITIAL_FORM_STATE = {
   quantity: "",
   category: "",
   status: "Còn hàng",
-  image: null,
+  images: [],
+  imageFiles: [],
   description: "",
 };
 
@@ -113,6 +118,101 @@ export const useProducts = () => {
     setShowProductModal(true);
   };
 
+  // Image handling functions
+  const handleImageUpload = (files) => {
+    const maxImages = 5;
+    const currentImages = currentProduct.images || [];
+    const remainingSlots = maxImages - currentImages.length;
+
+    if (files.length > remainingSlots) {
+      alert(`Chỉ có thể thêm tối đa ${remainingSlots} hình ảnh nữa!`);
+      return;
+    }
+
+    const validFiles = [];
+    const invalidFiles = [];
+
+    files.forEach((file) => {
+      // Validate file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        invalidFiles.push(`${file.name}: File quá lớn (max 10MB)`);
+        return;
+      }
+
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        invalidFiles.push(`${file.name}: Chỉ chấp nhận file hình ảnh`);
+        return;
+      }
+
+      validFiles.push(file);
+    });
+
+    if (invalidFiles.length > 0) {
+      alert("Một số file không hợp lệ:\n" + invalidFiles.join("\n"));
+    }
+
+    if (validFiles.length === 0) return;
+
+    // Convert valid files to base64 for preview
+    const newImages = [];
+    const newImageFiles = currentProduct.imageFiles
+      ? [...currentProduct.imageFiles]
+      : [];
+
+    validFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        newImages.push(event.target.result);
+        newImageFiles.push(file);
+
+        // Update product when all files are processed
+        if (newImages.length === validFiles.length) {
+          setCurrentProduct({
+            ...currentProduct,
+            images: [...currentImages, ...newImages],
+            imageFiles: newImageFiles,
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleRemoveImage = (index) => {
+    const newImages = currentProduct.images.filter((_, i) => i !== index);
+    const newImageFiles = currentProduct.imageFiles
+      ? currentProduct.imageFiles.filter((_, i) => i !== index)
+      : [];
+
+    setCurrentProduct({
+      ...currentProduct,
+      images: newImages,
+      imageFiles: newImageFiles,
+    });
+  };
+
+  const handleSetFeaturedImage = (index) => {
+    if (index === 0) return; // Already featured
+
+    const newImages = [
+      currentProduct.images[index],
+      ...currentProduct.images.filter((_, i) => i !== index),
+    ];
+    const newImageFiles = currentProduct.imageFiles
+      ? [
+          currentProduct.imageFiles[index],
+          ...currentProduct.imageFiles.filter((_, i) => i !== index),
+        ]
+      : [];
+
+    setCurrentProduct({
+      ...currentProduct,
+      images: newImages,
+      imageFiles: newImageFiles,
+    });
+  };
+
   const handleEditProduct = (productId) => {
     const product = products.find((p) => p.id === productId);
     if (product) {
@@ -144,7 +244,8 @@ export const useProducts = () => {
         quantity: Number(currentProduct.quantity),
         category: currentProduct.category,
         status: currentProduct.quantity > 0 ? "Còn hàng" : "Hết hàng",
-        image: currentProduct.image,
+        images: currentProduct.images || [],
+        imageFiles: currentProduct.imageFiles || [],
         description: currentProduct.description || "",
         actions: ["view", "edit", "delete"],
       };
@@ -159,6 +260,8 @@ export const useProducts = () => {
               quantity: Number(currentProduct.quantity),
               status:
                 Number(currentProduct.quantity) > 0 ? "Còn hàng" : "Hết hàng",
+              images: currentProduct.images || [],
+              imageFiles: currentProduct.imageFiles || [],
             }
           : product
       );
@@ -301,5 +404,10 @@ export const useProducts = () => {
     handleResetFilters,
     handleExport,
     getStatusColor,
+
+    // Image handling
+    handleImageUpload,
+    handleRemoveImage,
+    handleSetFeaturedImage,
   };
 };

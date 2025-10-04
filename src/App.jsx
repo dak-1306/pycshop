@@ -17,6 +17,8 @@ import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUsers from "./pages/admin/Users";
 import AdminProducts from "./pages/admin/Products";
 import AdminOrders from "./pages/admin/Orders";
+import AdminSellers from "./pages/admin/Sellers";
+import AdminReports from "./pages/admin/Reports";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Profile from "./pages/buyer/Profile/Profile";
 import "./App.css";
@@ -25,7 +27,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
+        <div className="app">
           <Routes>
             {/* Main Homepage */}
             <Route path="/" element={<HomePage />} />
@@ -58,24 +60,8 @@ function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="products" element={<AdminProducts />} />
               <Route path="orders" element={<AdminOrders />} />
-              <Route
-                path="sellers"
-                element={
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold">Quản lý Seller</h1>
-                    <p>Trang đang phát triển...</p>
-                  </div>
-                }
-              />
-              <Route
-                path="reports"
-                element={
-                  <div className="p-6">
-                    <h1 className="text-2xl font-bold">Báo cáo</h1>
-                    <p>Trang đang phát triển...</p>
-                  </div>
-                }
-              />
+              <Route path="sellers" element={<AdminSellers />} />
+              <Route path="reports" element={<AdminReports />} />
               <Route
                 path="settings"
                 element={

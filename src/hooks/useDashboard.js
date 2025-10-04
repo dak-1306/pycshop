@@ -4,6 +4,7 @@ import {
   MOCK_RECENT_USERS,
   MOCK_CHART_DATA,
   DASHBOARD_ORDER_STATUS_COLORS,
+  DEFAULT_STATS,
 } from "../constants/dashboardConstants.jsx";
 
 export const useDashboard = () => {
@@ -11,6 +12,12 @@ export const useDashboard = () => {
   const [recentOrders, setRecentOrders] = useState(MOCK_RECENT_ORDERS);
   const [recentUsers, setRecentUsers] = useState(MOCK_RECENT_USERS);
   const [chartData, setChartData] = useState(MOCK_CHART_DATA);
+  const [stats, setStats] = useState({
+    orders: DEFAULT_STATS.todayOrders,
+    revenue: DEFAULT_STATS.totalRevenue,
+    products: DEFAULT_STATS.totalProducts,
+    newCustomers: DEFAULT_STATS.todayUsers,
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize dashboard data
@@ -26,6 +33,12 @@ export const useDashboard = () => {
         setRecentOrders(MOCK_RECENT_ORDERS);
         setRecentUsers(MOCK_RECENT_USERS);
         setChartData(MOCK_CHART_DATA);
+        setStats({
+          orders: DEFAULT_STATS.todayOrders,
+          revenue: DEFAULT_STATS.totalRevenue,
+          products: DEFAULT_STATS.totalProducts,
+          newCustomers: DEFAULT_STATS.todayUsers,
+        });
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
@@ -80,6 +93,7 @@ export const useDashboard = () => {
     recentOrders,
     recentUsers,
     chartData,
+    stats,
     isLoading,
 
     // Utility functions

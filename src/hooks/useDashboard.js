@@ -2,13 +2,19 @@ import { useState, useEffect } from "react";
 import {
   DEFAULT_STATS,
   MOCK_RECENT_ORDERS,
+  MOCK_RECENT_USERS,
+  MOCK_CHART_DATA,
+  QUICK_ACTIONS,
   DASHBOARD_ORDER_STATUS_COLORS,
-} from "../constants/dashboardConstants";
+} from "../constants/dashboardConstants.jsx";
 
 export const useDashboard = () => {
   // State management
   const [stats, setStats] = useState(DEFAULT_STATS);
-  const [orderData, setOrderData] = useState([]);
+  const [recentOrders, setRecentOrders] = useState(MOCK_RECENT_ORDERS);
+  const [recentUsers, setRecentUsers] = useState(MOCK_RECENT_USERS);
+  const [chartData, setChartData] = useState(MOCK_CHART_DATA);
+  const [quickActions] = useState(QUICK_ACTIONS);
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize dashboard data
@@ -22,7 +28,9 @@ export const useDashboard = () => {
         await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate loading
 
         setStats(DEFAULT_STATS);
-        setOrderData(MOCK_RECENT_ORDERS);
+        setRecentOrders(MOCK_RECENT_ORDERS);
+        setRecentUsers(MOCK_RECENT_USERS);
+        setChartData(MOCK_CHART_DATA);
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
@@ -62,29 +70,57 @@ export const useDashboard = () => {
 
   // Stats processing
   const processedStats = {
-    orders: {
-      ...stats.orders,
-      formattedValue: formatNumber(stats.orders.value),
-      changeIcon: getChangeIcon(stats.orders.isPositive),
-      changeColor: getChangeColor(stats.orders.isPositive),
+    totalUsers: {
+      value: stats.totalUsers,
+      formattedValue: formatNumber(stats.totalUsers),
+      label: "Tổng người dùng",
+      icon: "👥",
     },
-    revenue: {
-      ...stats.revenue,
-      formattedValue: formatCurrency(stats.revenue.value).split("₫")[0],
-      changeIcon: getChangeIcon(stats.revenue.isPositive),
-      changeColor: getChangeColor(stats.revenue.isPositive),
+    totalOrders: {
+      value: stats.totalOrders,
+      formattedValue: formatNumber(stats.totalOrders),
+      label: "Tổng đơn hàng",
+      icon: "📦",
     },
-    products: {
-      ...stats.products,
-      formattedValue: formatNumber(stats.products.value),
-      changeIcon: getChangeIcon(stats.products.isPositive),
-      changeColor: getChangeColor(stats.products.isPositive),
+    totalProducts: {
+      value: stats.totalProducts,
+      formattedValue: formatNumber(stats.totalProducts),
+      label: "Tổng sản phẩm",
+      icon: "🛍️",
     },
-    newCustomers: {
-      ...stats.newCustomers,
-      formattedValue: formatNumber(stats.newCustomers.value),
-      changeIcon: getChangeIcon(stats.newCustomers.isPositive),
-      changeColor: getChangeColor(stats.newCustomers.isPositive),
+    totalRevenue: {
+      value: stats.totalRevenue,
+      formattedValue: formatCurrency(stats.totalRevenue),
+      label: "Tổng doanh thu",
+      icon: "💰",
+    },
+    todayOrders: {
+      value: stats.todayOrders,
+      formattedValue: formatNumber(stats.todayOrders),
+      label: "Đơn hàng hôm nay",
+      icon: "📈",
+    },
+    todayUsers: {
+      value: stats.todayUsers,
+      formattedValue: formatNumber(stats.todayUsers),
+      label: "Người dùng mới",
+      icon: "👤",
+    },
+    monthlyGrowth: {
+      value: stats.monthlyGrowth,
+      formattedValue: `${stats.monthlyGrowth}%`,
+      label: "Tăng trưởng tháng",
+      icon: "📊",
+      changeIcon: getChangeIcon(true),
+      changeColor: getChangeColor(true),
+    },
+    orderGrowth: {
+      value: stats.orderGrowth,
+      formattedValue: `${stats.orderGrowth}%`,
+      label: "Tăng trưởng đơn hàng",
+      icon: "🚀",
+      changeIcon: getChangeIcon(true),
+      changeColor: getChangeColor(true),
     },
   };
 
@@ -107,16 +143,29 @@ export const useDashboard = () => {
     try {
       // In real app, this would refresh order data from API
       await new Promise((resolve) => setTimeout(resolve, 500));
-      setOrderData([...MOCK_RECENT_ORDERS]);
+      setRecentOrders([...MOCK_RECENT_ORDERS]);
     } catch (error) {
       console.error("Error refreshing orders:", error);
+    }
+  };
+
+  const refreshUsers = async () => {
+    try {
+      // In real app, this would refresh user data from API
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      setRecentUsers([...MOCK_RECENT_USERS]);
+    } catch (error) {
+      console.error("Error refreshing users:", error);
     }
   };
 
   return {
     // State
     stats: processedStats,
-    orderData,
+    recentOrders,
+    recentUsers,
+    chartData,
+    quickActions,
     isLoading,
 
     // Utility functions
@@ -127,5 +176,6 @@ export const useDashboard = () => {
     // Actions
     refreshStats,
     refreshOrders,
+    refreshUsers,
   };
 };

@@ -79,6 +79,11 @@ const ManageProduct = () => {
     handleResetFilters,
     handleExport,
     getStatusColor,
+
+    // Image handling
+    handleImageUpload,
+    handleRemoveImage,
+    handleSetFeaturedImage,
   } = useProducts();
 
   return (
@@ -126,6 +131,9 @@ const ManageProduct = () => {
           onProductChange={setCurrentProduct}
           onSave={handleSaveProduct}
           categories={PRODUCT_CATEGORIES}
+          onImageUpload={handleImageUpload}
+          onRemoveImage={handleRemoveImage}
+          onSetFeaturedImage={handleSetFeaturedImage}
         />
 
         <ProductDetailModal

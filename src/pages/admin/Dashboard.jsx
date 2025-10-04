@@ -1,20 +1,22 @@
 import React from "react";
-import AdminStatsCards from "../../components/dashboard/AdminStatsCards";
 import AdminRecentOrdersTable from "../../components/dashboard/AdminRecentOrdersTable";
 import RecentUsersTable from "../../components/dashboard/RecentUsersTable";
 import AdminChartsSection from "../../components/dashboard/AdminChartsSection";
-import QuickActions from "../../components/dashboard/QuickActions";
+import StatsOverview from "../../components/reports/StatsOverview";
 import { useDashboard } from "../../hooks/useDashboard";
+import { useAdminReports } from "../../hooks/useAdminReports";
 
 const Dashboard = () => {
   const {
-    stats,
     recentOrders,
     recentUsers,
     chartData,
-    quickActions,
-    isLoading,
+    isLoading: dashboardLoading,
   } = useDashboard();
+
+  const { overviewStats, isLoading: reportsLoading } = useAdminReports();
+
+  const isLoading = dashboardLoading || reportsLoading;
 
   if (isLoading) {
     return (
@@ -25,18 +27,23 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Quick Actions */}
-      <QuickActions actions={quickActions} />
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* Page Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">🏠 Dashboard</h1>
+        <p className="text-gray-600">
+          Tổng quan hoạt động và quản lý hệ thống PycShop
+        </p>
+      </div>
 
-      {/* Statistics Cards */}
-      <AdminStatsCards stats={stats} />
+      {/* System Overview */}
+      <StatsOverview stats={overviewStats} />
 
       {/* Charts Section */}
       <AdminChartsSection chartData={chartData} />
 
       {/* Data Tables */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
         <AdminRecentOrdersTable recentOrders={recentOrders} />
         <RecentUsersTable recentUsers={recentUsers} />
       </div>

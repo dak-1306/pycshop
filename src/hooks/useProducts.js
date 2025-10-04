@@ -245,6 +245,7 @@ export const useProducts = () => {
       setCurrentProduct({
         ...product,
         price: product.price.replace(/,/g, ""), // Remove commas for editing
+        addStock: "", // Initialize add stock field for editing
       });
       setShowProductModal(true);
     }
@@ -254,7 +255,7 @@ export const useProducts = () => {
     if (
       !currentProduct.name ||
       !currentProduct.price ||
-      !currentProduct.quantity ||
+      (!currentProduct.quantity && !currentProduct.addStock) ||
       !currentProduct.category
     ) {
       alert("😱 Vui lòng điền đầy đủ thông tin!");
@@ -273,15 +274,22 @@ export const useProducts = () => {
         });
         alert("🎉 Thêm sản phẩm thành công!");
       } else {
+        // In edit mode, calculate new quantity by adding addStock to existing quantity
+        const currentQuantity = Number(currentProduct.quantity) || 0;
+        const addStock = Number(currentProduct.addStock) || 0;
+        const newQuantity = currentQuantity + addStock;
+
         await adminService.updateProduct(currentProduct.id, {
           name: currentProduct.name,
           price: Number(currentProduct.price),
-          quantity: Number(currentProduct.quantity),
+          quantity: newQuantity,
           category: currentProduct.category,
           description: currentProduct.description || "",
           images: currentProduct.images || [],
         });
-        alert("🎉 Cập nhật sản phẩm thành công!");
+        alert(
+          `🎉 Cập nhật sản phẩm thành công! Đã thêm ${addStock} sản phẩm vào kho.`
+        );
       }
 
       // Reload products

@@ -197,26 +197,49 @@ const ProductModal = ({
                     <span className="w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded-md flex items-center justify-center">
                       <span className="text-white text-xs">📊</span>
                     </span>
-                    Số lượng *
+                    {isEditMode ? "Nhập hàng thêm" : "Số lượng"} *
                   </label>
+                  {isEditMode && (
+                    <div className="mb-2 text-sm text-gray-600">
+                      <span className="font-medium">Tồn kho hiện tại:</span>{" "}
+                      {product.quantity || 0} sản phẩm
+                    </div>
+                  )}
                   <div className="relative">
                     <input
                       type="number"
-                      value={product.quantity || ""}
-                      onChange={(e) =>
-                        onProductChange({
-                          ...product,
-                          quantity: e.target.value,
-                        })
+                      value={
+                        isEditMode
+                          ? product.addStock || ""
+                          : product.quantity || ""
                       }
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        if (isEditMode) {
+                          onProductChange({
+                            ...product,
+                            addStock: value,
+                          });
+                        } else {
+                          onProductChange({
+                            ...product,
+                            quantity: value,
+                          });
+                        }
+                      }}
                       className="w-full px-4 py-3 pr-8 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                      placeholder="0"
+                      placeholder={isEditMode ? "Nhập số lượng thêm" : "0"}
                       min="0"
                     />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm font-medium">
                       sp
                     </div>
                   </div>
+                  {isEditMode && (
+                    <div className="mt-1 text-xs text-gray-500">
+                      Chỉ nhập số lượng muốn thêm vào kho
+                    </div>
+                  )}
                 </div>
               </div>
 

@@ -21,6 +21,7 @@ import AdminSellers from "./pages/admin/Sellers";
 import AdminReports from "./pages/admin/Reports";
 import AdminLogin from "./pages/admin/AdminLogin";
 import Profile from "./pages/buyer/Profile/Profile";
+import ProductDetail from "./pages/buyer/Products/ProductDetail";
 import "./App.css";
 
 function App() {
@@ -40,6 +41,8 @@ function App() {
 
             {/* Buyer Routes */}
             <Route path="/profile" element={<Profile />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/products" element={<div>Trang sản phẩm đang phát triển...</div>} />
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Dashboard />} />

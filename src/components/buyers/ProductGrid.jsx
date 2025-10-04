@@ -1,8 +1,11 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./ProductGrid.css";
 import aoThunNam from "../../images/products/ao_thun_nam.png";
 import sneakerNu from "../../images/products/sneaker_nu.png";
 const ProductGrid = () => {
+  const navigate = useNavigate();
+  
   // Sample product data (thay thế bằng API call sau này)
   const products = [
     {
@@ -181,9 +184,9 @@ const ProductGrid = () => {
     return stars;
   };
 
-  const handleProductClick = () => {
-    // Hiển thị thông báo cần đăng nhập khi chưa đăng nhập
-    alert("Vui lòng đăng nhập để xem chi tiết sản phẩm!");
+  const handleProductClick = (productId) => {
+    // Chuyển đến trang chi tiết sản phẩm
+    navigate(`/product/${productId}`);
   };
 
   return (
@@ -197,7 +200,7 @@ const ProductGrid = () => {
             <div
               key={product.id}
               className="product-card"
-              onClick={() => handleProductClick()}
+              onClick={() => handleProductClick(product.id)}
             >
               <div className="product-image">
                 <img src={product.image} alt={product.name} />

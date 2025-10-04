@@ -5,6 +5,7 @@ import cors from "cors";
 import morgan from "morgan";
 
 import productRoutes from "./routes/buyer/routeGetProduct.js";
+import sellerRoutes from "./routes/seller/SellerRoutes.js";
 
 const app = express();
 
@@ -33,7 +34,7 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-console.log("[PRODUCT] CORS allowed origins:", allowedOrigins);
+console.log("🔒 [PRODUCT] CORS allowed origins:", allowedOrigins);
 
 // Middleware
 app.use(cors(corsOptions));
@@ -42,9 +43,9 @@ app.use(morgan("dev"));
 
 // Request logging
 app.use((req, res, next) => {
-  console.log(`[PRODUCT] ${req.method} ${req.originalUrl}`);
+  console.log(`📦 [PRODUCT] ${req.method} ${req.originalUrl}`);
   if (req.query && Object.keys(req.query).length > 0) {
-    console.log(`[PRODUCT] Query params:`, req.query);
+    console.log(`📋 [PRODUCT] Query params:`, req.query);
   }
   next();
 });
@@ -58,12 +59,13 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Routes
+// Routes - Mount seller routes BEFORE buyer routes to avoid conflicts
+app.use("/seller", sellerRoutes);
 app.use("/", productRoutes);
 
 // 404 handler - sử dụng catch-all route thay vì wildcard *
 app.use((req, res) => {
-  console.log(`[PRODUCT] Route not found: ${req.method} ${req.originalUrl}`);
+  console.log(`❌ [PRODUCT] Route not found: ${req.method} ${req.originalUrl}`);
   res.status(404).json({
     success: false,
     message: "Product API endpoint not found",
@@ -72,7 +74,7 @@ app.use((req, res) => {
 
 // Error handling
 app.use((err, req, res, next) => {
-  console.error("[PRODUCT] Error:", err);
+  console.error("💥 [PRODUCT] Error:", err);
   res.status(500).json({
     success: false,
     message: "Product service error",
@@ -83,12 +85,20 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => {
-  console.log(`Product Service running at http://localhost:${PORT}`);
-  console.log(`Available endpoints:`);
+  console.log(`📦 Product Service running at http://localhost:${PORT}`);
+  console.log(`🔍 Available endpoints:`);
   console.log(`   GET  /health                 - Health check`);
   console.log(`   GET  /categories             - Get all categories`);
   console.log(`   GET  /?page=1&limit=20       - Get products with pagination`);
   console.log(`   GET  /?category=1            - Get products by category`);
   console.log(`   GET  /search?q=keyword       - Search products`);
   console.log(`   GET  /:id                    - Get product by ID`);
+  console.log(`🏪 Seller endpoints:`);
+  console.log(`   GET  /seller/shop            - Get shop info`);
+  console.log(`   PUT  /seller/shop            - Update shop info`);
+  console.log(`   GET  /seller/categories      - Get categories`);
+  console.log(`   GET  /seller/products        - Get seller products`);
+  console.log(`   POST /seller/products        - Add product`);
+  console.log(`   PUT  /seller/products/:id    - Update product`);
+  console.log(`   DELETE /seller/products/:id  - Delete product`);
 });

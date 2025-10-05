@@ -2,7 +2,6 @@
 .shop-profile {
   min-height: 100vh;
   background-color: #f5f5f5;
-  margin-top: 80px; /* Space for fixed header */
 }
 
 /* Loading State */
@@ -25,8 +24,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Not Found State */
@@ -211,7 +214,8 @@
   flex-shrink: 0;
 }
 
-.follow-btn, .chat-btn {
+.follow-btn,
+.chat-btn {
   padding: 12px 24px;
   border: none;
   border-radius: 6px;
@@ -608,7 +612,8 @@
     grid-template-columns: 1fr;
   }
 
-  .follow-btn, .chat-btn {
+  .follow-btn,
+  .chat-btn {
     min-width: auto;
     flex: 1;
   }

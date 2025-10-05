@@ -17,13 +17,16 @@ const Header = () => {
     e.preventDefault();
     if (searchKeyword.trim()) {
       const keyword = searchKeyword.trim();
-      
+
       // Kiểm tra nếu tìm kiếm shop (bắt đầu bằng "shop:" hoặc chứa từ khóa shop)
-      if (keyword.toLowerCase().startsWith('shop:')) {
+      if (keyword.toLowerCase().startsWith("shop:")) {
         const shopName = keyword.slice(5).trim();
         // Giả lập tìm shop bằng tên, có thể redirect đến shop cụ thể
         navigate(`/shop/1?name=${encodeURIComponent(shopName)}`);
-      } else if (keyword.toLowerCase().includes('shop') || keyword.toLowerCase().includes('cửa hàng')) {
+      } else if (
+        keyword.toLowerCase().includes("shop") ||
+        keyword.toLowerCase().includes("cửa hàng")
+      ) {
         // Tìm kiếm shop chung
         navigate(`/search?type=shop&keyword=${encodeURIComponent(keyword)}`);
       } else {

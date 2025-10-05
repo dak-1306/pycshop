@@ -417,9 +417,17 @@ const ProductDetail = () => {
         {/* Shop Information */}
         <div className="pd-shop-info">
           <div className="pd-shop-header">
-            <div className="pd-shop-avatar" onClick={handleViewShop} style={{cursor: 'pointer'}}>{product.shop.avatar}</div>
+            <div
+              className="pd-shop-avatar"
+              onClick={handleViewShop}
+              style={{ cursor: "pointer" }}
+            >
+              {product.shop.avatar}
+            </div>
             <div className="pd-shop-details">
-              <h3 onClick={handleViewShop} style={{cursor: 'pointer'}}>{product.shop.name}</h3>
+              <h3 onClick={handleViewShop} style={{ cursor: "pointer" }}>
+                {product.shop.name}
+              </h3>
               <div className="pd-shop-stats">
                 <span>
                   <i className="fas fa-star"></i> {product.shop.rating}

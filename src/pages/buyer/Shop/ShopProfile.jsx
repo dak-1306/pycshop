@@ -18,7 +18,6 @@ const ShopProfile = () => {
       id: shopId,
       name: "PycShop Electronics",
       avatar: "https://via.placeholder.com/100",
-      coverImage: "https://via.placeholder.com/1200x300",
       description: "Chuyên cung cấp các sản phẩm điện tử chất lượng cao",
       rating: 4.8,
       totalReviews: 1250,
@@ -162,240 +161,241 @@ const ShopProfile = () => {
     <>
       <Header />
       <div className="shop-profile">
-        {/* Cover Image */}
-        <div className="shop-cover">
-          <img src={shop.coverImage} alt="Shop Cover" />
+        {/* Shop Info */}
+        <div className="shop-info-section">
+          <div className="shop-container">
+            <div className="shop-header">
+              <div className="shop-avatar">
+                <img src={shop.avatar} alt={shop.name} />
+              </div>
+              <div className="shop-details">
+                <div className="shop-main-info">
+                  <h1 className="shop-name">{shop.name}</h1>
+                  <div className="shop-badges">
+                    {shop.badges.map((badge, index) => (
+                      <span key={index} className="shop-badge">
+                        {badge}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+                <div className="shop-stats">
+                  <div className="stat-item">
+                    <span className="stat-label">Đánh giá</span>
+                    <div className="stat-value">
+                      <span className="rating">{shop.rating}</span>
+                      <div className="stars">
+                        {[...Array(1)].map((_, i) => (
+                          <i
+                            key={i}
+                            className={`fas fa-star ${
+                              i < Math.floor(shop.rating) ? "filled" : ""
+                            }`}
+                          ></i>
+                        ))}
+                      </div>
+                      <span className="review-count">
+                        ({formatNumber(shop.totalReviews)} đánh giá)
+                      </span>
+                    </div>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Sản phẩm</span>
+                    <span className="stat-value">{shop.products}</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Người theo dõi</span>
+                    <span className="stat-value">
+                      {formatNumber(shop.followers)}
+                    </span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Tỷ lệ phản hồi</span>
+                    <span className="stat-value">{shop.responseRate}%</span>
+                  </div>
+                  <div className="stat-item">
+                    <span className="stat-label">Thời gian phản hồi</span>
+                    <span className="stat-value">{shop.responseTime}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="shop-actions">
+                <button
+                  className={`follow-btn ${
+                    shop.isFollowing ? "following" : ""
+                  }`}
+                  onClick={handleFollowShop}
+                >
+                  <i
+                    className={`fas ${
+                      shop.isFollowing ? "fa-check" : "fa-plus"
+                    }`}
+                  ></i>
+                  {shop.isFollowing ? "Đang theo dõi" : "Theo dõi"}
+                </button>
+                <button className="chat-btn">
+                  <i className="fas fa-comment"></i>
+                  Chat ngay
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-      {/* Shop Info */}
-      <div className="shop-info-section">
-        <div className="shop-container">
-          <div className="shop-header">
-            <div className="shop-avatar">
-              <img src={shop.avatar} alt={shop.name} />
+        {/* Shop Navigation */}
+        <div className="shop-nav">
+          <div className="shop-container">
+            <div className="nav-tabs">
+              <button
+                className={`nav-tab ${activeTab === "all" ? "active" : ""}`}
+                onClick={() => setActiveTab("all")}
+              >
+                Tất cả sản phẩm
+              </button>
+              <button
+                className={`nav-tab ${activeTab === "info" ? "active" : ""}`}
+                onClick={() => setActiveTab("info")}
+              >
+                Thông tin shop
+              </button>
             </div>
-            <div className="shop-details">
-              <div className="shop-main-info">
-                <h1 className="shop-name">{shop.name}</h1>
-                <div className="shop-badges">
-                  {shop.badges.map((badge, index) => (
-                    <span key={index} className="shop-badge">
-                      {badge}
-                    </span>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="shop-content">
+          <div className="shop-container">
+            {activeTab === "all" && (
+              <div className="products-section">
+                {/* Sort Options */}
+                <div className="sort-bar">
+                  <span>Sắp xếp theo:</span>
+                  <div className="sort-options">
+                    <button
+                      className={`sort-btn ${
+                        sortBy === "newest" ? "active" : ""
+                      }`}
+                      onClick={() => setSortBy("newest")}
+                    >
+                      Mới nhất
+                    </button>
+                    <button
+                      className={`sort-btn ${
+                        sortBy === "best-selling" ? "active" : ""
+                      }`}
+                      onClick={() => setSortBy("best-selling")}
+                    >
+                      Bán chạy
+                    </button>
+                    <button
+                      className={`sort-btn ${
+                        sortBy === "price-low" ? "active" : ""
+                      }`}
+                      onClick={() => setSortBy("price-low")}
+                    >
+                      Giá thấp đến cao
+                    </button>
+                    <button
+                      className={`sort-btn ${
+                        sortBy === "price-high" ? "active" : ""
+                      }`}
+                      onClick={() => setSortBy("price-high")}
+                    >
+                      Giá cao đến thấp
+                    </button>
+                  </div>
+                </div>
+
+                {/* Products Grid */}
+                <div className="shop-products-grid">
+                  {products.map((product) => (
+                    <div
+                      key={product.id}
+                      className="shop-product-card"
+                      onClick={() => handleProductClick(product.id)}
+                    >
+                      <div className="shop-product-image">
+                        <img src={product.image} alt={product.name} />
+                        {product.discount > 0 && (
+                          <div className="shop-discount-badge">
+                            -{product.discount}%
+                          </div>
+                        )}
+                      </div>
+                      <div className="shop-product-info">
+                        <h3 className="shop-product-name">{product.name}</h3>
+                        <div className="shop-product-price">
+                          <span className="shop-current-price">
+                            {formatPrice(product.price)}
+                          </span>
+                          {product.originalPrice && (
+                            <span className="shop-original-price">
+                              {formatPrice(product.originalPrice)}
+                            </span>
+                          )}
+                        </div>
+                        <div className="shop-product-meta">
+                          <div className="shop-product-rating">
+                            <div className="shop-stars">
+                              {[...Array(5)].map((_, i) => (
+                                <i
+                                  key={i}
+                                  className={`fas fa-star ${
+                                    i < Math.floor(product.rating)
+                                      ? "filled"
+                                      : ""
+                                  }`}
+                                ></i>
+                              ))}
+                            </div>
+                            <span className="shop-rating-text">
+                              ({product.rating})
+                            </span>
+                          </div>
+                          <span className="shop-product-sold">
+                            Đã bán {product.sold}
+                          </span>
+                        </div>
+                        <div className="shop-product-location">
+                          <i className="fas fa-map-marker-alt"></i>
+                          {product.location}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
-              <div className="shop-stats">
-                <div className="stat-item">
-                  <span className="stat-label">Đánh giá</span>
-                  <div className="stat-value">
-                    <span className="rating">{shop.rating}</span>
-                    <div className="stars">
-                      {[...Array(5)].map((_, i) => (
-                        <i
-                          key={i}
-                          className={`fas fa-star ${
-                            i < Math.floor(shop.rating) ? "filled" : ""
-                          }`}
-                        ></i>
-                      ))}
+            )}
+
+            {activeTab === "info" && (
+              <div className="shop-info-content">
+                <div className="info-card">
+                  <h3>Thông tin shop</h3>
+                  <div className="info-grid">
+                    <div className="info-item">
+                      <span className="info-label">Tên shop:</span>
+                      <span className="info-value">{shop.name}</span>
                     </div>
-                    <span className="review-count">
-                      ({formatNumber(shop.totalReviews)} đánh giá)
-                    </span>
+                    <div className="info-item">
+                      <span className="info-label">Địa chỉ:</span>
+                      <span className="info-value">{shop.location}</span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Ngày tham gia:</span>
+                      <span className="info-value">
+                        {new Date(shop.joinDate).toLocaleDateString("vi-VN")}
+                      </span>
+                    </div>
+                    <div className="info-item">
+                      <span className="info-label">Mô tả:</span>
+                      <span className="info-value">{shop.description}</span>
+                    </div>
                   </div>
                 </div>
-                <div className="stat-item">
-                  <span className="stat-label">Sản phẩm</span>
-                  <span className="stat-value">{shop.products}</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Người theo dõi</span>
-                  <span className="stat-value">
-                    {formatNumber(shop.followers)}
-                  </span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Tỷ lệ phản hồi</span>
-                  <span className="stat-value">{shop.responseRate}%</span>
-                </div>
-                <div className="stat-item">
-                  <span className="stat-label">Thời gian phản hồi</span>
-                  <span className="stat-value">{shop.responseTime}</span>
-                </div>
               </div>
-            </div>
-            <div className="shop-actions">
-              <button
-                className={`follow-btn ${shop.isFollowing ? "following" : ""}`}
-                onClick={handleFollowShop}
-              >
-                <i
-                  className={`fas ${shop.isFollowing ? "fa-check" : "fa-plus"}`}
-                ></i>
-                {shop.isFollowing ? "Đang theo dõi" : "Theo dõi"}
-              </button>
-              <button className="chat-btn">
-                <i className="fas fa-comment"></i>
-                Chat ngay
-              </button>
-            </div>
+            )}
           </div>
         </div>
-      </div>
-
-      {/* Shop Navigation */}
-      <div className="shop-nav">
-        <div className="shop-container">
-          <div className="nav-tabs">
-            <button
-              className={`nav-tab ${activeTab === "all" ? "active" : ""}`}
-              onClick={() => setActiveTab("all")}
-            >
-              Tất cả sản phẩm
-            </button>
-            <button
-              className={`nav-tab ${activeTab === "info" ? "active" : ""}`}
-              onClick={() => setActiveTab("info")}
-            >
-              Thông tin shop
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="shop-content">
-        <div className="shop-container">
-          {activeTab === "all" && (
-            <div className="products-section">
-              {/* Sort Options */}
-              <div className="sort-bar">
-                <span>Sắp xếp theo:</span>
-                <div className="sort-options">
-                  <button
-                    className={`sort-btn ${
-                      sortBy === "newest" ? "active" : ""
-                    }`}
-                    onClick={() => setSortBy("newest")}
-                  >
-                    Mới nhất
-                  </button>
-                  <button
-                    className={`sort-btn ${
-                      sortBy === "best-selling" ? "active" : ""
-                    }`}
-                    onClick={() => setSortBy("best-selling")}
-                  >
-                    Bán chạy
-                  </button>
-                  <button
-                    className={`sort-btn ${
-                      sortBy === "price-low" ? "active" : ""
-                    }`}
-                    onClick={() => setSortBy("price-low")}
-                  >
-                    Giá thấp đến cao
-                  </button>
-                  <button
-                    className={`sort-btn ${
-                      sortBy === "price-high" ? "active" : ""
-                    }`}
-                    onClick={() => setSortBy("price-high")}
-                  >
-                    Giá cao đến thấp
-                  </button>
-                </div>
-              </div>
-
-              {/* Products Grid */}
-              <div className="shop-products-grid">
-                {products.map((product) => (
-                  <div
-                    key={product.id}
-                    className="shop-product-card"
-                    onClick={() => handleProductClick(product.id)}
-                  >
-                    <div className="shop-product-image">
-                      <img src={product.image} alt={product.name} />
-                      {product.discount > 0 && (
-                        <div className="shop-discount-badge">
-                          -{product.discount}%
-                        </div>
-                      )}
-                    </div>
-                    <div className="shop-product-info">
-                      <h3 className="shop-product-name">{product.name}</h3>
-                      <div className="shop-product-price">
-                        <span className="shop-current-price">
-                          {formatPrice(product.price)}
-                        </span>
-                        {product.originalPrice && (
-                          <span className="shop-original-price">
-                            {formatPrice(product.originalPrice)}
-                          </span>
-                        )}
-                      </div>
-                      <div className="shop-product-meta">
-                        <div className="shop-product-rating">
-                          <div className="shop-stars">
-                            {[...Array(5)].map((_, i) => (
-                              <i
-                                key={i}
-                                className={`fas fa-star ${
-                                  i < Math.floor(product.rating) ? "filled" : ""
-                                }`}
-                              ></i>
-                            ))}
-                          </div>
-                          <span className="shop-rating-text">
-                            ({product.rating})
-                          </span>
-                        </div>
-                        <span className="shop-product-sold">
-                          Đã bán {product.sold}
-                        </span>
-                      </div>
-                      <div className="shop-product-location">
-                        <i className="fas fa-map-marker-alt"></i>
-                        {product.location}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "info" && (
-            <div className="shop-info-content">
-              <div className="info-card">
-                <h3>Thông tin shop</h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <span className="info-label">Tên shop:</span>
-                    <span className="info-value">{shop.name}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Địa chỉ:</span>
-                    <span className="info-value">{shop.location}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Ngày tham gia:</span>
-                    <span className="info-value">
-                      {new Date(shop.joinDate).toLocaleDateString("vi-VN")}
-                    </span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Mô tả:</span>
-                    <span className="info-value">{shop.description}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
       </div>
     </>
   );

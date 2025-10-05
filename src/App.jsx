@@ -23,6 +23,7 @@ import AdminLogin from "./pages/admin/AdminLogin";
 import Profile from "./pages/buyer/Profile/Profile";
 import ProductDetail from "./pages/buyer/Products/ProductDetail";
 import SearchResults from "./pages/buyer/Products/SearchResults";
+import ShopProfile from "./pages/buyer/Shop/ShopProfile";
 import "./App.css";
 
 function App() {
@@ -46,6 +47,7 @@ function App() {
             {/* Buyer Routes */}
             <Route path="/profile" element={<Profile />} />
             <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/shop/:shopId" element={<ShopProfile />} />
             <Route
               path="/products"
               element={<div>Trang sản phẩm đang phát triển...</div>}

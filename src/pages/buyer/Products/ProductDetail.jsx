@@ -71,6 +71,7 @@ const ProductDetail = () => {
       </ul>
     `,
     shop: {
+      id: 1,
       name: "PycShop Official Store",
       avatar: "🏪",
       rating: 4.9,
@@ -191,6 +192,12 @@ const ProductDetail = () => {
 
   const handleSimilarProductClick = (productId) => {
     navigate(`/product/${productId}`);
+  };
+
+  const handleViewShop = () => {
+    if (product?.shop?.id) {
+      navigate(`/shop/${product.shop.id}`);
+    }
   };
 
   // Loading state
@@ -410,9 +417,9 @@ const ProductDetail = () => {
         {/* Shop Information */}
         <div className="pd-shop-info">
           <div className="pd-shop-header">
-            <div className="pd-shop-avatar">{product.shop.avatar}</div>
+            <div className="pd-shop-avatar" onClick={handleViewShop} style={{cursor: 'pointer'}}>{product.shop.avatar}</div>
             <div className="pd-shop-details">
-              <h3>{product.shop.name}</h3>
+              <h3 onClick={handleViewShop} style={{cursor: 'pointer'}}>{product.shop.name}</h3>
               <div className="pd-shop-stats">
                 <span>
                   <i className="fas fa-star"></i> {product.shop.rating}
@@ -433,7 +440,7 @@ const ProductDetail = () => {
             </div>
           </div>
           <div className="pd-shop-actions">
-            <button className="pd-btn-view-shop">
+            <button className="pd-btn-view-shop" onClick={handleViewShop}>
               <i className="fas fa-eye"></i> Xem shop
             </button>
             <button className="pd-btn-follow-shop">

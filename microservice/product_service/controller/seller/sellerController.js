@@ -1,5 +1,337 @@
 import Seller from "../../models/seller/SellerModel.js";
 import Product from "../../models/buyer/getProductModel.js";
+import path from "path";
+import fs from "fs/promises";
+import { fileURLToPath } from "url";
+
+// ================== IMAGE MANAGEMENT FUNCTIONS ==================
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Upload ảnh sản phẩm (hỗ trợ cả file upload và URL)
+export const uploadProductImages = async (req, res) => {
+  try {
+    const { productId } = req.params;
+    const sellerId = req.user.id;
+
+    console.log(
+      `[SELLER_CONTROLLER] Upload request - ProductID: ${productId}, SellerID: ${sellerId}`
+    );
+
+    // Kiểm tra sản phẩm có thuộc về seller không
+    const isOwner = await Seller.checkProductOwnership(productId, sellerId);
+    if (!isOwner) {
+      return res.status(403).json({
+        success: false,
+        message: "Bạn không có quyền upload ảnh cho sản phẩm này",
+      });
+    }
+
+    // Kiểm tra số lượng ảnh hiện tại
+    const currentImageCount = await Seller.getImageCountByProductId(productId);
+
+    let uploadedImages = [];
+    let errors = [];
+
+    // Xử lý file upload nếu có
+    if (req.files && req.files.length > 0) {
+      // Kiểm tra giới hạn 15 ảnh
+      if (currentImageCount + req.files.length > 15) {
+        return res.status(400).json({
+          success: false,
+          message: `Sản phẩm chỉ được có tối đa 15 ảnh. Hiện tại có ${currentImageCount} ảnh, bạn chỉ có thể thêm ${
+            15 - currentImageCount
+          } ảnh nữa.`,
+        });
+      }
+
+      // Xử lý từng file
+      for (const file of req.files) {
+        try {
+          // Tạo tên file unique
+          const timestamp = Date.now();
+          const fileExtension = path.extname(file.originalname);
+          const fileName = `product_${productId}_${timestamp}_${Math.random()
+            .toString(36)
+            .substr(2, 9)}${fileExtension}`;
+
+          // Đường dẫn thư mục uploads
+          const uploadDir = path.join(
+            __dirname,
+            "../../uploads/product_images"
+          );
+
+          // Tạo thư mục nếu chưa tồn tại
+          try {
+            await fs.access(uploadDir);
+          } catch {
+            await fs.mkdir(uploadDir, { recursive: true });
+            console.log(
+              `[SELLER_CONTROLLER] Created upload directory: ${uploadDir}`
+            );
+          }
+
+          // Đường dẫn lưu file
+          const uploadPath = path.join(uploadDir, fileName);
+
+          // Lưu file vào thư mục
+          await fs.writeFile(uploadPath, file.buffer);
+
+          // URL để truy cập file
+          const imageUrl = `/uploads/product_images/${fileName}`;
+
+          // Lưu thông tin vào database
+          await Seller.addProductImage(productId, imageUrl);
+
+          uploadedImages.push({
+            fileName: fileName,
+            url: imageUrl,
+            originalName: file.originalname,
+          });
+        } catch (error) {
+          errors.push({
+            fileName: file.originalname,
+            error: error.message,
+          });
+        }
+      }
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Upload thành công ${uploadedImages.length} ảnh`,
+      data: {
+        uploadedImages,
+        errors: errors.length > 0 ? errors : null,
+        totalImages: currentImageCount + uploadedImages.length,
+      },
+    });
+  } catch (error) {
+    console.error("[SELLER_CONTROLLER] Error uploading images:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi upload ảnh",
+      error: error.message,
+    });
+  }
+};
+
+// Thêm ảnh bằng URL
+export const addProductImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sellerId = req.user.id;
+    const { images } = req.body;
+
+    console.log(
+      `[SELLER_CONTROLLER] Add images by URL to product ${id}, seller: ${sellerId}`
+    );
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID sản phẩm không hợp lệ",
+      });
+    }
+
+    // Kiểm tra sản phẩm có thuộc về seller không
+    const isOwner = await Seller.checkProductOwnership(id, sellerId);
+    if (!isOwner) {
+      return res.status(403).json({
+        success: false,
+        message: "Bạn không có quyền thêm ảnh cho sản phẩm này",
+      });
+    }
+
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng cung cấp danh sách URL ảnh",
+      });
+    }
+
+    // Validate image URLs
+    const validImageUrls = images.filter(
+      (url) => typeof url === "string" && url.trim().length > 0
+    );
+
+    if (validImageUrls.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Không có URL ảnh hợp lệ",
+      });
+    }
+
+    // Kiểm tra số lượng ảnh hiện tại
+    const currentImageCount = await Seller.getImageCountByProductId(id);
+
+    if (currentImageCount + validImageUrls.length > 15) {
+      return res.status(400).json({
+        success: false,
+        message: `Sản phẩm chỉ được có tối đa 15 ảnh. Hiện tại có ${currentImageCount} ảnh, bạn chỉ có thể thêm ${
+          15 - currentImageCount
+        } ảnh nữa.`,
+      });
+    }
+
+    const addedImages = [];
+    const errors = [];
+
+    // Thêm từng URL vào database
+    for (const url of validImageUrls) {
+      try {
+        await Seller.addProductImage(id, url);
+        addedImages.push({ url });
+      } catch (error) {
+        errors.push({
+          url: url,
+          error: error.message,
+        });
+      }
+    }
+
+    console.log(
+      `[SELLER_CONTROLLER] Added ${addedImages.length} images to product ${id}`
+    );
+
+    res.json({
+      success: true,
+      message: `Thêm thành công ${addedImages.length} ảnh`,
+      data: {
+        added: addedImages,
+        errors: errors.length > 0 ? errors : null,
+        totalImages: currentImageCount + addedImages.length,
+      },
+    });
+  } catch (error) {
+    console.error("[SELLER_CONTROLLER] Error in addProductImages:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi thêm ảnh",
+      error: error.message,
+    });
+  }
+};
+
+// Lấy danh sách ảnh của sản phẩm
+export const getProductImages = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const sellerId = req.user.id;
+
+    console.log(
+      `[SELLER_CONTROLLER] Get images for product ${id}, seller: ${sellerId}`
+    );
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID sản phẩm không hợp lệ",
+      });
+    }
+
+    // Kiểm tra sản phẩm có thuộc về seller không
+    const isOwner = await Seller.checkProductOwnership(id, sellerId);
+    if (!isOwner) {
+      return res.status(403).json({
+        success: false,
+        message: "Bạn không có quyền xem ảnh của sản phẩm này",
+      });
+    }
+
+    const images = await Seller.getImagesByProductId(id, sellerId);
+
+    console.log(
+      `[SELLER_CONTROLLER] Found ${images.length} images for product ${id}`
+    );
+
+    res.json({
+      success: true,
+      data: images,
+    });
+  } catch (error) {
+    console.error("[SELLER_CONTROLLER] Error getting product images:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi lấy danh sách ảnh",
+      error: error.message,
+    });
+  }
+};
+
+// Xóa ảnh sản phẩm
+export const deleteProductImage = async (req, res) => {
+  try {
+    const { id, imageId } = req.params;
+    const sellerId = req.user.id;
+
+    console.log(
+      `[SELLER_CONTROLLER] Delete request - ProductID: ${id}, ImageID: ${imageId}, SellerID: ${sellerId}`
+    );
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID sản phẩm không hợp lệ",
+      });
+    }
+
+    if (!imageId || isNaN(imageId)) {
+      return res.status(400).json({
+        success: false,
+        message: "ID ảnh không hợp lệ",
+      });
+    }
+
+    // Lấy thông tin ảnh và kiểm tra quyền sở hữu
+    const imageInfo = await Seller.getImageById(imageId);
+
+    if (!imageInfo) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy ảnh",
+      });
+    }
+
+    if (imageInfo.ID_NguoiBan !== sellerId) {
+      return res.status(403).json({
+        success: false,
+        message: "Bạn không có quyền xóa ảnh này",
+      });
+    }
+
+    // Xóa file vật lý nếu là file upload local
+    if (imageInfo.Url.startsWith("/uploads/")) {
+      try {
+        const filePath = path.join(__dirname, "../..", imageInfo.Url);
+        await fs.unlink(filePath);
+        console.log(`[SELLER_CONTROLLER] Deleted physical file: ${filePath}`);
+      } catch (fileError) {
+        console.warn("Could not delete physical file:", fileError.message);
+      }
+    }
+
+    // Xóa record trong database
+    await Seller.deleteProductImage(imageId, id);
+
+    console.log(
+      `[SELLER_CONTROLLER] Successfully deleted image ${imageId} from product ${id}`
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Xóa ảnh thành công",
+    });
+  } catch (error) {
+    console.error("[SELLER_CONTROLLER] Error deleting image:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi server khi xóa ảnh",
+      error: error.message,
+    });
+  }
+};
 
 // Get seller's products
 export const getSellerProducts = async (req, res) => {
@@ -67,6 +399,18 @@ export const addProduct = async (req, res) => {
     const { tenSanPham, moTa, gia, tonKho, danhMuc, trangThai } = req.body;
 
     console.log(`[SELLER_CONTROLLER] Add product for seller: ${sellerId}`);
+    console.log(
+      `[SELLER_CONTROLLER] Request body size:`,
+      JSON.stringify(req.body).length,
+      "bytes"
+    );
+    console.log(`[SELLER_CONTROLLER] Product data:`, {
+      tenSanPham,
+      gia,
+      tonKho,
+      danhMuc,
+      moTaLength: moTa?.length,
+    });
 
     // Validate required fields
     if (!tenSanPham || !gia || !tonKho || !danhMuc) {
@@ -129,18 +473,18 @@ export const updateProduct = async (req, res) => {
     }
 
     // Validate required fields
-    if (!tenSanPham || !gia || !tonKho || !danhMuc) {
+    if (!tenSanPham || !gia || !danhMuc) {
       return res.status(400).json({
         success: false,
         message: "Vui lòng điền đầy đủ thông tin sản phẩm",
       });
     }
 
-    // Validate price and stock
-    if (gia <= 0 || tonKho < 0) {
+    // Validate price
+    if (gia <= 0) {
       return res.status(400).json({
         success: false,
-        message: "Giá phải lớn hơn 0 và tồn kho không được âm",
+        message: "Giá phải lớn hơn 0",
       });
     }
 
@@ -148,7 +492,6 @@ export const updateProduct = async (req, res) => {
       tenSanPham,
       moTa,
       gia: parseFloat(gia),
-      tonKho: parseInt(tonKho),
       danhMuc: parseInt(danhMuc),
       trangThai,
     });

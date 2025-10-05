@@ -6,7 +6,6 @@ import morgan from "morgan";
 
 import productRoutes from "./routes/buyer/routeGetProduct.js";
 import sellerRoutes from "./routes/seller/SellerRoutes.js";
-import imageRoutes from "./routes/seller/ImageRoutes.js";
 
 const app = express();
 
@@ -16,6 +15,7 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   : [
       "http://localhost:3000",
       "http://localhost:5000",
+      "http://localhost:5173", // Vite dev server
       "http://127.0.0.1:5500",
       "http://127.0.0.1:3000",
       "http://localhost:8080",
@@ -40,8 +40,12 @@ console.log("🔒 [PRODUCT] CORS allowed origins:", allowedOrigins);
 
 // Middleware
 app.use(cors(corsOptions));
-app.use(express.json());
+app.use(express.json({ limit: "50mb" })); // Tăng giới hạn JSON payload
+app.use(express.urlencoded({ limit: "50mb", extended: true })); // Tăng giới hạn URL encoded
 app.use(morgan("dev"));
+
+// Serve static files (uploads)
+app.use("/uploads", express.static("uploads"));
 
 // Request logging
 app.use((req, res, next) => {
@@ -63,7 +67,6 @@ app.get("/health", (req, res) => {
 
 // Routes - Mount seller routes BEFORE buyer routes to avoid conflicts
 app.use("/seller", sellerRoutes);
-app.use("/images", imageRoutes);
 app.use("/", productRoutes);
 
 // 404 handler - sử dụng catch-all route thay vì wildcard *

@@ -1,86 +1,22 @@
 import { useState, useEffect } from "react";
-import adminService from "../services/adminService.js";
-
-// Mock data for fallback
-const INITIAL_PRODUCTS = [
-  {
-    id: 1,
-    images: [],
-    imageFiles: [],
-    name: "iPhone 15 Pro Max",
-    price: "29,990,000",
-    quantity: 50,
-    category: "Điện thoại",
-    status: "Còn hàng",
-    description:
-      "iPhone 15 Pro Max với chip A17 Pro mạnh mẽ, camera chuyên nghiệp 48MP, màn hình Super Retina XDR 6.7 inch, khung titan cao cấp và pin lâu dài. Thiết kế sang trọng, hiệu năng vượt trội.",
-    actions: ["view", "edit", "delete"],
-  },
-  {
-    id: 2,
-    images: [],
-    imageFiles: [],
-    name: "Samsung Galaxy S24 Ultra",
-    price: "26,990,000",
-    quantity: 30,
-    category: "Điện thoại",
-    status: "Còn hàng",
-    description:
-      "Samsung Galaxy S24 Ultra với S Pen tích hợp, camera 200MP siêu nét, màn hình Dynamic AMOLED 6.8 inch, chip Snapdragon 8 Gen 3 và tính năng AI thông minh. Trải nghiệm flagship đỉnh cao.",
-    actions: ["view", "edit", "delete"],
-  },
-  {
-    id: 3,
-    images: [],
-    imageFiles: [],
-    name: "MacBook Air M3",
-    price: "32,990,000",
-    quantity: 0,
-    category: "Laptop",
-    status: "Hết hàng",
-    description:
-      "MacBook Air M3 với thiết kế siêu mỏng, chip M3 8-core mạnh mẽ, màn hình Liquid Retina 13.6 inch, thời lượng pin lên đến 18 giờ. Hoàn hảo cho công việc và sáng tạo.",
-    actions: ["view", "edit", "delete"],
-  },
-  {
-    id: 4,
-    images: [],
-    imageFiles: [],
-    name: "iPad Pro 12.9",
-    price: "24,990,000",
-    quantity: 15,
-    category: "Máy tính bảng",
-    status: "Còn hàng",
-    description:
-      "iPad Pro 12.9 inch với chip M2, màn hình Liquid Retina XDR, hỗ trợ Apple Pencil Gen 2 và Magic Keyboard. Công cụ sáng tạo chuyên nghiệp trong tầm tay.",
-    actions: ["view", "edit", "delete"],
-  },
-  {
-    id: 5,
-    image: null,
-    name: "AirPods Pro 2",
-    price: "6,990,000",
-    quantity: 25,
-    category: "Phụ kiện",
-    status: "Còn hàng",
-    description:
-      "AirPods Pro 2 với chip H2, chống ồn chủ động nâng cấp, âm thanh không gian cá nhân hóa, thời lượng pin 6 giờ và hộp sạc MagSafe. Trải nghiệm âm thanh đỉnh cao.",
-    actions: ["view", "edit", "delete"],
-  },
-];
+import sellerProductService from "../services/sellerProductService.js";
+import { useCategories } from "./useCategories.js";
 
 const INITIAL_FORM_STATE = {
   name: "",
   price: "",
   quantity: "",
   category: "",
-  status: "Còn hàng",
+  status: "active",
   images: [],
   imageFiles: [],
   description: "",
 };
 
 export const useProducts = () => {
+  // Get categories helper
+  const { getCategoryName, categories } = useCategories();
+
   // Products state
   const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -102,29 +38,59 @@ export const useProducts = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Initialize products
-  useEffect(() => {
-    const loadProducts = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await adminService.getProducts({
-          page: currentPage,
-          limit: 10,
-          search: searchTerm,
-          category: selectedCategory,
-          status: selectedStatus,
-        });
-        setProducts(response.data || []);
-      } catch (error) {
-        console.error("Error loading products:", error);
-        setError("Failed to load products");
-        // Fallback to mock data
-        setProducts(INITIAL_PRODUCTS);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadProducts = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      console.log("[useProducts] Loading products from API...");
+      const response = await sellerProductService.getSellerProducts({
+        page: currentPage,
+        limit: 10,
+        search: searchTerm || undefined,
+        status: selectedStatus || undefined,
+        sortBy: "created_date",
+        sortOrder: "DESC",
+      });
 
+      console.log("[useProducts] API Response:", response);
+
+      if (response.success && response.data) {
+        // Map backend data to frontend format
+        const mappedProducts = response.data.map((product) => ({
+          id: product.ID_SanPham,
+          name: product.TenSanPham,
+          price: product.Gia?.toLocaleString("vi-VN"),
+          quantity: product.TonKho,
+          category: product.TenDanhMuc || "Chưa phân loại",
+          categoryId: product.ID_DanhMuc,
+          status: product.TrangThai === "active" ? "Còn hàng" : "Hết hàng",
+          description: product.MoTa || "",
+          images: product.image_urls
+            ? product.image_urls.split(",").filter((url) => url.trim())
+            : [],
+          imageFiles: [],
+          shopName: product.TenCuaHang || "",
+          created_date: product.created_date,
+          actions: ["view", "edit", "delete"],
+        }));
+
+        console.log("[useProducts] Mapped products:", mappedProducts);
+        setProducts(mappedProducts);
+      } else {
+        console.warn("[useProducts] No data in response");
+        setError("Không có dữ liệu sản phẩm từ server");
+        setProducts([]);
+      }
+    } catch (error) {
+      console.error("[useProducts] Error loading products:", error);
+      setError("Lỗi khi tải danh sách sản phẩm: " + error.message);
+      setProducts([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
     loadProducts();
   }, [currentPage, searchTerm, selectedCategory, selectedStatus]);
 
@@ -264,43 +230,98 @@ export const useProducts = () => {
 
     try {
       if (modalMode === "add") {
-        await adminService.createProduct({
-          name: currentProduct.name,
-          price: Number(currentProduct.price),
-          quantity: Number(currentProduct.quantity),
-          category: currentProduct.category,
-          description: currentProduct.description || "",
-          images: currentProduct.images || [],
+        console.log("[useProducts] Adding new product:", currentProduct);
+
+        // Find category ID from category name
+        const categoryId =
+          categories.find((cat) => cat.name === currentProduct.category)?.id ||
+          currentProduct.categoryId ||
+          1;
+
+        const newProduct = await sellerProductService.addProduct({
+          tenSanPham: currentProduct.name,
+          gia: currentProduct.price,
+          tonKho: Number(currentProduct.quantity),
+          danhMuc: categoryId, // Use category ID for backend
+          moTa: currentProduct.description || "",
+          trangThai: currentProduct.status || "active",
         });
-        alert("🎉 Thêm sản phẩm thành công!");
+
+        console.log("[useProducts] Product created successfully:", newProduct);
+
+        // Upload images if any files were selected
+        if (currentProduct.imageFiles && currentProduct.imageFiles.length > 0) {
+          console.log(
+            "[useProducts] Uploading images for new product:",
+            newProduct.data.productId
+          );
+          try {
+            const imageUploadResult =
+              await sellerProductService.uploadProductImages(
+                newProduct.data.productId,
+                currentProduct.imageFiles
+              );
+            console.log(
+              "[useProducts] Images uploaded successfully:",
+              imageUploadResult
+            );
+            alert("🎉 Thêm sản phẩm và ảnh thành công!");
+          } catch (imageError) {
+            console.error("[useProducts] Error uploading images:", imageError);
+            alert(
+              "⚠️ Thêm sản phẩm thành công nhưng có lỗi khi upload ảnh: " +
+                imageError.message
+            );
+          }
+        } else {
+          alert("🎉 Thêm sản phẩm thành công!");
+        }
       } else {
+        console.log("[useProducts] Updating product:", currentProduct);
+
         // In edit mode, calculate new quantity by adding addStock to existing quantity
         const currentQuantity = Number(currentProduct.quantity) || 0;
         const addStock = Number(currentProduct.addStock) || 0;
-        const newQuantity = currentQuantity + addStock;
+        const newQuantity =
+          addStock > 0 ? currentQuantity + addStock : currentQuantity;
 
-        await adminService.updateProduct(currentProduct.id, {
-          name: currentProduct.name,
-          price: Number(currentProduct.price),
-          quantity: newQuantity,
-          category: currentProduct.category,
-          description: currentProduct.description || "",
-          images: currentProduct.images || [],
+        // Find category ID from category name
+        const categoryId =
+          categories.find((cat) => cat.name === currentProduct.category)?.id ||
+          currentProduct.categoryId ||
+          1;
+
+        // Prepare image URLs for backend
+        const imageUrls = currentProduct.images || [];
+
+        await sellerProductService.updateProduct(currentProduct.id, {
+          tenSanPham: currentProduct.name,
+          gia: currentProduct.price,
+          tonKho: newQuantity,
+          danhMuc: categoryId, // Use category ID for backend
+          moTa: currentProduct.description || "",
+          trangThai: currentProduct.status || "active",
         });
+
+        // If we added stock, also call the stock management API
+        if (addStock > 0) {
+          await sellerProductService.addStock(
+            currentProduct.id,
+            addStock,
+            "import"
+          );
+        }
+
         alert(
-          `🎉 Cập nhật sản phẩm thành công! Đã thêm ${addStock} sản phẩm vào kho.`
+          addStock > 0
+            ? `🎉 Cập nhật sản phẩm thành công! Đã thêm ${addStock} sản phẩm vào kho.`
+            : `🎉 Cập nhật sản phẩm thành công!`
         );
       }
 
       // Reload products
-      const response = await adminService.getProducts({
-        page: currentPage,
-        limit: 10,
-        search: searchTerm,
-        category: selectedCategory,
-        status: selectedStatus,
-      });
-      setProducts(response.data || []);
+      console.log("[useProducts] Reloading products after save...");
+      await loadProducts();
 
       handleCloseProductModal();
     } catch (error) {
@@ -320,17 +341,13 @@ export const useProducts = () => {
   const confirmDeleteProduct = async () => {
     if (productToDelete) {
       try {
-        await adminService.deleteProduct(productToDelete.id);
+        console.log("[useProducts] Deleting product:", productToDelete.id);
+
+        await sellerProductService.deleteProduct(productToDelete.id);
 
         // Reload products
-        const response = await adminService.getProducts({
-          page: currentPage,
-          limit: 10,
-          search: searchTerm,
-          category: selectedCategory,
-          status: selectedStatus,
-        });
-        setProducts(response.data || []);
+        console.log("[useProducts] Reloading products after delete...");
+        await loadProducts();
 
         setShowDeleteModal(false);
         setProductToDelete(null);
@@ -420,6 +437,118 @@ export const useProducts = () => {
     }
   };
 
+  // Image Management Functions
+  const loadProductImages = async (productId) => {
+    try {
+      console.log(`[useProducts] Loading images for product ${productId}`);
+      const response = await sellerProductService.getProductImages(productId);
+
+      if (response.success && response.data) {
+        return response.data;
+      } else {
+        console.warn(`[useProducts] No images found for product ${productId}`);
+        return [];
+      }
+    } catch (error) {
+      console.error(
+        `[useProducts] Error loading images for product ${productId}:`,
+        error
+      );
+      throw error;
+    }
+  };
+
+  const addProductImages = async (productId, images) => {
+    try {
+      console.log(
+        `[useProducts] Adding images to product ${productId}:`,
+        images
+      );
+
+      if (!Array.isArray(images) || images.length === 0) {
+        throw new Error("Images must be a non-empty array");
+      }
+
+      const response = await sellerProductService.addProductImages(
+        productId,
+        images
+      );
+
+      if (response.success) {
+        // Reload products to reflect changes
+        await loadProducts();
+        return response.data;
+      } else {
+        throw new Error(response.message || "Failed to add images");
+      }
+    } catch (error) {
+      console.error(
+        `[useProducts] Error adding images to product ${productId}:`,
+        error
+      );
+      throw error;
+    }
+  };
+
+  const deleteProductImage = async (productId, imageId) => {
+    try {
+      console.log(
+        `[useProducts] Deleting image ${imageId} from product ${productId}`
+      );
+
+      const response = await sellerProductService.deleteProductImage(
+        productId,
+        imageId
+      );
+
+      if (response.success) {
+        // Reload products to reflect changes
+        await loadProducts();
+        return response.data;
+      } else {
+        throw new Error(response.message || "Failed to delete image");
+      }
+    } catch (error) {
+      console.error(
+        `[useProducts] Error deleting image ${imageId} from product ${productId}:`,
+        error
+      );
+      throw error;
+    }
+  };
+
+  const deleteProductImages = async (productId, imageIds) => {
+    try {
+      console.log(
+        `[useProducts] Deleting images from product ${productId}:`,
+        imageIds
+      );
+
+      if (!Array.isArray(imageIds) || imageIds.length === 0) {
+        throw new Error("Image IDs must be a non-empty array");
+      }
+
+      const response = await sellerProductService.deleteProductImages(
+        productId,
+        imageIds
+      );
+
+      if (response.success) {
+        // Reload products to reflect changes
+        await loadProducts();
+        return response.data;
+      } else {
+        throw new Error(response.message || "Failed to delete images");
+      }
+    } catch (error) {
+      console.error(
+        `[useProducts] Error deleting images from product ${productId}:`,
+        error
+      );
+      throw error;
+    }
+  };
+
   return {
     // State
     products,
@@ -456,10 +585,17 @@ export const useProducts = () => {
     handleResetFilters,
     handleExport,
     getStatusColor,
+    loadProducts, // Add retry function
 
     // Image handling
     handleImageUpload,
     handleRemoveImage,
     handleSetFeaturedImage,
+
+    // Image management API
+    loadProductImages,
+    addProductImages,
+    deleteProductImage,
+    deleteProductImages,
   };
 };

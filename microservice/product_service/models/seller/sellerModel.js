@@ -107,8 +107,9 @@ class Seller {
     }
   }
 
-  // Add new product
+  // Add new product with images
   static async addProduct(sellerId, productData) {
+    let connection;
     try {
       // Check if seller has shop
       const shopQuery =
@@ -128,31 +129,52 @@ class Seller {
         trangThai = "active",
       } = productData;
 
-      const query = `
+      // Get connection for transaction
+      connection = await db.getConnection();
+      await connection.query("START TRANSACTION");
+
+      // Insert product
+      const productQuery = `
         INSERT INTO SanPham (TenSanPham, MoTa, Gia, TonKho, ID_DanhMuc, ID_NguoiBan, TrangThai, CapNhat)
         VALUES (?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
       `;
 
-      const [result] = await db.execute(query, [
+      const [productResult] = await connection.execute(productQuery, [
         tenSanPham,
         moTa,
         gia,
         tonKho,
         danhMuc,
-        sellerId, // Use sellerId directly for ID_NguoiBan
+        sellerId,
         trangThai,
       ]);
-      return result.insertId;
+
+      const productId = productResult.insertId;
+
+      await connection.query("COMMIT");
+      return productId;
     } catch (error) {
+      if (connection) {
+        await connection.query("ROLLBACK");
+      }
       console.error("[SELLER] Error in addProduct:", error);
       throw error;
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
   }
 
-  // Update product (without stock - stock managed separately)
+  // Update product (without images - images managed separately)
   static async updateProduct(sellerId, productId, productData) {
+    let connection;
     try {
       const { tenSanPham, moTa, gia, danhMuc, trangThai } = productData;
+
+      // Get connection for transaction
+      connection = await db.getConnection();
+      await connection.query("START TRANSACTION");
 
       // Verify product belongs to seller
       const verifyQuery = `
@@ -161,7 +183,10 @@ class Seller {
         WHERE p.ID_SanPham = ? AND p.ID_NguoiBan = ?
       `;
 
-      const [verifyRows] = await db.execute(verifyQuery, [productId, sellerId]);
+      const [verifyRows] = await connection.execute(verifyQuery, [
+        productId,
+        sellerId,
+      ]);
 
       if (verifyRows.length === 0) {
         throw new Error(
@@ -169,13 +194,14 @@ class Seller {
         );
       }
 
-      const query = `
+      // Update product info
+      const updateProductQuery = `
         UPDATE SanPham 
         SET TenSanPham = ?, MoTa = ?, Gia = ?, ID_DanhMuc = ?, TrangThai = ?, CapNhat = CURRENT_TIMESTAMP
         WHERE ID_SanPham = ?
       `;
 
-      const [result] = await db.execute(query, [
+      const [result] = await connection.execute(updateProductQuery, [
         tenSanPham,
         moTa,
         gia,
@@ -183,10 +209,19 @@ class Seller {
         trangThai,
         productId,
       ]);
+
+      await connection.query("COMMIT");
       return result.affectedRows > 0;
     } catch (error) {
+      if (connection) {
+        await connection.query("ROLLBACK");
+      }
       console.error("[SELLER] Error in updateProduct:", error);
       throw error;
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
   }
 
@@ -347,9 +382,14 @@ class Seller {
     }
   }
 
-  // Delete product
+  // Delete product (hard delete from database)
   static async deleteProduct(sellerId, productId) {
+    let connection;
     try {
+      // Get connection for transaction
+      connection = await db.getConnection();
+      await connection.query("START TRANSACTION");
+
       // Verify product belongs to seller
       const verifyQuery = `
         SELECT p.ID_SanPham 
@@ -357,21 +397,44 @@ class Seller {
         WHERE p.ID_SanPham = ? AND p.ID_NguoiBan = ?
       `;
 
-      const [verifyRows] = await db.execute(verifyQuery, [productId, sellerId]);
+      const [verifyRows] = await connection.execute(verifyQuery, [
+        productId,
+        sellerId,
+      ]);
 
       if (verifyRows.length === 0) {
         throw new Error("Sản phẩm không tồn tại hoặc bạn không có quyền xóa.");
       }
 
-      // Soft delete by setting status to inactive
-      const query =
-        "UPDATE SanPham SET TrangThai = 'inactive' WHERE ID_SanPham = ?";
-      const [result] = await db.execute(query, [productId]);
+      // Delete product images first (foreign key constraint)
+      await connection.execute("DELETE FROM anhsanpham WHERE ID_SanPham = ?", [
+        productId,
+      ]);
 
+      // Delete stock history
+      await connection.execute(
+        "DELETE FROM nhatkythaydoitonkho WHERE ID_SanPham = ?",
+        [productId]
+      );
+
+      // Delete the product
+      const [result] = await connection.execute(
+        "DELETE FROM SanPham WHERE ID_SanPham = ?",
+        [productId]
+      );
+
+      await connection.query("COMMIT");
       return result.affectedRows > 0;
     } catch (error) {
+      if (connection) {
+        await connection.query("ROLLBACK");
+      }
       console.error("[SELLER] Error in deleteProduct:", error);
       throw error;
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
   }
 
@@ -404,6 +467,144 @@ class Seller {
       return rows[0];
     } catch (error) {
       console.error("[SELLER] Error in getProductById:", error);
+      throw error;
+    }
+  }
+
+  // ================== IMAGE MANAGEMENT METHODS ==================
+
+  // Thêm ảnh sản phẩm mới
+  static async addProductImage(productId, imageUrl) {
+    try {
+      const query = `
+        INSERT INTO anhsanpham (ID_SanPham, Url) 
+        VALUES (?, ?)
+      `;
+      const [result] = await db.execute(query, [productId, imageUrl]);
+      return result;
+    } catch (error) {
+      console.error("[SELLER] Error in addProductImage:", error);
+      throw error;
+    }
+  }
+
+  // Lấy số lượng ảnh hiện tại của sản phẩm
+  static async getImageCountByProductId(productId) {
+    try {
+      const query = `
+        SELECT COUNT(*) as count 
+        FROM anhsanpham 
+        WHERE ID_SanPham = ?
+      `;
+      const [rows] = await db.execute(query, [productId]);
+      return rows[0].count;
+    } catch (error) {
+      console.error("[SELLER] Error in getImageCountByProductId:", error);
+      throw error;
+    }
+  }
+
+  // Lấy tất cả ảnh của sản phẩm (với kiểm tra quyền seller)
+  static async getImagesByProductId(productId, sellerId = null) {
+    try {
+      let query, params;
+
+      if (sellerId) {
+        // Kiểm tra quyền seller
+        query = `
+          SELECT a.ID_Anh, a.Url, a.Upload_at 
+          FROM anhsanpham a
+          JOIN sanpham p ON a.ID_SanPham = p.ID_SanPham
+          WHERE a.ID_SanPham = ? AND p.ID_NguoiBan = ?
+          ORDER BY a.Upload_at ASC
+        `;
+        params = [productId, sellerId];
+      } else {
+        // Không kiểm tra quyền (cho public API)
+        query = `
+          SELECT ID_Anh, Url, Upload_at 
+          FROM anhsanpham 
+          WHERE ID_SanPham = ? 
+          ORDER BY Upload_at ASC
+        `;
+        params = [productId];
+      }
+
+      const [rows] = await db.execute(query, params);
+      return rows;
+    } catch (error) {
+      console.error("[SELLER] Error in getImagesByProductId:", error);
+      throw error;
+    }
+  }
+
+  // Xóa ảnh sản phẩm
+  static async deleteProductImage(imageId, productId) {
+    try {
+      const query = `
+        DELETE FROM anhsanpham 
+        WHERE ID_Anh = ? AND ID_SanPham = ?
+      `;
+      const [result] = await db.execute(query, [imageId, productId]);
+      return result;
+    } catch (error) {
+      console.error("[SELLER] Error in deleteProductImage:", error);
+      throw error;
+    }
+  }
+
+  // Kiểm tra sản phẩm có thuộc về seller không
+  static async checkProductOwnership(productId, sellerId) {
+    try {
+      console.log(
+        `[SELLER] checkProductOwnership - ProductID: ${productId}, SellerID: ${sellerId}`
+      );
+
+      if (!productId || !sellerId) {
+        console.log("[SELLER] Missing productId or sellerId");
+        return false;
+      }
+
+      const query = `
+        SELECT ID_SanPham 
+        FROM sanpham 
+        WHERE ID_SanPham = ? AND ID_NguoiBan = ?
+      `;
+      const [rows] = await db.execute(query, [productId, sellerId]);
+      console.log(`[SELLER] Query result: ${rows.length} rows found`);
+      return rows.length > 0;
+    } catch (error) {
+      console.error("[SELLER] Error in checkProductOwnership:", error);
+      throw error;
+    }
+  }
+
+  // Lấy thông tin ảnh theo ID với thông tin seller
+  static async getImageById(imageId) {
+    try {
+      const query = `
+        SELECT asp.*, sp.ID_NguoiBan 
+        FROM anhsanpham asp
+        JOIN sanpham sp ON asp.ID_SanPham = sp.ID_SanPham
+        WHERE asp.ID_Anh = ?
+      `;
+      const [rows] = await db.execute(query, [imageId]);
+      return rows[0];
+    } catch (error) {
+      console.error("[SELLER] Error in getImageById:", error);
+      throw error;
+    }
+  }
+
+  // Lấy danh mục sản phẩm
+  static async getCategories() {
+    try {
+      const query =
+        "SELECT ID_DanhMuc, TenDanhMuc FROM danhmuc ORDER BY TenDanhMuc";
+      const [rows] = await db.execute(query);
+      return rows;
+    } catch (error) {
+      console.error("[SELLER] Error in getCategories:", error);
       throw error;
     }
   }

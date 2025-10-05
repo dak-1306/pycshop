@@ -7,7 +7,10 @@ import SearchBar from "../../components/product/SearchBar";
 import ProductFilters from "../../components/product/ProductFilters";
 import ProductTable from "../../components/product/ProductTable";
 import Pagination from "../../components/product/Pagination";
+import ErrorDisplay from "../../components/common/ErrorDisplay";
+import EmptyState from "../../components/common/EmptyState";
 import { useProducts } from "../../hooks/useProducts";
+import { useCategories } from "../../hooks/useCategories";
 import { PRODUCT_CATEGORIES } from "../../constants/productConstants";
 
 // CSS animations
@@ -45,6 +48,14 @@ if (typeof document !== "undefined") {
 }
 
 const ManageProduct = () => {
+  // Get categories from API
+  const {
+    categories,
+    isLoading: categoriesLoading,
+    error: categoriesError,
+    getCategoryOptions,
+  } = useCategories();
+
   const {
     // State
     products,
@@ -65,6 +76,8 @@ const ManageProduct = () => {
     setSelectedPrice,
     currentPage,
     setCurrentPage,
+    isLoading,
+    error,
 
     // Actions
     handleViewProduct,
@@ -79,12 +92,19 @@ const ManageProduct = () => {
     handleResetFilters,
     handleExport,
     getStatusColor,
+    loadProducts, // Add retry function
 
     // Image handling
     handleImageUpload,
     handleRemoveImage,
     handleSetFeaturedImage,
   } = useProducts();
+
+  // Prepare categories for ProductModal (expects string array format)
+  const categoryNames = categories.map((cat) => cat.name);
+
+  // Add "Tất cả" option for filters
+  const filterCategories = ["Tất cả", ...categoryNames];
 
   return (
     <SellerLayout title="Manage Product">
@@ -103,24 +123,47 @@ const ManageProduct = () => {
           onResetFilters={handleResetFilters}
           onAddProduct={handleAddProduct}
           onExport={handleExport}
+          categories={filterCategories} // Use categories from API with "Tất cả" option
         />
 
         {/* Products Table */}
-        <ProductTable
-          products={products}
-          onViewProduct={handleViewProduct}
-          onEditProduct={handleEditProduct}
-          onDeleteProduct={handleDeleteProduct}
-          getStatusColor={getStatusColor}
-        />
+        {error ? (
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <ErrorDisplay
+              error={error}
+              onRetry={loadProducts}
+              title="Không thể tải danh sách sản phẩm"
+            />
+          </div>
+        ) : products.length === 0 && !isLoading ? (
+          <div className="bg-white rounded-xl shadow-sm border p-6">
+            <EmptyState
+              title="Chưa có sản phẩm"
+              description="Bạn chưa có sản phẩm nào. Hãy thêm sản phẩm đầu tiên để bắt đầu bán hàng!"
+              actionText="Thêm sản phẩm"
+              onAction={handleAddProduct}
+            />
+          </div>
+        ) : (
+          <ProductTable
+            products={products}
+            onViewProduct={handleViewProduct}
+            onEditProduct={handleEditProduct}
+            onDeleteProduct={handleDeleteProduct}
+            getStatusColor={getStatusColor}
+            isLoading={isLoading}
+          />
+        )}
 
-        {/* Pagination */}
-        <Pagination
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalItems={products.length}
-          itemsPerPage={10}
-        />
+        {/* Pagination - only show if there are products and no error */}
+        {!error && products.length > 0 && (
+          <Pagination
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalItems={products.length}
+            itemsPerPage={10}
+          />
+        )}
 
         {/* Modals */}
         <ProductModal
@@ -130,7 +173,7 @@ const ManageProduct = () => {
           product={currentProduct}
           onProductChange={setCurrentProduct}
           onSave={handleSaveProduct}
-          categories={PRODUCT_CATEGORIES}
+          categories={categoryNames} // Use categories from API
           onImageUpload={handleImageUpload}
           onRemoveImage={handleRemoveImage}
           onSetFeaturedImage={handleSetFeaturedImage}

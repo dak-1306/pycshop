@@ -32,6 +32,17 @@ const ProductModal = ({
 
   // Use image upload function from hook
   const handleImageUpload = (files) => {
+    console.log("[ProductModal] Image upload triggered with files:", files);
+
+    // Use the image upload handler from the hook if available
+    if (onImageUpload) {
+      console.log("[ProductModal] Using onImageUpload from hook");
+      onImageUpload(files);
+      return;
+    }
+
+    // Fallback to local handling if no hook function provided
+    console.log("[ProductModal] Using local image handling");
     const maxImages = 5;
     const currentImages = product.images || [];
     const remainingSlots = maxImages - currentImages.length;
@@ -70,23 +81,27 @@ const ProductModal = ({
     const newImages = [];
     const newImageFiles = product.imageFiles ? [...product.imageFiles] : [];
 
-    validFiles.forEach((file) => {
+    validFiles.forEach((file, index) => {
       const reader = new FileReader();
       reader.onload = (event) => {
         newImages.push(event.target.result);
         newImageFiles.push(file);
 
+        console.log(
+          `[ProductModal] Processed image ${index + 1}/${validFiles.length}:`,
+          event.target.result.substring(0, 50) + "..."
+        );
+
         // Update product when all files are processed
         if (newImages.length === validFiles.length) {
-          if (onImageUpload) {
-            onImageUpload(validFiles);
-          } else {
-            onProductChange({
-              ...product,
-              images: [...currentImages, ...newImages],
-              imageFiles: newImageFiles,
-            });
-          }
+          console.log(
+            "[ProductModal] All images processed, updating product state"
+          );
+          onProductChange({
+            ...product,
+            images: [...currentImages, ...newImages],
+            imageFiles: newImageFiles,
+          });
         }
       };
       reader.readAsDataURL(file);
@@ -164,6 +179,32 @@ const ProductModal = ({
                   }`}
                   placeholder="VD: iPhone 15 Pro Max 256GB"
                 />
+              </div>
+
+              {/* Product Description */}
+              <div className="group">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+                  <span className="w-6 h-6 bg-gradient-to-r from-teal-500 to-teal-600 rounded-md flex items-center justify-center">
+                    <span className="text-white text-xs">📝</span>
+                  </span>
+                  Mô tả sản phẩm
+                </label>
+                <textarea
+                  value={product.description || ""}
+                  onChange={(e) =>
+                    onProductChange({ ...product, description: e.target.value })
+                  }
+                  className={`w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:ring-2 transition-all bg-white shadow-sm font-medium text-gray-800 resize-none ${
+                    isEditMode
+                      ? "focus:border-blue-500 focus:ring-blue-200"
+                      : "focus:border-orange-500 focus:ring-orange-200"
+                  }`}
+                  placeholder="Mô tả chi tiết về sản phẩm, tính năng, ưu điểm..."
+                  rows={4}
+                />
+                <div className="mt-1 text-xs text-gray-500">
+                  Mô tả chi tiết giúp khách hàng hiểu rõ hơn về sản phẩm
+                </div>
               </div>
 
               {/* Price and Quantity Row */}

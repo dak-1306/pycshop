@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
+import { useChatWidget } from "../../../context/ChatContext";
+import { PLACEHOLDER_IMAGES } from "../../../utils/placeholderImages";
 import "./ShopProfile.css";
 
 const ShopProfile = () => {
   const { shopId } = useParams();
   const navigate = useNavigate();
+  const { openChat } = useChatWidget();
   const [shop, setShop] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -17,7 +20,7 @@ const ShopProfile = () => {
     const mockShop = {
       id: shopId,
       name: "PycShop Electronics",
-      avatar: "https://via.placeholder.com/100",
+      avatar: PLACEHOLDER_IMAGES.avatar100,
       description: "Chuyên cung cấp các sản phẩm điện tử chất lượng cao",
       rating: 4.8,
       totalReviews: 1250,
@@ -36,7 +39,7 @@ const ShopProfile = () => {
       {
         id: 1,
         name: "iPhone 15 Pro Max 256GB",
-        image: "https://via.placeholder.com/200",
+        image: PLACEHOLDER_IMAGES.product200,
         price: 29990000,
         originalPrice: 32990000,
         discount: 9,
@@ -47,7 +50,7 @@ const ShopProfile = () => {
       {
         id: 2,
         name: "Samsung Galaxy S24 Ultra",
-        image: "https://via.placeholder.com/200",
+        image: PLACEHOLDER_IMAGES.product200,
         price: 27990000,
         originalPrice: 30990000,
         discount: 10,
@@ -58,7 +61,7 @@ const ShopProfile = () => {
       {
         id: 3,
         name: "MacBook Air M3 13 inch",
-        image: "https://via.placeholder.com/200",
+        image: PLACEHOLDER_IMAGES.product200,
         price: 28990000,
         originalPrice: 31990000,
         discount: 9,
@@ -69,7 +72,7 @@ const ShopProfile = () => {
       {
         id: 4,
         name: "iPad Pro 11 inch M4",
-        image: "https://via.placeholder.com/200",
+        image: PLACEHOLDER_IMAGES.product200,
         price: 21990000,
         originalPrice: 24990000,
         discount: 12,
@@ -80,7 +83,7 @@ const ShopProfile = () => {
       {
         id: 5,
         name: "AirPods Pro 3rd Gen",
-        image: "https://via.placeholder.com/200",
+        image: PLACEHOLDER_IMAGES.product200,
         price: 5990000,
         originalPrice: 6990000,
         discount: 14,
@@ -91,7 +94,7 @@ const ShopProfile = () => {
       {
         id: 6,
         name: "Apple Watch Series 9",
-        image: "https://via.placeholder.com/200",
+        image: PLACEHOLDER_IMAGES.product200,
         price: 8990000,
         originalPrice: 9990000,
         discount: 10,
@@ -115,6 +118,20 @@ const ShopProfile = () => {
       isFollowing: !prev.isFollowing,
       followers: prev.isFollowing ? prev.followers - 1 : prev.followers + 1,
     }));
+  };
+
+  const handleChatClick = () => {
+    if (!shop) {
+      console.log('Shop data not loaded yet');
+      return;
+    }
+    
+    console.log('Opening chat for shop:', shop);
+    openChat({
+      shopId: shop.id,
+      shopName: shop.name,
+      shopAvatar: shop.avatar
+    });
   };
 
   const handleProductClick = (productId) => {
@@ -233,7 +250,7 @@ const ShopProfile = () => {
                   ></i>
                   {shop.isFollowing ? "Đang theo dõi" : "Theo dõi"}
                 </button>
-                <button className="chat-btn">
+                <button className="chat-btn" onClick={handleChatClick}>
                   <i className="fas fa-comment"></i>
                   Chat ngay
                 </button>

@@ -115,6 +115,7 @@ app.use((req, res, next) => {
     req.url.startsWith("/auth") ||
     req.url.startsWith("/products") ||
     req.url.startsWith("/seller") ||
+    req.url.startsWith("/shops") ||
     req.url.startsWith("/cart")
   ) {
     console.log(`[GATEWAY] Skipping JSON parsing for proxy route: ${req.url}`);
@@ -182,12 +183,27 @@ app.use((req, res, next) => {
     "/products", // Cho phép xem sản phẩm không cần đăng nhập
   ];
 
+  // Shop public routes
+  const shopPublicRoutes = [
+    "/shops/categories",
+    "/shops/search",
+    "/shops/category",
+    "/shops/health",
+  ];
+
+  // Combine all public routes
+  const allPublicRoutes = [...publicRoutes, ...shopPublicRoutes];
+
   // Kiểm tra nếu là public route
-  const isPublicRoute = publicRoutes.some((route) =>
+  const isPublicRoute = allPublicRoutes.some((route) =>
     req.originalUrl.startsWith(route)
   );
 
-  if (isPublicRoute) {
+  // Kiểm tra nếu là shop route với ID (GET /shops/123)
+  const isShopByIdRoute =
+    /^\/shops\/\d+$/.test(req.originalUrl) && req.method === "GET";
+
+  if (isPublicRoute || isShopByIdRoute) {
     console.log(`[GATEWAY] Public route: ${req.originalUrl}`);
     return next();
   }

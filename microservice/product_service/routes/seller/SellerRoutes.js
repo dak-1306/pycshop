@@ -1,8 +1,6 @@
 import express from "express";
 import sellerAuthMiddleware from "../../middleware/sellerAuthMiddleware.js";
 import {
-  getShopInfo,
-  updateShopInfo,
   getSellerProducts,
   addProduct,
   updateProduct,
@@ -11,13 +9,9 @@ import {
   getCategories,
   addStock,
   getStockHistory,
-} from "../../controller/seller/SellerController.js";
+} from "../../controller/seller/sellerController.js";
 
 const router = express.Router();
-
-// Shop management routes
-router.get("/shop", sellerAuthMiddleware, getShopInfo);
-router.put("/shop", sellerAuthMiddleware, updateShopInfo);
 
 // Product management routes (require seller role)
 router.get("/products", sellerAuthMiddleware, getSellerProducts);

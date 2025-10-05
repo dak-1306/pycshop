@@ -158,6 +158,60 @@ function setupRoutes(app) {
     })
   );
 
+  // Shop Service
+  app.use(
+    "/shops",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /shops route for ${req.method} ${req.originalUrl}`
+      );
+      next();
+    },
+    createProxyMiddleware({
+      target: process.env.SHOP_SERVICE_URL || "http://localhost:5003",
+      changeOrigin: true,
+      pathRewrite: { "^/shops": "/api/shops" },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.SHOP_SERVICE_URL || "http://localhost:5003"
+          }${proxyReq.path}`
+        );
+        // Truyền thông tin user từ API Gateway xuống shop service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id);
+          proxyReq.setHeader("x-user-role", req.user.role);
+          proxyReq.setHeader("x-user-type", req.user.userType);
+          console.log(
+            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${req.user.role}`
+          );
+        } else {
+          console.log(`[PROXY] No req.user found for shop request`);
+        }
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Shop Service`
+        );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Shop Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Shop service error", details: err.message });
+        }
+      },
+    })
+  );
+
   // Admin Service - requires admin auth
   app.use(
     "/admin",

@@ -1,112 +1,6 @@
 import Seller from "../../models/seller/SellerModel.js";
 import Product from "../../models/buyer/getProductModel.js";
 
-// Get seller shop information
-export const getShopInfo = async (req, res) => {
-  try {
-    const sellerId = req.user.id;
-
-    console.log(`[SELLER_CONTROLLER] Get shop info for seller: ${sellerId}`);
-
-    const shopInfo = await Seller.getShopInfo(sellerId);
-
-    if (!shopInfo) {
-      // Seller chưa có cửa hàng - trả về empty data thay vì lỗi
-      return res.json({
-        success: true,
-        data: null,
-        message:
-          "Bạn chưa có thông tin cửa hàng. Vui lòng cập nhật thông tin cửa hàng.",
-      });
-    }
-
-    console.log(`[SELLER_CONTROLLER] Found shop: ${shopInfo.TenCuaHang}`);
-
-    res.json({
-      success: true,
-      data: shopInfo,
-    });
-  } catch (error) {
-    console.error("[SELLER_CONTROLLER] Error in getShopInfo:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lỗi khi lấy thông tin cửa hàng",
-      error: error.message,
-    });
-  }
-};
-
-// Update shop information (or create if not exists)
-export const updateShopInfo = async (req, res) => {
-  try {
-    const sellerId = req.user.id;
-    const { tenCuaHang, danhMuc, diaChi, soDienThoai } = req.body;
-
-    console.log(
-      `[SELLER_CONTROLLER] Update/Create shop info for seller: ${sellerId}`
-    );
-
-    // Validate required fields
-    if (!tenCuaHang || !danhMuc || !diaChi || !soDienThoai) {
-      return res.status(400).json({
-        success: false,
-        message: "Vui lòng điền đầy đủ thông tin cửa hàng",
-      });
-    }
-
-    // Check if shop exists
-    const existingShop = await Seller.getShopInfo(sellerId);
-    let result;
-
-    if (existingShop) {
-      // Update existing shop
-      result = await Seller.updateShopInfo(sellerId, {
-        tenCuaHang,
-        danhMuc,
-        diaChi,
-        soDienThoai,
-      });
-
-      if (!result) {
-        return res.status(400).json({
-          success: false,
-          message: "Không thể cập nhật thông tin cửa hàng",
-        });
-      }
-
-      console.log(`[SELLER_CONTROLLER] Shop info updated successfully`);
-
-      res.json({
-        success: true,
-        message: "Cập nhật thông tin cửa hàng thành công",
-      });
-    } else {
-      // Create new shop
-      const shopId = await Seller.createShop(sellerId, {
-        tenCuaHang,
-        danhMuc,
-        diaChi,
-        soDienThoai,
-      });
-
-      console.log(`[SELLER_CONTROLLER] Shop created with ID: ${shopId}`);
-
-      res.json({
-        success: true,
-        message: "Tạo thông tin cửa hàng thành công",
-        data: { shopId },
-      });
-    }
-  } catch (error) {
-    console.error("[SELLER_CONTROLLER] Error in updateShopInfo:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lỗi khi cập nhật thông tin cửa hàng",
-      error: error.message,
-    });
-  }
-};
-
 // Get seller's products
 export const getSellerProducts = async (req, res) => {
   try {
@@ -128,25 +22,6 @@ export const getSellerProducts = async (req, res) => {
       sortBy,
       sortOrder,
     });
-
-    // Check if seller has shop first
-    const shopInfo = await Seller.getShopInfo(sellerId);
-    if (!shopInfo) {
-      return res.json({
-        success: true,
-        data: [],
-        pagination: {
-          page: 1,
-          limit: 20,
-          total: 0,
-          totalPages: 0,
-          hasNext: false,
-          hasPrev: false,
-        },
-        message:
-          "Bạn chưa có cửa hàng. Vui lòng cập nhật thông tin cửa hàng trước.",
-      });
-    }
 
     // Validate pagination params
     const pageNum = Math.max(1, parseInt(page));

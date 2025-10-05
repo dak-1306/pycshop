@@ -97,8 +97,6 @@ app.listen(PORT, () => {
   console.log(`   GET  /search?q=keyword       - Search products`);
   console.log(`   GET  /:id                    - Get product by ID`);
   console.log(`🏪 Seller endpoints:`);
-  console.log(`   GET  /seller/shop            - Get shop info`);
-  console.log(`   PUT  /seller/shop            - Update shop info`);
   console.log(`   GET  /seller/categories      - Get categories`);
   console.log(`   GET  /seller/products        - Get seller products`);
   console.log(`   POST /seller/products        - Add product`);

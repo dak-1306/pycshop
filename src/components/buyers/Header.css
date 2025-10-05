@@ -164,8 +164,8 @@
   border-radius: 5px;
 }
 .user-avatar .fa-user {
-  position: relative;
-  bottom: 6px;
+  color: #fff;
+  font-size: 16px;
 }
 .fa-shopping-bag {
   position: relative;
@@ -414,11 +414,17 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-right: 8px;
+}
+
+.user-avatar .fa-user {
+  color: #fff;
+  font-size: 16px;
 }
 .fa-user {
   position: relative;
+  top: -5px;
   left: 4.5px;
-  bottom: 5px;
 }
 .fa-chevron-down {
   position: relative;

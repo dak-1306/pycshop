@@ -2,13 +2,12 @@ import { useState, useEffect, useCallback } from "react";
 import {
   DEFAULT_SHOP_INFO,
   INITIAL_PRODUCT_STATE,
-  MOCK_PRODUCTS,
   PAGINATION_CONFIG,
   MODAL_MODES,
   SHOP_STATUS_COLORS,
   RECENT_ACTIVITIES,
 } from "../constants/shopPageConstants";
-import { productService } from "../services/productService";
+import ShopService from "../services/shopService";
 
 export const useShopPage = () => {
   // Shop Info State
@@ -43,41 +42,79 @@ export const useShopPage = () => {
       setLoading(true);
       setError(null);
 
-      const filters = {
-        search: searchTerm,
-        category: selectedCategory,
-        status: selectedStatus,
-        sort: sortBy,
+      console.log("Loading products with params:", {
         page: currentPage,
         limit: PAGINATION_CONFIG.itemsPerPage,
-      };
+        search: searchTerm || undefined,
+        category: selectedCategory || undefined,
+        status: selectedStatus || undefined,
+        sortBy,
+        sortOrder: "desc",
+      });
 
-      const response = await productService.getAllProducts(filters);
+      // Load products using ShopService
+      const response = await ShopService.getSellerProducts({
+        page: currentPage,
+        limit: PAGINATION_CONFIG.itemsPerPage,
+        search: searchTerm || undefined,
+        category: selectedCategory || undefined,
+        status: selectedStatus || undefined,
+        sortBy,
+        sortOrder: "desc",
+      });
 
-      if (response && response.data) {
-        setProducts(response.data.products || []);
+      console.log("Products response:", response);
+
+      if (response && response.success) {
+        setProducts(response.data || []);
         setTotalPages(
-          Math.ceil((response.data.total || 0) / PAGINATION_CONFIG.itemsPerPage)
+          Math.ceil(
+            (response.pagination?.total || 0) / PAGINATION_CONFIG.itemsPerPage
+          )
+        );
+        console.log(
+          "Products loaded successfully:",
+          response.data?.length || 0,
+          "products"
         );
       } else {
-        // Use mock data as fallback
-        setProducts(MOCK_PRODUCTS);
-        setTotalPages(
-          Math.ceil(MOCK_PRODUCTS.length / PAGINATION_CONFIG.itemsPerPage)
-        );
+        console.log("No products found or unsuccessful response");
+        setProducts([]);
+        setTotalPages(1);
       }
     } catch (error) {
       console.error("Error loading products:", error);
       setError("Không thể tải danh sách sản phẩm");
-      // Set mock data as fallback
-      setProducts(MOCK_PRODUCTS);
-      setTotalPages(
-        Math.ceil(MOCK_PRODUCTS.length / PAGINATION_CONFIG.itemsPerPage)
-      );
+      setProducts([]);
+      setTotalPages(1);
     } finally {
       setLoading(false);
     }
   }, [searchTerm, selectedCategory, selectedStatus, sortBy, currentPage]);
+
+  // Load shop info separately
+  const loadShopInfo = useCallback(async () => {
+    try {
+      console.log("Loading shop info...");
+      const shopResponse = await ShopService.getShopInfo();
+      console.log("Shop info response:", shopResponse);
+
+      if (shopResponse && shopResponse.success && shopResponse.shop) {
+        setShopInfo(shopResponse.shop);
+        console.log("Shop info loaded successfully:", shopResponse.shop);
+      } else {
+        console.log("No shop info found or unsuccessful response");
+      }
+    } catch (error) {
+      console.error("Error loading shop info:", error);
+      // Keep default shop info if error
+    }
+  }, []);
+
+  // Initial load for shop info
+  useEffect(() => {
+    loadShopInfo();
+  }, [loadShopInfo]);
 
   // Load products when filters change
   useEffect(() => {
@@ -90,17 +127,6 @@ export const useShopPage = () => {
     currentPage,
     loadProducts,
   ]);
-
-  // Filter and sort products
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      !selectedCategory || product.category === selectedCategory;
-    const matchesStatus = !selectedStatus || product.status === selectedStatus;
-    return matchesSearch && matchesCategory && matchesStatus;
-  });
 
   // Utility functions
   const getStatusColor = (status) => {
@@ -133,33 +159,58 @@ export const useShopPage = () => {
 
   const handleSaveProduct = async () => {
     try {
+      setLoading(true);
+
       if (modalMode === MODAL_MODES.ADD) {
-        const newProduct = {
-          ...currentProduct,
-          id: Date.now(),
-        };
-        setProducts((prev) => [...prev, newProduct]);
+        const response = await ShopService.addProduct(currentProduct);
+        if (response.success) {
+          setShowProductModal(false);
+          setCurrentProduct(INITIAL_PRODUCT_STATE);
+          alert("Thêm sản phẩm thành công!");
+          loadProducts(); // Reload products
+        } else {
+          alert(response.message || "Có lỗi xảy ra khi thêm sản phẩm");
+        }
       } else {
-        setProducts((prev) =>
-          prev.map((p) => (p.id === currentProduct.id ? currentProduct : p))
+        const response = await ShopService.updateProduct(
+          currentProduct.id,
+          currentProduct
         );
+        if (response.success) {
+          setShowProductModal(false);
+          setCurrentProduct(INITIAL_PRODUCT_STATE);
+          alert("Cập nhật sản phẩm thành công!");
+          loadProducts(); // Reload products
+        } else {
+          alert(response.message || "Có lỗi xảy ra khi cập nhật sản phẩm");
+        }
       }
-      setShowProductModal(false);
-      setCurrentProduct(INITIAL_PRODUCT_STATE);
     } catch (error) {
       console.error("Error saving product:", error);
-      setError("Không thể lưu sản phẩm");
+      alert("Không thể lưu sản phẩm");
+    } finally {
+      setLoading(false);
     }
   };
 
   const confirmDeleteProduct = async () => {
     try {
-      setProducts((prev) => prev.filter((p) => p.id !== productToDelete.id));
-      setShowDeleteModal(false);
-      setProductToDelete(null);
+      setLoading(true);
+      const response = await ShopService.deleteProduct(productToDelete.id);
+
+      if (response.success) {
+        setShowDeleteModal(false);
+        setProductToDelete(null);
+        alert("Xóa sản phẩm thành công!");
+        loadProducts(); // Reload products
+      } else {
+        alert(response.message || "Có lỗi xảy ra khi xóa sản phẩm");
+      }
     } catch (error) {
       console.error("Error deleting product:", error);
-      setError("Không thể xóa sản phẩm");
+      alert("Không thể xóa sản phẩm");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -168,13 +219,29 @@ export const useShopPage = () => {
     setShowShopEditModal(true);
   };
 
-  const handleSaveShopInfo = (updatedInfo) => {
-    setShopInfo((prev) => ({
-      ...prev,
-      ...updatedInfo,
-    }));
-    setShowShopEditModal(false);
-    alert("Cập nhật thông tin shop thành công!");
+  const handleSaveShopInfo = async (updatedInfo) => {
+    try {
+      setLoading(true);
+      const response = await ShopService.updateShop(updatedInfo);
+
+      if (response.success) {
+        setShopInfo((prev) => ({
+          ...prev,
+          ...updatedInfo,
+        }));
+        setShowShopEditModal(false);
+        alert("Cập nhật thông tin shop thành công!");
+        // Reload shop info to get latest data
+        loadShopInfo();
+      } else {
+        alert(response.message || "Có lỗi xảy ra khi cập nhật shop");
+      }
+    } catch (error) {
+      console.error("Error updating shop info:", error);
+      alert("Có lỗi xảy ra khi cập nhật shop");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Reset filters
@@ -203,7 +270,6 @@ export const useShopPage = () => {
     products,
     loading,
     error,
-    filteredProducts,
 
     // Search & Filter
     searchTerm,
@@ -250,6 +316,7 @@ export const useShopPage = () => {
     // Other Functions
     handleResetFilters,
     loadProducts,
+    loadShopInfo,
 
     // Statistics
     shopStats,

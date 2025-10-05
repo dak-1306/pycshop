@@ -29,8 +29,8 @@ app.get("/health", (req, res) => {
   });
 });
 
-// Routes
-app.use("/api/shops", shopRoutes);
+// Routes - mount at /shops to match incoming proxy requests
+app.use("/shops", shopRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -48,7 +48,7 @@ app.use(errorHandler);
 app.listen(PORT, () => {
   console.log(`🏪 Shop Service running on port ${PORT}`);
   console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-  console.log(`🔗 API endpoint: http://localhost:${PORT}/api/shops`);
+  console.log(`🔗 API endpoint: http://localhost:${PORT}/shops`);
 });
 
 export default app;

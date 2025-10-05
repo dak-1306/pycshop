@@ -5,7 +5,7 @@ const ShopEditModal = ({ isOpen, onClose, shopInfo, onSave }) => {
   const [tempShopInfo, setTempShopInfo] = useState({
     name: shopInfo.name || "",
     description: shopInfo.description || "",
-    email: shopInfo.email || "",
+    email: shopInfo.owner_email || shopInfo.email || "",
     phone: shopInfo.phone || "",
     address: shopInfo.address || "",
     website: shopInfo.website || "",

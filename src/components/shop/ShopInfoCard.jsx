@@ -49,7 +49,9 @@ const ShopInfoCard = ({ shopInfo, onEditShopInfo }) => {
             <label className="text-sm font-medium text-gray-500">
               Email liên hệ
             </label>
-            <p className="text-gray-900">{shopInfo.email}</p>
+            <p className="text-gray-900">
+              {shopInfo.owner_email || shopInfo.email}
+            </p>
           </div>
           <div>
             <label className="text-sm font-medium text-gray-500">

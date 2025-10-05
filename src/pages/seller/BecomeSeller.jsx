@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { authService } from "../../services/authService";
-import apiService from "../../services/apiService";
+import ShopService from "../../services/shopService";
 
 const BecomeSeller = () => {
   const navigate = useNavigate();
@@ -26,34 +26,34 @@ const BecomeSeller = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [categories, setCategories] = useState([]);
 
-  // Load categories from API
+  // Load categories from Shop Service
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const response = await apiService.get("/products/categories");
-        if (response && response.data) {
-          setCategories(response.data);
+        const response = await ShopService.getCategories();
+        if (response && response.success && response.categories) {
+          setCategories(response.categories);
         } else {
           // Fallback categories if API fails
           setCategories([
-            { ID_DanhMuc: 1, TenDanhMuc: "Thời Trang Nam" },
-            { ID_DanhMuc: 2, TenDanhMuc: "Thời Trang Nữ" },
-            { ID_DanhMuc: 3, TenDanhMuc: "Điện Thoại & Phụ Kiện" },
-            { ID_DanhMuc: 4, TenDanhMuc: "Máy Tính & Laptop" },
-            { ID_DanhMuc: 18, TenDanhMuc: "Nhà Sách Online" },
-            { ID_DanhMuc: 19, TenDanhMuc: "Bách Hóa Online" },
+            { id: 1, name: "Thời Trang Nam" },
+            { id: 2, name: "Thời Trang Nữ" },
+            { id: 3, name: "Điện Thoại & Phụ Kiện" },
+            { id: 4, name: "Máy Tính & Laptop" },
+            { id: 18, name: "Nhà Sách Online" },
+            { id: 19, name: "Bách Hóa Online" },
           ]);
         }
       } catch (error) {
         console.error("Error loading categories:", error);
         // Fallback categories
         setCategories([
-          { ID_DanhMuc: 1, TenDanhMuc: "Thời Trang Nam" },
-          { ID_DanhMuc: 2, TenDanhMuc: "Thời Trang Nữ" },
-          { ID_DanhMuc: 3, TenDanhMuc: "Điện Thoại & Phụ Kiện" },
-          { ID_DanhMuc: 4, TenDanhMuc: "Máy Tính & Laptop" },
-          { ID_DanhMuc: 18, TenDanhMuc: "Nhà Sách Online" },
-          { ID_DanhMuc: 19, TenDanhMuc: "Bách Hóa Online" },
+          { id: 1, name: "Thời Trang Nam" },
+          { id: 2, name: "Thời Trang Nữ" },
+          { id: 3, name: "Điện Thoại & Phụ Kiện" },
+          { id: 4, name: "Máy Tính & Laptop" },
+          { id: 18, name: "Nhà Sách Online" },
+          { id: 19, name: "Bách Hóa Online" },
         ]);
       }
     };
@@ -69,32 +69,45 @@ const BecomeSeller = () => {
     }));
   };
 
+  const validateForm = () => {
+    const errors = [];
+
+    if (!formData.shopName.trim()) {
+      errors.push("Tên shop không được để trống");
+    }
+
+    if (!formData.shopDescription.trim()) {
+      errors.push("Mô tả shop không được để trống");
+    }
+
+    if (!formData.shopCategory) {
+      errors.push("Vui lòng chọn danh mục shop");
+    }
+
+    if (!formData.shopAddress.trim()) {
+      errors.push("Địa chỉ shop không được để trống");
+    }
+
+    if (!formData.shopPhone.trim()) {
+      errors.push("Số điện thoại shop không được để trống");
+    } else {
+      // Validate phone number format
+      const phoneRegex = /^[0-9]{10,11}$/;
+      if (!phoneRegex.test(formData.shopPhone.trim())) {
+        errors.push("Số điện thoại phải có 10-11 chữ số");
+      }
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validation
-    if (!formData.shopName.trim()) {
-      alert("Vui lòng nhập tên shop");
-      return;
-    }
-
-    if (!formData.shopDescription.trim()) {
-      alert("Vui lòng nhập mô tả shop");
-      return;
-    }
-
-    if (!formData.shopCategory) {
-      alert("Vui lòng chọn danh mục shop");
-      return;
-    }
-
-    if (!formData.shopAddress.trim()) {
-      alert("Vui lòng nhập địa chỉ shop");
-      return;
-    }
-
-    if (!formData.shopPhone.trim()) {
-      alert("Vui lòng nhập số điện thoại shop");
+    const errors = validateForm();
+    if (errors.length > 0) {
+      alert(errors.join("\n"));
       return;
     }
 
@@ -112,10 +125,15 @@ const BecomeSeller = () => {
       console.log("Current user:", authService.getCurrentUser());
       console.log("Is authenticated:", authService.isAuthenticated());
 
-      const result = await authService.becomeSeller(formData);
+      const result = await ShopService.becomeSeller(formData);
       console.log("becomeSeller result:", result);
 
       if (result.success) {
+        // Update user context with new token if provided
+        if (result.token) {
+          authService.setToken(result.token);
+        }
+
         alert("Đăng ký thành seller thành công!");
         // Redirect to seller dashboard
         navigate("/seller/dashboard");
@@ -125,7 +143,17 @@ const BecomeSeller = () => {
     } catch (error) {
       console.error("Become seller error:", error);
       console.error("Error details:", error);
-      alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
+
+      // Handle specific error messages
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+        alert(error.response.data.message);
+      } else {
+        alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -203,10 +231,10 @@ const BecomeSeller = () => {
               <option value="">Chọn danh mục shop</option>
               {categories.map((category) => (
                 <option
-                  key={category.ID_DanhMuc || category}
-                  value={category.TenDanhMuc || category}
+                  key={category.id || category.ID_DanhMuc}
+                  value={category.name || category.TenDanhMuc}
                 >
-                  {category.TenDanhMuc || category}
+                  {category.name || category.TenDanhMuc}
                 </option>
               ))}
             </select>

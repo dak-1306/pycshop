@@ -42,18 +42,20 @@ const extractUserInfo = (req, res, next) => {
 router.get("/categories", getCategories);
 router.get("/search", searchShops);
 router.get("/category/:categoryId", getShopsByCategory);
-router.get("/:shopId", getShopById);
 
 // Routes that need authentication
 router.use(extractUserInfo);
 
+// Specific authenticated routes (must come before dynamic routes)
+router.get("/info", requireSeller, getShopInfo);
+router.post("/create", requireSeller, createShop);
+router.put("/update", requireSeller, updateShop);
+router.delete("/delete", requireSeller, deleteShop);
+
 // Become seller route (buyer to seller)
 router.post("/become-seller", becomeSeller);
 
-// Seller-specific routes (require seller role)
-router.get("/info", getShopInfo);
-router.post("/create", createShop);
-router.put("/update", updateShop);
-router.delete("/delete", deleteShop);
+// Dynamic routes (must come after specific routes)
+router.get("/id/:shopId", getShopById);
 
 export default router;

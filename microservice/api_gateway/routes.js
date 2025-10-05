@@ -1,4 +1,5 @@
 import { createProxyMiddleware } from "http-proxy-middleware";
+import authMiddleware from "./middleware/authMiddleware.js";
 
 function setupRoutes(app) {
   console.log("[ROUTES] Setting up proxy routes...");
@@ -158,7 +159,7 @@ function setupRoutes(app) {
     })
   );
 
-  // Shop Service
+  // Shop Service - Use function pathRewrite to preserve /shops prefix
   app.use(
     "/shops",
     (req, res, next) => {
@@ -167,11 +168,61 @@ function setupRoutes(app) {
       );
       next();
     },
+    // Add authentication middleware for protected shop routes
+    (req, res, next) => {
+      // Skip auth for public routes
+      if (
+        req.path.includes("/categories") ||
+        req.path.includes("/search") ||
+        req.path.match(/^\/\d+$/) || // /:shopId pattern
+        req.path.match(/^\/id\/\d+$/)
+      ) {
+        // /id/:shopId pattern
+        console.log(
+          `[ROUTES] Skipping auth for public shop route: ${req.path}`
+        );
+        return next();
+      }
+
+      // Apply auth middleware for protected routes
+      console.log(
+        `[ROUTES] Applying auth middleware for shop route: ${req.path}`
+      );
+      authMiddleware(req, res, next);
+    },
+    // Debug middleware to check req.user before proxy
+    (req, res, next) => {
+      console.log(`[DEBUG] Before proxy - req.user:`, req.user);
+      console.log(`[DEBUG] Before proxy - path:`, req.path);
+      console.log(`[DEBUG] Before proxy - originalUrl:`, req.originalUrl);
+
+      // Manually set headers for proxy
+      if (req.user) {
+        req.headers["x-user-id"] = req.user.id;
+        req.headers["x-user-role"] = req.user.role;
+        req.headers["x-user-type"] = req.user.userType;
+        console.log(
+          `[DEBUG] Set headers manually: x-user-id=${req.user.id}, x-user-role=${req.user.role}`
+        );
+      }
+      next();
+    },
     createProxyMiddleware({
       target: process.env.SHOP_SERVICE_URL || "http://localhost:5003",
       changeOrigin: true,
-      pathRewrite: { "^/shops": "/api/shops" },
+      // Simple pathRewrite - don't add prefix since shop service expects /shops/info
+      pathRewrite: (path, req) => {
+        // Remove /shops prefix and keep the rest
+        const newPath = req.originalUrl;
+        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
+        return newPath;
+      },
       onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `[PROXY] onProxyReq callback for shop service - URL: ${req.url}`
+        );
+        console.log(`[PROXY] req.user exists:`, !!req.user);
+        console.log(`[PROXY] req.user details:`, req.user);
         console.log(
           `[PROXY] Forwarding ${req.method} ${req.url} to ${
             process.env.SHOP_SERVICE_URL || "http://localhost:5003"

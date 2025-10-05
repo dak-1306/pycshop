@@ -46,12 +46,17 @@ function App() {
             {/* Buyer Routes */}
             <Route path="/profile" element={<Profile />} />
             <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/products" element={<div>Trang sản phẩm đang phát triển...</div>} />
+            <Route
+              path="/products"
+              element={<div>Trang sản phẩm đang phát triển...</div>}
+            />
 
             {/* Seller Routes */}
             <Route path="/seller/dashboard" element={<Dashboard />} />
+            <Route path="/seller/shop-info" element={<ShopPage />} />
+            <Route path="/seller/manage-products" element={<ManageProduct />} />
             <Route path="/seller/manage-product" element={<ManageProduct />} />
-            <Route path="/seller/order" element={<Order />} />
+            <Route path="/seller/orders" element={<Order />} />
             <Route path="/seller/shop-page" element={<ShopPage />} />
 
             {/* Admin Routes */}

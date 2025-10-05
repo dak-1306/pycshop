@@ -60,7 +60,6 @@ const ShopPage = () => {
     categories,
     getStatusColor,
     formatPrice,
-    filteredProducts,
     shopStats,
     recentActivities,
   } = useShopPage();
@@ -96,7 +95,7 @@ const ShopPage = () => {
 
         {/* Featured Products */}
         <FeaturedProducts
-          products={filteredProducts}
+          products={products}
           categories={categories}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}

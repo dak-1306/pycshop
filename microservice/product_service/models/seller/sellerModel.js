@@ -608,6 +608,198 @@ class Seller {
       throw error;
     }
   }
+
+  // ================== ORDER MANAGEMENT METHODS ==================
+
+  // Get seller's orders
+  static async getSellerOrders(
+    sellerId,
+    { page = 1, limit = 10, search = "", status = null }
+  ) {
+    try {
+      const offset = (page - 1) * limit;
+      let whereConditions = [
+        "o.ID_CuaHang = ch.ID_CuaHang",
+        "ch.ID_NguoiBan = ?",
+      ];
+      let params = [sellerId];
+
+      // Search filter
+      if (search) {
+        whereConditions.push(
+          "(o.TenNguoiNhan LIKE ? OR o.SoDienThoai LIKE ? OR o.DiaChiGiaoHang LIKE ?)"
+        );
+        params.push(`%${search}%`, `%${search}%`, `%${search}%`);
+      }
+
+      // Status filter
+      if (status) {
+        whereConditions.push("o.TrangThai = ?");
+        params.push(status);
+      }
+
+      const whereClause = `WHERE ${whereConditions.join(" AND ")}`;
+
+      // Get total count
+      const countQuery = `
+        SELECT COUNT(*) as total
+        FROM donhang o
+        JOIN cuahang ch ON o.ID_CuaHang = ch.ID_CuaHang
+        ${whereClause}
+      `;
+      const [countResult] = await db.execute(countQuery, params);
+      const total = countResult[0].total;
+
+      // Get orders
+      const query = `
+        SELECT
+          o.ID_DonHang,
+          o.TenNguoiNhan,
+          o.SoDienThoai,
+          o.DiaChiGiaoHang,
+          o.TongTien,
+          o.TrangThai,
+          o.NgayDatHang,
+          o.GhiChu,
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'ID_ChiTiet', ct.ID_ChiTietDonHang,
+              'TenSanPham', sp.TenSanPham,
+              'SoLuong', ct.SoLuong,
+              'Gia', ct.Gia,
+              'HinhAnh', (
+                SELECT JSON_ARRAYAGG(hinh.HinhAnh)
+                FROM hinhanhsanpham hinh
+                WHERE hinh.ID_SanPham = sp.ID_SanPham
+                LIMIT 1
+              )
+            )
+          ) as ChiTietDonHang
+        FROM donhang o
+        JOIN cuahang ch ON o.ID_CuaHang = ch.ID_CuaHang
+        LEFT JOIN chitietdonhang ct ON o.ID_DonHang = ct.ID_DonHang
+        LEFT JOIN sanpham sp ON ct.ID_SanPham = sp.ID_SanPham
+        ${whereClause}
+        GROUP BY o.ID_DonHang
+        ORDER BY o.NgayDatHang DESC
+        LIMIT ? OFFSET ?
+      `;
+
+      params.push(limit, offset);
+      const [rows] = await db.execute(query, params);
+
+      return {
+        orders: rows,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      };
+    } catch (error) {
+      console.error("[SELLER] Error in getSellerOrders:", error);
+      throw error;
+    }
+  }
+
+  // Get order by ID
+  static async getOrderById(orderId, sellerId) {
+    try {
+      const query = `
+        SELECT
+          o.ID_DonHang,
+          o.TenNguoiNhan,
+          o.SoDienThoai,
+          o.DiaChiGiaoHang,
+          o.TongTien,
+          o.TrangThai,
+          o.NgayDatHang,
+          o.GhiChu,
+          JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'ID_ChiTiet', ct.ID_ChiTietDonHang,
+              'TenSanPham', sp.TenSanPham,
+              'SoLuong', ct.SoLuong,
+              'Gia', ct.Gia,
+              'HinhAnh', (
+                SELECT JSON_ARRAYAGG(hinh.HinhAnh)
+                FROM hinhanhsanpham hinh
+                WHERE hinh.ID_SanPham = sp.ID_SanPham
+                LIMIT 1
+              )
+            )
+          ) as ChiTietDonHang
+        FROM donhang o
+        JOIN cuahang ch ON o.ID_CuaHang = ch.ID_CuaHang
+        LEFT JOIN chitietdonhang ct ON o.ID_DonHang = ct.ID_DonHang
+        LEFT JOIN sanpham sp ON ct.ID_SanPham = sp.ID_SanPham
+        WHERE o.ID_DonHang = ? AND ch.ID_NguoiBan = ?
+        GROUP BY o.ID_DonHang
+      `;
+
+      const [rows] = await db.execute(query, [orderId, sellerId]);
+      return rows[0] || null;
+    } catch (error) {
+      console.error("[SELLER] Error in getOrderById:", error);
+      throw error;
+    }
+  }
+
+  // Update order status
+  static async updateOrderStatus(orderId, sellerId, status) {
+    try {
+      const query = `
+        UPDATE donhang o
+        JOIN cuahang ch ON o.ID_CuaHang = ch.ID_CuaHang
+        SET o.TrangThai = ?, o.CapNhat = CURRENT_TIMESTAMP
+        WHERE o.ID_DonHang = ? AND ch.ID_NguoiBan = ?
+      `;
+
+      const [result] = await db.execute(query, [status, orderId, sellerId]);
+      return result.affectedRows > 0;
+    } catch (error) {
+      console.error("[SELLER] Error in updateOrderStatus:", error);
+      throw error;
+    }
+  }
+
+  // Get order statistics
+  static async getOrderStats(sellerId) {
+    try {
+      const query = `
+        SELECT
+          COUNT(*) as totalOrders,
+          SUM(CASE WHEN TrangThai = 'pending' THEN 1 ELSE 0 END) as pendingOrders,
+          SUM(CASE WHEN TrangThai = 'confirmed' THEN 1 ELSE 0 END) as confirmedOrders,
+          SUM(CASE WHEN TrangThai = 'shipping' THEN 1 ELSE 0 END) as shippingOrders,
+          SUM(CASE WHEN TrangThai = 'delivered' THEN 1 ELSE 0 END) as deliveredOrders,
+          SUM(CASE WHEN TrangThai = 'cancelled' THEN 1 ELSE 0 END) as cancelledOrders,
+          SUM(TongTien) as totalRevenue,
+          AVG(TongTien) as averageOrderValue
+        FROM donhang o
+        JOIN cuahang ch ON o.ID_CuaHang = ch.ID_CuaHang
+        WHERE ch.ID_NguoiBan = ?
+      `;
+
+      const [rows] = await db.execute(query, [sellerId]);
+      return (
+        rows[0] || {
+          totalOrders: 0,
+          pendingOrders: 0,
+          confirmedOrders: 0,
+          shippingOrders: 0,
+          deliveredOrders: 0,
+          cancelledOrders: 0,
+          totalRevenue: 0,
+          averageOrderValue: 0,
+        }
+      );
+    } catch (error) {
+      console.error("[SELLER] Error in getOrderStats:", error);
+      throw error;
+    }
+  }
 }
 
 export default Seller;

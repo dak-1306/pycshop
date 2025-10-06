@@ -177,7 +177,7 @@
   justify-content: space-between;
   align-items: center;
   padding-bottom: 8px;
-  border-bottom: 2px solid #ee4d2d;
+  border-bottom: 2px solid #00b894;
 }
 
 .sr-filter-section h4 {
@@ -418,7 +418,7 @@
 .sr-product-card:hover {
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   transform: translateY(-4px);
-  border-color: #ee4d2d;
+  border-color: #00a085;
 }
 
 .sr-product-image {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import adminService from "../services/adminService.js";
+import sellerOrderService from "../services/sellerOrderService.js";
 import {
   ORDER_STATUSES,
   ORDER_CATEGORIES,
@@ -33,7 +33,7 @@ export const useOrders = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await adminService.getOrders({
+        const response = await sellerOrderService.getSellerOrders({
           page: currentPage,
           limit: 10,
           search: searchTerm,
@@ -118,33 +118,19 @@ export const useOrders = () => {
 
     try {
       if (modalMode === "add") {
-        await adminService.createOrder({
-          productName: currentOrder.productName,
-          price: Number(currentOrder.price.replace(/,/g, "")),
-          quantity: Number(currentOrder.quantity),
-          category: currentOrder.category,
-          customerName: currentOrder.customerName,
-          customerPhone: currentOrder.customerPhone,
-          address: currentOrder.address,
-          status: currentOrder.status,
-        });
-        alert("🎉 Thêm đơn hàng thành công!");
+        // Seller cannot create new orders, only update existing ones
+        alert("Seller không thể tạo đơn hàng mới!");
+        return;
       } else {
-        await adminService.updateOrder(currentOrder.id, {
-          productName: currentOrder.productName,
-          price: Number(currentOrder.price.replace(/,/g, "")),
-          quantity: Number(currentOrder.quantity),
-          category: currentOrder.category,
-          customerName: currentOrder.customerName,
-          customerPhone: currentOrder.customerPhone,
-          address: currentOrder.address,
-          status: currentOrder.status,
-        });
+        await sellerOrderService.updateOrderStatus(
+          currentOrder.id,
+          currentOrder.status
+        );
         alert("🎉 Cập nhật đơn hàng thành công!");
       }
 
       // Reload orders
-      const response = await adminService.getOrders({
+      const response = await sellerOrderService.getSellerOrders({
         page: currentPage,
         limit: 10,
         search: searchTerm,
@@ -170,20 +156,11 @@ export const useOrders = () => {
   const confirmDeleteOrder = async () => {
     if (orderToDelete) {
       try {
-        await adminService.deleteOrder(orderToDelete.id);
-
-        // Reload orders
-        const response = await adminService.getOrders({
-          page: currentPage,
-          limit: 10,
-          search: searchTerm,
-          status: selectedFilter !== "Tất cả" ? selectedFilter : undefined,
-        });
-        setOrders(response.data || []);
-
+        // Seller cannot delete orders, only update status
+        alert("Seller không thể xóa đơn hàng!");
         setShowDeleteModal(false);
         setOrderToDelete(null);
-        alert("🗑️ Đã xóa đơn hàng thành công!");
+        return;
       } catch (error) {
         console.error("Error deleting order:", error);
         alert("❌ Lỗi khi xóa đơn hàng: " + (error.message || "Unknown error"));
@@ -209,6 +186,16 @@ export const useOrders = () => {
   const handleResetFilters = () => {
     setSearchTerm("");
     setSelectedFilter("Tất cả");
+    setCurrentPage(1);
+  };
+
+  // Add aliases for functions expected by Order.jsx
+  const handleCancelOrder = handleDeleteOrder;
+  const confirmCancelOrder = confirmDeleteOrder;
+
+  // Add missing functions
+  const handleFilterChange = (filter) => {
+    setSelectedFilter(filter);
     setCurrentPage(1);
   };
 
@@ -260,9 +247,12 @@ export const useOrders = () => {
     handleSaveOrder,
     handleDeleteOrder,
     confirmDeleteOrder,
+    handleCancelOrder,
+    confirmCancelOrder,
     handleCloseOrderModal,
     handleCloseDetailModal,
     handleCloseDeleteModal,
+    handleFilterChange,
     handleResetFilters,
     handleExport,
 
@@ -270,5 +260,9 @@ export const useOrders = () => {
     formatCurrency,
     getStatusColor,
     formatNumber,
+
+    // Constants
+    orderStatuses: ORDER_STATUSES,
+    orderCategories: ORDER_CATEGORIES,
   };
 };

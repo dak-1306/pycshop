@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CollaboratorModal from "../modals/CollaboratorModal";
 import { useNotifications } from "../../hooks/useNotifications";
+import { useShopInfo } from "../../hooks/useShopInfo";
 import NotificationPanel from "../common/NotificationPanel";
 import "../../assets/css/logo.css";
 
@@ -13,6 +14,9 @@ const SellerLayout = ({ children }) => {
     name: "",
     email: "",
   });
+
+  // Get shop information
+  const { shopInfo, isLoading: shopLoading } = useShopInfo();
 
   // Notification system
   const {
@@ -78,19 +82,19 @@ const SellerLayout = ({ children }) => {
       id: "manageProduct",
       name: "Manage Product",
       icon: "products",
-      href: "/seller/manage-product",
+      href: "/seller/products",
     },
     {
       id: "order",
       name: "Order",
       icon: "orders",
-      href: "/seller/order",
+      href: "/seller/orders",
     },
     {
       id: "shopPage",
       name: "Shop Page",
       icon: "shop",
-      href: "/seller/shop-page",
+      href: "/seller/shop",
     },
   ];
 
@@ -154,7 +158,7 @@ const SellerLayout = ({ children }) => {
             {/* Shop Name */}
             <div className="flex-1 text-center">
               <h2 className="text-lg font-semibold text-yellow-300">
-                TÊN CỦA SHOP
+                {shopLoading ? "Đang tải..." : shopInfo?.name || "Tên Shop"}
               </h2>
             </div>
 

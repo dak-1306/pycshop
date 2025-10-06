@@ -111,7 +111,7 @@ const ChatDialog = ({ isOpen, onClose, shop }) => {
               </div>
             </div>
           ))}
-          
+
           {isTyping && (
             <div className="message shop-message">
               <img

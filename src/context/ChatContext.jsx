@@ -1,21 +1,13 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { useState, createContext } from "react";
 
 const ChatContext = createContext();
-
-export const useChatWidget = () => {
-  const context = useContext(ChatContext);
-  if (!context) {
-    throw new Error("useChatWidget must be used within a ChatProvider");
-  }
-  return context;
-};
 
 export const ChatProvider = ({ children }) => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [currentShop, setCurrentShop] = useState(null);
 
   const openChat = (shopInfo = null) => {
-    console.log('ChatContext: Opening chat with shop info:', shopInfo);
+    console.log("ChatContext: Opening chat with shop info:", shopInfo);
     setCurrentShop(shopInfo);
     setIsChatOpen(true);
   };
@@ -48,4 +40,4 @@ export const ChatProvider = ({ children }) => {
   );
 };
 
-export default ChatContext;
+export { ChatContext };

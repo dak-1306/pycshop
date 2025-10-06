@@ -70,8 +70,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 
 .chat-close-btn {
@@ -201,11 +206,17 @@
   animation: typing 1.4s infinite ease-in-out both;
 }
 
-.typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-.typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+.typing-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.typing-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
 
 @keyframes typing {
-  0%, 80%, 100% {
+  0%,
+  80%,
+  100% {
     transform: scale(0);
     opacity: 0.5;
   }
@@ -310,15 +321,15 @@
     max-height: 100vh;
     border-radius: 0;
   }
-  
+
   .chat-overlay {
     padding: 0;
   }
-  
+
   .chat-quick-actions {
     flex-wrap: wrap;
   }
-  
+
   .quick-action-btn {
     flex: 1;
     min-width: 0;

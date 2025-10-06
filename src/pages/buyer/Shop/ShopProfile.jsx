@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
-import { useChatWidget } from "../../../context/ChatContext";
+import { useChatWidget } from "../../../hooks/useChatWidget";
 import { PLACEHOLDER_IMAGES } from "../../../utils/placeholderImages";
 import "./ShopProfile.css";
 
@@ -122,15 +122,15 @@ const ShopProfile = () => {
 
   const handleChatClick = () => {
     if (!shop) {
-      console.log('Shop data not loaded yet');
+      console.log("Shop data not loaded yet");
       return;
     }
-    
-    console.log('Opening chat for shop:', shop);
+
+    console.log("Opening chat for shop:", shop);
     openChat({
       shopId: shop.id,
       shopName: shop.name,
-      shopAvatar: shop.avatar
+      shopAvatar: shop.avatar,
     });
   };
 

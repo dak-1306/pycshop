@@ -111,9 +111,11 @@
 .shop-avatar {
   flex-shrink: 0;
 }
-
+.fa-star {
+  color: #ffce3d;
+}
 .shop-avatar img {
-  width: 100px;
+  width: 100px !important;
   height: 100px;
   border-radius: 50%;
   border: 4px solid white;
@@ -145,9 +147,9 @@
 
 .shop-badge {
   padding: 4px 12px;
-  background: linear-gradient(135deg, #166534, #22c55e);
+  background: #166534;
   color: white;
-  border-radius: 16px;
+  border-radius: 10px;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -183,15 +185,19 @@
 }
 
 .rating {
-  color: #166534;
   font-weight: 700;
 }
-
+.fa-star {
+  position: relative;
+  top: -5px;
+}
 .shop-stars {
   display: flex;
-  gap: 2px;
 }
-
+.fa-map-marker-alt {
+  position: relative;
+  top: -5px;
+}
 .shop-stars i {
   font-size: 12px;
   color: #ddd;
@@ -208,6 +214,7 @@
 }
 
 .shop-actions {
+  padding-top: 20px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -216,7 +223,7 @@
 
 .follow-btn,
 .chat-btn {
-  padding: 12px 24px;
+  padding: 10px 10px;
   border: none;
   border-radius: 6px;
   font-size: 14px;
@@ -229,7 +236,15 @@
   gap: 8px;
   min-width: 140px;
 }
-
+.fa-plus,
+.fa-check {
+  color: #fff;
+  position: relative;
+  top: -5px;
+}
+.fa-check {
+  left: 10px;
+}
 .follow-btn {
   background: #166534;
   color: white;
@@ -239,17 +254,19 @@
   background: #14532d;
   transform: translateY(-1px);
 }
-
+.fa-comment {
+  position: relative;
+  top: -5px;
+}
 .follow-btn.following {
-  background: #f0f0f0;
-  color: #666;
+  background: #08561e;
+
   border: 1px solid #ddd;
 }
 
 .follow-btn.following:hover {
-  background: #ff4757;
+  background: #088435;
   color: white;
-  border-color: #ff4757;
 }
 
 .chat-btn {
@@ -259,15 +276,13 @@
 }
 
 .chat-btn:hover {
-  background: #166534;
-  color: white;
+  background: #d3e2d9;
 }
 
 /* Navigation */
 .shop-nav {
   background: white;
   border-bottom: 1px solid #eee;
-  position: sticky;
   top: 80px;
   z-index: 100;
 }
@@ -439,7 +454,7 @@
 .shop-current-price {
   font-size: 16px;
   font-weight: 700;
-  color: #166534;
+  color: #ee4d2d;
 }
 
 .shop-original-price {
@@ -464,11 +479,13 @@
 .shop-rating-text {
   font-size: 12px;
   color: #666;
+  margin-top: 10px;
 }
 
 .shop-product-sold {
   font-size: 12px;
   color: #666;
+  margin-top: 10px;
 }
 
 .shop-product-location {

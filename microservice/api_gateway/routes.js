@@ -24,9 +24,16 @@ function setupRoutes(app) {
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id);
           proxyReq.setHeader("x-user-role", req.user.role);
-          proxyReq.setHeader("x-user-type", req.user.userType);
+
+          // Only set x-user-type if it exists to avoid undefined header
+          if (req.user.userType) {
+            proxyReq.setHeader("x-user-type", req.user.userType);
+          }
+
           console.log(
-            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${req.user.role}`
+            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${
+              req.user.role
+            }, userType: ${req.user.userType || "undefined"}`
           );
         } else {
           console.log(`[PROXY] No req.user found for this request`);
@@ -200,9 +207,18 @@ function setupRoutes(app) {
       if (req.user) {
         req.headers["x-user-id"] = req.user.id;
         req.headers["x-user-role"] = req.user.role;
-        req.headers["x-user-type"] = req.user.userType;
+
+        // Only set x-user-type if it exists
+        if (req.user.userType) {
+          req.headers["x-user-type"] = req.user.userType;
+        }
+
         console.log(
-          `[DEBUG] Set headers manually: x-user-id=${req.user.id}, x-user-role=${req.user.role}`
+          `[DEBUG] Set headers manually: x-user-id=${
+            req.user.id
+          }, x-user-role=${req.user.role}, x-user-type=${
+            req.user.userType || "undefined"
+          }`
         );
       }
       next();
@@ -232,7 +248,11 @@ function setupRoutes(app) {
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id);
           proxyReq.setHeader("x-user-role", req.user.role);
-          proxyReq.setHeader("x-user-type", req.user.userType);
+
+          // Only set x-user-type if it exists
+          if (req.user.userType) {
+            proxyReq.setHeader("x-user-type", req.user.userType);
+          }
           console.log(
             `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${req.user.role}`
           );
@@ -286,9 +306,16 @@ function setupRoutes(app) {
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id);
           proxyReq.setHeader("x-user-role", req.user.role);
-          proxyReq.setHeader("x-user-type", req.user.userType);
+
+          // Only set x-user-type if it exists
+          if (req.user.userType) {
+            proxyReq.setHeader("x-user-type", req.user.userType);
+          }
+
           console.log(
-            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${req.user.role}`
+            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${
+              req.user.role
+            }, userType: ${req.user.userType || "undefined"}`
           );
         } else {
           console.log(`[PROXY] No req.user found for this request`);

@@ -1,7 +1,7 @@
 import React from "react";
-import ProductStats from "../../components/product/ProductStats";
-import AdminProductFilters from "../../components/product/AdminProductFilters";
-import AdminProductTable from "../../components/product/AdminProductTable";
+import ProductStats from "../../components/common/product/ProductStats";
+import ProductFilters from "../../components/common/product/ProductFilters";
+import ProductTable from "../../components/common/product/ProductTable";
 import { useAdminProducts } from "../../hooks/useAdminProducts";
 
 const AdminProducts = () => {
@@ -41,7 +41,8 @@ const AdminProducts = () => {
 
       {/* Products Table with Filters */}
       <div className="bg-white rounded-lg shadow">
-        <AdminProductFilters
+        <ProductFilters
+          variant="admin"
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           categoryFilter={categoryFilter}
@@ -49,8 +50,10 @@ const AdminProducts = () => {
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
           onAddProduct={handleAddProduct}
+          onExport={() => console.log("Export products")}
         />
-        <AdminProductTable
+        <ProductTable
+          variant="admin"
           products={products}
           onViewProduct={handleViewProduct}
           onApproveProduct={handleApproveProduct}

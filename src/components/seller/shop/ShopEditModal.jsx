@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { SHOP_TABS } from "../../constants/shopPageConstants";
+import { SHOP_TABS } from "../../../constants/shopPageConstants";
 
 const ShopEditModal = ({ isOpen, onClose, shopInfo, onSave }) => {
   const [tempShopInfo, setTempShopInfo] = useState({

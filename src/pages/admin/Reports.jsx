@@ -1,11 +1,11 @@
 import React from "react";
 import { useAdminReports } from "../../hooks/useAdminReports";
-import UserAnalytics from "../../components/reports/UserAnalytics";
-import OrderAnalytics from "../../components/reports/OrderAnalytics";
-import ProductAnalytics from "../../components/reports/ProductAnalytics";
-import FinancialReports from "../../components/reports/FinancialReports";
-import ViolationReports from "../../components/reports/ViolationReports";
-import ReportFilters from "../../components/reports/ReportFilters";
+import UserAnalytics from "../../components/admin/reports/UserAnalytics";
+import OrderAnalytics from "../../components/admin/reports/OrderAnalytics";
+import ProductAnalytics from "../../components/admin/reports/ProductAnalytics";
+import FinancialReports from "../../components/admin/reports/FinancialReports";
+import ViolationReports from "../../components/admin/reports/ViolationReports";
+import ReportFilters from "../../components/admin/reports/ReportFilters";
 
 const Reports = () => {
   const {

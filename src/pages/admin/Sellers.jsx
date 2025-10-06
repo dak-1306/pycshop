@@ -1,11 +1,11 @@
 import React from "react";
 import { useAdminSellers } from "../../hooks/useAdminSellers";
-import SellersStats from "../../components/seller/SellersStats";
-import SellersFilters from "../../components/seller/SellersFilters";
-import SellersTable from "../../components/seller/SellersTable";
-import SellerDetailModal from "../../components/seller/SellerDetailModal";
-import SellerActionModal from "../../components/seller/SellerActionModal";
-import DeleteModal from "../../components/modals/DeleteModal";
+import SellersStats from "../../components/admin/sellers/SellersStats";
+import SellersFilters from "../../components/admin/sellers/SellersFilters";
+import SellersTable from "../../components/admin/sellers/SellersTable";
+import SellerDetailModal from "../../components/admin/sellers/SellerDetailModal";
+import SellerActionModal from "../../components/admin/sellers/SellerActionModal";
+import DeleteModal from "../../components/common/DeleteModal";
 
 const Sellers = () => {
   const {

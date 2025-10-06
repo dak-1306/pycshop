@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import CollaboratorModal from "../modals/CollaboratorModal";
+import CollaboratorModal from "../seller/CollaboratorModal";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useShopInfo } from "../../hooks/useShopInfo";
 import NotificationPanel from "../common/NotificationPanel";

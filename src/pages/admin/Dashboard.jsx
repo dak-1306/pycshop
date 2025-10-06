@@ -1,8 +1,9 @@
 import React from "react";
-import AdminRecentOrdersTable from "../../components/dashboard/AdminRecentOrdersTable";
-import RecentUsersTable from "../../components/dashboard/RecentUsersTable";
-import AdminChartsSection from "../../components/dashboard/AdminChartsSection";
-import StatsOverview from "../../components/reports/StatsOverview";
+import RecentOrdersTable from "../../components/common/dashboard/RecentOrdersTable";
+import RecentUsersTable from "../../components/admin/dashboard/RecentUsersTable";
+import ChartsSection from "../../components/common/dashboard/ChartsSection";
+import StatsCards from "../../components/common/dashboard/StatsCards";
+import StatsOverview from "../../components/admin/reports/StatsOverview";
 import { useDashboard } from "../../hooks/useDashboard";
 import { useAdminReports } from "../../hooks/useAdminReports";
 
@@ -39,12 +40,38 @@ const Dashboard = () => {
       {/* System Overview */}
       <StatsOverview stats={overviewStats} />
 
+      {/* Stats Cards */}
+      <StatsCards
+        variant="admin"
+        stats={{
+          totalUsers: overviewStats?.totalUsers || 0,
+          totalOrders: overviewStats?.totalOrders || 0,
+          totalRevenue: overviewStats?.totalRevenue || 0,
+          totalProducts: overviewStats?.totalProducts || 0,
+        }}
+      />
+
       {/* Charts Section */}
-      <AdminChartsSection chartData={chartData} />
+      <ChartsSection variant="admin" />
 
       {/* Data Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
-        <AdminRecentOrdersTable recentOrders={recentOrders} />
+        <RecentOrdersTable
+          variant="admin"
+          orderData={recentOrders}
+          getStatusColor={(status) => {
+            switch (status) {
+              case "completed":
+                return "bg-green-100 text-green-800";
+              case "pending":
+                return "bg-yellow-100 text-yellow-800";
+              case "cancelled":
+                return "bg-red-100 text-red-800";
+              default:
+                return "bg-gray-100 text-gray-800";
+            }
+          }}
+        />
         <RecentUsersTable recentUsers={recentUsers} />
       </div>
     </div>

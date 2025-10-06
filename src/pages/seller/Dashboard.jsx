@@ -1,9 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import SellerLayout from "../../components/layout/SellerLayout";
-import StatsCards from "../../components/dashboard/StatsCards";
-import ChartsSection from "../../components/dashboard/ChartsSection";
-import RecentOrdersTable from "../../components/dashboard/RecentOrdersTable";
+import StatsCards from "../../components/common/dashboard/StatsCards";
+import ChartsSection from "../../components/common/dashboard/ChartsSection";
+import RecentOrdersTable from "../../components/common/dashboard/RecentOrdersTable";
 import { useDashboard } from "../../hooks/useDashboard";
 
 const Dashboard = () => {
@@ -13,13 +13,14 @@ const Dashboard = () => {
     <SellerLayout title="Dashboard">
       <div className="p-8">
         {/* Stats Cards */}
-        <StatsCards stats={stats} />
+        <StatsCards variant="seller" stats={stats} />
 
         {/* Charts Section */}
-        <ChartsSection />
+        <ChartsSection variant="seller" />
 
         {/* Recent Orders Table */}
         <RecentOrdersTable
+          variant="seller"
           orderData={orderData}
           getStatusColor={getStatusColor}
         />

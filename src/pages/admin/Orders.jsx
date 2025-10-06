@@ -1,10 +1,10 @@
 import React from "react";
-import OrderStats from "../../components/order/OrderStats";
-import AdminOrderFilters from "../../components/order/AdminOrderFilters";
-import AdminOrderTable from "../../components/order/AdminOrderTable";
-import OrderModal from "../../components/modals/OrderModal";
-import OrderDetailModal from "../../components/modals/OrderDetailModal";
-import DeleteModal from "../../components/modals/DeleteModal";
+import OrderStats from "../../components/common/order/OrderStats";
+import OrderFilters from "../../components/common/order/OrderFilters";
+import OrderTable from "../../components/common/order/OrderTable";
+import OrderModal from "../../components/admin/orders/OrderModal";
+import OrderDetailModal from "../../components/common/order/OrderDetailModal";
+import DeleteModal from "../../components/common/DeleteModal";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
 
 const AdminOrders = () => {
@@ -58,17 +58,18 @@ const AdminOrders = () => {
 
       {/* Orders Table with Filters */}
       <div className="bg-white rounded-lg shadow">
-        <AdminOrderFilters
-          searchValue={searchValue}
+        <OrderFilters
+          variant="admin"
+          searchTerm={searchValue}
           onSearchChange={setSearchValue}
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
           paymentFilter={paymentFilter}
           onPaymentChange={setPaymentFilter}
           onExport={handleExport}
-          onAddOrder={handleAddOrder}
         />
-        <AdminOrderTable
+        <OrderTable
+          variant="admin"
           orders={orders}
           onViewOrder={handleViewOrder}
           onEditOrder={handleEditOrder}

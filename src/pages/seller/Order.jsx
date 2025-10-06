@@ -1,12 +1,12 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import OrderModal from "../../components/modals/OrderModal";
-import DeleteModal from "../../components/modals/DeleteModal";
-import OrderDetailModal from "../../components/modals/OrderDetailModal";
-import OrderSearchBar from "../../components/order/OrderSearchBar";
-import OrderFilters from "../../components/order/OrderFilters";
-import OrderTable from "../../components/order/OrderTable";
-import OrderPagination from "../../components/order/OrderPagination";
+import OrderModal from "../../components/admin/orders/OrderModal";
+import DeleteModal from "../../components/common/DeleteModal";
+import OrderDetailModal from "../../components/common/order/OrderDetailModal";
+import OrderSearchBar from "../../components/common/order/OrderSearchBar";
+import OrderFilters from "../../components/common/order/OrderFilters";
+import OrderTable from "../../components/common/order/OrderTable";
+import OrderPagination from "../../components/common/order/OrderPagination";
 import { useOrders } from "../../hooks/useOrders";
 
 // CSS animations (giữ nguyên)
@@ -100,6 +100,7 @@ const Order = () => {
 
         {/* Orders Table */}
         <OrderTable
+          variant="seller"
           orders={orders}
           onViewOrder={handleViewOrder}
           onEditOrder={handleEditOrder}

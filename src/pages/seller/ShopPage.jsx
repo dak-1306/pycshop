@@ -1,12 +1,12 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import ProductModal from "../../components/modals/ProductModal";
-import ShopEditModal from "../../components/modals/ShopEditModal";
-import ShopHeader from "../../components/shop/ShopHeader";
-import ShopInfoCard from "../../components/shop/ShopInfoCard";
-import QuickStatsCard from "../../components/shop/QuickStatsCard";
-import FeaturedProducts from "../../components/shop/FeaturedProducts";
-import DeleteModal from "../../components/modals/DeleteModal";
+import ProductModal from "../../components/seller/product/ProductModal";
+import ShopEditModal from "../../components/seller/shop/ShopEditModal";
+import ShopHeader from "../../components/seller/shop/ShopHeader";
+import ShopInfoCard from "../../components/seller/shop/ShopInfoCard";
+import QuickStatsCard from "../../components/seller/shop/QuickStatsCard";
+import FeaturedProducts from "../../components/seller/shop/FeaturedProducts";
+import DeleteModal from "../../components/common/DeleteModal";
 import { useShopPage } from "../../hooks/useShopPage";
 
 const ShopPage = () => {

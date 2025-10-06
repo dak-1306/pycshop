@@ -1,12 +1,12 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import ProductModal from "../../components/modals/ProductModal";
-import DeleteModal from "../../components/modals/DeleteModal";
-import ProductDetailModal from "../../components/modals/ProductDetailModal";
-import SearchBar from "../../components/product/SearchBar";
-import ProductFilters from "../../components/product/ProductFilters";
-import ProductTable from "../../components/product/ProductTable";
-import Pagination from "../../components/product/Pagination";
+import ProductModal from "../../components/seller/product/ProductModal";
+import DeleteModal from "../../components/common/DeleteModal";
+import ProductDetailModal from "../../components/common/product/ProductDetailModal";
+import SearchBar from "../../components/seller/product/SearchBar";
+import ProductFilters from "../../components/common/product/ProductFilters";
+import ProductTable from "../../components/common/product/ProductTable";
+import Pagination from "../../components/common/product/Pagination";
 import ErrorDisplay from "../../components/common/ErrorDisplay";
 import EmptyState from "../../components/common/EmptyState";
 import { useProducts } from "../../hooks/useProducts";
@@ -146,6 +146,7 @@ const ManageProduct = () => {
           </div>
         ) : (
           <ProductTable
+            variant="seller"
             products={products}
             onViewProduct={handleViewProduct}
             onEditProduct={handleEditProduct}

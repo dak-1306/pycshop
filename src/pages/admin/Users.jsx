@@ -1,7 +1,7 @@
 import React from "react";
-import UserStats from "../../components/user/UserStats";
-import AdminUserFilters from "../../components/user/AdminUserFilters";
-import AdminUserTable from "../../components/user/AdminUserTable";
+import UserStats from "../../components/admin/user/UserStats";
+import AdminUserFilters from "../../components/admin/user/AdminUserFilters";
+import AdminUserTable from "../../components/admin/user/AdminUserTable";
 import { useAdminUsers } from "../../hooks/useAdminUsers";
 
 const AdminUsers = () => {

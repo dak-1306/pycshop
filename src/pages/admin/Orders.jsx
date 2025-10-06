@@ -2,7 +2,7 @@ import React from "react";
 import OrderStats from "../../components/common/order/OrderStats";
 import OrderFilters from "../../components/common/order/OrderFilters";
 import OrderTable from "../../components/common/order/OrderTable";
-import OrderModal from "../../components/admin/orders/OrderModal";
+import OrderModal from "../../components/common/modals/OrderModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
 import DeleteModal from "../../components/common/DeleteModal";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
@@ -82,11 +82,10 @@ const AdminOrders = () => {
       <OrderModal
         isOpen={showOrderModal}
         onClose={() => setShowOrderModal(false)}
-        mode={modalMode}
         order={selectedOrder}
-        orderForm={orderForm}
-        onOrderFormChange={setOrderForm}
-        onSave={handleSaveOrder}
+        variant="admin"
+        onUpdateStatus={handleUpdateOrderStatus}
+        onViewDetails={handleViewOrder}
       />
 
       {/* Order Detail Modal */}

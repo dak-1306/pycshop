@@ -1,6 +1,6 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import ProductModal from "../../components/seller/product/ProductModal";
+import ProductModal from "../../components/common/modals/ProductModal";
 import ShopEditModal from "../../components/seller/shop/ShopEditModal";
 import ShopHeader from "../../components/seller/shop/ShopHeader";
 import ShopInfoCard from "../../components/seller/shop/ShopInfoCard";
@@ -127,6 +127,7 @@ const ShopPage = () => {
           onProductChange={setCurrentProduct}
           onSave={handleSaveProduct}
           categories={categories}
+          variant="seller"
         />
 
         {/* Delete Modal */}

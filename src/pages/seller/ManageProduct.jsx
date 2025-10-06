@@ -1,9 +1,9 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import ProductModal from "../../components/seller/product/ProductModal";
+import ProductModal from "../../components/common/modals/ProductModal";
 import DeleteModal from "../../components/common/DeleteModal";
 import ProductDetailModal from "../../components/common/product/ProductDetailModal";
-import SearchBar from "../../components/seller/product/SearchBar";
+import SearchBar from "../../components/common/ui/SearchBar";
 import ProductFilters from "../../components/common/product/ProductFilters";
 import ProductTable from "../../components/common/product/ProductTable";
 import Pagination from "../../components/common/product/Pagination";
@@ -110,7 +110,11 @@ const ManageProduct = () => {
     <SellerLayout title="Manage Product">
       <div className="p-6 bg-gray-50 min-h-screen">
         {/* Search Bar */}
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+        <SearchBar
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          variant="seller"
+        />
 
         {/* Filters and Action Buttons */}
         <ProductFilters
@@ -175,6 +179,7 @@ const ManageProduct = () => {
           onProductChange={setCurrentProduct}
           onSave={handleSaveProduct}
           categories={categoryNames} // Use categories from API
+          variant="seller"
           onImageUpload={handleImageUpload}
           onRemoveImage={handleRemoveImage}
           onSetFeaturedImage={handleSetFeaturedImage}

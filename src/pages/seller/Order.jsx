@@ -1,6 +1,6 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import OrderModal from "../../components/admin/orders/OrderModal";
+import OrderModal from "../../components/common/modals/OrderModal";
 import DeleteModal from "../../components/common/DeleteModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
 import OrderSearchBar from "../../components/common/order/OrderSearchBar";
@@ -120,12 +120,12 @@ const Order = () => {
         <OrderModal
           isOpen={showOrderModal}
           onClose={handleCloseOrderModal}
-          mode={modalMode}
           order={currentOrder}
-          onOrderChange={setCurrentOrder}
-          onSave={handleSaveOrder}
-          categories={orderCategories}
-          orderStatuses={orderStatuses.filter((f) => f !== "Tất cả")}
+          variant="seller"
+          onUpdateStatus={(orderId, status) =>
+            console.log("Update status:", orderId, status)
+          }
+          onViewDetails={handleViewOrder}
         />
 
         <OrderDetailModal

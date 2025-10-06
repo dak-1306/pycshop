@@ -13,11 +13,31 @@ const Dashboard = () => {
     recentUsers,
     chartData,
     isLoading: dashboardLoading,
+    error: dashboardError,
   } = useDashboard();
 
-  const { overviewStats, isLoading: reportsLoading } = useAdminReports();
+  const {
+    overviewStats,
+    isLoading: reportsLoading,
+    error: reportsError,
+  } = useAdminReports();
 
-  const isLoading = dashboardLoading || reportsLoading;
+  // Fallback data when API fails
+  const fallbackStats = {
+    totalUsers: 0,
+    totalOrders: 0,
+    totalRevenue: 0,
+    totalProducts: 0,
+    activeUsers: 0,
+    pendingOrders: 0,
+  };
+
+  const safeOverviewStats = overviewStats || fallbackStats;
+  const isLoading =
+    (dashboardLoading || reportsLoading) && !dashboardError && !reportsError;
+
+  // Show error notification if APIs fail
+  const hasErrors = dashboardError || reportsError;
 
   if (isLoading) {
     return (
@@ -37,28 +57,41 @@ const Dashboard = () => {
         </p>
       </div>
 
+      {/* Error Notification */}
+      {hasErrors && (
+        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center gap-2">
+            <span className="text-red-600">⚠️</span>
+            <h3 className="text-red-800 font-semibold">Lỗi kết nối API</h3>
+          </div>
+          <p className="text-red-700 text-sm mt-1">
+            Không thể kết nối đến server. Hiển thị dữ liệu mặc định.
+          </p>
+        </div>
+      )}
+
       {/* System Overview */}
-      <StatsOverview stats={overviewStats} />
+      <StatsOverview stats={safeOverviewStats} />
 
       {/* Stats Cards */}
       <StatsCards
         variant="admin"
         stats={{
-          totalUsers: overviewStats?.totalUsers || 0,
-          totalOrders: overviewStats?.totalOrders || 0,
-          totalRevenue: overviewStats?.totalRevenue || 0,
-          totalProducts: overviewStats?.totalProducts || 0,
+          totalUsers: safeOverviewStats.totalUsers,
+          totalOrders: safeOverviewStats.totalOrders,
+          totalRevenue: safeOverviewStats.totalRevenue,
+          totalProducts: safeOverviewStats.totalProducts,
         }}
       />
 
       {/* Charts Section */}
-      <ChartsSection variant="admin" />
+      <ChartsSection variant="admin" chartData={chartData} />
 
       {/* Data Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
         <RecentOrdersTable
           variant="admin"
-          orderData={recentOrders}
+          orderData={recentOrders || []}
           getStatusColor={(status) => {
             switch (status) {
               case "completed":
@@ -72,7 +105,7 @@ const Dashboard = () => {
             }
           }}
         />
-        <RecentUsersTable recentUsers={recentUsers} />
+        <RecentUsersTable recentUsers={recentUsers || []} />
       </div>
     </div>
   );

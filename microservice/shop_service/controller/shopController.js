@@ -451,26 +451,51 @@ export const becomeSeller = async (req, res) => {
     const connection = await db.getConnection();
 
     try {
+      console.log("🔄 [BECOME_SELLER] Starting transaction...");
+
+      // Set connection timeout
+      await connection.query("SET SESSION innodb_lock_wait_timeout = 10");
+
       // Begin transaction
       await connection.beginTransaction();
 
+      // Check if user already has a shop before proceeding
+      const [existingShopCheck] = await connection.execute(
+        "SELECT ID_CuaHang FROM NguoiDung WHERE ID_NguoiDung = ? FOR UPDATE",
+        [userId]
+      );
+
+      if (existingShopCheck[0].ID_CuaHang) {
+        throw new Error("User already has a shop");
+      }
+
       // Update user role to seller first
+      console.log("🔄 [BECOME_SELLER] Updating user role...");
       await connection.execute(
         "UPDATE NguoiDung SET VaiTro = ? WHERE ID_NguoiDung = ?",
         ["seller", userId]
       );
 
-      // Create shop
-      const shopId = await Shop.createShop(userId, {
-        name: shopName,
-        description: shopDescription,
-        category_id: categoryId,
-        address: shopAddress,
-        phone: shopPhone,
-      });
+      // Create shop directly in this transaction (not using Shop.createShop to avoid nested transactions)
+      console.log("🔄 [BECOME_SELLER] Creating shop...");
+      const [shopResult] = await connection.execute(
+        `INSERT INTO CuaHang (TenCuaHang, ID_DanhMuc, DiaChiCH, SoDienThoaiCH, NgayCapNhat)
+         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+        [shopName, categoryId, shopAddress, shopPhone]
+      );
+
+      const shopId = shopResult.insertId;
+
+      // Update user to link with shop
+      console.log("🔄 [BECOME_SELLER] Linking shop to user...");
+      await connection.execute(
+        "UPDATE NguoiDung SET ID_CuaHang = ? WHERE ID_NguoiDung = ?",
+        [shopId, userId]
+      );
 
       // Commit transaction
       await connection.commit();
+      console.log("✅ [BECOME_SELLER] Transaction committed successfully");
 
       // Generate new token with seller role
       const token = jwt.sign(
@@ -500,17 +525,45 @@ export const becomeSeller = async (req, res) => {
         },
       });
     } catch (transactionError) {
+      console.error("🔄 [BECOME_SELLER] Transaction error:", transactionError);
+
       // Rollback on error
-      await connection.rollback();
+      try {
+        await connection.rollback();
+        console.log("🔄 [BECOME_SELLER] Transaction rolled back");
+      } catch (rollbackError) {
+        console.error("❌ [BECOME_SELLER] Rollback error:", rollbackError);
+      }
+
+      // If it's a lock timeout, log the error
+      if (transactionError.code === "ER_LOCK_WAIT_TIMEOUT") {
+        console.log(
+          "🔍 [BECOME_SELLER] Lock timeout detected - system may be busy"
+        );
+      }
+
       throw transactionError;
     } finally {
       connection.release();
+      console.log("🔄 [BECOME_SELLER] Connection released");
     }
   } catch (error) {
     console.error("❌ [BECOME_SELLER] Error:", error);
+
+    let errorMessage = "Lỗi server khi trở thành seller";
+
+    // Provide user-friendly error messages
+    if (error.code === "ER_LOCK_WAIT_TIMEOUT") {
+      errorMessage = "Hệ thống đang bận, vui lòng thử lại sau ít phút";
+    } else if (error.message.includes("already has a shop")) {
+      errorMessage = "Bạn đã có cửa hàng rồi";
+    } else if (error.message.includes("User not found")) {
+      errorMessage = "Thông tin người dùng không hợp lệ";
+    }
+
     res.status(500).json({
       success: false,
-      message: "Lỗi server khi trở thành seller",
+      message: errorMessage,
       error: error.message,
     });
   }

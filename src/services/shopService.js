@@ -48,8 +48,12 @@ class ShopService {
   // Become seller (from buyer to seller with shop creation)
   static async becomeSeller(shopData) {
     try {
+      console.log("ShopService - becomeSeller called with:", shopData);
       const response = await apiService.post("/shops/become-seller", shopData);
-      return response.data;
+      console.log("ShopService - becomeSeller response:", response);
+
+      // apiService returns direct JSON, not wrapped in .data
+      return response;
     } catch (error) {
       console.error("ShopService - becomeSeller error:", error);
       throw error;

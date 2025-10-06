@@ -94,23 +94,27 @@ export const authService = {
     return user && user.role === "admin";
   },
 
-  // Đăng ký trở thành seller
-  becomeSeller: async (sellerData) => {
-    try {
-      const response = await api.post("/auth/become-seller", sellerData);
+  // Set new token
+  setToken: (token) => {
+    if (token) {
+      localStorage.setItem("token", token);
+    }
+  },
 
-      // Update user info and token in localStorage with new role
-      if (response.token) {
-        localStorage.setItem("token", response.token);
-      }
-      if (response.user) {
-        localStorage.setItem("user", JSON.stringify(response.user));
-      }
+  // Update user info in localStorage
+  updateUser: (user) => {
+    if (user) {
+      localStorage.setItem("user", JSON.stringify(user));
+    }
+  },
 
-      return response;
-    } catch (error) {
-      console.error("Become seller error:", error);
-      throw error;
+  // Update both token and user
+  updateAuthData: (authData) => {
+    if (authData.token) {
+      authService.setToken(authData.token);
+    }
+    if (authData.user) {
+      authService.updateUser(authData.user);
     }
   },
 };

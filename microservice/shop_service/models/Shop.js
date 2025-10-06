@@ -54,14 +54,50 @@ class Shop {
     }
   }
 
-  // Create new shop
-  static async createShop(sellerId, shopData) {
-    const connection = await db.getConnection();
+  // Create new shop with retry mechanism
+  static async createShop(sellerId, shopData, retryCount = 0) {
+    const maxRetries = 3;
+    const retryDelay = 1000; // 1 second
+
+    let connection;
 
     try {
+      console.log(
+        `[SHOP] Creating shop for seller ${sellerId}, attempt ${retryCount + 1}`
+      );
+
+      // Get connection with timeout settings
+      connection = await db.getConnection();
+
+      // Set session variables for this connection
+      await connection.query("SET SESSION innodb_lock_wait_timeout = 10");
+      await connection.query("SET SESSION autocommit = 0");
+
       await connection.beginTransaction();
 
       const { name, description, category_id, address, phone } = shopData;
+
+      // Check if user already has a shop
+      const checkUserQuery = `
+        SELECT ID_CuaHang, HoTen 
+        FROM NguoiDung 
+        WHERE ID_NguoiDung = ? 
+        FOR UPDATE
+      `;
+
+      const [userRows] = await connection.execute(checkUserQuery, [sellerId]);
+
+      if (userRows.length === 0) {
+        throw new Error("User not found");
+      }
+
+      if (userRows[0].ID_CuaHang) {
+        throw new Error("User already has a shop");
+      }
+
+      console.log(
+        `[SHOP] User ${userRows[0].HoTen} is eligible to create shop`
+      );
 
       // Insert new shop
       const insertShopQuery = `
@@ -77,24 +113,65 @@ class Shop {
       ]);
 
       const shopId = shopResult.insertId;
+      console.log(`[SHOP] Shop created with ID: ${shopId}`);
 
       // Update user to link with shop
       const updateUserQuery = `
         UPDATE NguoiDung 
         SET ID_CuaHang = ? 
-        WHERE ID_NguoiDung = ?
+        WHERE ID_NguoiDung = ? AND ID_CuaHang IS NULL
       `;
 
-      await connection.execute(updateUserQuery, [shopId, sellerId]);
+      const [updateResult] = await connection.execute(updateUserQuery, [
+        shopId,
+        sellerId,
+      ]);
+
+      if (updateResult.affectedRows === 0) {
+        throw new Error(
+          "Failed to link shop to user - user may already have a shop"
+        );
+      }
+
+      console.log(`[SHOP] User ${sellerId} linked to shop ${shopId}`);
 
       await connection.commit();
+      console.log(`[SHOP] Transaction committed successfully`);
+
       return shopId;
     } catch (error) {
-      await connection.rollback();
-      console.error("[SHOP] Error in createShop:", error);
+      console.error(
+        `[SHOP] Error in createShop (attempt ${retryCount + 1}):`,
+        error
+      );
+
+      if (connection) {
+        try {
+          await connection.rollback();
+          console.log(`[SHOP] Transaction rolled back`);
+        } catch (rollbackError) {
+          console.error(`[SHOP] Rollback error:`, rollbackError);
+        }
+      }
+
+      // Retry for lock timeout errors
+      if (error.code === "ER_LOCK_WAIT_TIMEOUT" && retryCount < maxRetries) {
+        console.log(
+          `[SHOP] Retrying in ${retryDelay}ms... (${
+            retryCount + 1
+          }/${maxRetries})`
+        );
+
+        await new Promise((resolve) => setTimeout(resolve, retryDelay));
+        return this.createShop(sellerId, shopData, retryCount + 1);
+      }
+
       throw error;
     } finally {
-      connection.release();
+      if (connection) {
+        connection.release();
+        console.log(`[SHOP] Connection released`);
+      }
     }
   }
 

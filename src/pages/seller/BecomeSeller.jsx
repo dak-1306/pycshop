@@ -127,17 +127,26 @@ const BecomeSeller = () => {
 
       const result = await ShopService.becomeSeller(formData);
       console.log("becomeSeller result:", result);
+      console.log("result.success:", result.success);
+      console.log("result type:", typeof result);
+      console.log("result keys:", Object.keys(result));
 
       if (result.success) {
-        // Update user context with new token if provided
+        // Update user context with new token and user info
         if (result.token) {
           authService.setToken(result.token);
         }
+        if (result.user) {
+          authService.updateUser(result.user);
+        }
 
+        console.log("Auth data updated successfully");
         alert("Đăng ký thành seller thành công!");
+
         // Redirect to seller dashboard
         navigate("/seller/dashboard");
       } else {
+        console.error("becomeSeller failed:", result);
         alert(result.message || "Có lỗi xảy ra trong quá trình đăng ký");
       }
     } catch (error) {

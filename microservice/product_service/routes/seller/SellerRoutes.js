@@ -17,6 +17,11 @@ import {
   addProductImages,
   getProductImages,
   deleteProductImage,
+  // Order management functions
+  getSellerOrders,
+  getOrderById,
+  updateOrderStatus,
+  getOrderStats,
 } from "../../controller/seller/sellerController.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -86,5 +91,11 @@ router.use("/uploads", express.static(path.join(__dirname, "../../uploads")));
 
 // Categories for product creation
 router.get("/categories", sellerAuthMiddleware, getCategories);
+
+// Order management routes (require seller role)
+router.get("/orders", sellerAuthMiddleware, getSellerOrders);
+router.get("/orders/stats", sellerAuthMiddleware, getOrderStats);
+router.get("/orders/:id", sellerAuthMiddleware, getOrderById);
+router.put("/orders/:id/status", sellerAuthMiddleware, updateOrderStatus);
 
 export default router;

@@ -746,3 +746,139 @@ export const getStockHistory = async (req, res) => {
     });
   }
 };
+
+// ================== ORDER MANAGEMENT FUNCTIONS ==================
+
+// Get seller's orders
+export const getSellerOrders = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const { page = 1, limit = 10, search = "", status = "" } = req.query;
+
+    console.log(`[SELLER_CONTROLLER] Get orders for seller ${sellerId}`);
+
+    const orders = await Seller.getSellerOrders(sellerId, {
+      page: parseInt(page),
+      limit: parseInt(limit),
+      search,
+      status: status || null,
+    });
+
+    res.json({
+      success: true,
+      data: orders,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+      },
+    });
+  } catch (error) {
+    console.error("[SELLER_CONTROLLER] Error in getSellerOrders:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy danh sách đơn hàng",
+      error: error.message,
+    });
+  }
+};
+
+// Get order by ID
+export const getOrderById = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const { id } = req.params;
+
+    console.log(`[SELLER_CONTROLLER] Get order ${id} for seller ${sellerId}`);
+
+    const order = await Seller.getOrderById(id, sellerId);
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đơn hàng",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: order,
+    });
+  } catch (error) {
+    console.error("[SELLER_CONTROLLER] Error in getOrderById:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy thông tin đơn hàng",
+      error: error.message,
+    });
+  }
+};
+
+// Update order status
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    console.log(
+      `[SELLER_CONTROLLER] Update order ${id} status to ${status} for seller ${sellerId}`
+    );
+
+    // Validate status
+    const validStatuses = [
+      "pending",
+      "confirmed",
+      "shipping",
+      "delivered",
+      "cancelled",
+    ];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Trạng thái đơn hàng không hợp lệ",
+      });
+    }
+
+    const updated = await Seller.updateOrderStatus(id, sellerId, status);
+    if (!updated) {
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy đơn hàng hoặc bạn không có quyền cập nhật",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Cập nhật trạng thái đơn hàng thành công",
+    });
+  } catch (error) {
+    console.error("[SELLER_CONTROLLER] Error in updateOrderStatus:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi cập nhật trạng thái đơn hàng",
+      error: error.message,
+    });
+  }
+};
+
+// Get order statistics
+export const getOrderStats = async (req, res) => {
+  try {
+    const sellerId = req.user.id;
+
+    console.log(`[SELLER_CONTROLLER] Get order stats for seller ${sellerId}`);
+
+    const stats = await Seller.getOrderStats(sellerId);
+
+    res.json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    console.error("[SELLER_CONTROLLER] Error in getOrderStats:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy thống kê đơn hàng",
+      error: error.message,
+    });
+  }
+};

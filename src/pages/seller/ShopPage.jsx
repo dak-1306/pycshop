@@ -1,6 +1,7 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
 import ProductModal from "../../components/common/modals/ProductModal";
+import ProductDetailModal from "../../components/common/product/ProductDetailModal";
 import ShopEditModal from "../../components/seller/shop/ShopEditModal";
 import ShopHeader from "../../components/seller/shop/ShopHeader";
 import ShopInfoCard from "../../components/seller/shop/ShopInfoCard";
@@ -51,6 +52,7 @@ const ShopPage = () => {
 
     // Product Operations
     handleAddProduct,
+    handleViewProduct,
     handleEditProduct,
     handleDeleteProduct,
     handleSaveProduct,
@@ -113,6 +115,7 @@ const ShopPage = () => {
           formatPrice={formatPrice}
           getStatusColor={getStatusColor}
           onAddProduct={handleAddProduct}
+          onViewProduct={handleViewProduct} // Sử dụng handleViewProduct để mở ProductDetailModal
           onEditProduct={handleEditProduct}
           onDeleteProduct={handleDeleteProduct}
           onResetFilters={handleResetFilters}
@@ -126,8 +129,17 @@ const ShopPage = () => {
           product={currentProduct}
           onProductChange={setCurrentProduct}
           onSave={handleSaveProduct}
-          categories={categories}
+          categories={categories.map((cat) => cat.name || cat)} // Convert to array of strings
           variant="seller"
+        />
+
+        {/* Product Detail Modal - same as ManageProduct */}
+        <ProductDetailModal
+          isOpen={currentProduct && modalMode === "view"}
+          onClose={() => setCurrentProduct(null)}
+          product={currentProduct}
+          onEdit={handleEditProduct}
+          onDelete={handleDeleteProduct}
         />
 
         {/* Delete Modal */}

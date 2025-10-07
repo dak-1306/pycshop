@@ -1,39 +1,55 @@
-import React, { useState } from "react";
-import { SHOP_TABS } from "../../../constants/shopPageConstants";
+import React, { useState, useEffect } from "react";
+import ShopService from "../../../services/shopService";
 
 const ShopEditModal = ({ isOpen, onClose, shopInfo, onSave }) => {
   const [tempShopInfo, setTempShopInfo] = useState({
     name: shopInfo.name || "",
     description: shopInfo.description || "",
-    email: shopInfo.owner_email || shopInfo.email || "",
+    category_id: shopInfo.category_id || "",
     phone: shopInfo.phone || "",
     address: shopInfo.address || "",
-    website: shopInfo.website || "",
-    socialMedia: {
-      facebook: shopInfo.socialMedia?.facebook || "",
-      instagram: shopInfo.socialMedia?.instagram || "",
-      zalo: shopInfo.socialMedia?.zalo || "",
-    },
-    policies: {
-      returnPolicy: shopInfo.policies?.returnPolicy || "",
-      shippingPolicy: shopInfo.policies?.shippingPolicy || "",
-      warrantyPolicy: shopInfo.policies?.warrantyPolicy || "",
-    },
   });
 
-  const [activeTab, setActiveTab] = useState("basic");
+  const [categories, setCategories] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  // Load categories when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      loadCategories();
+      // Reset form with current shop info
+      setTempShopInfo({
+        name: shopInfo.name || "",
+        description: shopInfo.description || "",
+        category_id: shopInfo.category_id || "",
+        phone: shopInfo.phone || "",
+        address: shopInfo.address || "",
+      });
+    }
+  }, [isOpen, shopInfo]);
+
+  const loadCategories = async () => {
+    try {
+      setLoadingCategories(true);
+      const response = await ShopService.getCategories();
+      if (response && response.success) {
+        setCategories(response.categories || []);
+      }
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     const updatedShopInfo = {
       name: tempShopInfo.name,
       description: tempShopInfo.description,
-      email: tempShopInfo.email,
+      category_id: parseInt(tempShopInfo.category_id),
       phone: tempShopInfo.phone,
       address: tempShopInfo.address,
-      website: tempShopInfo.website,
-      socialMedia: tempShopInfo.socialMedia,
-      policies: tempShopInfo.policies,
     };
     onSave(updatedShopInfo);
   };
@@ -42,16 +58,6 @@ const ShopEditModal = ({ isOpen, onClose, shopInfo, onSave }) => {
     setTempShopInfo((prev) => ({
       ...prev,
       [field]: value,
-    }));
-  };
-
-  const handleNestedInputChange = (parent, field, value) => {
-    setTempShopInfo((prev) => ({
-      ...prev,
-      [parent]: {
-        ...prev[parent],
-        [field]: value,
-      },
     }));
   };
 
@@ -96,290 +102,118 @@ const ShopEditModal = ({ isOpen, onClose, shopInfo, onSave }) => {
           </div>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="px-6 pt-4 border-b border-gray-200 flex-shrink-0">
-          <div className="flex space-x-1">
-            {SHOP_TABS.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-t-lg font-medium text-sm transition-all ${
-                  activeTab === tab.id
-                    ? "bg-orange-50 text-orange-600 border-b-2 border-orange-500"
-                    : "text-gray-600 hover:text-gray-800 hover:bg-gray-50"
-                }`}
-              >
-                <span>{tab.icon}</span>
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Modal Body */}
         <div className="flex-1 overflow-y-auto p-6">
           <form onSubmit={handleSubmit}>
-            {/* Basic Information Tab */}
-            {activeTab === "basic" && (
-              <div className="space-y-5">
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">🏷️</span>
-                    </span>
-                    Tên shop *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={tempShopInfo.name}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="VD: My Awesome Shop"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">📝</span>
-                    </span>
-                    Mô tả shop *
-                  </label>
-                  <textarea
-                    rows={4}
-                    required
-                    value={tempShopInfo.description}
-                    onChange={(e) =>
-                      handleInputChange("description", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="Mô tả chi tiết về shop của bạn, sản phẩm chính, thế mạnh..."
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Mô tả này sẽ hiển thị trên trang shop của bạn
-                  </p>
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">🌐</span>
-                    </span>
-                    Website (tùy chọn)
-                  </label>
-                  <input
-                    type="url"
-                    value={tempShopInfo.website}
-                    onChange={(e) =>
-                      handleInputChange("website", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="https://yourwebsite.com"
-                  />
-                </div>
+            <div className="space-y-5">
+              {/* Shop Name */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+                  <span className="w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-md flex items-center justify-center">
+                    <span className="text-white text-xs">🏷️</span>
+                  </span>
+                  Tên shop *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={tempShopInfo.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
+                  placeholder="VD: My Awesome Shop"
+                />
               </div>
-            )}
 
-            {/* Contact Information Tab */}
-            {activeTab === "contact" && (
-              <div className="space-y-5">
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-red-500 to-pink-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">📧</span>
-                    </span>
-                    Email liên hệ *
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={tempShopInfo.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="contact@yourshop.com"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">📱</span>
-                    </span>
-                    Số điện thoại *
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    value={tempShopInfo.phone}
-                    onChange={(e) => handleInputChange("phone", e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="+84 123 456 789"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-green-500 to-teal-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">📍</span>
-                    </span>
-                    Địa chỉ *
-                  </label>
-                  <textarea
-                    rows={3}
-                    required
-                    value={tempShopInfo.address}
-                    onChange={(e) =>
-                      handleInputChange("address", e.target.value)
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="Địa chỉ chi tiết của shop"
-                  />
-                </div>
+              {/* Shop Description */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+                  <span className="w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-md flex items-center justify-center">
+                    <span className="text-white text-xs">📝</span>
+                  </span>
+                  Mô tả shop *
+                </label>
+                <textarea
+                  rows={4}
+                  required
+                  value={tempShopInfo.description}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
+                  placeholder="Mô tả chi tiết về shop của bạn, sản phẩm chính, thế mạnh..."
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Mô tả này sẽ hiển thị trên trang shop của bạn
+                </p>
               </div>
-            )}
 
-            {/* Social Media Tab */}
-            {activeTab === "social" && (
-              <div className="space-y-5">
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-blue-600 to-blue-700 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">📘</span>
-                    </span>
-                    Facebook
-                  </label>
-                  <input
-                    type="url"
-                    value={tempShopInfo.socialMedia.facebook}
-                    onChange={(e) =>
-                      handleNestedInputChange(
-                        "socialMedia",
-                        "facebook",
-                        e.target.value
-                      )
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="https://facebook.com/yourshop"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-pink-500 to-rose-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">📸</span>
-                    </span>
-                    Instagram
-                  </label>
-                  <input
-                    type="text"
-                    value={tempShopInfo.socialMedia.instagram}
-                    onChange={(e) =>
-                      handleNestedInputChange(
-                        "socialMedia",
-                        "instagram",
-                        e.target.value
-                      )
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="@yourshop"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-blue-400 to-blue-500 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">💬</span>
-                    </span>
-                    Zalo
-                  </label>
-                  <input
-                    type="text"
-                    value={tempShopInfo.socialMedia.zalo}
-                    onChange={(e) =>
-                      handleNestedInputChange(
-                        "socialMedia",
-                        "zalo",
-                        e.target.value
-                      )
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="Số Zalo để khách hàng liên hệ"
-                  />
-                </div>
+              {/* Category */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+                  <span className="w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded-md flex items-center justify-center">
+                    <span className="text-white text-xs">�</span>
+                  </span>
+                  Danh mục chính *
+                </label>
+                <select
+                  required
+                  value={tempShopInfo.category_id}
+                  onChange={(e) =>
+                    handleInputChange("category_id", e.target.value)
+                  }
+                  disabled={loadingCategories}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800 disabled:bg-gray-100"
+                >
+                  <option value="">
+                    {loadingCategories ? "Đang tải..." : "Chọn danh mục"}
+                  </option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+                <p className="text-xs text-gray-500 mt-1">
+                  Danh mục chính của shop giúp khách hàng dễ tìm thấy
+                </p>
               </div>
-            )}
 
-            {/* Policies Tab */}
-            {activeTab === "policies" && (
-              <div className="space-y-5">
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-green-500 to-emerald-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">🔄</span>
-                    </span>
-                    Chính sách đổi trả
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={tempShopInfo.policies.returnPolicy}
-                    onChange={(e) =>
-                      handleNestedInputChange(
-                        "policies",
-                        "returnPolicy",
-                        e.target.value
-                      )
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="Mô tả chính sách đổi trả của shop"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">🚚</span>
-                    </span>
-                    Chính sách giao hàng
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={tempShopInfo.policies.shippingPolicy}
-                    onChange={(e) =>
-                      handleNestedInputChange(
-                        "policies",
-                        "shippingPolicy",
-                        e.target.value
-                      )
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="Mô tả chính sách giao hàng của shop"
-                  />
-                </div>
-
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                    <span className="w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded-md flex items-center justify-center">
-                      <span className="text-white text-xs">🛡️</span>
-                    </span>
-                    Chính sách bảo hành
-                  </label>
-                  <textarea
-                    rows={3}
-                    value={tempShopInfo.policies.warrantyPolicy}
-                    onChange={(e) =>
-                      handleNestedInputChange(
-                        "policies",
-                        "warrantyPolicy",
-                        e.target.value
-                      )
-                    }
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
-                    placeholder="Mô tả chính sách bảo hành của shop"
-                  />
-                </div>
+              {/* Phone */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+                  <span className="w-6 h-6 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-md flex items-center justify-center">
+                    <span className="text-white text-xs">�</span>
+                  </span>
+                  Số điện thoại *
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={tempShopInfo.phone}
+                  onChange={(e) => handleInputChange("phone", e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
+                  placeholder="+84 123 456 789"
+                />
               </div>
-            )}
+
+              {/* Address */}
+              <div>
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
+                  <span className="w-6 h-6 bg-gradient-to-r from-green-500 to-teal-600 rounded-md flex items-center justify-center">
+                    <span className="text-white text-xs">�</span>
+                  </span>
+                  Địa chỉ *
+                </label>
+                <textarea
+                  rows={3}
+                  required
+                  value={tempShopInfo.address}
+                  onChange={(e) => handleInputChange("address", e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all bg-white shadow-sm font-medium text-gray-800"
+                  placeholder="Địa chỉ chi tiết của shop"
+                />
+              </div>
+            </div>
 
             {/* Tips Section */}
             <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
@@ -397,9 +231,7 @@ const ShopEditModal = ({ isOpen, onClose, shopInfo, onSave }) => {
                   vụ
                 </li>
                 <li>• Thông tin liên hệ chính xác giúp tăng độ tin cậy</li>
-                <li>
-                  • Chính sách rõ ràng giúp tránh hiểu nhầm với khách hàng
-                </li>
+                <li>• Chọn danh mục chính xác để tăng khả năng tìm thấy</li>
               </ul>
             </div>
           </form>

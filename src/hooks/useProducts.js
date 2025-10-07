@@ -212,57 +212,59 @@ export const useProducts = () => {
       setCurrentProduct({
         ...product,
         price: product.price.replace(/,/g, ""), // Remove commas for editing
-        addStock: "", // Initialize add stock field for editing
+        stock: product.quantity, // Ensure stock field exists for edit
       });
       setShowProductModal(true);
     }
   };
 
-  const handleSaveProduct = async () => {
+  const handleSaveProduct = async (productData = null) => {
+    // Use product data from modal (if provided) or current product
+    const productToSave = productData || currentProduct;
+
     // Different validation for add vs edit mode
     const isValidForAdd =
       modalMode === "add" &&
-      currentProduct.name &&
-      currentProduct.price &&
-      currentProduct.quantity &&
-      currentProduct.category;
+      productToSave.name &&
+      productToSave.price &&
+      (productToSave.quantity || productToSave.stock) &&
+      productToSave.category;
 
     const isValidForEdit =
       modalMode === "edit" &&
-      currentProduct.name &&
-      currentProduct.price &&
-      currentProduct.category &&
-      (currentProduct.quantity || currentProduct.addStock);
+      productToSave.name &&
+      productToSave.price &&
+      productToSave.category;
 
     if (!isValidForAdd && !isValidForEdit) {
-      console.log("[useProducts] Validation failed:", currentProduct);
+      console.log("[useProducts] Validation failed:", productToSave);
       alert("😱 Vui lòng điền đầy đủ thông tin!");
       return;
     }
 
     try {
       if (modalMode === "add") {
-        console.log("[useProducts] Adding new product:", currentProduct);
+        console.log("[useProducts] Adding new product:", productToSave);
 
         // Find category ID from category name
         const categoryId =
-          categories.find((cat) => cat.name === currentProduct.category)?.id ||
-          currentProduct.categoryId ||
+          categories.find((cat) => cat.name === productToSave.category)?.id ||
+          productToSave.categoryId ||
           1;
 
         const newProduct = await sellerProductService.addProduct({
-          tenSanPham: currentProduct.name,
-          moTa: currentProduct.description || "",
-          gia: currentProduct.price,
-          tonKho: Number(currentProduct.quantity),
+          tenSanPham: productToSave.name,
+          moTa: productToSave.description || "",
+          gia: productToSave.price,
+          tonKho: Number(productToSave.quantity || productToSave.stock),
           danhMuc: categoryId, // Use category ID for backend
-          trangThai: currentProduct.status || "active",
+          trangThai: productToSave.status || "active",
         });
 
         console.log("[useProducts] Product created successfully:", newProduct);
 
         // Upload images if any files were selected
-        if (currentProduct.imageFiles && currentProduct.imageFiles.length > 0) {
+        if (productToSave.imageFiles && productToSave.imageFiles.length > 0) {
           console.log(
             "[useProducts] Uploading images for new product:",
             newProduct.data.productId
@@ -271,7 +273,7 @@ export const useProducts = () => {
             const imageUploadResult =
               await sellerProductService.uploadProductImages(
                 newProduct.data.productId,
-                currentProduct.imageFiles
+                productToSave.imageFiles
               );
             console.log(
               "[useProducts] Images uploaded successfully:",
@@ -289,46 +291,40 @@ export const useProducts = () => {
           alert("🎉 Thêm sản phẩm thành công!");
         }
       } else {
-        console.log("[useProducts] Updating product:", currentProduct);
-
-        // In edit mode, calculate new quantity by adding addStock to existing quantity
-        const currentQuantity = Number(currentProduct.quantity) || 0;
-        const addStock = Number(currentProduct.addStock) || 0;
-        const newQuantity =
-          addStock > 0 ? currentQuantity + addStock : currentQuantity;
+        console.log("[useProducts] Updating product:", productToSave);
 
         // Find category ID from category name
         const categoryId =
-          categories.find((cat) => cat.name === currentProduct.category)?.id ||
-          currentProduct.categoryId ||
+          categories.find((cat) => cat.name === productToSave.category)?.id ||
+          productToSave.categoryId ||
           1;
 
-        // Prepare image URLs for backend
-        const imageUrls = currentProduct.images || [];
-
-        await sellerProductService.updateProduct(currentProduct.id, {
-          tenSanPham: currentProduct.name,
-          gia: currentProduct.price,
-          tonKho: newQuantity,
-          danhMuc: categoryId, // Use category ID for backend
-          moTa: currentProduct.description || "",
-          trangThai: currentProduct.status || "active",
+        // Update basic product info (NO tonKho field)
+        await sellerProductService.updateProduct(productToSave.id, {
+          tenSanPham: productToSave.name,
+          gia: productToSave.price,
+          danhMuc: categoryId,
+          moTa: productToSave.description || "",
+          trangThai: productToSave.status || "active",
         });
 
-        // If we added stock, also call the stock management API
-        if (addStock > 0) {
-          await sellerProductService.addStock(
-            currentProduct.id,
-            addStock,
-            "import"
-          );
-        }
+        // Check if we need to add stock (additionalStock from ProductModal)
+        const additionalStock = Number(productToSave.additionalStock) || 0;
 
-        alert(
-          addStock > 0
-            ? `🎉 Cập nhật sản phẩm thành công! Đã thêm ${addStock} sản phẩm vào kho.`
-            : `🎉 Cập nhật sản phẩm thành công!`
-        );
+        if (additionalStock > 0) {
+          console.log(
+            `[useProducts] Adding ${additionalStock} stock to product ${productToSave.id}`
+          );
+          await sellerProductService.addStock(productToSave.id, {
+            soLuongThayDoi: additionalStock,
+            hanhDong: "import",
+          });
+          alert(
+            `🎉 Cập nhật sản phẩm thành công! Đã nhập thêm ${additionalStock} sản phẩm vào kho.`
+          );
+        } else {
+          alert(`🎉 Cập nhật sản phẩm thành công!`);
+        }
       }
 
       // Reload products

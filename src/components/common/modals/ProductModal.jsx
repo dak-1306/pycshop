@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const ProductModal = ({
   isOpen,
@@ -14,9 +14,33 @@ const ProductModal = ({
   onRemoveImage,
   onSetFeaturedImage,
 }) => {
-  if (!isOpen) return null;
-
   const isEditMode = mode === "edit";
+  const [additionalStock, setAdditionalStock] = useState(0);
+
+  // Reset additional stock when modal opens/closes or mode changes
+  useEffect(() => {
+    if (isOpen && isEditMode) {
+      setAdditionalStock(0);
+    }
+  }, [isOpen, isEditMode]);
+
+  // Handle save with stock logic
+  const handleSave = () => {
+    if (isEditMode) {
+      // For edit mode, pass additionalStock separately
+      const updatedProduct = {
+        ...product,
+        additionalStock: additionalStock, // Pass additional stock amount for useProducts to handle
+      };
+      onSave(updatedProduct);
+    } else {
+      // For add mode, pass current product
+      onSave(product);
+    }
+    setAdditionalStock(0); // Reset after save
+  };
+
+  if (!isOpen) return null;
   const modalTitle = isEditMode ? "Chỉnh sửa sản phẩm" : "Thêm sản phẩm mới";
   const modalSubtitle = isEditMode
     ? `Cập nhật thông tin sản phẩm: ${product?.name || ""}`
@@ -240,20 +264,66 @@ const ProductModal = ({
                       <span className="w-5 h-5 bg-yellow-500 text-white rounded text-xs flex items-center justify-center">
                         📦
                       </span>
-                      Số lượng tồn kho *
+                      {isEditMode ? "Nhập hàng thêm" : "Số lượng tồn kho *"}
                     </label>
-                    <input
-                      type="number"
-                      value={product?.quantity || ""}
-                      onChange={(e) =>
-                        onProductChange({
-                          ...product,
-                          quantity: e.target.value,
-                        })
-                      }
-                      className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all"
-                      placeholder="0"
-                    />
+                    {isEditMode ? (
+                      // Edit mode: Show current stock + additional input
+                      <div className="space-y-3">
+                        <div className="bg-gray-50 p-3 rounded-lg">
+                          <div className="text-sm text-gray-600 mb-1">
+                            Số lượng hiện tại:
+                          </div>
+                          <div className="text-lg font-semibold text-gray-800">
+                            {product?.stock || product?.quantity || 0} sản phẩm
+                          </div>
+                        </div>
+                        <input
+                          type="number"
+                          min="0"
+                          value={additionalStock}
+                          onChange={(e) => {
+                            const value = Math.max(
+                              0,
+                              parseInt(e.target.value) || 0
+                            );
+                            setAdditionalStock(value);
+                          }}
+                          className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all"
+                          placeholder="Nhập số lượng muốn thêm"
+                        />
+                        {additionalStock > 0 && (
+                          <div className="bg-green-50 p-3 rounded-lg border border-green-200">
+                            <div className="text-sm text-green-700">
+                              📈 Sau khi nhập thêm:{" "}
+                              <span className="font-semibold">
+                                {(product?.stock || product?.quantity || 0) +
+                                  additionalStock}{" "}
+                                sản phẩm
+                              </span>
+                            </div>
+                          </div>
+                        )}
+                        <div className="text-sm text-blue-600">
+                          💡 Chỉ có thể thêm hàng, không thể giảm số lượng
+                        </div>
+                      </div>
+                    ) : (
+                      // Add mode: Normal stock input
+                      <input
+                        type="number"
+                        min="0"
+                        value={product?.quantity || product?.stock || ""}
+                        onChange={(e) =>
+                          onProductChange({
+                            ...product,
+                            quantity: e.target.value,
+                            stock: e.target.value,
+                          })
+                        }
+                        className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all"
+                        placeholder="0"
+                      />
+                    )}
                   </div>
 
                   <div>
@@ -436,7 +506,7 @@ const ProductModal = ({
             <span>❌</span> Hủy bỏ
           </button>
           <button
-            onClick={onSave}
+            onClick={handleSave}
             className={`relative px-10 py-3 bg-gradient-to-r ${colors.buttonGradient} text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5 flex items-center gap-2 overflow-hidden`}
           >
             <span>{colors.buttonIcon}</span>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { DashboardLayout, Card, Button, Input } from "../../components";
+import { DashboardLayout, Card, Button, Input } from "../..";
 import { useAuth } from "../../hooks/useAuth";
 
 const Settings = () => {

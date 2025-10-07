@@ -4,13 +4,14 @@ import { useCategories } from "./useCategories.js";
 
 const INITIAL_FORM_STATE = {
   name: "",
-  price: "",
-  quantity: "",
-  category: "",
-  status: "active",
-  images: [],
-  imageFiles: [],
   description: "",
+  price: 0,
+  stock: 0,
+  category: "",
+  weight: 1, // Default 1kg
+  unit: "cái", // Default unit
+  images: [],
+  featured: false,
 };
 
 export const useProducts = () => {

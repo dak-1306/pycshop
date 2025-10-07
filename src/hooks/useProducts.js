@@ -218,12 +218,23 @@ export const useProducts = () => {
   };
 
   const handleSaveProduct = async () => {
-    if (
-      !currentProduct.name ||
-      !currentProduct.price ||
-      (!currentProduct.quantity && !currentProduct.addStock) ||
-      !currentProduct.category
-    ) {
+    // Different validation for add vs edit mode
+    const isValidForAdd =
+      modalMode === "add" &&
+      currentProduct.name &&
+      currentProduct.price &&
+      currentProduct.quantity &&
+      currentProduct.category;
+
+    const isValidForEdit =
+      modalMode === "edit" &&
+      currentProduct.name &&
+      currentProduct.price &&
+      currentProduct.category &&
+      (currentProduct.quantity || currentProduct.addStock);
+
+    if (!isValidForAdd && !isValidForEdit) {
+      console.log("[useProducts] Validation failed:", currentProduct);
       alert("😱 Vui lòng điền đầy đủ thông tin!");
       return;
     }
@@ -240,10 +251,10 @@ export const useProducts = () => {
 
         const newProduct = await sellerProductService.addProduct({
           tenSanPham: currentProduct.name,
+          moTa: currentProduct.description || "",
           gia: currentProduct.price,
           tonKho: Number(currentProduct.quantity),
           danhMuc: categoryId, // Use category ID for backend
-          moTa: currentProduct.description || "",
           trangThai: currentProduct.status || "active",
         });
 

@@ -244,9 +244,12 @@ const ProductModal = ({
                     </label>
                     <input
                       type="number"
-                      value={product?.stock || ""}
+                      value={product?.quantity || ""}
                       onChange={(e) =>
-                        onProductChange({ ...product, stock: e.target.value })
+                        onProductChange({
+                          ...product,
+                          quantity: e.target.value,
+                        })
                       }
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 transition-all"
                       placeholder="0"

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { DashboardLayout, DataTable, Button, Badge } from "../../components";
+import { DashboardLayout, DataTable, Button, Badge } from "../..";
 import { useAuth } from "../../hooks/useAuth";
 import { usePermissions } from "../../hooks/usePermissions";
 

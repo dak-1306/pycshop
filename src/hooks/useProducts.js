@@ -57,23 +57,31 @@ export const useProducts = () => {
 
       if (response.success && response.data) {
         // Map backend data to frontend format
-        const mappedProducts = response.data.map((product) => ({
-          id: product.ID_SanPham,
-          name: product.TenSanPham,
-          price: product.Gia?.toLocaleString("vi-VN"),
-          quantity: product.TonKho,
-          category: product.TenDanhMuc || "Chưa phân loại",
-          categoryId: product.ID_DanhMuc,
-          status: product.TrangThai === "active" ? "Còn hàng" : "Hết hàng",
-          description: product.MoTa || "",
-          images: product.image_urls
+        const mappedProducts = response.data.map((product) => {
+          const imageArray = product.image_urls
             ? product.image_urls.split(",").filter((url) => url.trim())
-            : [],
-          imageFiles: [],
-          shopName: product.TenCuaHang || "",
-          created_date: product.created_date,
-          actions: ["view", "edit", "delete"],
-        }));
+            : [];
+
+          return {
+            id: product.ID_SanPham,
+            name: product.TenSanPham,
+            price: product.Gia?.toLocaleString("vi-VN"),
+            quantity: product.TonKho,
+            category: product.TenDanhMuc || "Chưa phân loại",
+            categoryId: product.ID_DanhMuc,
+            status: product.TrangThai === "active" ? "Còn hàng" : "Hết hàng",
+            description: product.MoTa || "",
+            images: imageArray,
+            image:
+              imageArray.length > 0
+                ? `http://localhost:5002${imageArray[0]}`
+                : null, // Add first image URL for ProductTable (bypass API Gateway)
+            imageFiles: [],
+            shopName: product.TenCuaHang || "",
+            created_date: product.created_date,
+            actions: ["view", "edit", "delete"],
+          };
+        });
 
         console.log("[useProducts] Mapped products:", mappedProducts);
         setProducts(mappedProducts);

@@ -181,6 +181,7 @@ app.use((req, res, next) => {
     "/auth/login",
     "/auth/register",
     "/products", // Cho phép xem sản phẩm không cần đăng nhập
+    "/uploads", // Static files (product images)
   ];
 
   // Shop public routes
@@ -199,12 +200,17 @@ app.use((req, res, next) => {
     req.originalUrl.startsWith(route)
   );
 
+  // Debug logs
+  console.log(`[GATEWAY] Checking route: ${req.originalUrl}`);
+  console.log(`[GATEWAY] Public routes:`, allPublicRoutes);
+  console.log(`[GATEWAY] Is public route:`, isPublicRoute);
+
   // Kiểm tra nếu là shop route với ID (GET /shops/123)
   const isShopByIdRoute =
     /^\/shops\/\d+$/.test(req.originalUrl) && req.method === "GET";
 
   if (isPublicRoute || isShopByIdRoute) {
-    console.log(`[GATEWAY] Public route: ${req.originalUrl}`);
+    console.log(`[GATEWAY] Public route allowed: ${req.originalUrl}`);
     return next();
   }
 

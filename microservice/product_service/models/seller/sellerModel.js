@@ -63,7 +63,7 @@ class Seller {
         LEFT JOIN nguoidung n ON p.ID_NguoiBan = n.ID_NguoiDung
         LEFT JOIN cuahang c ON n.ID_CuaHang = c.ID_CuaHang
         LEFT JOIN danhmuc dm ON p.ID_DanhMuc = dm.ID_DanhMuc
-        LEFT JOIN AnhSanPham a ON p.ID_SanPham = a.ID_SanPham
+        LEFT JOIN anhsanpham a ON p.ID_SanPham = a.ID_SanPham
         ${whereClause}
         GROUP BY p.ID_SanPham, p.TenSanPham, p.MoTa, p.Gia, p.TonKho, p.TrangThai, p.CapNhat, dm.TenDanhMuc, dm.ID_DanhMuc, c.TenCuaHang
         ORDER BY p.${finalSortBy} ${finalSortOrder}
@@ -458,7 +458,7 @@ class Seller {
         LEFT JOIN nguoidung n ON p.ID_NguoiBan = n.ID_NguoiDung
         LEFT JOIN cuahang c ON n.ID_CuaHang = c.ID_CuaHang
         LEFT JOIN danhmuc dm ON p.ID_DanhMuc = dm.ID_DanhMuc
-        LEFT JOIN AnhSanPham a ON p.ID_SanPham = a.ID_SanPham
+        LEFT JOIN anhsanpham a ON p.ID_SanPham = a.ID_SanPham
         WHERE p.ID_SanPham = ? AND p.ID_NguoiBan = ?
         GROUP BY p.ID_SanPham, p.TenSanPham, p.MoTa, p.Gia, p.TonKho, p.TrangThai, p.CapNhat, dm.TenDanhMuc, dm.ID_DanhMuc, c.TenCuaHang
       `;

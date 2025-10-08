@@ -80,7 +80,6 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
           category: product.TenDanhMuc,
           stock: product.TonKho,
         }));
-        console.log("Loaded products:", transformedProducts);
 
         if (reset || pageNum === 1) {
           setProducts(transformedProducts);

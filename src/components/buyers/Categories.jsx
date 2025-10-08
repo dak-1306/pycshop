@@ -62,10 +62,15 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
   };
 
   const handleCategoryClick = (categoryId) => {
+    console.log("🏷️ [CATEGORY] Clicked category:", categoryId);
+    console.log("🏷️ [CATEGORY] Current selected:", selectedCategory);
+
     if (selectedCategory === categoryId) {
       // If clicking the same category, deselect it
+      console.log("🏷️ [CATEGORY] Deselecting category");
       onCategorySelect(null);
     } else {
+      console.log("🏷️ [CATEGORY] Selecting new category:", categoryId);
       onCategorySelect(categoryId);
     }
   };

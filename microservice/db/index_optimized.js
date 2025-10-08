@@ -39,8 +39,12 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 100, // Tăng từ 10 lên 100 cho 1M users
   queueLimit: 1000, // Giới hạn queue để tránh memory leak
-  acquireTimeout: 5000, // Timeout để acquire connection
+  acquireTimeout: 5000, // Giảm từ 60s xuống 5s để fail fast
+  timeout: 30000, // Giảm query timeout từ 60s xuống 30s
   idleTimeout: 900000, // 15 phút idle timeout
+  reconnect: true, // Enable auto reconnect
+  maxReconnects: 10, // Số lần reconnect tối đa
+  reconnectDelay: 2000, // Delay giữa các lần reconnect
 
   // MySQL specific optimizations for high concurrency
   ssl: false, // Disable SSL để tăng performance (nếu internal network)
@@ -71,8 +75,10 @@ if (process.env.DB_REPLICA_HOST) {
     host: process.env.DB_REPLICA_HOST,
     connectionLimit: 150, // More connections for read replica
     queueLimit: 1500,
-    acquireTimeout: 3000, // Timeout for read connections
+    acquireTimeout: 3000, // Faster timeout for reads
+    timeout: 20000, // Shorter timeout for read queries
     idleTimeout: 600000, // 10 phút idle cho read replica
+    reconnect: true,
   });
 
   console.log("🔄 Read replica pool configured for scaling");

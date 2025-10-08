@@ -10,11 +10,13 @@ const HomePage = () => {
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleSearch = (query) => {
+    console.log("🔍 [HOME] handleSearch called with:", query);
     setSearchQuery(query);
     setSelectedCategory(null); // Clear category filter when searching
   };
 
   const handleCategorySelect = (categoryId) => {
+    console.log("🏷️ [HOME] handleCategorySelect called with:", categoryId);
     setSelectedCategory(categoryId);
     setSearchQuery(""); // Clear search when selecting category
   };

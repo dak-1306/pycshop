@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ChatProvider } from "./context/ChatContext";
 import GlobalChatWidget from "./components/GlobalChatWidget/GlobalChatWidget";
-import HomePage from "./pages/HomePage";
+import HomePage from "./pages/buyer/Home";
 import Dashboard from "./pages/seller/Dashboard";
 import ManageProduct from "./pages/seller/ManageProduct";
 import Order from "./pages/seller/Order";

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProductGrid.css";
 import { productService } from "../../services/productService";
@@ -11,6 +11,10 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Ref to track the last API call to prevent duplicates
+  const lastApiCall = useRef(null);
+  const lastParams = useRef(null);
 
   // Load products function
   const loadProducts = async (pageNum = 1, reset = false) => {
@@ -39,9 +43,29 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
         params.category = selectedCategory;
       }
 
+      // Simple duplicate detection - only block if exact same params
+      const paramsString = JSON.stringify(params);
+      if (lastParams.current === paramsString && pageNum === 1) {
+        console.log("🚫 Skipping duplicate API call");
+        setLoading(false);
+        setIsLoadingMore(false);
+        return;
+      }
+      lastParams.current = paramsString;
+
+      // Create a unique identifier for this API call
+      const apiCallId = paramsString + Date.now();
+      lastApiCall.current = apiCallId;
+
       console.log("Loading products with params:", params);
 
       const response = await productService.getProducts(params);
+
+      // Check if this is still the latest API call
+      if (lastApiCall.current !== apiCallId) {
+        console.log("🚫 Discarding outdated API response");
+        return;
+      }
 
       if (response.success) {
         const transformedProducts = response.data.map((product) => ({
@@ -50,7 +74,7 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
           price: parseFloat(product.Gia),
           image: product.image_urls
             ? product.image_urls.split(",")[0]
-            : "https://via.placeholder.com/300x300/ff6b35/ffffff?text=PycShop",
+            : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23ff6b35'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='white'%3EPycShop%3C/text%3E%3C/svg%3E",
           rating: parseFloat(product.average_rating) || 0,
           sold: product.review_count || 0,
           location: product.shop_location || "TP.HCM",
@@ -84,7 +108,21 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
 
   // Initial load and reload when search/category changes
   useEffect(() => {
-    loadProducts(1, true);
+    const currentParams = { searchQuery, selectedCategory };
+    console.log(
+      "🔄 ProductGrid useEffect triggered - Search:",
+      searchQuery,
+      "Category:",
+      selectedCategory
+    );
+    console.log("🔍 useEffect dependencies changed:", currentParams);
+
+    // Add a small delay to debounce rapid state changes
+    const timeoutId = setTimeout(() => {
+      loadProducts(1, true);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [searchQuery, selectedCategory]);
 
   // Load more products
@@ -218,10 +256,10 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
         <div className="section-header">
           <h2 className="section-title">
             {searchQuery
-              ? `Kết quả tìm kiếm: "${searchQuery}" `
+              ? `Kết quả tìm kiếm: "${searchQuery}"`
               : selectedCategory
-              ? `Danh mục: ${products[0]?.category || "Sản phẩm"} `
-              : `Gợi Ý Hôm Nay `}
+              ? `Danh mục: ${products[0]?.category || "Sản phẩm"}`
+              : "Gợi Ý Hôm Nay"}
           </h2>
         </div>
         <div className="products-grid">
@@ -236,8 +274,11 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
                   src={product.image}
                   alt={product.name}
                   onError={(e) => {
-                    e.target.src =
-                      "https://via.placeholder.com/300x300/ff6b35/ffffff?text=PycShop";
+                    // Prevent infinite loop by checking if already using fallback
+                    if (!e.target.src.includes("data:image")) {
+                      e.target.src =
+                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23ff6b35'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='white'%3EPycShop%3C/text%3E%3C/svg%3E";
+                    }
                   }}
                 />
                 {product.discount > 0 && (

@@ -49,13 +49,12 @@ const Header = ({ onSearch }) => {
     }
   };
 
-  // Clear search when component unmounts or search query changes externally
-  useEffect(() => {
-    if (onSearch && !searchKeyword) {
-      // Clear search results when search box is empty
-      onSearch("");
-    }
-  }, [searchKeyword, onSearch]);
+  // Note: Removed automatic search clearing to prevent conflicts with category selection
+  // useEffect(() => {
+  //   if (onSearch && !searchKeyword) {
+  //     onSearch("");
+  //   }
+  // }, [searchKeyword, onSearch]);
 
   const handleSellerChannelClick = (e) => {
     e.preventDefault();

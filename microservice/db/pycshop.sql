@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 02, 2025 lúc 07:02 PM
+-- Thời gian đã tạo: Th10 08, 2025 lúc 12:23 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -53,6 +53,13 @@ CREATE TABLE `anhsanpham` (
   `Url` text NOT NULL,
   `Upload_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `anhsanpham`
+--
+
+INSERT INTO `anhsanpham` (`ID_Anh`, `ID_SanPham`, `Url`, `Upload_at`) VALUES
+(12, 29, '/uploads/product_images/product_29_1759660782333_shq9rh2vr.png', '2025-10-05 10:39:42');
 
 -- --------------------------------------------------------
 
@@ -108,6 +115,7 @@ CREATE TABLE `chitietdonhang` (
 CREATE TABLE `cuahang` (
   `ID_CuaHang` bigint(20) NOT NULL,
   `TenCuaHang` varchar(255) NOT NULL,
+  `DanhGiaTB` decimal(2,1) UNSIGNED NOT NULL DEFAULT 0.0 CHECK (`DanhGiaTB` >= 0.0 and `DanhGiaTB` <= 5.0),
   `ID_DanhMuc` int(11) NOT NULL,
   `DiaChiCH` varchar(255) NOT NULL,
   `SoDienThoaiCH` varchar(20) NOT NULL,
@@ -118,9 +126,10 @@ CREATE TABLE `cuahang` (
 -- Đang đổ dữ liệu cho bảng `cuahang`
 --
 
-INSERT INTO `cuahang` (`ID_CuaHang`, `TenCuaHang`, `ID_DanhMuc`, `DiaChiCH`, `SoDienThoaiCH`, `NgayCapNhat`) VALUES
-(1, 'Thời Trang Nam Unisex', 1, '123 Lê Lợi, Quận 1, TP.HCM', '0901234567', '2025-10-02 20:30:56'),
-(3, 'Cửa hàng sách Hải Nam', 18, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-02 23:29:55');
+INSERT INTO `cuahang` (`ID_CuaHang`, `TenCuaHang`, `DanhGiaTB`, `ID_DanhMuc`, `DiaChiCH`, `SoDienThoaiCH`, `NgayCapNhat`) VALUES
+(1, 'Thời Trang Nam Unisex', 0.0, 1, '123 Lê Lợi, Quận 1, TP.HCM', '0901234567', '2025-10-02 20:30:56'),
+(3, 'Cửa hàng sách Hải Nam', 0.0, 18, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-02 23:29:55'),
+(7, 'Shop của Bảnh', 0.0, 11, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-06 15:43:56');
 
 -- --------------------------------------------------------
 
@@ -136,6 +145,132 @@ CREATE TABLE `danhgiasanpham` (
   `TyLe` int(11) NOT NULL,
   `ThoiGian` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `danhgiasanpham`
+--
+
+INSERT INTO `danhgiasanpham` (`ID_DanhGia`, `ID_SanPham`, `ID_NguoiMua`, `BinhLuan`, `TyLe`, `ThoiGian`) VALUES
+(1, 1, 3, 'Áo đẹp, vải mát và dễ mặc.', 5, '2025-10-08 10:22:51'),
+(2, 1, 4, 'Giao hàng nhanh, chất lượng ổn.', 4, '2025-10-08 10:22:51'),
+(3, 1, 5, 'Mặc hơi rộng, nhưng chất liệu tốt.', 4, '2025-10-08 10:22:51'),
+(4, 1, 6, 'Không giống hình lắm nhưng vẫn ổn.', 3, '2025-10-08 10:22:51'),
+(5, 2, 3, 'Đầm rất xinh, vải mềm mịn.', 5, '2025-10-08 10:22:51'),
+(6, 2, 4, 'Form hơi nhỏ, nên chọn size lớn hơn.', 4, '2025-10-08 10:22:51'),
+(7, 2, 5, 'Đẹp nhưng giao hơi lâu.', 3, '2025-10-08 10:22:51'),
+(8, 2, 6, 'Sản phẩm tốt, sẽ mua thêm.', 5, '2025-10-08 10:22:51'),
+(9, 3, 3, 'Ốp chắc chắn, cầm tay rất vừa.', 5, '2025-10-08 10:22:51'),
+(10, 3, 4, 'Màu không giống hình lắm.', 3, '2025-10-08 10:22:51'),
+(11, 3, 5, 'Giá ổn, chất lượng tốt.', 4, '2025-10-08 10:22:51'),
+(12, 3, 6, 'Ốp bị trầy nhẹ khi nhận.', 2, '2025-10-08 10:22:51'),
+(13, 4, 3, 'Máy chạy ổn, cấu hình phù hợp nhu cầu.', 5, '2025-10-08 10:22:51'),
+(14, 4, 4, 'Pin yếu, dùng tầm 3 tiếng.', 3, '2025-10-08 10:22:51'),
+(15, 4, 5, 'Thiết kế đẹp, màn hình nét.', 4, '2025-10-08 10:22:51'),
+(16, 4, 6, 'Giao hàng cẩn thận, có tem chính hãng.', 5, '2025-10-08 10:22:51'),
+(17, 5, 3, 'Quay rõ, màu đẹp, dễ dùng.', 5, '2025-10-08 10:22:51'),
+(18, 5, 4, 'Ổn so với giá, nhưng pin hơi yếu.', 4, '2025-10-08 10:22:51'),
+(19, 5, 5, 'Sản phẩm đúng mô tả.', 4, '2025-10-08 10:22:51'),
+(20, 5, 6, 'Giao hàng nhanh, rất hài lòng.', 5, '2025-10-08 10:22:51'),
+(21, 6, 3, 'Đẹp, nhẹ, chính hãng Casio.', 5, '2025-10-08 10:22:51'),
+(22, 6, 4, 'Dây đeo hơi cứng.', 3, '2025-10-08 10:22:51'),
+(23, 6, 5, 'Thiết kế sang trọng, dễ xem giờ.', 5, '2025-10-08 10:22:51'),
+(24, 6, 6, 'Chống nước tốt.', 4, '2025-10-08 10:22:51'),
+(25, 7, 3, 'Giày đẹp, đúng size.', 5, '2025-10-08 10:22:51'),
+(26, 7, 4, 'Mang êm, không bị trượt.', 4, '2025-10-08 10:22:51'),
+(27, 7, 5, 'Giao hàng nhanh, đóng gói kỹ.', 5, '2025-10-08 10:22:51'),
+(28, 7, 6, 'Đế hơi cứng.', 3, '2025-10-08 10:22:51'),
+(29, 8, 3, 'Giày vừa chân, kiểu dáng đẹp.', 5, '2025-10-08 10:22:51'),
+(30, 8, 4, 'Mang hơi đau chân lúc đầu.', 3, '2025-10-08 10:22:51'),
+(31, 8, 5, 'Giày ổn, màu nhã nhặn.', 4, '2025-10-08 10:22:51'),
+(32, 8, 6, 'Sản phẩm đẹp, giống mô tả.', 5, '2025-10-08 10:22:51'),
+(33, 9, 3, 'Túi chắc chắn, đựng được nhiều.', 5, '2025-10-08 10:22:51'),
+(34, 9, 4, 'Khóa kéo hơi cứng.', 3, '2025-10-08 10:22:51'),
+(35, 9, 5, 'Thiết kế đẹp, rất hài lòng.', 5, '2025-10-08 10:22:51'),
+(36, 9, 6, 'Giá hợp lý, chất liệu tốt.', 4, '2025-10-08 10:22:51'),
+(37, 10, 3, 'Túi rất đẹp, giống hình.', 5, '2025-10-08 10:22:51'),
+(38, 10, 4, 'Chất da mềm, đường may chắc.', 5, '2025-10-08 10:22:51'),
+(39, 10, 5, 'Giao hàng nhanh, đóng gói đẹp.', 5, '2025-10-08 10:22:51'),
+(40, 10, 6, 'Kích thước nhỏ hơn mong đợi.', 3, '2025-10-08 10:22:51'),
+(41, 11, 3, 'Âm thanh tốt, pin ổn.', 5, '2025-10-08 10:22:51'),
+(42, 11, 4, 'Bluetooth kết nối nhanh.', 4, '2025-10-08 10:22:51'),
+(43, 11, 5, 'Hơi đau tai nếu đeo lâu.', 3, '2025-10-08 10:22:51'),
+(44, 11, 6, 'Giá hợp lý, chất lượng ổn.', 4, '2025-10-08 10:22:51'),
+(45, 12, 3, 'Chạy êm, tiết kiệm điện.', 5, '2025-10-08 10:22:51'),
+(46, 12, 4, 'Thiết kế đẹp, dễ sử dụng.', 5, '2025-10-08 10:22:51'),
+(47, 12, 5, 'Pin hơi yếu.', 3, '2025-10-08 10:22:51'),
+(48, 12, 6, 'Giá cao nhưng đáng tiền.', 4, '2025-10-08 10:22:51'),
+(49, 13, 3, 'Chắc chắn, gỗ tốt.', 5, '2025-10-08 10:22:51'),
+(50, 13, 4, 'Màu đẹp, đúng mô tả.', 5, '2025-10-08 10:22:51'),
+(51, 13, 5, 'Giao hàng lâu.', 3, '2025-10-08 10:22:51'),
+(52, 13, 6, 'Lắp ráp dễ dàng.', 4, '2025-10-08 10:22:51'),
+(53, 14, 3, 'Màu lên đẹp, giữ lâu.', 5, '2025-10-08 10:22:51'),
+(54, 14, 4, 'Không bị khô môi.', 4, '2025-10-08 10:22:51'),
+(55, 14, 5, 'Giá hợp lý.', 4, '2025-10-08 10:22:51'),
+(56, 14, 6, 'Mùi thơm nhẹ, dễ chịu.', 5, '2025-10-08 10:22:51'),
+(57, 15, 3, 'Dễ uống, hiệu quả tốt.', 5, '2025-10-08 10:22:51'),
+(58, 15, 4, 'Giá phải chăng.', 4, '2025-10-08 10:22:51'),
+(59, 15, 5, 'Bao bì đẹp.', 4, '2025-10-08 10:22:51'),
+(60, 15, 6, 'Sẽ mua lại.', 5, '2025-10-08 10:22:51'),
+(61, 16, 3, 'Đỉnh cao giải trí, đồ họa siêu đẹp.', 5, '2025-10-08 10:22:51'),
+(62, 16, 4, 'Giá hơi cao.', 4, '2025-10-08 10:22:51'),
+(63, 16, 5, 'Chạy êm, chơi mượt.', 5, '2025-10-08 10:22:51'),
+(64, 16, 6, 'Giao hàng nhanh, đóng gói kỹ.', 5, '2025-10-08 10:22:51'),
+(65, 17, 3, 'Bé uống ngon, tăng cân tốt.', 5, '2025-10-08 10:22:51'),
+(66, 17, 4, 'Giá hơi cao.', 4, '2025-10-08 10:22:51'),
+(67, 17, 5, 'Chất lượng tốt, chính hãng.', 5, '2025-10-08 10:22:51'),
+(68, 17, 6, 'Sẽ mua thêm.', 5, '2025-10-08 10:22:51'),
+(69, 18, 3, 'Sách mới, giấy tốt.', 5, '2025-10-08 10:22:51'),
+(70, 18, 4, 'Đúng chương trình học.', 5, '2025-10-08 10:22:51'),
+(71, 18, 5, 'Giá hợp lý.', 4, '2025-10-08 10:22:51'),
+(72, 18, 6, 'Giao hàng nhanh.', 5, '2025-10-08 10:22:51'),
+(73, 19, 3, 'Mì ngon, vị đậm đà.', 5, '2025-10-08 10:22:51'),
+(74, 19, 4, 'Giao nhanh, còn hạn sử dụng dài.', 5, '2025-10-08 10:22:51'),
+(75, 19, 5, 'Giá ổn.', 4, '2025-10-08 10:22:51'),
+(76, 19, 6, 'Hàng chính hãng.', 5, '2025-10-08 10:22:51'),
+(77, 20, 3, 'Áo mềm, thấm hút tốt.', 5, '2025-10-08 10:22:51'),
+(78, 20, 4, 'Vải co giãn, dễ mặc.', 4, '2025-10-08 10:22:51'),
+(79, 20, 5, 'Màu không phai sau khi giặt.', 5, '2025-10-08 10:22:51'),
+(80, 20, 6, 'Sản phẩm ổn trong tầm giá.', 4, '2025-10-08 10:22:51'),
+(81, 21, 3, 'Áo đẹp, đúng size.', 5, '2025-10-08 10:22:51'),
+(82, 21, 4, 'Chất vải mịn, dễ ủi.', 4, '2025-10-08 10:22:51'),
+(83, 21, 5, 'Đường may chắc chắn.', 5, '2025-10-08 10:22:51'),
+(84, 21, 6, 'Rất đáng tiền.', 5, '2025-10-08 10:22:51'),
+(85, 22, 3, 'Máy mượt, camera đẹp.', 5, '2025-10-08 10:22:51'),
+(86, 22, 4, 'Pin ổn, màn hình sắc nét.', 5, '2025-10-08 10:22:51'),
+(87, 22, 5, 'Giá cao nhưng đáng tiền.', 4, '2025-10-08 10:22:51'),
+(88, 22, 6, 'Sản phẩm chính hãng.', 5, '2025-10-08 10:22:51'),
+(89, 23, 3, 'Cấu hình mạnh, pin lâu.', 5, '2025-10-08 10:22:51'),
+(90, 23, 4, 'Thiết kế đẹp.', 5, '2025-10-08 10:22:51'),
+(91, 23, 5, 'Giá hơi cao.', 4, '2025-10-08 10:22:51'),
+(92, 23, 6, 'Màn hình sắc nét.', 5, '2025-10-08 10:22:51'),
+(93, 24, 3, 'Chụp nét, màu đẹp.', 5, '2025-10-08 10:22:51'),
+(94, 24, 4, 'Dễ dùng, phù hợp người mới.', 4, '2025-10-08 10:22:51'),
+(95, 24, 5, 'Pin yếu.', 3, '2025-10-08 10:22:51'),
+(96, 24, 6, 'Giá hợp lý.', 4, '2025-10-08 10:22:51'),
+(97, 25, 3, 'Truyện rất hấp dẫn.', 5, '2025-10-08 10:22:51'),
+(98, 25, 4, 'Cốt truyện hay, cuốn hút.', 5, '2025-10-08 10:22:51'),
+(99, 25, 5, 'Giấy in tốt.', 4, '2025-10-08 10:22:51'),
+(100, 25, 6, 'Đáng đọc.', 5, '2025-10-08 10:22:51'),
+(101, 26, 3, 'Nội dung lôi cuốn.', 5, '2025-10-08 10:22:51'),
+(102, 26, 4, 'Hơi ngắn nhưng hay.', 4, '2025-10-08 10:22:51'),
+(103, 26, 5, 'Bìa đẹp.', 4, '2025-10-08 10:22:51'),
+(104, 26, 6, 'Giá tốt.', 5, '2025-10-08 10:22:51'),
+(105, 29, 3, 'Thông tin bổ ích, dễ hiểu.', 5, '2025-10-08 10:22:51'),
+(106, 29, 4, 'Sách hiếm, đáng mua.', 5, '2025-10-08 10:22:51'),
+(107, 29, 5, 'Giấy đẹp, in rõ.', 4, '2025-10-08 10:22:51'),
+(108, 29, 6, 'Nội dung chuyên sâu.', 5, '2025-10-08 10:22:51'),
+(109, 30, 3, 'Truyền cảm hứng tốt.', 5, '2025-10-08 10:22:51'),
+(110, 30, 4, 'Nhiều bài học hữu ích.', 5, '2025-10-08 10:22:51'),
+(111, 30, 5, 'Sách hay, dễ đọc.', 5, '2025-10-08 10:22:51'),
+(112, 30, 6, 'Đọc xong có động lực.', 5, '2025-10-08 10:22:51'),
+(113, 31, 3, 'Truyện hay cho thiếu nhi.', 5, '2025-10-08 10:22:51'),
+(114, 31, 4, 'In màu đẹp.', 5, '2025-10-08 10:22:51'),
+(115, 31, 5, 'Giấy tốt, đóng gáy chắc.', 4, '2025-10-08 10:22:51'),
+(116, 31, 6, 'Phù hợp cho trẻ nhỏ.', 5, '2025-10-08 10:22:51'),
+(117, 32, 3, 'Sách chuẩn chương trình.', 5, '2025-10-08 10:22:51'),
+(118, 32, 4, 'Giấy trắng, dễ đọc.', 5, '2025-10-08 10:22:51'),
+(119, 32, 5, 'Giá hợp lý.', 4, '2025-10-08 10:22:51'),
+(120, 32, 6, 'Giao nhanh, đóng gói kỹ.', 5, '2025-10-08 10:22:51');
 
 -- --------------------------------------------------------
 
@@ -255,7 +390,8 @@ CREATE TABLE `nguoidung` (
 INSERT INTO `nguoidung` (`ID_NguoiDung`, `VaiTro`, `HoTen`, `Email`, `MatKhau`, `SoDienThoai`, `DiaChi`, `TrangThai`, `ThoiGianTao`, `AvatarUrl`, `ID_CuaHang`) VALUES
 (3, 'seller', 'Nguyễn Văn Test', 'test@gmail.com', '$2b$10$kyTNrvfNiY2YcWIsctNm8O6Z08YJVJRNdIwNmgjlgGANAq7kNjrjm', '0123456789', '123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'active', '2025-09-29 10:46:02', NULL, 3),
 (4, 'seller', 'Trần Tuấn Anh', 'anh@gmail.com', '$2b$10$.nBUefCG4ZtzVCSUhbjb5.tcqiyZfpzfRENMJBdVqu.e.mvrDEJ3W', '01234567689', '357 Điện Biên Phủ, Phường 15, Quận Bình Thạnh, TP.HCM', 'active', '2025-09-30 07:25:46', NULL, NULL),
-(5, 'buyer', 'Phạm Văn Bành', 'banh@gmail.com', '$2b$10$zdiHx0ziAUGVrMslqzUP9.cw93BaTIzSdAVOId9yQ3B9bg.DAGDZu', '0123456789', '147 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM', 'active', '2025-09-30 07:31:08', NULL, NULL);
+(5, 'seller', 'Phạm Văn Bành', 'banh@gmail.com', '$2b$10$zdiHx0ziAUGVrMslqzUP9.cw93BaTIzSdAVOId9yQ3B9bg.DAGDZu', '0123456789', '147 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM', 'active', '2025-09-30 07:31:08', NULL, 7),
+(6, 'buyer', 'Trần Hải Đăng', 'dang@gmail.com', '$2b$10$5Q/4QYH1d/TlDwPbiV8HO.JWhdItHwsgkmm9UnVrWQCRQVnHb71OS', '0123435445', 'Số 2 Võ Oanh, Phường 25, Bình Thạnh, Hồ Chí Minh, Việt Nam', 'active', '2025-10-07 13:29:08', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -276,7 +412,12 @@ CREATE TABLE `nhatkythaydoitonkho` (
 --
 
 INSERT INTO `nhatkythaydoitonkho` (`ID_NhatKy`, `ID_SanPham`, `SoLuongThayDoi`, `HanhDong`, `ThoiGian`) VALUES
-(1, 26, 10, 'import', '2025-10-02 17:01:35');
+(1, 26, 10, 'import', '2025-10-02 17:01:35'),
+(2, 26, 10, 'import', '2025-10-04 07:02:07'),
+(3, 26, 5, 'import', '2025-10-04 07:09:28'),
+(4, 26, 5, 'import', '2025-10-04 07:09:38'),
+(5, 26, 10, 'import', '2025-10-04 07:12:59'),
+(6, 25, 18, 'import', '2025-10-05 09:41:19');
 
 -- --------------------------------------------------------
 
@@ -342,8 +483,12 @@ INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, 
 (22, 4, 3, 'iPhone 12', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 15000000.00, 20, 'active', '2025-10-01 10:44:11'),
 (23, 4, 4, 'Laptop Lenovo', 'Sản phẩm máy tính xách tay: Asus, Dell', 25000000.00, 15, 'active', '2025-10-01 10:44:11'),
 (24, 4, 5, 'Máy ảnh Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 9000000.00, 10, 'active', '2025-10-01 10:44:11'),
-(25, 3, 18, 'Sách huyền vũ yêu quái', 'Sách nói về 1 chàng trai không được bình thường và kỳ lạ, cuối cùng....', 10000.00, 12, 'active', '2025-10-02 16:41:54'),
-(26, 3, 18, 'Sách quỷ diệt hồn', 'Chuyện kể về 1 nhóm anh hùng chuyên trừ gian diệt ác', 200000.00, 30, 'active', '2025-10-02 17:01:35');
+(25, 3, 18, 'Sách huyền vũ yêu quái', 'Sách nói về 1 chàng trai không được bình thường và kỳ lạ, cuối cùng....', 10000.00, 30, 'active', '2025-10-05 09:41:19'),
+(26, 3, 18, 'Sách quỷ diệt hồn', 'Chuyện kể về 1 nhóm anh hùng chuyên trừ gian diệt ác', 200000.00, 60, 'active', '2025-10-05 09:26:14'),
+(29, 3, 18, 'Sách ARPANET', 'Sách nói về mạng máy tính đầu tiên', 200000.00, 20, 'active', '2025-10-05 10:44:52'),
+(30, 3, 18, 'Sách làm giàu', 'oke á', 200000.00, 20, 'active', '2025-10-07 13:11:32'),
+(31, 3, 18, 'Sách cổ tích xưa', 'woww', 300000.00, 50, 'active', '2025-10-07 04:28:25'),
+(32, 3, 18, 'Sách lớp 2', 'omg', 300000.00, 30, 'active', '2025-10-07 05:05:42');
 
 -- --------------------------------------------------------
 
@@ -589,7 +734,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT cho bảng `anhsanpham`
 --
 ALTER TABLE `anhsanpham`
-  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT cho bảng `apma`
@@ -613,13 +758,13 @@ ALTER TABLE `chitietdonhang`
 -- AUTO_INCREMENT cho bảng `cuahang`
 --
 ALTER TABLE `cuahang`
-  MODIFY `ID_CuaHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `ID_CuaHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `danhgiasanpham`
 --
 ALTER TABLE `danhgiasanpham`
-  MODIFY `ID_DanhGia` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_DanhGia` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
 
 --
 -- AUTO_INCREMENT cho bảng `danhmuc`
@@ -655,13 +800,13 @@ ALTER TABLE `hoithoai`
 -- AUTO_INCREMENT cho bảng `nguoidung`
 --
 ALTER TABLE `nguoidung`
-  MODIFY `ID_NguoiDung` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID_NguoiDung` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `nhatkythaydoitonkho`
 --
 ALTER TABLE `nhatkythaydoitonkho`
-  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT cho bảng `phieugiamgia`
@@ -673,7 +818,7 @@ ALTER TABLE `phieugiamgia`
 -- AUTO_INCREMENT cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
+  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
 
 --
 -- AUTO_INCREMENT cho bảng `sanphamtronggio`

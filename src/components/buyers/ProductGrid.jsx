@@ -1,146 +1,98 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProductGrid.css";
-import aoThunNam from "../../images/products/ao_thun_nam.png";
-import sneakerNu from "../../images/products/sneaker_nu.png";
-const ProductGrid = () => {
+import { productService } from "../../services/productService";
+
+const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
   const navigate = useNavigate();
-  
-  // Sample product data (thay thế bằng API call sau này)
-  const products = [
-    {
-      id: 1,
-      name: "Áo thun nam basic cotton 100%",
-      price: 199000,
-      originalPrice: 299000,
-      discount: 33,
-      image: aoThunNam,
-      rating: 4.5,
-      sold: 150,
-      location: "TP. Hồ Chí Minh",
-    },
-    {
-      id: 2,
-      name: "Giày sneaker nữ thời trang",
-      price: 450000,
-      originalPrice: 600000,
-      discount: 25,
-      image: sneakerNu,
-      rating: 4.8,
-      sold: 89,
-      location: "Hà Nội",
-    },
-    {
-      id: 3,
-      name: "Túi xách nữ da thật cao cấp",
-      price: 890000,
-      originalPrice: 1200000,
-      discount: 26,
-      image: aoThunNam,
-      rating: 4.7,
-      sold: 45,
-      location: "Đà Nẵng",
-    },
-    {
-      id: 4,
-      name: "Điện thoại smartphone chính hãng",
-      price: 5990000,
-      originalPrice: 7990000,
-      discount: 25,
-      image: sneakerNu,
-      rating: 4.9,
-      sold: 234,
-      location: "TP. Hồ Chí Minh",
-    },
-    {
-      id: 5,
-      name: "Laptop gaming cao cấp",
-      price: 18990000,
-      originalPrice: 22990000,
-      discount: 17,
-      image: aoThunNam,
-      rating: 4.6,
-      sold: 67,
-      location: "Hà Nội",
-    },
-    {
-      id: 6,
-      name: "Đồng hồ thông minh smartwatch",
-      price: 2490000,
-      originalPrice: 3490000,
-      discount: 29,
-      image: aoThunNam,
-      rating: 4.4,
-      sold: 123,
-      location: "TP. Hồ Chí Minh",
-    },
-    {
-      id: 7,
-      name: "Quần jean nam slim fit",
-      price: 350000,
-      originalPrice: 500000,
-      discount: 30,
-      image: aoThunNam,
-      rating: 4.3,
-      sold: 98,
-      location: "Cần Thơ",
-    },
-    {
-      id: 8,
-      name: "Máy ảnh DSLR chuyên nghiệp",
-      price: 12500000,
-      originalPrice: 15000000,
-      discount: 17,
-      image: sneakerNu,
-      rating: 4.8,
-      sold: 23,
-      location: "Hà Nội",
-    },
-    {
-      id: 9,
-      name: "Váy nữ dạ hội sang trọng",
-      price: 1200000,
-      originalPrice: 1800000,
-      discount: 33,
-      image: sneakerNu,
-      rating: 4.5,
-      sold: 56,
-      location: "TP. Hồ Chí Minh",
-    },
-    {
-      id: 10,
-      name: "Tai nghe bluetooth không dây",
-      price: 890000,
-      originalPrice: 1290000,
-      discount: 31,
-      image: sneakerNu,
-      rating: 4.6,
-      sold: 189,
-      location: "Đà Nẵng",
-    },
-    {
-      id: 11,
-      name: "Kính mát nam nữ UV400",
-      price: 299000,
-      originalPrice: 599000,
-      discount: 50,
-      image: aoThunNam,
-      rating: 4.2,
-      sold: 145,
-      location: "Hà Nội",
-    },
-    {
-      id: 12,
-      name: "Balo laptop chống nước",
-      price: 450000,
-      originalPrice: 650000,
-      discount: 31,
-      image: sneakerNu,
-      rating: 4.7,
-      sold: 87,
-      location: "TP. Hồ Chí Minh",
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
+  // Load products function
+  const loadProducts = async (pageNum = 1, reset = false) => {
+    try {
+      if (pageNum === 1) {
+        setLoading(true);
+        setError(null);
+      } else {
+        setIsLoadingMore(true);
+      }
+
+      const params = {
+        page: pageNum,
+        limit: 20,
+        sortBy: "created_date",
+        sortOrder: "DESC",
+      };
+
+      // Add search query if exists
+      if (searchQuery && searchQuery.trim()) {
+        params.search = searchQuery.trim();
+      }
+
+      // Add category filter if selected
+      if (selectedCategory) {
+        params.category = selectedCategory;
+      }
+
+      console.log("Loading products with params:", params);
+
+      const response = await productService.getProducts(params);
+
+      if (response.success) {
+        const transformedProducts = response.data.map((product) => ({
+          id: product.ID_SanPham,
+          name: product.TenSanPham,
+          price: parseFloat(product.Gia),
+          image: product.image_urls
+            ? product.image_urls.split(",")[0]
+            : "https://via.placeholder.com/300x300/ff6b35/ffffff?text=PycShop",
+          rating: parseFloat(product.average_rating) || 0,
+          sold: product.review_count || 0,
+          location: product.shop_location || "TP.HCM",
+          category: product.TenDanhMuc,
+          stock: product.TonKho,
+        }));
+
+        if (reset || pageNum === 1) {
+          setProducts(transformedProducts);
+        } else {
+          setProducts((prev) => [...prev, ...transformedProducts]);
+        }
+
+        // Check if there are more products
+        setHasMore(response.pagination.hasNext);
+        setPage(pageNum);
+      } else {
+        throw new Error(response.message || "Failed to load products");
+      }
+    } catch (err) {
+      console.error("Error loading products:", err);
+      setError("Không thể tải sản phẩm. Vui lòng thử lại.");
+      if (pageNum === 1) {
+        setProducts([]);
+      }
+    } finally {
+      setLoading(false);
+      setIsLoadingMore(false);
+    }
+  };
+
+  // Initial load and reload when search/category changes
+  useEffect(() => {
+    loadProducts(1, true);
+  }, [searchQuery, selectedCategory]);
+
+  // Load more products
+  const handleLoadMore = () => {
+    if (!isLoadingMore && hasMore) {
+      loadProducts(page + 1, false);
+    }
+  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -185,15 +137,92 @@ const ProductGrid = () => {
   };
 
   const handleProductClick = (productId) => {
-    // Chuyển đến trang chi tiết sản phẩm
     navigate(`/product/${productId}`);
   };
+
+  // Loading state
+  if (loading) {
+    return (
+      <div className="products-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">
+              {searchQuery
+                ? `Kết quả tìm kiếm: "${searchQuery}"`
+                : "Gợi Ý Hôm Nay"}
+            </h2>
+          </div>
+          <div className="loading-container">
+            <div className="loading-spinner"></div>
+            <p>Đang tải sản phẩm...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <div className="products-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">Có lỗi xảy ra</h2>
+          </div>
+          <div className="error-container">
+            <p>{error}</p>
+            <button className="retry-btn" onClick={() => loadProducts(1, true)}>
+              Thử lại
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // No products found
+  if (products.length === 0) {
+    return (
+      <div className="products-section">
+        <div className="container">
+          <div className="section-header">
+            <h2 className="section-title">
+              {searchQuery
+                ? `Không tìm thấy sản phẩm cho "${searchQuery}"`
+                : "Không có sản phẩm"}
+            </h2>
+          </div>
+          <div className="no-products">
+            <p>
+              {searchQuery
+                ? "Thử tìm kiếm với từ khóa khác hoặc kiểm tra chính tả"
+                : "Hiện tại chưa có sản phẩm nào được hiển thị"}
+            </p>
+            {searchQuery && (
+              <button
+                className="clear-search-btn"
+                onClick={() => onCategorySelect && onCategorySelect(null)}
+              >
+                Xem tất cả sản phẩm
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="products-section">
       <div className="container">
         <div className="section-header">
-          <h2 className="section-title">Gợi Ý Hôm Nay</h2>
+          <h2 className="section-title">
+            {searchQuery
+              ? `Kết quả tìm kiếm: "${searchQuery}" `
+              : selectedCategory
+              ? `Danh mục: ${products[0]?.category || "Sản phẩm"} `
+              : `Gợi Ý Hôm Nay `}
+          </h2>
         </div>
         <div className="products-grid">
           {products.map((product) => (
@@ -203,13 +232,25 @@ const ProductGrid = () => {
               onClick={() => handleProductClick(product.id)}
             >
               <div className="product-image">
-                <img src={product.image} alt={product.name} />
+                <img
+                  src={product.image}
+                  alt={product.name}
+                  onError={(e) => {
+                    e.target.src =
+                      "https://via.placeholder.com/300x300/ff6b35/ffffff?text=PycShop";
+                  }}
+                />
                 {product.discount > 0 && (
                   <div className="discount-badge">-{product.discount}%</div>
                 )}
+                {product.stock === 0 && (
+                  <div className="out-of-stock-badge">Hết hàng</div>
+                )}
               </div>
               <div className="product-info">
-                <h3 className="product-name">{product.name}</h3>
+                <h3 className="product-name" title={product.name}>
+                  {product.name}
+                </h3>
                 <div className="product-price">
                   <span className="current-price">
                     {formatPrice(product.price)}
@@ -223,23 +264,48 @@ const ProductGrid = () => {
                 <div className="product-meta">
                   <div className="rating">
                     <div className="stars">{renderStars(product.rating)}</div>
-                    <span className="rating-text">({product.rating})</span>
+                    <span className="rating-text">
+                      ({product.rating.toFixed(1)})
+                    </span>
                   </div>
-                  <div className="sold">Đã bán {product.sold}</div>
+                  <div className="sold">
+                    {product.sold > 0
+                      ? `${product.sold} đánh giá`
+                      : "Chưa có đánh giá"}
+                  </div>
                 </div>
                 <div className="product-location">{product.location}</div>
               </div>
             </div>
           ))}
         </div>
-        <div className="load-more">
-          <button
-            className="load-more-btn"
-            onClick={() => alert("Vui lòng đăng nhập để xem thêm sản phẩm!")}
-          >
-            Xem Thêm
-          </button>
-        </div>
+
+        {/* Load More Button */}
+        {hasMore && (
+          <div className="load-more">
+            <button
+              className={`load-more-btn ${isLoadingMore ? "loading" : ""}`}
+              onClick={handleLoadMore}
+              disabled={isLoadingMore}
+            >
+              {isLoadingMore ? (
+                <>
+                  <div className="loading-spinner small"></div>
+                  Đang tải...
+                </>
+              ) : (
+                "Xem Thêm"
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* No more products message */}
+        {!hasMore && products.length > 0 && (
+          <div className="no-more-products">
+            <p>Đã hiển thị tất cả sản phẩm</p>
+          </div>
+        )}
       </div>
     </div>
   );

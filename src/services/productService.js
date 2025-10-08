@@ -2,7 +2,19 @@ import { api } from "./apiService.js";
 
 // Product Service
 export const productService = {
-  // Get all products
+  // Get products with pagination and filters
+  getProducts: async (params = {}) => {
+    try {
+      const queryParams = new URLSearchParams(params).toString();
+      const url = `/products${queryParams ? `?${queryParams}` : ""}`;
+      return await api.get(url);
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      throw error;
+    }
+  },
+
+  // Get all products (legacy method)
   getAllProducts: async (filters = {}) => {
     try {
       const queryParams = new URLSearchParams(filters).toString();
@@ -14,12 +26,48 @@ export const productService = {
     }
   },
 
-  // Get product by ID
-  getProductById: async (id) => {
+  // Get categories
+  getCategories: async () => {
     try {
-      return await api.get(`/products/${id}`);
+      return await api.get("/products/categories");
     } catch (error) {
-      console.error("Error fetching product:", error);
+      console.error("Error fetching categories:", error);
+      throw error;
+    }
+  },
+
+  // Search products
+  searchProducts: async (params = {}) => {
+    try {
+      const queryParams = new URLSearchParams(params).toString();
+      const url = `/products/search${queryParams ? `?${queryParams}` : ""}`;
+      return await api.get(url);
+    } catch (error) {
+      console.error("Error searching products:", error);
+      throw error;
+    }
+  },
+
+  // Get product reviews
+  getProductReviews: async (productId, params = {}) => {
+    try {
+      const queryParams = new URLSearchParams(params).toString();
+      const url = `/products/${productId}/reviews${
+        queryParams ? `?${queryParams}` : ""
+      }`;
+      return await api.get(url);
+    } catch (error) {
+      console.error("Error fetching product reviews:", error);
+      throw error;
+    }
+  },
+
+  // Get product rating statistics
+  getProductRatingStats: async (productId) => {
+    try {
+      return await api.get(`/products/${productId}/rating-stats`);
+    } catch (error) {
+      console.error("Error fetching product rating stats:", error);
       throw error;
     }
   },

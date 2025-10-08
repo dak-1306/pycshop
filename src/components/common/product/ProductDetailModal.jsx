@@ -153,14 +153,18 @@ const ProductDetailModal = ({ isOpen, onClose, product, onEdit, onDelete }) => {
                     </span>
                     <span
                       className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                        product.status === "Còn hàng"
+                        product.status === "active"
                           ? "bg-green-100 text-green-800"
-                          : product.status === "Hết hàng"
+                          : product.status === "out_of_stock"
                           ? "bg-red-100 text-red-800"
                           : "bg-gray-100 text-gray-800"
                       }`}
                     >
-                      {product.status}
+                      {product.status === "active"
+                        ? "Còn hàng"
+                        : product.status === "out_of_stock"
+                        ? "Hết hàng"
+                        : "Ngừng bán"}
                     </span>
                   </div>
                 </div>

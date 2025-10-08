@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 08, 2025 lúc 04:52 PM
+-- Thời gian đã tạo: Th10 08, 2025 lúc 07:59 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -60,7 +60,56 @@ CREATE TABLE `anhsanpham` (
 
 INSERT INTO `anhsanpham` (`ID_Anh`, `ID_SanPham`, `Url`, `Upload_at`) VALUES
 (12, 29, '/uploads/product_images/product_29_1759660782333_shq9rh2vr.png', '2025-10-05 10:39:42'),
-(14, 33, '/uploads/product_images/product_33_1759934234970_81ypmyi0u.jpg', '2025-10-08 14:37:14');
+(14, 33, '/uploads/product_images/product_33_1759934234970_81ypmyi0u.jpg', '2025-10-08 14:37:14'),
+(19, 4, '/uploads/product_images/product_4_1759941885376_fgq4wb6tv.webp', '2025-10-08 10:04:17'),
+(20, 4, '/uploads/product_images/product_4_1759941885380_awlf2g3fr.webp', '2025-10-08 10:04:16'),
+(21, 4, '/uploads/product_images/product_4_1759941885386_i27n5pwx8.webp', '2025-10-08 10:04:15'),
+(22, 4, '/uploads/product_images/product_4_1759941885390_yg6d1nthv.webp', '2025-10-08 10:04:18'),
+(23, 4, '/uploads/product_images/product_4_1759941885394_oa0vcrxo9.webp', '2025-10-08 10:04:19'),
+(24, 21, '/uploads/product_images/product_21_1759941973770_svq8bffqt.jpg', '2025-10-08 10:12:18'),
+(25, 21, '/uploads/product_images/product_21_1759941973774_eflai9iv0.jpg', '2025-10-08 10:12:19'),
+(26, 21, '/uploads/product_images/product_21_1759941973777_g8wxyey22.jpg', '2025-10-08 10:12:17'),
+(27, 21, '/uploads/product_images/product_21_1759941973781_4ssa7ih01.jpg', '2025-10-08 10:12:20'),
+(28, 22, '/uploads/product_images/product_22_1759944845260_ey9lvhmof.webp', '2025-10-08 10:34:36'),
+(29, 22, '/uploads/product_images/product_22_1759944845265_jdt7l9laj.webp', '2025-10-08 10:34:37'),
+(30, 22, '/uploads/product_images/product_22_1759944845268_47k2xnxhu.webp', '2025-10-08 10:34:38'),
+(31, 22, '/uploads/product_images/product_22_1759944845271_e0u0x90ir.webp', '2025-10-08 10:34:39'),
+(32, 22, '/uploads/product_images/product_22_1759944845274_yywevj4ms.webp', '2025-10-08 10:34:40'),
+(34, 34, '/uploads/product_images/product_34_1759944979769_hv0bo6532.webp', '2025-10-08 10:36:31'),
+(35, 34, '/uploads/product_images/product_34_1759944979773_c2tgoid79.webp', '2025-10-08 10:36:33'),
+(36, 34, '/uploads/product_images/product_34_1759944979776_g9trzn0q6.webp', '2025-10-08 10:36:32'),
+(37, 23, '/uploads/product_images/product_23_1759945085996_gmk772qsx.webp', '2025-10-08 17:38:05'),
+(38, 23, '/uploads/product_images/product_23_1759945086000_nlmx9jhgp.webp', '2025-10-08 17:38:06'),
+(39, 23, '/uploads/product_images/product_23_1759945086008_qca50hmrr.webp', '2025-10-08 17:38:06'),
+(40, 23, '/uploads/product_images/product_23_1759945086011_ozm4bs71i.webp', '2025-10-08 17:38:06'),
+(41, 23, '/uploads/product_images/product_23_1759945086015_ayhswdkjl.webp', '2025-10-08 17:38:06'),
+(42, 24, '/uploads/product_images/product_24_1759945189227_b0mqi8ovf.webp', '2025-10-08 10:39:59'),
+(43, 24, '/uploads/product_images/product_24_1759945189231_8om9m1dhj.webp', '2025-10-08 10:40:01'),
+(44, 24, '/uploads/product_images/product_24_1759945189234_f3r3mzdd4.webp', '2025-10-08 10:40:02'),
+(45, 24, '/uploads/product_images/product_24_1759945189237_ymutw2utn.webp', '2025-10-08 10:40:03'),
+(46, 24, '/uploads/product_images/product_24_1759945189241_5r6lsd9bd.webp', '2025-10-08 10:40:00'),
+(47, 1, '/uploads/product_images/product_1_1759945257550_4ujrjgwhn.jpg', '2025-10-08 17:40:57'),
+(48, 1, '/uploads/product_images/product_1_1759945257554_xs9unodv7.jpg', '2025-10-08 17:40:57'),
+(49, 2, '/uploads/product_images/product_2_1759945314268_rteseqhvx.webp', '2025-10-08 17:41:54'),
+(50, 2, '/uploads/product_images/product_2_1759945314272_94buf3pla.webp', '2025-10-08 17:41:54'),
+(51, 2, '/uploads/product_images/product_2_1759945314276_ozu3ygz8l.webp', '2025-10-08 17:41:54'),
+(52, 2, '/uploads/product_images/product_2_1759945314279_uamk12a9b.webp', '2025-10-08 17:41:54'),
+(53, 3, '/uploads/product_images/product_3_1759945383469_uv8625ik0.webp', '2025-10-08 10:43:18'),
+(54, 3, '/uploads/product_images/product_3_1759945383473_xiupo2d04.webp', '2025-10-08 10:43:16'),
+(55, 3, '/uploads/product_images/product_3_1759945383476_wp09u6r7f.webp', '2025-10-08 10:43:17'),
+(56, 3, '/uploads/product_images/product_3_1759945383480_xgqfkts4m.webp', '2025-10-08 10:43:19'),
+(58, 30, '/uploads/product_images/product_30_1759945772491_q2eq1q6r1.jpg', '2025-10-08 10:49:45'),
+(59, 30, '/uploads/product_images/product_30_1759945772496_x6x1tbn37.webp', '2025-10-08 10:49:46'),
+(60, 30, '/uploads/product_images/product_30_1759945772500_p48bpz6uv.webp', '2025-10-08 10:49:47'),
+(61, 30, '/uploads/product_images/product_30_1759945772504_12j9eawri.webp', '2025-10-08 10:49:48'),
+(62, 32, '/uploads/product_images/product_32_1759945827658_xhfevo4gt.jpg', '2025-10-08 10:50:56'),
+(63, 32, '/uploads/product_images/product_32_1759945827661_wz8wmvqfm.jpg', '2025-10-08 10:50:57'),
+(64, 32, '/uploads/product_images/product_32_1759945827667_unqcbvl21.jpg', '2025-10-08 10:50:58'),
+(65, 31, '/uploads/product_images/product_31_1759945889216_w5xmy8yuk.webp', '2025-10-08 17:51:29'),
+(66, 25, '/uploads/product_images/product_25_1759946110929_jxk70or3i.webp', '2025-10-08 17:55:10'),
+(67, 26, '/uploads/product_images/product_26_1759946193509_fae74qk13.jpg', '2025-10-08 10:56:56'),
+(68, 26, '/uploads/product_images/product_26_1759946193513_2kb8iwrs7.jpg', '2025-10-08 10:56:55'),
+(69, 26, '/uploads/product_images/product_26_1759946193517_3mgjz6wiw.jpg', '2025-10-08 10:56:57');
 
 -- --------------------------------------------------------
 
@@ -265,10 +314,6 @@ INSERT INTO `danhgiasanpham` (`ID_DanhGia`, `ID_SanPham`, `ID_NguoiMua`, `BinhLu
 (74, 19, 4, 'Giao nhanh, còn hạn sử dụng dài.', 5, '2025-10-08 10:22:51'),
 (75, 19, 5, 'Giá ổn.', 4, '2025-10-08 10:22:51'),
 (76, 19, 6, 'Hàng chính hãng.', 5, '2025-10-08 10:22:51'),
-(77, 20, 3, 'Áo mềm, thấm hút tốt.', 5, '2025-10-08 10:22:51'),
-(78, 20, 4, 'Vải co giãn, dễ mặc.', 4, '2025-10-08 10:22:51'),
-(79, 20, 5, 'Màu không phai sau khi giặt.', 5, '2025-10-08 10:22:51'),
-(80, 20, 6, 'Sản phẩm ổn trong tầm giá.', 4, '2025-10-08 10:22:51'),
 (81, 21, 3, 'Áo đẹp, đúng size.', 5, '2025-10-08 10:22:51'),
 (82, 21, 4, 'Chất vải mịn, dễ ủi.', 4, '2025-10-08 10:22:51'),
 (83, 21, 5, 'Đường may chắc chắn.', 5, '2025-10-08 10:22:51'),
@@ -455,7 +500,8 @@ INSERT INTO `nhatkythaydoitonkho` (`ID_NhatKy`, `ID_SanPham`, `SoLuongThayDoi`, 
 (3, 26, 5, 'import', '2025-10-04 07:09:28'),
 (4, 26, 5, 'import', '2025-10-04 07:09:38'),
 (5, 26, 10, 'import', '2025-10-04 07:12:59'),
-(6, 25, 18, 'import', '2025-10-05 09:41:19');
+(6, 25, 18, 'import', '2025-10-05 09:41:19'),
+(7, 4, 18, 'import', '2025-10-08 16:09:01');
 
 -- --------------------------------------------------------
 
@@ -551,10 +597,10 @@ CREATE TABLE `sanpham` (
 --
 
 INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, `MoTa`, `Gia`, `TonKho`, `TrangThai`, `CapNhat`) VALUES
-(1, 4, 1, 'Áo ba lỗ', 'Sản phẩm thời trang nam: áo ba lỗ, áo thun', 150000.00, 50, 'active', '2025-10-01 09:27:57'),
-(2, 4, 2, 'Đầm váy', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 250000.00, 30, 'active', '2025-10-01 09:27:57'),
-(3, 4, 3, 'Ốp lưng điện thoại', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 12000000.00, 20, 'active', '2025-10-01 09:27:57'),
-(4, 4, 4, 'Laptop Asus', 'Sản phẩm máy tính xách tay: Asus, Dell', 15000000.00, 0, 'out_of_stock', '2025-10-01 10:30:33'),
+(1, 4, 1, 'Áo ba lỗ', 'Sản phẩm thời trang nam: áo ba lỗ, áo thun', 150000.00, 50, 'active', '2025-10-08 17:40:57'),
+(2, 4, 2, 'Đầm váy', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 250000.00, 30, 'active', '2025-10-08 17:41:54'),
+(3, 4, 3, 'Ốp lưng điện thoại', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 12000000.00, 20, 'active', '2025-10-08 17:43:16'),
+(4, 4, 4, 'Laptop Asus', 'Sản phẩm máy tính xách tay: Asus, Dell', 15000000.00, 18, 'active', '2025-10-08 17:09:50'),
 (5, 4, 5, 'Máy quay Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 10000000.00, 10, 'active', '2025-10-01 09:27:57'),
 (6, 4, 6, 'Đồng hồ Casio', 'Sản phẩm đồng hồ: Casio, đồng hồ thông minh', 2000000.00, 40, 'active', '2025-10-01 09:27:57'),
 (7, 4, 7, 'Giày sneaker nam', 'Sản phẩm giày dép nam: sneaker, giày da', 800000.00, 60, 'active', '2025-10-01 09:27:57'),
@@ -570,18 +616,18 @@ INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, 
 (17, 4, 17, 'Sữa bột trẻ em', 'Sản phẩm mẹ & bé: sữa bột, xe đẩy', 800000.00, 30, 'active', '2025-10-01 09:27:57'),
 (18, 4, 18, 'Sách Tiếng Việt lớp 4', 'Sản phẩm nhà sách online: sách giáo khoa, tiểu thuyết', 150000.00, 200, 'active', '2025-10-01 09:27:57'),
 (19, 4, 19, 'Mì Omachi tôm chua cay', 'Sản phẩm bách hóa online: mì gói, nước ngọt', 50000.00, 300, 'active', '2025-10-01 09:27:57'),
-(20, 4, 1, 'Áo thun xanh', 'Sản phẩm thời trang nam: áo ba lỗ, áo thun', 119000.00, 50, 'active', '2025-10-08 14:38:44'),
-(21, 4, 2, 'Áo sơ mi nữ', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 299999.00, 30, 'active', '2025-10-01 10:44:11'),
-(22, 4, 3, 'iPhone 12', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 15000000.00, 20, 'active', '2025-10-01 10:44:11'),
-(23, 4, 4, 'Laptop Lenovo', 'Sản phẩm máy tính xách tay: Asus, Dell', 25000000.00, 15, 'active', '2025-10-01 10:44:11'),
-(24, 4, 5, 'Máy ảnh Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 9000000.00, 10, 'active', '2025-10-01 10:44:11'),
-(25, 3, 18, 'Sách huyền vũ yêu quái', 'Sách nói về 1 chàng trai không được bình thường và kỳ lạ, cuối cùng....', 10000.00, 30, 'active', '2025-10-05 09:41:19'),
-(26, 3, 18, 'Sách quỷ diệt hồn', 'Chuyện kể về 1 nhóm anh hùng chuyên trừ gian diệt ác', 200000.00, 60, 'active', '2025-10-05 09:26:14'),
+(21, 4, 2, 'Áo sơ mi nữ', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 299999.00, 30, 'active', '2025-10-08 17:12:17'),
+(22, 4, 3, 'iPhone 12', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 15000000.00, 20, 'active', '2025-10-08 17:34:36'),
+(23, 4, 4, 'Laptop Lenovo', 'Sản phẩm máy tính xách tay: Asus, Dell', 25000000.00, 15, 'active', '2025-10-08 17:38:05'),
+(24, 4, 5, 'Máy ảnh Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 9000000.00, 10, 'active', '2025-10-08 17:39:59'),
+(25, 3, 18, 'Sách huyền vũ yêu quái', 'Sách nói về 1 chàng trai không được bình thường và kỳ lạ, cuối cùng....', 10000.00, 30, 'active', '2025-10-08 17:55:10'),
+(26, 3, 18, 'Sách quỷ diệt hồn', 'Chuyện kể về 1 nhóm anh hùng chuyên trừ gian diệt ác', 200000.00, 60, 'active', '2025-10-08 17:56:55'),
 (29, 3, 18, 'Sách ARPANET', 'Sách nói về mạng máy tính đầu tiên', 200000.00, 20, 'active', '2025-10-05 10:44:52'),
-(30, 3, 18, 'Sách làm giàu', 'oke á', 200000.00, 20, 'active', '2025-10-07 13:11:32'),
-(31, 3, 18, 'Sách cổ tích xưa', 'woww', 300000.00, 50, 'active', '2025-10-07 04:28:25'),
-(32, 3, 18, 'Sách lớp 2', 'omg', 300000.00, 30, 'active', '2025-10-07 05:05:42'),
-(33, 4, 1, 'Áo thun xám', 'Chất liệu cotton, mát mẻ', 159000.00, 100, 'active', '2025-10-08 14:37:14');
+(30, 3, 18, 'Sách làm giàu', 'oke á', 200000.00, 20, 'active', '2025-10-08 17:49:45'),
+(31, 3, 18, 'Sách cổ tích xưa', 'woww', 300000.00, 50, 'active', '2025-10-08 17:51:29'),
+(32, 3, 18, 'Sách lớp 2', 'omg', 300000.00, 30, 'active', '2025-10-08 17:50:56'),
+(33, 4, 1, 'Áo thun xám', 'Chất liệu cotton, mát mẻ', 159000.00, 100, 'active', '2025-10-08 14:37:14'),
+(34, 4, 1, 'Áo thun xanh', 'Áo hot trend cho mùa hè', 199000.00, 100, 'active', '2025-10-08 17:36:31');
 
 -- --------------------------------------------------------
 
@@ -844,7 +890,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT cho bảng `anhsanpham`
 --
 ALTER TABLE `anhsanpham`
-  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
 
 --
 -- AUTO_INCREMENT cho bảng `apma`
@@ -916,7 +962,7 @@ ALTER TABLE `nguoidung`
 -- AUTO_INCREMENT cho bảng `nhatkythaydoitonkho`
 --
 ALTER TABLE `nhatkythaydoitonkho`
-  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `phieugiamgia`
@@ -928,7 +974,7 @@ ALTER TABLE `phieugiamgia`
 -- AUTO_INCREMENT cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
 
 --
 -- AUTO_INCREMENT cho bảng `sanphamtronggio`

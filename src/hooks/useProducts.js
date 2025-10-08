@@ -124,7 +124,7 @@ export const useProducts = () => {
 
   // Image handling functions
   const handleImageUpload = (files) => {
-    const maxImages = 5;
+    const maxImages = 15;
     const currentImages = currentProduct.images || [];
     const remainingSlots = maxImages - currentImages.length;
 
@@ -413,7 +413,7 @@ export const useProducts = () => {
           // Send image order if images were reordered
           imageOrder: productToSave.hasImageReorder
             ? productToSave.images
-                .map((img) => img.id || img.url || img)
+                .map((img) => img.id || img.ID_Anh)
                 .filter(Boolean)
             : undefined,
         };

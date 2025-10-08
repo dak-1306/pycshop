@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 08, 2025 lúc 12:23 PM
+-- Thời gian đã tạo: Th10 08, 2025 lúc 04:52 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -59,7 +59,8 @@ CREATE TABLE `anhsanpham` (
 --
 
 INSERT INTO `anhsanpham` (`ID_Anh`, `ID_SanPham`, `Url`, `Upload_at`) VALUES
-(12, 29, '/uploads/product_images/product_29_1759660782333_shq9rh2vr.png', '2025-10-05 10:39:42');
+(12, 29, '/uploads/product_images/product_29_1759660782333_shq9rh2vr.png', '2025-10-05 10:39:42'),
+(14, 33, '/uploads/product_images/product_33_1759934234970_81ypmyi0u.jpg', '2025-10-08 14:37:14');
 
 -- --------------------------------------------------------
 
@@ -91,6 +92,43 @@ CREATE TABLE `baocao` (
   `TrangThai` enum('in_progress','resolved') NOT NULL DEFAULT 'in_progress',
   `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `category_product_count_cache`
+--
+
+CREATE TABLE `category_product_count_cache` (
+  `ID_DanhMuc` int(11) NOT NULL,
+  `product_count` int(11) DEFAULT 0,
+  `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `category_product_count_cache`
+--
+
+INSERT INTO `category_product_count_cache` (`ID_DanhMuc`, `product_count`, `last_updated`) VALUES
+(1, 2, '2025-10-08 12:03:56'),
+(2, 2, '2025-10-08 12:03:56'),
+(3, 2, '2025-10-08 12:03:56'),
+(4, 2, '2025-10-08 12:03:56'),
+(5, 2, '2025-10-08 12:03:56'),
+(6, 1, '2025-10-08 12:03:56'),
+(7, 1, '2025-10-08 12:03:56'),
+(8, 1, '2025-10-08 12:03:56'),
+(9, 1, '2025-10-08 12:03:56'),
+(10, 1, '2025-10-08 12:03:56'),
+(11, 1, '2025-10-08 12:03:56'),
+(12, 1, '2025-10-08 12:03:56'),
+(13, 1, '2025-10-08 12:03:56'),
+(14, 1, '2025-10-08 12:03:56'),
+(15, 1, '2025-10-08 12:03:56'),
+(16, 1, '2025-10-08 12:03:56'),
+(17, 1, '2025-10-08 12:03:56'),
+(18, 7, '2025-10-08 12:03:56'),
+(19, 1, '2025-10-08 12:03:56');
 
 -- --------------------------------------------------------
 
@@ -389,7 +427,7 @@ CREATE TABLE `nguoidung` (
 
 INSERT INTO `nguoidung` (`ID_NguoiDung`, `VaiTro`, `HoTen`, `Email`, `MatKhau`, `SoDienThoai`, `DiaChi`, `TrangThai`, `ThoiGianTao`, `AvatarUrl`, `ID_CuaHang`) VALUES
 (3, 'seller', 'Nguyễn Văn Test', 'test@gmail.com', '$2b$10$kyTNrvfNiY2YcWIsctNm8O6Z08YJVJRNdIwNmgjlgGANAq7kNjrjm', '0123456789', '123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'active', '2025-09-29 10:46:02', NULL, 3),
-(4, 'seller', 'Trần Tuấn Anh', 'anh@gmail.com', '$2b$10$.nBUefCG4ZtzVCSUhbjb5.tcqiyZfpzfRENMJBdVqu.e.mvrDEJ3W', '01234567689', '357 Điện Biên Phủ, Phường 15, Quận Bình Thạnh, TP.HCM', 'active', '2025-09-30 07:25:46', NULL, NULL),
+(4, 'seller', 'Trần Tuấn Anh', 'anh@gmail.com', '$2b$10$.nBUefCG4ZtzVCSUhbjb5.tcqiyZfpzfRENMJBdVqu.e.mvrDEJ3W', '01234567689', '357 Điện Biên Phủ, Phường 15, Quận Bình Thạnh, TP.HCM', 'active', '2025-09-30 07:25:46', NULL, 1),
 (5, 'seller', 'Phạm Văn Bành', 'banh@gmail.com', '$2b$10$zdiHx0ziAUGVrMslqzUP9.cw93BaTIzSdAVOId9yQ3B9bg.DAGDZu', '0123456789', '147 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM', 'active', '2025-09-30 07:31:08', NULL, 7),
 (6, 'buyer', 'Trần Hải Đăng', 'dang@gmail.com', '$2b$10$5Q/4QYH1d/TlDwPbiV8HO.JWhdItHwsgkmm9UnVrWQCRQVnHb71OS', '0123435445', 'Số 2 Võ Oanh, Phường 25, Bình Thạnh, Hồ Chí Minh, Việt Nam', 'active', '2025-10-07 13:29:08', NULL, NULL);
 
@@ -439,6 +477,60 @@ CREATE TABLE `phieugiamgia` (
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `product_rating_cache`
+--
+
+CREATE TABLE `product_rating_cache` (
+  `ID_SanPham` int(11) NOT NULL,
+  `total_reviews` int(11) DEFAULT 0,
+  `count_1_star` int(11) DEFAULT 0,
+  `count_2_star` int(11) DEFAULT 0,
+  `count_3_star` int(11) DEFAULT 0,
+  `count_4_star` int(11) DEFAULT 0,
+  `count_5_star` int(11) DEFAULT 0,
+  `average_rating` decimal(3,1) DEFAULT 0.0,
+  `last_updated` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `product_rating_cache`
+--
+
+INSERT INTO `product_rating_cache` (`ID_SanPham`, `total_reviews`, `count_1_star`, `count_2_star`, `count_3_star`, `count_4_star`, `count_5_star`, `average_rating`, `last_updated`) VALUES
+(1, 4, 0, 0, 1, 2, 1, 4.0, '2025-10-08 12:03:56'),
+(2, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
+(3, 4, 0, 1, 1, 1, 1, 3.5, '2025-10-08 12:03:56'),
+(4, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
+(5, 4, 0, 0, 0, 2, 2, 4.5, '2025-10-08 12:03:56'),
+(6, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
+(7, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
+(8, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
+(9, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
+(10, 4, 0, 0, 1, 0, 3, 4.5, '2025-10-08 12:03:56'),
+(11, 4, 0, 0, 1, 2, 1, 4.0, '2025-10-08 12:03:56'),
+(12, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
+(13, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
+(14, 4, 0, 0, 0, 2, 2, 4.5, '2025-10-08 12:03:56'),
+(15, 4, 0, 0, 0, 2, 2, 4.5, '2025-10-08 12:03:56'),
+(16, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(17, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(18, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(19, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(20, 4, 0, 0, 0, 2, 2, 4.5, '2025-10-08 12:03:56'),
+(21, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(22, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(23, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(24, 4, 0, 0, 1, 2, 1, 4.0, '2025-10-08 12:03:56'),
+(25, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(26, 4, 0, 0, 0, 2, 2, 4.5, '2025-10-08 12:03:56'),
+(29, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(30, 4, 0, 0, 0, 0, 4, 5.0, '2025-10-08 12:03:56'),
+(31, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(32, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `sanpham`
 --
 
@@ -478,7 +570,7 @@ INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, 
 (17, 4, 17, 'Sữa bột trẻ em', 'Sản phẩm mẹ & bé: sữa bột, xe đẩy', 800000.00, 30, 'active', '2025-10-01 09:27:57'),
 (18, 4, 18, 'Sách Tiếng Việt lớp 4', 'Sản phẩm nhà sách online: sách giáo khoa, tiểu thuyết', 150000.00, 200, 'active', '2025-10-01 09:27:57'),
 (19, 4, 19, 'Mì Omachi tôm chua cay', 'Sản phẩm bách hóa online: mì gói, nước ngọt', 50000.00, 300, 'active', '2025-10-01 09:27:57'),
-(20, 4, 1, 'Áo thun', 'Sản phẩm thời trang nam: áo ba lỗ, áo thun', 119000.00, 50, 'active', '2025-10-01 10:44:11'),
+(20, 4, 1, 'Áo thun xanh', 'Sản phẩm thời trang nam: áo ba lỗ, áo thun', 119000.00, 50, 'active', '2025-10-08 14:38:44'),
 (21, 4, 2, 'Áo sơ mi nữ', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 299999.00, 30, 'active', '2025-10-01 10:44:11'),
 (22, 4, 3, 'iPhone 12', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 15000000.00, 20, 'active', '2025-10-01 10:44:11'),
 (23, 4, 4, 'Laptop Lenovo', 'Sản phẩm máy tính xách tay: Asus, Dell', 25000000.00, 15, 'active', '2025-10-01 10:44:11'),
@@ -488,7 +580,8 @@ INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, 
 (29, 3, 18, 'Sách ARPANET', 'Sách nói về mạng máy tính đầu tiên', 200000.00, 20, 'active', '2025-10-05 10:44:52'),
 (30, 3, 18, 'Sách làm giàu', 'oke á', 200000.00, 20, 'active', '2025-10-07 13:11:32'),
 (31, 3, 18, 'Sách cổ tích xưa', 'woww', 300000.00, 50, 'active', '2025-10-07 04:28:25'),
-(32, 3, 18, 'Sách lớp 2', 'omg', 300000.00, 30, 'active', '2025-10-07 05:05:42');
+(32, 3, 18, 'Sách lớp 2', 'omg', 300000.00, 30, 'active', '2025-10-07 05:05:42'),
+(33, 4, 1, 'Áo thun xám', 'Chất liệu cotton, mát mẻ', 159000.00, 100, 'active', '2025-10-08 14:37:14');
 
 -- --------------------------------------------------------
 
@@ -596,6 +689,14 @@ ALTER TABLE `baocao`
   ADD KEY `fk_baocao_sanpham` (`ID_SpBiBC`);
 
 --
+-- Chỉ mục cho bảng `category_product_count_cache`
+--
+ALTER TABLE `category_product_count_cache`
+  ADD PRIMARY KEY (`ID_DanhMuc`),
+  ADD KEY `idx_count` (`product_count`),
+  ADD KEY `idx_updated` (`last_updated`);
+
+--
 -- Chỉ mục cho bảng `chitietdonhang`
 --
 ALTER TABLE `chitietdonhang`
@@ -676,6 +777,15 @@ ALTER TABLE `phieugiamgia`
   ADD UNIQUE KEY `MaGiam` (`MaGiam`);
 
 --
+-- Chỉ mục cho bảng `product_rating_cache`
+--
+ALTER TABLE `product_rating_cache`
+  ADD PRIMARY KEY (`ID_SanPham`),
+  ADD KEY `idx_rating` (`average_rating`),
+  ADD KEY `idx_reviews` (`total_reviews`),
+  ADD KEY `idx_updated` (`last_updated`);
+
+--
 -- Chỉ mục cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
@@ -734,7 +844,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT cho bảng `anhsanpham`
 --
 ALTER TABLE `anhsanpham`
-  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT cho bảng `apma`
@@ -818,7 +928,7 @@ ALTER TABLE `phieugiamgia`
 -- AUTO_INCREMENT cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=33;
+  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT cho bảng `sanphamtronggio`

@@ -66,14 +66,13 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
         console.log("🚫 Discarding outdated API response");
         return;
       }
-
       if (response.success) {
         const transformedProducts = response.data.map((product) => ({
           id: product.ID_SanPham,
           name: product.TenSanPham,
           price: parseFloat(product.Gia),
           image: product.image_urls
-            ? product.image_urls.split(",")[0]
+            ? `../../../microservice/product_service/${product.image_urls}`
             : "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23ff6b35'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='white'%3EPycShop%3C/text%3E%3C/svg%3E",
           rating: parseFloat(product.average_rating) || 0,
           sold: product.review_count || 0,
@@ -81,6 +80,7 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
           category: product.TenDanhMuc,
           stock: product.TonKho,
         }));
+        console.log("Loaded products:", transformedProducts);
 
         if (reset || pageNum === 1) {
           setProducts(transformedProducts);

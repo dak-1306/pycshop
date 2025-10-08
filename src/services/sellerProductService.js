@@ -85,25 +85,99 @@ export const addProduct = async (productData) => {
   }
 };
 
-// Update product (without images)
-export const updateProduct = async (productId, productData) => {
+// Update product - Unified function supports both JSON and FormData
+export const updateProduct = async (productId, productData, options = {}) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
-      method: "PUT",
-      headers: createHeaders(),
-      body: JSON.stringify(productData),
-    });
+    const {
+      newImageFiles = [],
+      imagesToDelete = [],
+      newImageUrls = [],
+    } = options;
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Lỗi khi cập nhật sản phẩm");
+    // Check if we need to handle images
+    const hasImages =
+      newImageFiles.length > 0 ||
+      imagesToDelete.length > 0 ||
+      newImageUrls.length > 0;
+
+    if (hasImages) {
+      // Use FormData for image uploads
+      const formData = new FormData();
+
+      // Add basic product info
+      formData.append("tenSanPham", productData.tenSanPham || "");
+      formData.append("moTa", productData.moTa || "");
+      formData.append("gia", productData.gia || "0");
+      formData.append("danhMuc", productData.danhMuc || "1");
+      formData.append("trangThai", productData.trangThai || "active");
+
+      // Add images to delete (as JSON string)
+      if (imagesToDelete.length > 0) {
+        formData.append("imagesToDelete", JSON.stringify(imagesToDelete));
+      }
+
+      // Add new image URLs (as JSON string)
+      if (newImageUrls.length > 0) {
+        formData.append("newImageUrls", JSON.stringify(newImageUrls));
+      }
+
+      // Add new image files
+      if (newImageFiles.length > 0) {
+        newImageFiles.forEach((file) => {
+          formData.append("newImages", file);
+        });
+      }
+
+      console.log("[SERVICE] Updating product with FormData:", {
+        productId,
+        newImageFiles: newImageFiles.length,
+        imagesToDelete: imagesToDelete.length,
+        newImageUrls: newImageUrls.length,
+      });
+
+      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+        method: "PUT",
+        headers: createMultipartHeaders(), // No Content-Type for FormData
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Lỗi khi cập nhật sản phẩm");
+      }
+
+      return await response.json();
+    } else {
+      // Use JSON for simple updates without images
+      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+        method: "PUT",
+        headers: createHeaders(),
+        body: JSON.stringify(productData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Lỗi khi cập nhật sản phẩm");
+      }
+
+      return await response.json();
     }
-
-    return await response.json();
   } catch (error) {
     console.error("Error updating product:", error);
     throw error;
   }
+};
+
+// DEPRECATED: Use updateProduct instead
+export const updateProductWithImages = async (
+  productId,
+  productData,
+  options = {}
+) => {
+  console.warn(
+    "[DEPRECATED] updateProductWithImages is deprecated. Use updateProduct instead."
+  );
+  return updateProduct(productId, productData, options);
 };
 
 // Get product by ID
@@ -353,6 +427,7 @@ const sellerProductService = {
   getSellerProducts,
   addProduct,
   updateProduct,
+  // updateProductWithImages, // DEPRECATED - use updateProduct instead
   getProductById,
   deleteProduct,
 

@@ -170,7 +170,7 @@ class Seller {
   static async updateProduct(sellerId, productId, productData) {
     let connection;
     try {
-      const { tenSanPham, moTa, gia, danhMuc, trangThai } = productData;
+      const { tenSanPham, moTa, gia, danhMuc } = productData;
 
       // Get connection for transaction
       connection = await db.getConnection();
@@ -197,7 +197,7 @@ class Seller {
       // Update product info
       const updateProductQuery = `
         UPDATE SanPham 
-        SET TenSanPham = ?, MoTa = ?, Gia = ?, ID_DanhMuc = ?, TrangThai = ?, CapNhat = CURRENT_TIMESTAMP
+        SET TenSanPham = ?, MoTa = ?, Gia = ?, ID_DanhMuc = ?, TrangThai = 'active', CapNhat = CURRENT_TIMESTAMP
         WHERE ID_SanPham = ?
       `;
 
@@ -206,7 +206,6 @@ class Seller {
         moTa,
         gia,
         danhMuc,
-        trangThai,
         productId,
       ]);
 

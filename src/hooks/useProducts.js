@@ -11,6 +11,9 @@ const INITIAL_FORM_STATE = {
   weight: 1, // Default 1kg
   unit: "cái", // Default unit
   images: [],
+  imageFiles: [], // For new image files
+  imagesToDelete: [], // For tracking images to delete
+  newImageUrls: [], // For new image URLs
   featured: false,
 };
 
@@ -69,7 +72,7 @@ export const useProducts = () => {
             quantity: product.TonKho,
             category: product.TenDanhMuc || "Chưa phân loại",
             categoryId: product.ID_DanhMuc,
-            status: product.TrangThai === "active" ? "Còn hàng" : "Hết hàng",
+            status: product.TrangThai,
             description: product.MoTa || "",
             images: imageArray,
             image:
@@ -180,15 +183,37 @@ export const useProducts = () => {
   };
 
   const handleRemoveImage = (index) => {
+    const imageToRemove = currentProduct.images[index];
     const newImages = currentProduct.images.filter((_, i) => i !== index);
     const newImageFiles = currentProduct.imageFiles
       ? currentProduct.imageFiles.filter((_, i) => i !== index)
       : [];
 
+    // Track images that need to be deleted from database
+    const imagesToDelete = currentProduct.imagesToDelete || [];
+
+    // If the image has an ID (existing image from DB), add it to delete list
+    if (imageToRemove && imageToRemove.id) {
+      imagesToDelete.push(imageToRemove.id);
+      console.log(
+        `[useProducts] Added image ID ${imageToRemove.id} to delete list`,
+        imagesToDelete
+      );
+    } else if (
+      typeof imageToRemove === "string" &&
+      imageToRemove.includes("/uploads/")
+    ) {
+      // Handle legacy string URLs by trying to extract ID from backend
+      console.warn(
+        `[useProducts] Cannot delete image without ID: ${imageToRemove}`
+      );
+    }
+
     setCurrentProduct({
       ...currentProduct,
       images: newImages,
       imageFiles: newImageFiles,
+      imagesToDelete: imagesToDelete,
     });
   };
 
@@ -213,15 +238,55 @@ export const useProducts = () => {
     });
   };
 
-  const handleEditProduct = (productId) => {
+  const handleEditProduct = async (productId) => {
     const product = products.find((p) => p.id === productId);
     if (product) {
       setModalMode("edit");
-      setCurrentProduct({
-        ...product,
-        price: product.price.replace(/,/g, ""), // Remove commas for editing
-        stock: product.quantity, // Ensure stock field exists for edit
-      });
+
+      // Load detailed image information for editing
+      try {
+        console.log(
+          `[useProducts] Loading detailed images for product ${productId}`
+        );
+        const imageResponse = await sellerProductService.getProductImages(
+          productId
+        );
+
+        let detailedImages = [];
+        if (imageResponse.success && imageResponse.data) {
+          detailedImages = imageResponse.data.map((img) => ({
+            id: img.ID_Anh, // Image ID for deletion
+            url: `../../../../microservice/product_service${img.Url}`, // Image URL
+            Upload_at: img.Upload_at, // Upload timestamp
+          }));
+          console.log(
+            `[useProducts] Loaded ${detailedImages.length} detailed images:`,
+            detailedImages
+          );
+        }
+
+        setCurrentProduct({
+          ...product,
+          price: product.price.replace(/,/g, ""), // Remove commas for editing
+          stock: product.quantity, // Ensure stock field exists for edit
+          images: detailedImages, // Use detailed images with IDs
+          imagesToDelete: [], // Initialize empty array to track deleted images
+          newImageUrls: [], // Initialize empty array for new URL images
+          imageFiles: [], // Initialize empty array for new files
+        });
+      } catch (error) {
+        console.error("[useProducts] Error loading images for edit:", error);
+        // Fallback to original images without IDs
+        setCurrentProduct({
+          ...product,
+          price: product.price.replace(/,/g, ""),
+          stock: product.quantity,
+          imagesToDelete: [],
+          newImageUrls: [],
+          imageFiles: [],
+        });
+      }
+
       setShowProductModal(true);
     }
   };
@@ -307,14 +372,45 @@ export const useProducts = () => {
           productToSave.categoryId ||
           1;
 
-        // Update basic product info (NO tonKho field)
-        await sellerProductService.updateProduct(productToSave.id, {
+        // Prepare update data
+        const updateData = {
           tenSanPham: productToSave.name,
           gia: productToSave.price,
           danhMuc: categoryId,
           moTa: productToSave.description || "",
           trangThai: productToSave.status || "active",
+        };
+
+        // Prepare image options
+        const imageOptions = {
+          newImageFiles: productToSave.imageFiles || [],
+          imagesToDelete: productToSave.imagesToDelete || [],
+          newImageUrls: productToSave.newImageUrls || [],
+        };
+
+        // Check if we need to handle images
+        const hasImageChanges =
+          imageOptions.newImageFiles.length > 0 ||
+          imageOptions.imagesToDelete.length > 0 ||
+          imageOptions.newImageUrls.length > 0;
+
+        // Always use unified updateProduct function
+        console.log("[useProducts] Updating product with unified function:", {
+          hasImageChanges,
+          imageOptions: hasImageChanges ? imageOptions : "none",
+          productToSave: {
+            id: productToSave.id,
+            name: productToSave.name,
+            imagesToDelete: productToSave.imagesToDelete,
+            imageFiles: productToSave.imageFiles?.length || 0,
+          },
         });
+
+        await sellerProductService.updateProduct(
+          productToSave.id,
+          updateData,
+          hasImageChanges ? imageOptions : {}
+        );
 
         // Check if we need to add stock (additionalStock from ProductModal)
         const additionalStock = Number(productToSave.additionalStock) || 0;

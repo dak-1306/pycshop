@@ -48,7 +48,7 @@ const FeaturedProducts = ({
     }
 
     const fullUrl = imageUrl.startsWith("http")
-      ? imageUrl
+      ? `../../../../microservice/product_service${imageUrl}`
       : `http://localhost:5002${imageUrl}`;
     console.log("Final image URL:", fullUrl);
 

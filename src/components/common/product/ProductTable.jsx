@@ -15,6 +15,7 @@ const ProductTable = ({
       currency: "VND",
     }).format(price);
   };
+  console.log("Rendering ProductTable with products:", products);
 
   const getStockColor = (stock) => {
     if (stock > 10) return "text-green-600";
@@ -23,8 +24,6 @@ const ProductTable = ({
   };
 
   const getStatusColorInternal = (status) => {
-    if (getStatusColor) return getStatusColor(status);
-
     switch (status) {
       case "active":
         return "bg-green-100 text-green-800";
@@ -42,13 +41,13 @@ const ProductTable = ({
   const getStatusText = (status) => {
     switch (status) {
       case "active":
-        return "Hoạt động";
+        return "Còn hàng";
       case "out_of_stock":
         return "Hết hàng";
       case "pending":
         return "Chờ duyệt";
       case "inactive":
-        return "Không hoạt động";
+        return "Ngưng bán";
       default:
         return "Không xác định";
     }

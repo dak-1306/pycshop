@@ -14,7 +14,6 @@ import {
   getStockHistory,
   // Image management functions
   uploadProductImages,
-  addProductImages,
   getProductImages,
   deleteProductImage,
   // Order management functions
@@ -53,7 +52,12 @@ const upload = multer({
 router.get("/products", sellerAuthMiddleware, getSellerProducts);
 router.post("/products", sellerAuthMiddleware, addProduct);
 router.get("/products/:id", sellerAuthMiddleware, getProductById);
-router.put("/products/:id", sellerAuthMiddleware, updateProduct);
+router.put(
+  "/products/:id",
+  sellerAuthMiddleware,
+  upload.array("newImages", 15),
+  updateProduct
+);
 router.delete("/products/:id", sellerAuthMiddleware, deleteProduct);
 
 // Stock management routes
@@ -71,9 +75,8 @@ router.get(
   getStockHistory
 );
 
-// Image management routes - sử dụng SellerController
+// Image management routes - chỉ giữ endpoint cần thiết
 router.get("/products/:id/images", sellerAuthMiddleware, getProductImages);
-router.post("/products/:id/images", sellerAuthMiddleware, addProductImages);
 router.post(
   "/products/:productId/upload-images",
   sellerAuthMiddleware,

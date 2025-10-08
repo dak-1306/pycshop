@@ -456,39 +456,129 @@ const ProductModal = ({
 
                   {/* Image Preview */}
                   {product?.images && product.images.length > 0 && (
-                    <div className="grid grid-cols-2 gap-3">
-                      {product.images.map((image, index) => (
-                        <div key={index} className="relative group">
-                          <img
-                            src={image.url || image}
-                            alt={`Product ${index + 1}`}
-                            className="w-full h-24 object-cover rounded-lg border-2 border-gray-200 group-hover:border-purple-400 transition-colors"
-                          />
-                          <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 rounded-lg transition-all flex items-center justify-center">
-                            <div className="opacity-0 group-hover:opacity-100 flex space-x-2">
-                              <button
-                                onClick={() =>
-                                  onSetFeaturedImage &&
-                                  onSetFeaturedImage(index)
-                                }
-                                className="p-1 bg-white rounded text-purple-600 hover:bg-purple-50"
-                                title="Đặt làm ảnh chính"
-                              >
-                                ⭐
-                              </button>
-                              <button
-                                onClick={() =>
-                                  onRemoveImage && onRemoveImage(index)
-                                }
-                                className="p-1 bg-white rounded text-red-600 hover:bg-red-50"
-                                title="Xóa ảnh"
-                              >
-                                🗑️
-                              </button>
+                    <div className="space-y-3">
+                      <div className="text-sm text-gray-600 flex items-center gap-2">
+                        <span className="w-4 h-4 bg-yellow-500 text-white rounded text-xs flex items-center justify-center">
+                          ⭐
+                        </span>
+                        Ảnh đầu tiên sẽ là ảnh chính
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        {product.images.map((image, index) => (
+                          <div key={index} className="relative group">
+                            {/* Main image indicator */}
+                            {index === 0 && (
+                              <div className="absolute -top-2 -left-2 z-10 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full shadow-md font-medium">
+                                <span className="flex items-center gap-1">
+                                  ⭐ Ảnh chính
+                                </span>
+                              </div>
+                            )}
+
+                            <img
+                              src={
+                                typeof image === "object"
+                                  ? image.url || image.Url || image.ImageURL
+                                  : image
+                              }
+                              alt={`Product ${index + 1}`}
+                              className={`w-full h-24 object-cover rounded-lg border-2 transition-all ${
+                                index === 0
+                                  ? "border-yellow-400 shadow-md ring-2 ring-yellow-200"
+                                  : "border-gray-200 group-hover:border-purple-400"
+                              }`}
+                              onError={(e) => {
+                                console.log(
+                                  "Image failed to load:",
+                                  typeof image === "object" ? image.url : image
+                                );
+                                e.target.style.display = "none";
+                                e.target.nextElementSibling.style.display =
+                                  "flex";
+                              }}
+                              onLoad={() => {
+                                console.log(
+                                  "Image loaded successfully at index:",
+                                  index
+                                );
+                              }}
+                            />
+
+                            {/* Error fallback */}
+                            <div className="hidden w-full h-24 bg-gray-100 rounded-lg border-2 border-gray-200 items-center justify-center">
+                              <span className="text-gray-400 text-xs">
+                                Lỗi tải ảnh
+                              </span>
+                            </div>
+
+                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 rounded-lg transition-all flex items-center justify-center">
+                              <div className="opacity-0 group-hover:opacity-100 flex space-x-2">
+                                {index !== 0 && (
+                                  <button
+                                    onClick={() => {
+                                      console.log(
+                                        `Setting image ${index} as featured`
+                                      );
+                                      onSetFeaturedImage &&
+                                        onSetFeaturedImage(index);
+                                    }}
+                                    className="p-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-white shadow-md transform hover:scale-105 transition-all"
+                                    title="Đặt làm ảnh chính"
+                                  >
+                                    <svg
+                                      className="w-4 h-4"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                    </svg>
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() => {
+                                    console.log(`Removing image ${index}`);
+                                    onRemoveImage && onRemoveImage(index);
+                                  }}
+                                  className="p-2 bg-red-500 hover:bg-red-600 rounded-lg text-white shadow-md transform hover:scale-105 transition-all"
+                                  title="Xóa ảnh"
+                                >
+                                  <svg
+                                    className="w-4 h-4"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                    />
+                                  </svg>
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Index number */}
+                            <div className="absolute bottom-1 right-1 bg-black bg-opacity-70 text-white text-xs px-2 py-1 rounded">
+                              {index + 1}
                             </div>
                           </div>
+                        ))}
+                      </div>
+
+                      {/* Instructions */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="text-sm text-blue-800">
+                          <div className="font-medium mb-1">📋 Hướng dẫn:</div>
+                          <ul className="text-xs space-y-1 text-blue-700">
+                            <li>• Ảnh đầu tiên sẽ hiển thị làm ảnh đại diện</li>
+                            <li>• Click ⭐ để đặt ảnh khác làm ảnh chính</li>
+                            <li>• Click 🗑️ để xóa ảnh không cần thiết</li>
+                            <li>• Kéo thả để sắp xếp thứ tự ảnh</li>
+                          </ul>
                         </div>
-                      ))}
+                      </div>
                     </div>
                   )}
                 </div>

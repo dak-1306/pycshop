@@ -14,6 +14,7 @@ const INITIAL_FORM_STATE = {
   imageFiles: [], // For new image files
   imagesToDelete: [], // For tracking images to delete
   newImageUrls: [], // For new image URLs
+  hasImageReorder: false, // For tracking image reordering
   featured: false,
 };
 
@@ -218,24 +219,45 @@ export const useProducts = () => {
   };
 
   const handleSetFeaturedImage = (index) => {
-    if (index === 0) return; // Already featured
+    console.log(`[useProducts] Setting image at index ${index} as featured`);
 
+    if (index === 0) {
+      console.log("[useProducts] Image is already featured");
+      alert("ℹ️ Ảnh này đã là ảnh chính!");
+      return; // Already featured
+    }
+
+    // Move selected image to first position
+    const selectedImage = currentProduct.images[index];
     const newImages = [
-      currentProduct.images[index],
+      selectedImage,
       ...currentProduct.images.filter((_, i) => i !== index),
     ];
+
+    // Also reorder imageFiles if they exist
     const newImageFiles = currentProduct.imageFiles
       ? [
-          currentProduct.imageFiles[index],
+          currentProduct.imageFiles[index] || null,
           ...currentProduct.imageFiles.filter((_, i) => i !== index),
-        ]
+        ].filter(Boolean)
       : [];
+
+    console.log("[useProducts] New image order:", {
+      oldOrder: currentProduct.images.map(
+        (img, i) => `${i}: ${img.url || img}`
+      ),
+      newOrder: newImages.map((img, i) => `${i}: ${img.url || img}`),
+    });
 
     setCurrentProduct({
       ...currentProduct,
       images: newImages,
       imageFiles: newImageFiles,
+      hasImageReorder: true, // Flag to indicate images were reordered
     });
+
+    // Show success feedback
+    alert("⭐ Đã đặt ảnh làm ảnh chính!");
   };
 
   const handleEditProduct = async (productId) => {
@@ -273,6 +295,7 @@ export const useProducts = () => {
           imagesToDelete: [], // Initialize empty array to track deleted images
           newImageUrls: [], // Initialize empty array for new URL images
           imageFiles: [], // Initialize empty array for new files
+          hasImageReorder: false, // Initialize reorder flag
         });
       } catch (error) {
         console.error("[useProducts] Error loading images for edit:", error);
@@ -284,6 +307,7 @@ export const useProducts = () => {
           imagesToDelete: [],
           newImageUrls: [],
           imageFiles: [],
+          hasImageReorder: false,
         });
       }
 
@@ -386,23 +410,32 @@ export const useProducts = () => {
           newImageFiles: productToSave.imageFiles || [],
           imagesToDelete: productToSave.imagesToDelete || [],
           newImageUrls: productToSave.newImageUrls || [],
+          // Send image order if images were reordered
+          imageOrder: productToSave.hasImageReorder
+            ? productToSave.images
+                .map((img) => img.id || img.url || img)
+                .filter(Boolean)
+            : undefined,
         };
 
         // Check if we need to handle images
         const hasImageChanges =
           imageOptions.newImageFiles.length > 0 ||
           imageOptions.imagesToDelete.length > 0 ||
-          imageOptions.newImageUrls.length > 0;
+          imageOptions.newImageUrls.length > 0 ||
+          productToSave.hasImageReorder; // Include image reordering
 
         // Always use unified updateProduct function
         console.log("[useProducts] Updating product with unified function:", {
           hasImageChanges,
+          hasImageReorder: productToSave.hasImageReorder,
           imageOptions: hasImageChanges ? imageOptions : "none",
           productToSave: {
             id: productToSave.id,
             name: productToSave.name,
             imagesToDelete: productToSave.imagesToDelete,
             imageFiles: productToSave.imageFiles?.length || 0,
+            imagesCount: productToSave.images?.length || 0,
           },
         });
 

@@ -54,7 +54,7 @@ class Seller {
           p.Gia,
           p.TonKho,
           p.TrangThai,
-          GROUP_CONCAT(a.Url) as image_urls,
+          GROUP_CONCAT(a.Url ORDER BY a.Upload_at ASC) as image_urls,
           p.CapNhat as created_date,
           dm.TenDanhMuc,
           dm.ID_DanhMuc,
@@ -448,7 +448,7 @@ class Seller {
           p.Gia,
           p.TonKho,
           p.TrangThai,
-          GROUP_CONCAT(a.Url) as image_urls,
+          GROUP_CONCAT(a.Url ORDER BY a.Upload_at ASC) as image_urls,
           p.CapNhat as created_date,
           dm.TenDanhMuc,
           dm.ID_DanhMuc,
@@ -549,6 +549,92 @@ class Seller {
     } catch (error) {
       console.error("[SELLER] Error in deleteProductImage:", error);
       throw error;
+    }
+  }
+
+  // Cập nhật thứ tự ảnh sản phẩm
+  static async updateImageOrder(productId, imageOrder, sellerId) {
+    let connection;
+    try {
+      console.log(
+        `[SELLER] updateImageOrder - ProductID: ${productId}, Order: ${imageOrder}`
+      );
+
+      // Verify product ownership
+      const isOwner = await this.checkProductOwnership(productId, sellerId);
+      if (!isOwner) {
+        throw new Error("Không có quyền thay đổi thứ tự ảnh của sản phẩm này");
+      }
+
+      // Get connection for transaction
+      connection = await db.getConnection();
+      await connection.query("START TRANSACTION");
+
+      // Get current images for this product
+      const getCurrentImagesQuery = `
+        SELECT ID_Anh, Url FROM anhsanpham 
+        WHERE ID_SanPham = ? 
+        ORDER BY Upload_at ASC
+      `;
+      const [currentImages] = await connection.execute(getCurrentImagesQuery, [
+        productId,
+      ]);
+
+      // Create mapping of URL/ID to database ID
+      const imageMap = new Map();
+      currentImages.forEach((img) => {
+        imageMap.set(img.ID_Anh.toString(), img.ID_Anh);
+        imageMap.set(img.Url, img.ID_Anh);
+      });
+
+      // Update order by modifying Upload_at timestamp with sequence
+      const baseTimestamp = new Date();
+
+      for (let i = 0; i < imageOrder.length; i++) {
+        const identifier = imageOrder[i];
+        const dbImageId =
+          imageMap.get(identifier.toString()) || imageMap.get(identifier);
+
+        if (dbImageId) {
+          // Set timestamp with sequence to maintain order
+          const newTimestamp = new Date(baseTimestamp.getTime() + i * 1000);
+
+          const updateQuery = `
+            UPDATE anhsanpham 
+            SET Upload_at = ? 
+            WHERE ID_Anh = ? AND ID_SanPham = ?
+          `;
+
+          await connection.execute(updateQuery, [
+            newTimestamp.toISOString().slice(0, 19).replace("T", " "),
+            dbImageId,
+            productId,
+          ]);
+
+          console.log(`[SELLER] Updated image ${dbImageId} to position ${i}`);
+        } else {
+          console.warn(
+            `[SELLER] Could not find image for identifier: ${identifier}`
+          );
+        }
+      }
+
+      await connection.query("COMMIT");
+      console.log(
+        `[SELLER] Successfully reordered ${imageOrder.length} images`
+      );
+
+      return true;
+    } catch (error) {
+      if (connection) {
+        await connection.query("ROLLBACK");
+      }
+      console.error("[SELLER] Error in updateImageOrder:", error);
+      throw error;
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
   }
 

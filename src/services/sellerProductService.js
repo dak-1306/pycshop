@@ -92,13 +92,15 @@ export const updateProduct = async (productId, productData, options = {}) => {
       newImageFiles = [],
       imagesToDelete = [],
       newImageUrls = [],
+      imageOrder = null, // New: array of image IDs/URLs in desired order
     } = options;
 
     // Check if we need to handle images
     const hasImages =
       newImageFiles.length > 0 ||
       imagesToDelete.length > 0 ||
-      newImageUrls.length > 0;
+      newImageUrls.length > 0 ||
+      imageOrder !== null;
 
     if (hasImages) {
       // Use FormData for image uploads
@@ -121,6 +123,11 @@ export const updateProduct = async (productId, productData, options = {}) => {
         formData.append("newImageUrls", JSON.stringify(newImageUrls));
       }
 
+      // Add image order (as JSON string)
+      if (imageOrder && imageOrder.length > 0) {
+        formData.append("imageOrder", JSON.stringify(imageOrder));
+      }
+
       // Add new image files
       if (newImageFiles.length > 0) {
         newImageFiles.forEach((file) => {
@@ -133,6 +140,7 @@ export const updateProduct = async (productId, productData, options = {}) => {
         newImageFiles: newImageFiles.length,
         imagesToDelete: imagesToDelete.length,
         newImageUrls: newImageUrls.length,
+        imageOrder: imageOrder ? imageOrder.length : 0,
       });
 
       const response = await fetch(`${API_BASE_URL}/products/${productId}`, {

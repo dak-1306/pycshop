@@ -393,11 +393,13 @@ export const updateProduct = async (req, res) => {
       trangThai,
       imagesToDelete: imagesToDeleteRaw,
       newImageUrls: newImageUrlsRaw,
+      imageOrder: imageOrderRaw,
     } = req.body;
 
     // Parse JSON strings nếu cần
     let imagesToDelete = null;
     let newImageUrls = null;
+    let imageOrder = null;
 
     try {
       imagesToDelete = imagesToDeleteRaw ? JSON.parse(imagesToDeleteRaw) : null;
@@ -411,6 +413,12 @@ export const updateProduct = async (req, res) => {
       newImageUrls = newImageUrlsRaw ? JSON.parse(newImageUrlsRaw) : null;
     } catch (e) {
       newImageUrls = Array.isArray(newImageUrlsRaw) ? newImageUrlsRaw : null;
+    }
+
+    try {
+      imageOrder = imageOrderRaw ? JSON.parse(imageOrderRaw) : null;
+    } catch (e) {
+      imageOrder = Array.isArray(imageOrderRaw) ? imageOrderRaw : null;
     }
 
     console.log(
@@ -428,6 +436,7 @@ export const updateProduct = async (req, res) => {
     console.log(`[SELLER_CONTROLLER] Request files:`, req.files?.length || 0);
     console.log(`[SELLER_CONTROLLER] Images to delete:`, imagesToDelete);
     console.log(`[SELLER_CONTROLLER] New image URLs:`, newImageUrls);
+    console.log(`[SELLER_CONTROLLER] Image order:`, imageOrder);
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
@@ -604,6 +613,28 @@ export const updateProduct = async (req, res) => {
             error: error.message,
           });
         }
+      }
+    }
+
+    // Xử lý thay đổi thứ tự ảnh nếu có
+    if (imageOrder && Array.isArray(imageOrder) && imageOrder.length > 0) {
+      console.log(
+        `[SELLER_CONTROLLER] Updating image order for ${imageOrder.length} images`
+      );
+
+      try {
+        // Update image order in database
+        await Seller.updateImageOrder(id, imageOrder, sellerId);
+        imageUpdateResults.reordered = imageOrder.length;
+        console.log(
+          `[SELLER_CONTROLLER] Successfully reordered ${imageOrder.length} images`
+        );
+      } catch (error) {
+        console.error(`[SELLER_CONTROLLER] Error reordering images:`, error);
+        imageUpdateResults.errors.push({
+          type: "reorder",
+          error: error.message,
+        });
       }
     }
 

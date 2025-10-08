@@ -127,7 +127,7 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
           {categories.map((category) => (
             <div
               key={category.ID_DanhMuc}
-              className={`category-card ${
+              className={`category-item ${
                 selectedCategory === category.ID_DanhMuc ? "active" : ""
               }`}
               onClick={() => handleCategoryClick(category.ID_DanhMuc)}

@@ -376,6 +376,131 @@ function setupRoutes(app) {
       },
     })
   );
+
+  // Review Service - For reviews and ratings
+  app.use(
+    "/api/reviews",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /api/reviews route for ${req.method} ${req.originalUrl}`
+      );
+      next();
+    },
+    // Apply auth middleware for protected review routes
+    (req, res, next) => {
+      // Skip auth for GET requests to public review routes (viewing reviews)
+      if (req.method === 'GET' && req.path.match(/^\/products\/\d+\/reviews/)) {
+        console.log(`[ROUTES] Skipping auth for public review route: ${req.path}`);
+        return next();
+      }
+
+      // Skip auth for check route if no auth header (will return hasReviewed: false)
+      if (req.method === 'GET' && req.path.includes('/check/') && !req.headers.authorization) {
+        console.log(`[ROUTES] Skipping auth for check route without token: ${req.path}`);
+        return next();
+      }
+
+      // Apply auth middleware for POST and protected routes
+      console.log(`[ROUTES] Applying auth middleware for review route: ${req.path}`);
+      authMiddleware(req, res, next);
+    },
+    createProxyMiddleware({
+      target: process.env.REVIEW_SERVICE_URL || "http://localhost:5005",
+      changeOrigin: true,
+      pathRewrite: { "^/api/reviews": "/api/reviews" },
+      onProxyReq: (proxyReq, req, res) => {
+        // Truyền thông tin user từ API Gateway xuống review service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id);
+          proxyReq.setHeader("x-user-role", req.user.role);
+
+          if (req.user.userType) {
+            proxyReq.setHeader("x-user-type", req.user.userType);
+          }
+
+          console.log(
+            `[PROXY] Adding user headers for review service - user ID: ${req.user.id}, role: ${
+              req.user.role
+            }, userType: ${req.user.userType || "undefined"}`
+          );
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.REVIEW_SERVICE_URL || "http://localhost:5005"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Review Service`
+        );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Review Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Review service error", details: err.message });
+        }
+      },
+    })
+  );
+
+  // Product reviews route (public access)
+  app.use(
+    "/api/products",
+    (req, res, next) => {
+      // Only handle requests that end with /reviews
+      if (req.originalUrl.includes('/reviews')) {
+        console.log(
+          `[ROUTES] Matched product reviews route for ${req.method} ${req.originalUrl}`
+        );
+        next();
+      } else {
+        next(); // Pass to other middleware
+      }
+    },
+    createProxyMiddleware({
+      target: process.env.REVIEW_SERVICE_URL || "http://localhost:5005",
+      changeOrigin: true,
+      // Filter only review requests  
+      filter: (pathname, req) => {
+        return pathname.includes('/reviews');
+      },
+      pathRewrite: (path, req) => {
+        // Keep the path as is since Review Service expects /api/products/:id/reviews
+        return path;
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.REVIEW_SERVICE_URL || "http://localhost:5005"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Review Service (products route)`
+        );
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Review Service (products) Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Review service error", details: err.message });
+        }
+      },
+    })
+  );
 }
 
 export default setupRoutes;

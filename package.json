@@ -8,7 +8,9 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "backend": "concurrently \"cd microservice/api_gateway && node index.js\" \"cd microservice/auth_service && node app.js\" \"cd microservice/product_service && node app.js\" \"cd microservice/admin_service && node index.js\" \"cd microservice/shop_service && node server.js\"",
+    "backend": "concurrently \"cd microservice/api_gateway && node index.js\" \"cd microservice/auth_service && node app.js\" \"cd microservice/product_service && node app.js\" \"cd microservice/admin_service && node index.js\" \"cd microservice/shop_service && node server.js\" \"cd microservice/danhgia_service && node server.js\"",
+    "kafka-consumer": "cd microservice/danhgia_service && node shopRatingConsumer.js",
+    "backend-with-kafka": "concurrently \"npm run backend\" \"npm run kafka-consumer\"",
     "server": "npm run backend",
     "api": "npm run backend",
     "services": "npm run backend",
@@ -34,7 +36,8 @@
     "mysql2": "^3.15.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.3"
+    "react-router-dom": "^7.9.3",
+    "kafkajs": "^2.2.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",
@@ -47,6 +50,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^16.4.0",
+    "nodemon": "^3.0.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "vite": "^7.1.7"

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
+import ReviewForm from "../../../components/buyers/ReviewForm";
+import ReviewList from "../../../components/buyers/ReviewList";
 import { productService } from "../../../services/productService";
 import "./ProductDetail.css";
 
@@ -17,6 +19,9 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState({});
   const [similarProducts, setSimilarProducts] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReview, setNewReview] = useState(null);
+  const [userReviewStatus, setUserReviewStatus] = useState({ hasReviewed: false, loading: true });
 
   // // Mock data for demo (replace with real API calls)
   // const mockProduct = {
@@ -219,6 +224,44 @@ const ProductDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]); // Only depend on id
 
+  // Check if user has reviewed this product
+  useEffect(() => {
+    const checkUserReview = async () => {
+      const token = localStorage.getItem('authToken');
+      if (!token || !id) {
+        setUserReviewStatus({ hasReviewed: false, loading: false });
+        return;
+      }
+
+      try {
+        const response = await fetch(`http://localhost:5000/api/reviews/check/${id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+
+        const data = await response.json();
+        
+        if (response.ok) {
+          setUserReviewStatus({
+            hasReviewed: data.hasReviewed,
+            loading: false,
+            review: data.review,
+          });
+        } else {
+          setUserReviewStatus({ hasReviewed: false, loading: false });
+        }
+      } catch (error) {
+        console.error('Error checking user review:', error);
+        setUserReviewStatus({ hasReviewed: false, loading: false });
+      }
+    };
+
+    if (id) {
+      checkUserReview();
+    }
+  }, [id]);
+
   // Utility functions
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -276,6 +319,25 @@ const ProductDetail = () => {
     if (product?.shop?.id) {
       navigate(`/shop/${product.shop.id}`);
     }
+  };
+
+  const handleShowReviewForm = () => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      alert('Vui lòng đăng nhập để đánh giá sản phẩm');
+      return;
+    }
+    setShowReviewForm(true);
+  };
+
+  const handleCloseReviewForm = () => {
+    setShowReviewForm(false);
+  };
+
+  const handleReviewSubmitted = (review) => {
+    setNewReview(review);
+    setUserReviewStatus({ hasReviewed: true, loading: false, review: review });
+    setShowReviewForm(false);
   };
 
   // Loading state
@@ -549,6 +611,30 @@ const ProductDetail = () => {
           />
         </div>
 
+        {/* Review Section */}
+        <div className="pd-review-section">
+          <div className="pd-review-header">
+            <h2>Đánh giá sản phẩm</h2>
+            {!userReviewStatus.loading && !userReviewStatus.hasReviewed && (
+              <button
+                className="pd-btn-write-review"
+                onClick={handleShowReviewForm}
+              >
+                <i className="fas fa-star"></i>
+                Viết đánh giá
+              </button>
+            )}
+            {userReviewStatus.hasReviewed && (
+              <div className="pd-review-status">
+                <i className="fas fa-check-circle"></i>
+                Bạn đã đánh giá sản phẩm này
+              </div>
+            )}
+          </div>
+
+          <ReviewList productId={id} newReview={newReview} />
+        </div>
+
         {/* Similar Products */}
         <div className="pd-similar-products">
           <h2 className="pd-similar-title">Sản phẩm tương tự</h2>
@@ -590,6 +676,16 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+      
+      {/* Review Form Modal */}
+      {showReviewForm && (
+        <ReviewForm
+          productId={id}
+          onReviewSubmitted={handleReviewSubmitted}
+          onClose={handleCloseReviewForm}
+        />
+      )}
+      
       <Footer />
     </div>
   );

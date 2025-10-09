@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import sellerProductService from "../services/sellerProductService.js";
 import { useCategories } from "./useCategories.js";
 
@@ -20,7 +20,7 @@ const INITIAL_FORM_STATE = {
 
 export const useProducts = () => {
   // Get categories helper
-  const { getCategoryName, categories } = useCategories();
+  const { categories } = useCategories();
 
   // Products state
   const [products, setProducts] = useState([]);
@@ -42,12 +42,15 @@ export const useProducts = () => {
   const [selectedPrice, setSelectedPrice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Pagination states
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   // Initialize products
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      console.log("[useProducts] Loading products from API...");
       const response = await sellerProductService.getSellerProducts({
         page: currentPage,
         limit: 10,
@@ -56,8 +59,6 @@ export const useProducts = () => {
         sortBy: "created_date",
         sortOrder: "DESC",
       });
-
-      console.log("[useProducts] API Response:", response);
 
       if (response.success && response.data) {
         // Map backend data to frontend format
@@ -79,7 +80,7 @@ export const useProducts = () => {
             image:
               imageArray.length > 0
                 ? `http://localhost:5002${imageArray[0]}`
-                : null, // Add first image URL for ProductTable (bypass API Gateway)
+                : null,
             imageFiles: [],
             shopName: product.TenCuaHang || "",
             created_date: product.created_date,
@@ -87,25 +88,30 @@ export const useProducts = () => {
           };
         });
 
-        console.log("[useProducts] Mapped products:", mappedProducts);
         setProducts(mappedProducts);
+
+        // Update pagination info
+        if (response.pagination) {
+          setTotalItems(response.pagination.total || 0);
+          setTotalPages(response.pagination.totalPages || 1);
+        }
       } else {
-        console.warn("[useProducts] No data in response");
         setError("Không có dữ liệu sản phẩm từ server");
         setProducts([]);
+        setTotalItems(0);
+        setTotalPages(1);
       }
     } catch (error) {
-      console.error("[useProducts] Error loading products:", error);
       setError("Lỗi khi tải danh sách sản phẩm: " + error.message);
       setProducts([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, searchTerm, selectedStatus]);
 
   useEffect(() => {
     loadProducts();
-  }, [currentPage, searchTerm, selectedCategory, selectedStatus]);
+  }, [loadProducts]);
 
   // Product operations
   const handleViewProduct = (productId) => {
@@ -714,6 +720,8 @@ export const useProducts = () => {
     setSelectedPrice,
     currentPage,
     setCurrentPage,
+    totalItems,
+    totalPages,
     isLoading,
     error,
 

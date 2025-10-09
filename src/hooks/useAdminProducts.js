@@ -15,6 +15,11 @@ export const useAdminProducts = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   // Initialize data
   useEffect(() => {
     const initializeProducts = async () => {
@@ -27,6 +32,8 @@ export const useAdminProducts = () => {
 
         setProducts(MOCK_PRODUCTS);
         setStats(DEFAULT_PRODUCT_STATS);
+        setTotalItems(MOCK_PRODUCTS.length);
+        setTotalPages(Math.ceil(MOCK_PRODUCTS.length / 10));
       } catch (error) {
         console.error("Error loading products data:", error);
       } finally {
@@ -111,6 +118,12 @@ export const useAdminProducts = () => {
     setCategoryFilter,
     statusFilter,
     setStatusFilter,
+
+    // Pagination states
+    currentPage,
+    setCurrentPage,
+    totalItems,
+    totalPages,
 
     // Utility functions
     formatCurrency,

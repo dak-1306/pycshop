@@ -2,6 +2,7 @@ import React from "react";
 import ProductStats from "../../components/common/product/ProductStats";
 import ProductFilters from "../../components/common/product/ProductFilters";
 import ProductTable from "../../components/common/product/ProductTable";
+import Pagination from "../../components/common/product/Pagination";
 import { useAdminProducts } from "../../hooks/useAdminProducts";
 
 const AdminProducts = () => {
@@ -15,6 +16,10 @@ const AdminProducts = () => {
     setCategoryFilter,
     statusFilter,
     setStatusFilter,
+    currentPage,
+    setCurrentPage,
+    totalItems,
+    totalPages,
     handleViewProduct,
     handleApproveProduct,
     handleDeleteProduct,
@@ -60,6 +65,16 @@ const AdminProducts = () => {
           onDeleteProduct={handleDeleteProduct}
         />
       </div>
+
+      {/* Pagination */}
+      {totalItems > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalItems={totalItems}
+          itemsPerPage={10}
+        />
+      )}
     </div>
   );
 };

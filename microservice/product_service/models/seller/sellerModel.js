@@ -1,6 +1,17 @@
 import db from "../../../db/index.js";
 
 class Seller {
+  // Initialize connection settings for GROUP_CONCAT
+  static async initializeConnection() {
+    try {
+      await db.execute("SET SESSION group_concat_max_len = 10000");
+    } catch (error) {
+      console.warn(
+        "[SELLER] Warning: Could not set group_concat_max_len:",
+        error.message
+      );
+    }
+  }
   // Get seller's products with pagination
   static async getSellerProducts({
     sellerId,
@@ -12,6 +23,8 @@ class Seller {
     sortOrder = "DESC",
   }) {
     try {
+      // Initialize connection settings
+      await this.initializeConnection();
       const offset = (page - 1) * limit;
       let whereConditions = ["p.ID_NguoiBan = ?"];
       let params = [sellerId];
@@ -45,7 +58,7 @@ class Seller {
         ? sortOrder.toUpperCase()
         : "DESC";
 
-      // Main query
+      // Main query - Fix GROUP_CONCAT with pagination
       const query = `
         SELECT 
           p.ID_SanPham,
@@ -54,7 +67,7 @@ class Seller {
           p.Gia,
           p.TonKho,
           p.TrangThai,
-          GROUP_CONCAT(a.Url ORDER BY a.Upload_at ASC) as image_urls,
+          COALESCE(GROUP_CONCAT(DISTINCT a.Url ORDER BY a.Upload_at ASC SEPARATOR ','), '') as image_urls,
           p.CapNhat as created_date,
           dm.TenDanhMuc,
           dm.ID_DanhMuc,
@@ -448,7 +461,7 @@ class Seller {
           p.Gia,
           p.TonKho,
           p.TrangThai,
-          GROUP_CONCAT(a.Url ORDER BY a.Upload_at ASC) as image_urls,
+          COALESCE(GROUP_CONCAT(DISTINCT a.Url ORDER BY a.Upload_at ASC SEPARATOR ','), '') as image_urls,
           p.CapNhat as created_date,
           dm.TenDanhMuc,
           dm.ID_DanhMuc,

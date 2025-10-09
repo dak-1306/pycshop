@@ -44,9 +44,28 @@ const Pagination = ({
           </button>
 
           <div className="flex space-x-1">
-            {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
-              const page = index + 1;
-              return (
+            {(() => {
+              const maxVisiblePages = 5;
+              let startPage = Math.max(
+                1,
+                currentPage - Math.floor(maxVisiblePages / 2)
+              );
+              let endPage = Math.min(
+                totalPages,
+                startPage + maxVisiblePages - 1
+              );
+
+              // Adjust startPage if we're near the end
+              if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+              }
+
+              const pages = [];
+              for (let i = startPage; i <= endPage; i++) {
+                pages.push(i);
+              }
+
+              return pages.map((page) => (
                 <button
                   key={page}
                   onClick={() => setCurrentPage(page)}
@@ -59,8 +78,8 @@ const Pagination = ({
                 >
                   {page}
                 </button>
-              );
-            })}
+              ));
+            })()}
           </div>
 
           <button

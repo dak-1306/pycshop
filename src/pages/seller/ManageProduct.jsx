@@ -76,6 +76,8 @@ const ManageProduct = () => {
     setSelectedPrice,
     currentPage,
     setCurrentPage,
+    totalItems,
+    totalPages,
     isLoading,
     error,
 
@@ -161,11 +163,11 @@ const ManageProduct = () => {
         )}
 
         {/* Pagination - only show if there are products and no error */}
-        {!error && products.length > 0 && (
+        {!error && totalItems > 0 && (
           <Pagination
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
-            totalItems={products.length}
+            totalItems={totalItems}
             itemsPerPage={10}
           />
         )}

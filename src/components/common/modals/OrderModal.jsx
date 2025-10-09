@@ -1,14 +1,55 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const OrderModal = ({
   isOpen,
   onClose,
   order,
   variant = "admin", // "admin" | "seller"
+  modalMode = "view", // "view" | "edit" | "add"
   onUpdateStatus,
   onViewDetails,
+  onSave,
 }) => {
-  if (!isOpen || !order) return null;
+  const [formData, setFormData] = useState({
+    customer: "",
+    email: "",
+    total: "",
+    items: "",
+    status: "pending",
+    paymentStatus: "pending",
+    seller: "",
+  });
+
+  // Populate form when order changes or modal opens in edit mode
+  useEffect(() => {
+    if (order && (modalMode === "edit" || modalMode === "add")) {
+      setFormData({
+        customer: order.customer || order.customerName || "",
+        email: order.email || order.customerEmail || "",
+        total: order.total || order.totalAmount || "",
+        items: order.items || order.productName || "",
+        status: order.status || "pending",
+        paymentStatus: order.paymentStatus || "pending",
+        seller: order.seller || order.sellerName || "",
+      });
+    }
+  }, [order, modalMode]);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (onSave) {
+      onSave(formData);
+    }
+    onClose();
+  };
 
   // Colors and gradients based on variant
   const colors =
@@ -72,6 +113,189 @@ const OrderModal = ({
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleString("vi-VN");
   };
+
+  // Check if modal should be shown
+  if (!isOpen) return null;
+
+  // If in edit mode, show edit form
+  if (modalMode === "edit" || modalMode === "add") {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transform transition-all animate-slideUp">
+          {/* Header */}
+          <div
+            className={`relative bg-gradient-to-r ${colors.headerGradient} text-white px-8 py-6 rounded-t-2xl flex-shrink-0`}
+          >
+            <div className="relative flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                  <span className="text-2xl">
+                    {modalMode === "edit" ? "✏️" : "➕"}
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold">
+                    {modalMode === "edit"
+                      ? `Chỉnh sửa đơn hàng #${order?.id}`
+                      : "Thêm đơn hàng mới"}
+                  </h2>
+                  <p className="text-white text-opacity-90 text-sm mt-1">
+                    {modalMode === "edit"
+                      ? "Cập nhật thông tin đơn hàng"
+                      : "Tạo đơn hàng mới"}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-xl flex items-center justify-center transition-all hover:scale-110"
+              >
+                <span className="text-xl">✕</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="p-8 space-y-6">
+            {/* Customer Info */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Tên khách hàng *
+                </label>
+                <input
+                  type="text"
+                  name="customer"
+                  value={formData.customer}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Nhập tên khách hàng"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email *
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Nhập email khách hàng"
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Order Details */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Tổng tiền (VNĐ) *
+                </label>
+                <input
+                  type="number"
+                  name="total"
+                  value={formData.total}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Nhập tổng tiền"
+                  min="0"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Sản phẩm
+                </label>
+                <input
+                  type="text"
+                  name="items"
+                  value={formData.items}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                  placeholder="Mô tả sản phẩm"
+                />
+              </div>
+            </div>
+
+            {/* Seller */}
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Người bán
+              </label>
+              <input
+                type="text"
+                name="seller"
+                value={formData.seller}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                placeholder="Nhập tên người bán"
+              />
+            </div>
+
+            {/* Status */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Trạng thái đơn hàng
+                </label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  {getStatusOptions().map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.icon} {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Trạng thái thanh toán
+                </label>
+                <select
+                  name="paymentStatus"
+                  value={formData.paymentStatus}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                >
+                  <option value="pending">⏳ Chờ thanh toán</option>
+                  <option value="paid">💰 Đã thanh toán</option>
+                  <option value="failed">❌ Thất bại</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex justify-end gap-4 pt-6 border-t border-gray-200">
+              <button
+                type="button"
+                onClick={onClose}
+                className="px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all font-medium shadow-sm hover:shadow-md"
+              >
+                Hủy
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+              >
+                💾 {modalMode === "edit" ? "Lưu thay đổi" : "Tạo đơn hàng"}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // View mode - existing code
+  if (!order) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">

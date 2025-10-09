@@ -81,31 +81,31 @@ const OrderTable = ({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 ID
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Khách hàng
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Người bán
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Sản phẩm
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Tổng tiền
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Trạng thái
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Thanh toán
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Ngày tạo
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Hành động
               </th>
             </tr>
@@ -113,10 +113,10 @@ const OrderTable = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {orders.map((order) => (
               <tr key={order.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   #{order.id}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
                     {order.customerName || order.customer}
                   </div>
@@ -124,22 +124,22 @@ const OrderTable = ({
                     {order.customerEmail || ""}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
                     {order.sellerName || order.seller}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {order.productName || order.items?.length + " sản phẩm"}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-semibold text-gray-900">
                     {formatPrice(order.total || order.totalAmount)}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColorInternal(
                       order.status
@@ -148,7 +148,7 @@ const OrderTable = ({
                     {getStatusText(order.status)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPaymentStatusColor(
                       order.paymentStatus
@@ -157,36 +157,79 @@ const OrderTable = ({
                     {getPaymentStatusText(order.paymentStatus)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(
                     order.createdAt || order.orderDate
                   ).toLocaleDateString("vi-VN")}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
                     <button
                       onClick={() => onViewOrder && onViewOrder(order.id)}
-                      className="text-blue-600 hover:text-blue-900"
+                      className="group flex items-center gap-1 px-3 py-1.5 text-blue-600 hover:text-white hover:bg-blue-600 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-600"
+                      title="Xem chi tiết đơn hàng"
                     >
-                      Xem
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                        />
+                      </svg>
+                      <span className="text-xs">Xem</span>
                     </button>
                     <button
                       onClick={() => onEditOrder && onEditOrder(order.id)}
-                      className="text-indigo-600 hover:text-indigo-900"
+                      className="group flex items-center gap-1 px-3 py-1.5 text-indigo-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-all duration-200 border border-indigo-200 hover:border-indigo-600"
+                      title="Chỉnh sửa đơn hàng"
                     >
-                      Sửa
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                        />
+                      </svg>
+                      <span className="text-xs">Sửa</span>
                     </button>
-                    <button
-                      onClick={() => onUpdateStatus && onUpdateStatus(order.id)}
-                      className="text-green-600 hover:text-green-900"
-                    >
-                      Cập nhật
-                    </button>
+
                     <button
                       onClick={() => onDeleteOrder && onDeleteOrder(order.id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="group flex items-center gap-1 px-3 py-1.5 text-red-600 hover:text-white hover:bg-red-600 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-600"
+                      title="Xóa đơn hàng"
                     >
-                      Xóa
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                      <span className="text-xs">Xóa</span>
                     </button>
                   </div>
                 </td>

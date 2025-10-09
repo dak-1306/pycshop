@@ -122,6 +122,8 @@ const Order = () => {
           onClose={handleCloseOrderModal}
           order={currentOrder}
           variant="seller"
+          modalMode={modalMode}
+          onSave={handleSaveOrder}
           onUpdateStatus={(orderId, status) =>
             console.log("Update status:", orderId, status)
           }
@@ -133,6 +135,7 @@ const Order = () => {
           onClose={handleCloseDetailModal}
           order={currentOrder}
           onEdit={handleEditOrder}
+          variant="seller"
         />
 
         <DeleteModal

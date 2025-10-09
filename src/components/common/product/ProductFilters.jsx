@@ -28,58 +28,146 @@ const ProductFilters = ({
   // Render Admin variant
   if (variant === "admin") {
     return (
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <input
-              type="text"
-              placeholder="Tìm kiếm sản phẩm..."
-              value={searchValue || ""}
-              onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
+      <div className="bg-white rounded-xl shadow-sm border p-6">
+        <div className="flex flex-wrap items-center justify-between gap-6">
+          <div className="flex flex-wrap items-center gap-4">
+            {/* Search Input */}
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-gray-400 group-focus-within:text-blue-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                value={searchValue || ""}
+                onChange={(e) =>
+                  onSearchChange && onSearchChange(e.target.value)
+                }
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-300"
+              />
+            </div>
 
-            <select
-              value={categoryFilter || ""}
-              onChange={(e) =>
-                onCategoryChange && onCategoryChange(e.target.value)
-              }
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Tất cả danh mục</option>
-              {PRODUCT_CATEGORIES.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+            {/* Category Filter */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+              <select
+                value={categoryFilter || ""}
+                onChange={(e) =>
+                  onCategoryChange && onCategoryChange(e.target.value)
+                }
+                className="relative bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-300 appearance-none cursor-pointer"
+              >
+                <option value="">📦 Tất cả danh mục</option>
+                {PRODUCT_CATEGORIES.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
 
-            <select
-              value={statusFilter || ""}
-              onChange={(e) => onStatusChange && onStatusChange(e.target.value)}
-              className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">Tất cả trạng thái</option>
-              {PRODUCT_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
+            {/* Status Filter */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+              <select
+                value={statusFilter || ""}
+                onChange={(e) =>
+                  onStatusChange && onStatusChange(e.target.value)
+                }
+                className="relative bg-white border border-gray-300 rounded-lg px-4 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-300 appearance-none cursor-pointer"
+              >
+                <option value="">⚡ Tất cả trạng thái</option>
+                {PRODUCT_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <svg
+                  className="w-4 h-4 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-3">
             <button
               onClick={onAddProduct}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              className="group relative flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 shadow-lg hover:shadow-xl overflow-hidden"
             >
-              Thêm sản phẩm
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4v16m8-8H4"
+                />
+              </svg>
+              <span>Thêm sản phẩm</span>
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
             </button>
             <button
               onClick={onExport}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              className="group relative flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 shadow-lg hover:shadow-xl overflow-hidden"
             >
-              Xuất Excel
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <span>Xuất Excel</span>
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
             </button>
           </div>
         </div>

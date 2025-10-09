@@ -20,6 +20,13 @@ export const useAdminProducts = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Modal states
+  const [showProductModal, setShowProductModal] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
+
   // Initialize data
   useEffect(() => {
     const initializeProducts = async () => {
@@ -57,24 +64,83 @@ export const useAdminProducts = () => {
   };
 
   // Event handlers
-  const handleViewProduct = (product) => {
-    console.log("View product:", product);
-    // Implement view product logic
+  const handleViewProduct = (productId) => {
+    console.log("View product:", productId);
+    const product = products.find((p) => p.id === productId);
+    if (product) {
+      setSelectedProduct(product);
+      setShowDetailModal(true);
+    }
   };
 
-  const handleApproveProduct = (product) => {
-    console.log("Approve product:", product);
-    // Implement approve product logic
+  const handleEditProduct = (productId) => {
+    console.log("Edit product:", productId);
+    const product = products.find((p) => p.id === productId);
+    if (product) {
+      setSelectedProduct(product);
+      setModalMode("edit");
+      setShowProductModal(true);
+    }
   };
 
-  const handleDeleteProduct = (product) => {
-    console.log("Delete product:", product);
-    // Implement delete product logic
+  const handleApproveProduct = (productId) => {
+    console.log("Approve product:", productId);
+    // Implement approve product logic - update product status
+    setProducts((prevProducts) =>
+      prevProducts.map((product) =>
+        product.id === productId ? { ...product, status: "active" } : product
+      )
+    );
+  };
+
+  const handleDeleteProduct = (productId) => {
+    console.log("Delete product:", productId);
+    const product = products.find((p) => p.id === productId);
+    if (product) {
+      setSelectedProduct(product);
+      setShowDeleteModal(true);
+    }
   };
 
   const handleAddProduct = () => {
     console.log("Add new product");
-    // Implement add product logic
+    setSelectedProduct(null);
+    setModalMode("add");
+    setShowProductModal(true);
+  };
+
+  const confirmDeleteProduct = () => {
+    if (selectedProduct) {
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product.id !== selectedProduct.id)
+      );
+      setShowDeleteModal(false);
+      setSelectedProduct(null);
+    }
+  };
+
+  const handleSaveProduct = (productData) => {
+    console.log("Save product:", productData);
+    if (modalMode === "add") {
+      // Add new product
+      const newProduct = {
+        ...productData,
+        id: Math.max(...products.map((p) => p.id), 0) + 1,
+        createdAt: new Date().toISOString(),
+      };
+      setProducts((prevProducts) => [...prevProducts, newProduct]);
+    } else {
+      // Update existing product
+      setProducts((prevProducts) =>
+        prevProducts.map((product) =>
+          product.id === selectedProduct.id
+            ? { ...product, ...productData }
+            : product
+        )
+      );
+    }
+    setShowProductModal(false);
+    setSelectedProduct(null);
   };
 
   // Processed stats
@@ -129,10 +195,23 @@ export const useAdminProducts = () => {
     formatCurrency,
     formatNumber,
 
+    // Modal states
+    showProductModal,
+    setShowProductModal,
+    showDetailModal,
+    setShowDetailModal,
+    showDeleteModal,
+    setShowDeleteModal,
+    selectedProduct,
+    modalMode,
+
     // Event handlers
     handleViewProduct,
+    handleEditProduct,
     handleApproveProduct,
     handleDeleteProduct,
     handleAddProduct,
+    handleSaveProduct,
+    confirmDeleteProduct,
   };
 };

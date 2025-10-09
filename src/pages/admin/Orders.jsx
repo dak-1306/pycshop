@@ -5,6 +5,7 @@ import OrderTable from "../../components/common/order/OrderTable";
 import OrderModal from "../../components/common/modals/OrderModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
 import DeleteModal from "../../components/common/DeleteModal";
+import Pagination from "../../components/common/product/Pagination";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
 
 const AdminOrders = () => {
@@ -18,6 +19,10 @@ const AdminOrders = () => {
     setStatusFilter,
     paymentFilter,
     setPaymentFilter,
+    currentPage,
+    setCurrentPage,
+    totalItems,
+    totalPages,
     showOrderModal,
     setShowOrderModal,
     showDetailModal,
@@ -66,6 +71,9 @@ const AdminOrders = () => {
           onStatusChange={setStatusFilter}
           paymentFilter={paymentFilter}
           onPaymentChange={setPaymentFilter}
+          onUpdateStatus={() => {
+            handleAddOrder();
+          }}
           onExport={handleExport}
         />
         <OrderTable
@@ -78,12 +86,25 @@ const AdminOrders = () => {
         />
       </div>
 
+      {/* Pagination */}
+      {totalItems > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalItems={totalItems}
+          itemsPerPage={10}
+          variant="admin"
+        />
+      )}
+
       {/* Order Modal */}
       <OrderModal
         isOpen={showOrderModal}
         onClose={() => setShowOrderModal(false)}
         order={selectedOrder}
         variant="admin"
+        modalMode={modalMode}
+        onSave={handleSaveOrder}
         onUpdateStatus={handleUpdateOrderStatus}
         onViewDetails={handleViewOrder}
       />
@@ -95,8 +116,9 @@ const AdminOrders = () => {
         order={selectedOrder}
         onEdit={() => {
           setShowDetailModal(false);
-          handleEditOrder(selectedOrder);
+          handleEditOrder(selectedOrder?.id);
         }}
+        variant="admin"
       />
 
       {/* Delete Confirmation Modal */}
@@ -104,8 +126,10 @@ const AdminOrders = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDeleteOrder}
-        title="Xóa đơn hàng"
-        message={`Bạn có chắc chắn muốn xóa đơn hàng ${selectedOrder?.id} của khách hàng ${selectedOrder?.customer}? Hành động này không thể hoàn tác.`}
+        item={selectedOrder}
+        itemType="đơn hàng"
+        title="Xác nhận xóa đơn hàng"
+        subtitle="Hành động này không thể hoàn tác"
       />
     </div>
   );

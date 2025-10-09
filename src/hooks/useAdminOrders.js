@@ -16,6 +16,11 @@ export const useAdminOrders = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [paymentFilter, setPaymentFilter] = useState("");
 
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   // Modal states
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -46,6 +51,8 @@ export const useAdminOrders = () => {
 
         setOrders(MOCK_ORDERS);
         setStats(DEFAULT_ORDER_STATS);
+        setTotalItems(MOCK_ORDERS.length);
+        setTotalPages(Math.ceil(MOCK_ORDERS.length / 10));
       } catch (error) {
         console.error("Error loading orders data:", error);
       } finally {
@@ -86,45 +93,49 @@ export const useAdminOrders = () => {
     return matchesSearch && matchesStatus && matchesPayment;
   });
 
-  // CRUD Operations
+  // CRUD Operations will be defined below
+
+  const handleViewOrder = (orderId) => {
+    console.log("View order:", orderId);
+    const order = orders.find((o) => o.id === orderId);
+    if (order) {
+      setSelectedOrder(order);
+      setShowDetailModal(true);
+    }
+  };
+
+  const handleDeleteOrder = (orderId) => {
+    console.log("Delete order:", orderId);
+    const order = orders.find((o) => o.id === orderId);
+    if (order) {
+      setSelectedOrder(order);
+      setShowDeleteModal(true);
+    }
+  };
+
+  const handleEditOrder = (orderId) => {
+    console.log("Edit order:", orderId);
+    const order = orders.find((o) => o.id === orderId);
+    if (order) {
+      setModalMode("edit");
+      setSelectedOrder(order);
+      setShowOrderModal(true);
+    }
+  };
+
   const handleAddOrder = () => {
     setModalMode("add");
-    setOrderForm({
-      customer: "",
-      email: "",
-      total: "",
-      items: "",
-      status: "pending",
-      paymentStatus: "pending",
-      seller: "",
-    });
     setSelectedOrder(null);
     setShowOrderModal(true);
   };
 
-  const handleEditOrder = (order) => {
-    setModalMode("edit");
-    setOrderForm({
-      customer: order.customer,
-      email: order.email,
-      total: order.total,
-      items: order.items,
-      status: order.status,
-      paymentStatus: order.paymentStatus,
-      seller: order.seller,
-    });
-    setSelectedOrder(order);
-    setShowOrderModal(true);
-  };
-
-  const handleViewOrder = (order) => {
-    setSelectedOrder(order);
-    setShowDetailModal(true);
-  };
-
-  const handleDeleteOrder = (order) => {
-    setSelectedOrder(order);
-    setShowDeleteModal(true);
+  const handleUpdateOrderStatus = (orderId, newStatus) => {
+    console.log("Update order status:", orderId, newStatus);
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === orderId ? { ...order, status: newStatus } : order
+      )
+    );
   };
 
   const confirmDeleteOrder = () => {
@@ -144,9 +155,9 @@ export const useAdminOrders = () => {
     }
   };
 
-  const handleSaveOrder = () => {
+  const handleSaveOrder = (formData) => {
     // Basic validation
-    if (!orderForm.customer || !orderForm.email || !orderForm.total) {
+    if (!formData.customer || !formData.email || !formData.total) {
       alert("Vui lòng điền đầy đủ thông tin!");
       return;
     }
@@ -154,7 +165,7 @@ export const useAdminOrders = () => {
     if (modalMode === "add") {
       const newOrder = {
         id: `ORD-${Date.now()}`,
-        ...orderForm,
+        ...formData,
         createdDate: new Date().toISOString().split("T")[0],
       };
       setOrders([...orders, newOrder]);
@@ -162,14 +173,14 @@ export const useAdminOrders = () => {
         ...prev,
         totalOrders: prev.totalOrders + 1,
         pendingOrders:
-          orderForm.status === "pending"
+          formData.status === "pending"
             ? prev.pendingOrders + 1
             : prev.pendingOrders,
       }));
     } else if (modalMode === "edit" && selectedOrder) {
       setOrders(
         orders.map((order) =>
-          order.id === selectedOrder.id ? { ...order, ...orderForm } : order
+          order.id === selectedOrder.id ? { ...order, ...formData } : order
         )
       );
     }
@@ -178,31 +189,7 @@ export const useAdminOrders = () => {
     setSelectedOrder(null);
   };
 
-  const handleUpdateOrderStatus = (orderId, newStatus) => {
-    setOrders(
-      orders.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
-    );
-
-    // Update stats
-    setStats((prev) => {
-      const order = orders.find((o) => o.id === orderId);
-      if (!order) return prev;
-
-      const newStats = { ...prev };
-
-      // Remove from old status count
-      if (order.status === "completed") newStats.completedOrders--;
-      else if (order.status === "pending") newStats.pendingOrders--;
-
-      // Add to new status count
-      if (newStatus === "completed") newStats.completedOrders++;
-      else if (newStatus === "pending") newStats.pendingOrders++;
-
-      return newStats;
-    });
-  };
+  // handleUpdateOrderStatus is defined above
 
   const handleExport = () => {
     // Mock export functionality
@@ -302,6 +289,12 @@ export const useAdminOrders = () => {
     formatCurrency,
     getStatusColor,
     formatNumber,
+
+    // Pagination states
+    currentPage,
+    setCurrentPage,
+    totalItems,
+    totalPages,
 
     // CRUD handlers
     handleAddOrder,

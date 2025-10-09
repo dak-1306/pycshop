@@ -1,15 +1,18 @@
 import React from "react";
+import FeaturedProductsPagination from "./FeaturedProductsPagination";
 
 const FeaturedProducts = ({
   products,
   formatPrice,
   getStatusColor,
   onAddProduct,
-  onViewProduct, // Thêm prop cho xem chi tiết
+  onViewProduct,
   loading = false,
   error = null,
-  // Ignore other props that are not needed for featured products display
-  ...otherProps
+  // Pagination props
+  currentPage,
+  setCurrentPage,
+  totalPages,
 }) => {
   // Helper function to get product image URL
   const getProductImageUrl = (product) => {
@@ -65,28 +68,9 @@ const FeaturedProducts = ({
             <div className="ml-2 w-5 h-5 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
           )}
         </h2>
-        <button
-          onClick={() => {
-            // Hiển thị thêm sản phẩm thay vì chuyển trang
-            console.log("Show more products clicked");
-          }}
-          className="text-sm text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 hover:gap-2 transition-all"
-        >
-          Xem thêm
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
+        <div className="text-sm text-gray-600">
+          Trang {currentPage || 1} / {totalPages || 1}
+        </div>
       </div>
 
       {/* Error State */}
@@ -140,7 +124,7 @@ const FeaturedProducts = ({
                         ".fallback-placeholder"
                       ).style.display = "flex";
                     }}
-                    onLoad={(e) => {
+                    onLoad={() => {
                       console.log("Image loaded successfully:", imageUrl);
                     }}
                   />
@@ -348,6 +332,15 @@ const FeaturedProducts = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* Pagination - only show when there are products */}
+      {products && products.length > 0 && totalPages > 1 && (
+        <FeaturedProductsPagination
+          currentPage={currentPage || 1}
+          setCurrentPage={setCurrentPage}
+          totalPages={totalPages}
+        />
       )}
     </div>
   );

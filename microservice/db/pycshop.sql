@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 08, 2025 lúc 07:59 PM
+-- Thời gian đã tạo: Th10 09, 2025 lúc 01:28 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -109,7 +109,57 @@ INSERT INTO `anhsanpham` (`ID_Anh`, `ID_SanPham`, `Url`, `Upload_at`) VALUES
 (66, 25, '/uploads/product_images/product_25_1759946110929_jxk70or3i.webp', '2025-10-08 17:55:10'),
 (67, 26, '/uploads/product_images/product_26_1759946193509_fae74qk13.jpg', '2025-10-08 10:56:56'),
 (68, 26, '/uploads/product_images/product_26_1759946193513_2kb8iwrs7.jpg', '2025-10-08 10:56:55'),
-(69, 26, '/uploads/product_images/product_26_1759946193517_3mgjz6wiw.jpg', '2025-10-08 10:56:57');
+(69, 26, '/uploads/product_images/product_26_1759946193517_3mgjz6wiw.jpg', '2025-10-08 10:56:57'),
+(76, 5, '/uploads/product_images/product_5_1760007305446_2f9d88kks.avif', '2025-10-09 03:55:27'),
+(77, 5, '/uploads/product_images/product_5_1760007305450_0djwlhuml.avif', '2025-10-09 03:55:28'),
+(78, 5, '/uploads/product_images/product_5_1760007305454_1rr47pkkm.avif', '2025-10-09 03:55:26'),
+(79, 5, '/uploads/product_images/product_5_1760007305460_s8oya8v71.avif', '2025-10-09 03:55:29'),
+(80, 5, '/uploads/product_images/product_5_1760007305464_9r48qmrwz.avif', '2025-10-09 03:55:25'),
+(81, 6, '/uploads/product_images/product_6_1760007379908_vfaap49sw.jpg', '2025-10-09 03:56:32'),
+(82, 6, '/uploads/product_images/product_6_1760007379914_0jkt4ywv5.jpg', '2025-10-09 03:56:33'),
+(83, 6, '/uploads/product_images/product_6_1760007379919_m1pn8pwv2.jpeg', '2025-10-09 03:56:34'),
+(84, 7, '/uploads/product_images/product_7_1760008593225_vmpdz7661.webp', '2025-10-09 11:16:33'),
+(85, 7, '/uploads/product_images/product_7_1760008593229_tf6y6rdrl.webp', '2025-10-09 11:16:33'),
+(86, 7, '/uploads/product_images/product_7_1760008593232_pa2fz1vvi.webp', '2025-10-09 11:16:33'),
+(87, 7, '/uploads/product_images/product_7_1760008593235_9i9wxty10.webp', '2025-10-09 11:16:33'),
+(88, 7, '/uploads/product_images/product_7_1760008593239_yrmd4wdee.webp', '2025-10-09 11:16:33'),
+(89, 8, '/uploads/product_images/product_8_1760008651502_8b0fzja73.webp', '2025-10-09 11:17:31'),
+(90, 8, '/uploads/product_images/product_8_1760008651505_xaadspsoi.webp', '2025-10-09 11:17:31'),
+(91, 8, '/uploads/product_images/product_8_1760008651508_tlebbr5hs.webp', '2025-10-09 11:17:31'),
+(92, 8, '/uploads/product_images/product_8_1760008651510_am50h4m1h.webp', '2025-10-09 11:17:31'),
+(93, 9, '/uploads/product_images/product_9_1760008694242_hkwvxbvjx.jpg', '2025-10-09 11:18:14'),
+(94, 9, '/uploads/product_images/product_9_1760008694246_roeogtdta.jpg', '2025-10-09 11:18:14'),
+(95, 9, '/uploads/product_images/product_9_1760008694249_wrm1qi2mo.jpg', '2025-10-09 11:18:14'),
+(96, 9, '/uploads/product_images/product_9_1760008694252_j5fqarulj.jpg', '2025-10-09 11:18:14'),
+(97, 10, '/uploads/product_images/product_10_1760008753543_aeftcz7u6.jpg', '2025-10-09 11:19:13'),
+(98, 10, '/uploads/product_images/product_10_1760008753547_i4wp0wu4v.jpg', '2025-10-09 11:19:13'),
+(99, 10, '/uploads/product_images/product_10_1760008753550_h85f15644.jpg', '2025-10-09 11:19:13'),
+(100, 11, '/uploads/product_images/product_11_1760008808084_y1gkaobjx.jpeg', '2025-10-09 11:20:08'),
+(101, 11, '/uploads/product_images/product_11_1760008808088_bq69oauwk.jpeg', '2025-10-09 11:20:08'),
+(102, 11, '/uploads/product_images/product_11_1760008808090_hsigtwy1o.jpeg', '2025-10-09 11:20:08'),
+(103, 12, '/uploads/product_images/product_12_1760008855866_vrerbbf48.jpg', '2025-10-09 11:20:55'),
+(104, 12, '/uploads/product_images/product_12_1760008855869_sah0sqgsa.jpg', '2025-10-09 11:20:55'),
+(105, 12, '/uploads/product_images/product_12_1760008855872_nwrfwi8dp.jpg', '2025-10-09 11:20:55'),
+(106, 12, '/uploads/product_images/product_12_1760008855875_7lr3thhc2.jpg', '2025-10-09 11:20:55'),
+(107, 12, '/uploads/product_images/product_12_1760008855880_yxnyue639.jpg', '2025-10-09 11:20:55'),
+(108, 13, '/uploads/product_images/product_13_1760008888555_mqnx5hjwi.jpg', '2025-10-09 11:21:28'),
+(109, 13, '/uploads/product_images/product_13_1760008888559_afemcv84v.jpg', '2025-10-09 11:21:28'),
+(110, 14, '/uploads/product_images/product_14_1760008924398_m4fg208l6.webp', '2025-10-09 04:22:19'),
+(111, 14, '/uploads/product_images/product_14_1760008924405_t4vz7ij5y.webp', '2025-10-09 04:22:18'),
+(112, 14, '/uploads/product_images/product_14_1760008924412_f10m2bb5i.webp', '2025-10-09 04:22:20'),
+(113, 15, '/uploads/product_images/product_15_1760008998203_m4lsv5h4e.webp', '2025-10-09 04:27:09'),
+(114, 15, '/uploads/product_images/product_15_1760008998206_vh0yt4h2e.webp', '2025-10-09 04:27:08'),
+(115, 15, '/uploads/product_images/product_15_1760008998211_gxnrsxv4g.webp', '2025-10-09 04:27:10'),
+(116, 16, '/uploads/product_images/product_16_1760009049968_oikdvof37.jpg', '2025-10-09 11:24:09'),
+(117, 16, '/uploads/product_images/product_16_1760009049972_aokd9573s.jpg', '2025-10-09 11:24:09'),
+(118, 16, '/uploads/product_images/product_16_1760009049975_az1b64d5i.jpg', '2025-10-09 11:24:09'),
+(119, 17, '/uploads/product_images/product_17_1760009116367_q9fhwtya0.webp', '2025-10-09 04:27:00'),
+(120, 17, '/uploads/product_images/product_17_1760009116370_vyqroy2rt.webp', '2025-10-09 04:27:01'),
+(122, 17, '/uploads/product_images/product_17_1760009116376_eyx8rjmvh.webp', '2025-10-09 04:27:02'),
+(123, 18, '/uploads/product_images/product_18_1760009153009_lkh63gmw2.webp', '2025-10-09 11:25:53'),
+(124, 19, '/uploads/product_images/product_19_1760009205270_i1vsfxln4.webp', '2025-10-09 11:26:45'),
+(125, 19, '/uploads/product_images/product_19_1760009205273_t3q89h581.webp', '2025-10-09 11:26:45'),
+(126, 19, '/uploads/product_images/product_19_1760009205276_1fwxc782e.webp', '2025-10-09 11:26:45');
 
 -- --------------------------------------------------------
 
@@ -601,21 +651,21 @@ INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, 
 (2, 4, 2, 'Đầm váy', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 250000.00, 30, 'active', '2025-10-08 17:41:54'),
 (3, 4, 3, 'Ốp lưng điện thoại', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 12000000.00, 20, 'active', '2025-10-08 17:43:16'),
 (4, 4, 4, 'Laptop Asus', 'Sản phẩm máy tính xách tay: Asus, Dell', 15000000.00, 18, 'active', '2025-10-08 17:09:50'),
-(5, 4, 5, 'Máy quay Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 10000000.00, 10, 'active', '2025-10-01 09:27:57'),
-(6, 4, 6, 'Đồng hồ Casio', 'Sản phẩm đồng hồ: Casio, đồng hồ thông minh', 2000000.00, 40, 'active', '2025-10-01 09:27:57'),
-(7, 4, 7, 'Giày sneaker nam', 'Sản phẩm giày dép nam: sneaker, giày da', 800000.00, 60, 'active', '2025-10-01 09:27:57'),
-(8, 4, 8, 'Giày cao gót', 'Sản phẩm giày dép nữ: cao gót, sandal', 600000.00, 70, 'active', '2025-10-01 09:27:57'),
-(9, 4, 9, 'Túi đeo chéo nam', 'Sản phẩm túi ví nam: túi đeo chéo, ví da', 500000.00, 50, 'active', '2025-10-01 09:27:57'),
-(10, 4, 10, 'Túi xách nữ', 'Sản phẩm túi ví nữ: túi xách, ví cầm tay', 700000.00, 40, 'active', '2025-10-01 09:27:57'),
-(11, 4, 11, 'Tai nghe Bluetooth', 'Sản phẩm thiết bị điện tử: tai nghe, loa', 1000000.00, 25, 'active', '2025-10-01 09:27:57'),
-(12, 4, 12, 'Xe máy điện', 'Sản phẩm phương tiện: xe đạp, xe máy điện', 5000000.00, 10, 'active', '2025-10-01 09:27:57'),
-(13, 4, 13, 'Bàn ghế gỗ', 'Sản phẩm nhà cửa đời sống: bàn ghế, chăn ga', 3000000.00, 20, 'active', '2025-10-01 09:27:57'),
-(14, 4, 14, 'Son môi', 'Sản phẩm làm đẹp: son môi, kem dưỡng da', 300000.00, 100, 'active', '2025-10-01 09:27:57'),
-(15, 4, 15, 'Vitamin A', 'Sản phẩm sức khỏe: thực phẩm chức năng, vitamin', 400000.00, 80, 'active', '2025-10-01 09:27:57'),
-(16, 4, 16, 'Máy chơi game PS5', 'Sản phẩm giải trí: PS5, Lego', 12000000.00, 5, 'active', '2025-10-01 09:27:57'),
-(17, 4, 17, 'Sữa bột trẻ em', 'Sản phẩm mẹ & bé: sữa bột, xe đẩy', 800000.00, 30, 'active', '2025-10-01 09:27:57'),
-(18, 4, 18, 'Sách Tiếng Việt lớp 4', 'Sản phẩm nhà sách online: sách giáo khoa, tiểu thuyết', 150000.00, 200, 'active', '2025-10-01 09:27:57'),
-(19, 4, 19, 'Mì Omachi tôm chua cay', 'Sản phẩm bách hóa online: mì gói, nước ngọt', 50000.00, 300, 'active', '2025-10-01 09:27:57'),
+(5, 4, 5, 'Máy quay Sony', 'Sản phẩm máy ảnh và máy quay phim: Canon, Sony', 10000000.00, 10, 'active', '2025-10-09 10:55:25'),
+(6, 4, 6, 'Đồng hồ Casio', 'Sản phẩm đồng hồ: Casio, đồng hồ thông minh', 2000000.00, 40, 'active', '2025-10-09 10:56:32'),
+(7, 4, 7, 'Giày sneaker nam', 'Sản phẩm giày dép nam: sneaker, giày da', 800000.00, 60, 'active', '2025-10-09 11:16:33'),
+(8, 4, 8, 'Giày cao gót', 'Sản phẩm giày dép nữ: cao gót, sandal', 600000.00, 70, 'active', '2025-10-09 11:17:31'),
+(9, 4, 9, 'Túi đeo chéo nam', 'Sản phẩm túi ví nam: túi đeo chéo, ví da', 500000.00, 50, 'active', '2025-10-09 11:18:14'),
+(10, 4, 10, 'Túi xách nữ', 'Sản phẩm túi ví nữ: túi xách, ví cầm tay', 700000.00, 40, 'active', '2025-10-09 11:19:13'),
+(11, 4, 11, 'Tai nghe Bluetooth', 'Sản phẩm thiết bị điện tử: tai nghe, loa', 1000000.00, 25, 'active', '2025-10-09 11:20:08'),
+(12, 4, 12, 'Xe máy điện', 'Sản phẩm phương tiện: xe đạp, xe máy điện', 5000000.00, 10, 'active', '2025-10-09 11:20:55'),
+(13, 4, 13, 'Bàn ghế gỗ', 'Sản phẩm nhà cửa đời sống: bàn ghế, chăn ga', 3000000.00, 20, 'active', '2025-10-09 11:21:28'),
+(14, 4, 14, 'Son môi', 'Sản phẩm làm đẹp: son môi, kem dưỡng da', 300000.00, 100, 'active', '2025-10-09 11:22:18'),
+(15, 4, 15, 'Vitamin A', 'Sản phẩm sức khỏe: thực phẩm chức năng, vitamin', 400000.00, 80, 'active', '2025-10-09 11:27:08'),
+(16, 4, 16, 'Máy chơi game PS5', 'Sản phẩm giải trí: PS5, Lego', 12000000.00, 5, 'active', '2025-10-09 11:24:09'),
+(17, 4, 17, 'Sữa bột trẻ em', 'Sản phẩm mẹ & bé: sữa bột, xe đẩy', 800000.00, 30, 'active', '2025-10-09 11:27:00'),
+(18, 4, 18, 'Sách Tiếng Việt lớp 4 (tập1)', 'Sản phẩm nhà sách online: sách giáo khoa, tiểu thuyết', 150000.00, 200, 'active', '2025-10-09 11:25:52'),
+(19, 4, 19, 'Mì Omachi tôm chua cay', 'Sản phẩm bách hóa online: mì gói, nước ngọt', 50000.00, 300, 'active', '2025-10-09 11:26:45'),
 (21, 4, 2, 'Áo sơ mi nữ', 'Sản phẩm thời trang nữ: đầm, váy, áo sơ mi nữ', 299999.00, 30, 'active', '2025-10-08 17:12:17'),
 (22, 4, 3, 'iPhone 12', 'Sản phẩm điện thoại và phụ kiện: iPhone, ốp lưng', 15000000.00, 20, 'active', '2025-10-08 17:34:36'),
 (23, 4, 4, 'Laptop Lenovo', 'Sản phẩm máy tính xách tay: Asus, Dell', 25000000.00, 15, 'active', '2025-10-08 17:38:05'),
@@ -890,7 +940,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT cho bảng `anhsanpham`
 --
 ALTER TABLE `anhsanpham`
-  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
 
 --
 -- AUTO_INCREMENT cho bảng `apma`

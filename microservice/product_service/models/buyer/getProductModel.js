@@ -199,39 +199,71 @@ class Product {
           p.Gia,
           p.TonKho,
           p.TrangThai,
-          COALESCE(GROUP_CONCAT(DISTINCT a.Url ORDER BY a.Upload_at ASC SEPARATOR ','), '') as image_urls,
+          (SELECT GROUP_CONCAT(Url ORDER BY Upload_at ASC SEPARATOR ',')
+           FROM AnhSanPham a 
+           WHERE a.ID_SanPham = p.ID_SanPham) AS image_urls,
           p.CapNhat as created_date,
+          (SELECT COUNT(*) 
+           FROM DanhGiaSanPham dg 
+           WHERE dg.ID_SanPham = p.ID_SanPham) AS review_count,
+          (SELECT COALESCE(ROUND(AVG(dg.TyLe), 1), 0)
+           FROM DanhGiaSanPham dg 
+           WHERE dg.ID_SanPham = p.ID_SanPham) AS average_rating,
           c.TenDanhMuc,
           c.ID_DanhMuc,
           ch.TenCuaHang,
           ch.ID_CuaHang,
           ch.DiaChiCH,
           SUBSTRING_INDEX(ch.DiaChiCH, ',', -1) as shop_location,
-          COALESCE(
-            ROUND(
-              (SUM(CASE WHEN dg.TyLe = 1 THEN 1 ELSE 0 END) * 1 +
-               SUM(CASE WHEN dg.TyLe = 2 THEN 1 ELSE 0 END) * 2 +
-               SUM(CASE WHEN dg.TyLe = 3 THEN 1 ELSE 0 END) * 3 +
-               SUM(CASE WHEN dg.TyLe = 4 THEN 1 ELSE 0 END) * 4 +
-               SUM(CASE WHEN dg.TyLe = 5 THEN 1 ELSE 0 END) * 5) /
-              NULLIF(COUNT(dg.ID_DanhGia), 0)
-            , 1)
-          , 0) as average_rating,
-          COUNT(dg.ID_DanhGia) as review_count
+          -- Shop statistics
+          (SELECT COUNT(*) 
+           FROM SanPham sp 
+           WHERE sp.ID_NguoiBan = p.ID_NguoiBan AND sp.TrangThai != 'inactive') AS shop_product_count,
+          (SELECT COALESCE(ROUND(AVG(dg2.TyLe), 1), 0)
+           FROM SanPham sp2 
+           JOIN DanhGiaSanPham dg2 ON sp2.ID_SanPham = dg2.ID_SanPham
+           WHERE sp2.ID_NguoiBan = p.ID_NguoiBan) AS shop_average_rating
         FROM SanPham p
         LEFT JOIN DanhMuc c ON p.ID_DanhMuc = c.ID_DanhMuc
-        LEFT JOIN AnhSanPham a ON p.ID_SanPham = a.ID_SanPham
         LEFT JOIN NguoiDung nb ON p.ID_NguoiBan = nb.ID_NguoiDung
         LEFT JOIN CuaHang ch ON nb.ID_CuaHang = ch.ID_CuaHang
-        LEFT JOIN DanhGiaSanPham dg ON p.ID_SanPham = dg.ID_SanPham
         WHERE p.ID_SanPham = ? AND p.TrangThai != 'inactive'
-        GROUP BY p.ID_SanPham, p.TenSanPham, p.MoTa, p.Gia, p.TonKho, p.TrangThai, p.CapNhat, c.TenDanhMuc, c.ID_DanhMuc, ch.TenCuaHang, ch.ID_CuaHang, ch.DiaChiCH
       `;
 
       const [rows] = await db.execute(query, [id]);
       return rows[0];
     } catch (error) {
       console.error("[PRODUCT] Error in getProductById:", error);
+      throw error;
+    }
+  }
+
+  // Get similar products by category
+  static async getSimilarProducts(productId, categoryId, limit = 4) {
+    try {
+      const query = `
+        SELECT 
+          p.ID_SanPham,
+          p.TenSanPham,
+          p.Gia,
+          (SELECT a.Url FROM AnhSanPham a 
+           WHERE a.ID_SanPham = p.ID_SanPham 
+           ORDER BY a.Upload_at ASC LIMIT 1) as first_image,
+          COALESCE(ROUND(AVG(dg.TyLe), 1), 0) as average_rating
+        FROM SanPham p
+        LEFT JOIN DanhGiaSanPham dg ON p.ID_SanPham = dg.ID_SanPham
+        WHERE p.ID_DanhMuc = ? 
+          AND p.ID_SanPham != ? 
+          AND p.TrangThai = 'active'
+        GROUP BY p.ID_SanPham, p.TenSanPham, p.Gia
+        ORDER BY RAND()
+        LIMIT ?
+      `;
+
+      const [rows] = await db.execute(query, [categoryId, productId, limit]);
+      return rows;
+    } catch (error) {
+      console.error("[PRODUCT] Error in getSimilarProducts:", error);
       throw error;
     }
   }

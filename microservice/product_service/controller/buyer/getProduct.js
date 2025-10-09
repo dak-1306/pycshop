@@ -88,6 +88,7 @@ export const getProductById = async (req, res) => {
       price: parseFloat(product.Gia),
       stock_quantity: product.TonKho,
       category: product.TenDanhMuc,
+      category_id: product.ID_DanhMuc,
       images: product.image_urls ? product.image_urls.split(",") : [],
       average_rating: parseFloat(product.average_rating) || 0,
       review_count: product.review_count || 0,
@@ -96,6 +97,8 @@ export const getProductById = async (req, res) => {
       shop_location: product.shop_location
         ? product.shop_location.trim()
         : "TP.HCM",
+      shop_product_count: product.shop_product_count || 0,
+      shop_average_rating: parseFloat(product.shop_average_rating) || 0,
       created_date: product.created_date,
     };
 
@@ -271,6 +274,64 @@ export const getProductRatingStats = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to fetch rating statistics",
+      error: error.message,
+    });
+  }
+};
+
+// Get similar products by category
+export const getSimilarProducts = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit = 4 } = req.query;
+
+    console.log(`[PRODUCT_CONTROLLER] Get similar products for ID: ${id}`);
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    // First get the product to know its category
+    const product = await Product.getProductById(id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // Get similar products
+    const similarProducts = await Product.getSimilarProducts(
+      id,
+      product.ID_DanhMuc,
+      parseInt(limit)
+    );
+
+    // Transform data
+    const transformedProducts = similarProducts.map((item) => ({
+      id: item.ID_SanPham,
+      name: item.TenSanPham,
+      price: parseFloat(item.Gia),
+      image: item.first_image || null,
+      rating: parseFloat(item.average_rating) || 0,
+    }));
+
+    console.log(
+      `[PRODUCT_CONTROLLER] Found ${transformedProducts.length} similar products`
+    );
+
+    res.json({
+      success: true,
+      data: transformedProducts,
+    });
+  } catch (error) {
+    console.error("[PRODUCT_CONTROLLER] Error in getSimilarProducts:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch similar products",
       error: error.message,
     });
   }

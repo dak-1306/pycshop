@@ -36,6 +36,16 @@ export const productService = {
     }
   },
 
+  // Get product by ID
+  getProductById: async (id) => {
+    try {
+      return await api.get(`/products/${id}`);
+    } catch (error) {
+      console.error("Error fetching product by ID:", error);
+      throw error;
+    }
+  },
+
   // Search products
   searchProducts: async (params = {}) => {
     try {
@@ -68,6 +78,20 @@ export const productService = {
       return await api.get(`/products/${productId}/rating-stats`);
     } catch (error) {
       console.error("Error fetching product rating stats:", error);
+      throw error;
+    }
+  },
+
+  // Get similar products
+  getSimilarProducts: async (productId, limit = 4) => {
+    try {
+      const queryParams = new URLSearchParams({ limit }).toString();
+      const url = `/products/${productId}/similar${
+        queryParams ? `?${queryParams}` : ""
+      }`;
+      return await api.get(url);
+    } catch (error) {
+      console.error("Error fetching similar products:", error);
       throw error;
     }
   },

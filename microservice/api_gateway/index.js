@@ -184,6 +184,11 @@ app.use((req, res, next) => {
     "/uploads", // Static files (product images)
   ];
 
+  // Review public routes - allow viewing reviews without authentication
+  const reviewPublicRoutes = [
+    "/api/products", // Allow GET /api/products/:id/reviews
+  ];
+
   // Shop public routes
   const shopPublicRoutes = [
     "/shops/categories",
@@ -193,23 +198,27 @@ app.use((req, res, next) => {
   ];
 
   // Combine all public routes
-  const allPublicRoutes = [...publicRoutes, ...shopPublicRoutes];
+  const allPublicRoutes = [...publicRoutes, ...reviewPublicRoutes, ...shopPublicRoutes];
 
   // Kiểm tra nếu là public route
   const isPublicRoute = allPublicRoutes.some((route) =>
     req.originalUrl.startsWith(route)
   );
 
+  // Special case: Allow GET requests to review endpoints without authentication
+  const isReviewGetRoute = req.originalUrl.includes('/reviews') && req.method === 'GET';
+
   // Debug logs
   console.log(`[GATEWAY] Checking route: ${req.originalUrl}`);
   console.log(`[GATEWAY] Public routes:`, allPublicRoutes);
   console.log(`[GATEWAY] Is public route:`, isPublicRoute);
+  console.log(`[GATEWAY] Is review GET route:`, isReviewGetRoute);
 
   // Kiểm tra nếu là shop route với ID (GET /shops/123)
   const isShopByIdRoute =
     /^\/shops\/\d+$/.test(req.originalUrl) && req.method === "GET";
 
-  if (isPublicRoute || isShopByIdRoute) {
+  if (isPublicRoute || isShopByIdRoute || isReviewGetRoute) {
     console.log(`[GATEWAY] Public route allowed: ${req.originalUrl}`);
     return next();
   }
@@ -219,6 +228,35 @@ app.use((req, res, next) => {
     `[GATEWAY] Protected route: ${req.originalUrl} - Checking token...`
   );
   authMiddleware(req, res, next);
+});
+
+// Add specific route for reviews BEFORE setupRoutes
+app.get(/^\/api\/products\/\d+\/reviews/, (req, res) => {
+  console.log(`[GATEWAY] Review route matched: ${req.method} ${req.originalUrl}`);
+  
+  // Proxy to review service
+  const reviewServiceUrl = 'http://localhost:5005';
+  const targetUrl = `${reviewServiceUrl}${req.originalUrl}`;
+  
+  console.log(`[GATEWAY] Proxying to: ${targetUrl}`);
+  
+  // Simple proxy using fetch
+  fetch(targetUrl, {
+    method: req.method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...req.headers
+    }
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(`[GATEWAY] Review service response received`);
+    res.json(data);
+  })
+  .catch(error => {
+    console.error(`[GATEWAY] Review service error:`, error);
+    res.status(500).json({ error: 'Review service error' });
+  });
 });
 
 // Đăng ký các route proxy

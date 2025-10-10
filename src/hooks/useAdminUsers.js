@@ -67,52 +67,98 @@ export const useAdminUsers = () => {
   const getRoleColor = (role) => {
     return USER_ROLE_COLORS[role] || USER_ROLE_COLORS.default;
   };
-
   // Event handlers
   const handleViewUser = (user) => {
     console.log("View user:", user);
-    // Implement view user logic
+    return user; // Return user data for modal display
   };
 
-  const handleEditUser = async (user) => {
+  const handleEditUser = async (userData) => {
     try {
-      await adminService.updateUserStatus(user.id, {
-        status: user.status === "active" ? "inactive" : "active",
-      });
-      // Reload users
+      await adminService.updateUser(userData.id, userData);
+      
+      // Reload users after successful update
       const response = await adminService.getUsers({
         search: searchValue,
         role: roleFilter,
         status: statusFilter,
       });
       setUsers(response.data || []);
-      console.log("User status updated:", user);
+      
+      // Update stats
+      const dashboardData = await adminService.getDashboardStats();
+      setStats({
+        total: dashboardData.stats.totalUsers || 0,
+        active: dashboardData.stats.activeUsers || 0,
+        inactive: dashboardData.stats.inactiveUsers || 0,
+        newThisMonth: dashboardData.stats.newUsersThisMonth || 0,
+      });
+      
+      console.log("User updated successfully:", userData);
+      return { success: true };
     } catch (error) {
       console.error("Error updating user:", error);
       setError("Failed to update user");
+      throw error;
     }
   };
-
   const handleDeleteUser = async (user) => {
     try {
       await adminService.deleteUser(user.id);
-      // Reload users
+      
+      // Reload users after successful deletion
       const response = await adminService.getUsers({
         search: searchValue,
         role: roleFilter,
         status: statusFilter,
       });
       setUsers(response.data || []);
-      console.log("User deleted:", user);
+      
+      // Update stats
+      const dashboardData = await adminService.getDashboardStats();
+      setStats({
+        total: dashboardData.stats.totalUsers || 0,
+        active: dashboardData.stats.activeUsers || 0,
+        inactive: dashboardData.stats.inactiveUsers || 0,
+        newThisMonth: dashboardData.stats.newUsersThisMonth || 0,
+      });
+      
+      console.log("User deleted successfully:", user);
+      return { success: true };
     } catch (error) {
       console.error("Error deleting user:", error);
       setError("Failed to delete user");
+      throw error;
     }
   };
-
-  const handleAddUser = () => {
-    console.log("Add new user");
-    // Implement add user logic - could open modal
+  const handleAddUser = async (userData) => {
+    try {
+      await adminService.createUser(userData);
+      
+      // Reload users after successful creation
+      const response = await adminService.getUsers({
+        search: searchValue,
+        role: roleFilter,
+        status: statusFilter,
+      });
+      setUsers(response.data || []);
+      
+      // Update stats
+      const dashboardData = await adminService.getDashboardStats();
+      setStats({
+        total: dashboardData.stats.totalUsers || 0,
+        active: dashboardData.stats.activeUsers || 0,
+        inactive: dashboardData.stats.inactiveUsers || 0,
+        newThisMonth: dashboardData.stats.newUsersThisMonth || 0,
+      });
+      
+      console.log("User created successfully");
+      return { success: true };
+    } catch (error) {
+      console.error("Error creating user:", error);
+      setError("Failed to create user");
+      throw error;
+    }
   };
 
   // Processed stats

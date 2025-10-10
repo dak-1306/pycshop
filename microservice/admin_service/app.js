@@ -366,6 +366,168 @@ app.delete("/users/:id", async (req, res) => {
   }
 });
 
+// Create new user
+app.post("/users", async (req, res) => {
+  try {
+    const { name, email, password, role, status, phone, address } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Name, email and password are required",
+      });
+    }
+
+    // Check if email already exists
+    const [existingUser] = await db.execute(
+      "SELECT ID_NguoiDung FROM nguoidung WHERE Email = ?",
+      [email]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already exists",
+      });
+    }
+
+    // Hash password (in production, use bcrypt)
+    const hashedPassword = password; // For now, storing as plain text - should be hashed
+
+    // Insert new user
+    const [result] = await db.execute(
+      `INSERT INTO nguoidung (HoTen, Email, MatKhau, VaiTro, TrangThai, SoDienThoai, DiaChi, ThoiGianTao) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
+      [
+        name,
+        email,
+        hashedPassword,
+        role || 'customer',
+        status || 'active',
+        phone || null,
+        address || null
+      ]
+    );
+
+    // Get the created user
+    const [newUser] = await db.execute(
+      `SELECT ID_NguoiDung as id, HoTen as name, Email as email, SoDienThoai as phone, 
+              DiaChi as address, VaiTro as role, TrangThai as status, ThoiGianTao as joinDate
+       FROM nguoidung WHERE ID_NguoiDung = ?`,
+      [result.insertId]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: "User created successfully",
+      data: newUser[0]
+    });
+
+  } catch (error) {
+    console.error("[ADMIN] Error creating user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create user",
+      error: error.message,
+    });
+  }
+});
+
+// Get user by ID
+app.get("/users/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const [user] = await db.execute(
+      `SELECT ID_NguoiDung as id, HoTen as name, Email as email, SoDienThoai as phone, 
+              DiaChi as address, VaiTro as role, TrangThai as status, 
+              ThoiGianTao as joinDate, ThoiGianTao as lastLogin
+       FROM nguoidung WHERE ID_NguoiDung = ?`,
+      [id]
+    );
+
+    if (user.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: user[0]
+    });
+
+  } catch (error) {
+    console.error("[ADMIN] Error getting user by ID:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to get user",
+      error: error.message,
+    });
+  }
+});
+
+// Update user
+app.put("/users/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, email, phone, address, role, status } = req.body;
+
+    // Validate required fields
+    if (!name || !email) {
+      return res.status(400).json({
+        success: false,
+        message: "Name and email are required",
+      });
+    }
+
+    // Check if email already exists for other users
+    const [existingUser] = await db.execute(
+      "SELECT ID_NguoiDung FROM nguoidung WHERE Email = ? AND ID_NguoiDung != ?",
+      [email, id]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(409).json({
+        success: false,
+        message: "Email already exists",
+      });
+    }
+
+    // Update user
+    await db.execute(
+      `UPDATE nguoidung 
+       SET HoTen = ?, Email = ?, SoDienThoai = ?, DiaChi = ?, VaiTro = ?, TrangThai = ?
+       WHERE ID_NguoiDung = ?`,
+      [name, email, phone || null, address || null, role || 'customer', status || 'active', id]
+    );
+
+    // Get updated user
+    const [updatedUser] = await db.execute(
+      `SELECT ID_NguoiDung as id, HoTen as name, Email as email, SoDienThoai as phone, 
+              DiaChi as address, VaiTro as role, TrangThai as status, ThoiGianTao as joinDate
+       FROM nguoidung WHERE ID_NguoiDung = ?`,
+      [id]
+    );
+
+    res.json({
+      success: true,
+      message: "User updated successfully",
+      data: updatedUser[0]
+    });
+
+  } catch (error) {
+    console.error("[ADMIN] Error updating user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update user",
+      error: error.message,
+    });
+  }
+});
+
 // Product management
 app.get("/products", async (req, res) => {
   try {

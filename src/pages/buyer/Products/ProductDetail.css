@@ -728,13 +728,13 @@
     padding: 16px;
     margin-top: 20px;
   }
-  
+
   .pd-review-header {
     flex-direction: column;
     gap: 12px;
     align-items: flex-start;
   }
-  
+
   .pd-btn-write-review {
     width: 100%;
     justify-content: center;

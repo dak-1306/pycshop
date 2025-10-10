@@ -6,6 +6,7 @@ import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import jwt from "jsonwebtoken";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import setupRoutes from "./routes.js"; // Import routes
 import authMiddleware from "./middleware/authMiddleware.js"; // Import auth middleware
@@ -116,7 +117,9 @@ app.use((req, res, next) => {
     req.url.startsWith("/products") ||
     req.url.startsWith("/seller") ||
     req.url.startsWith("/shops") ||
-    req.url.startsWith("/cart")
+    req.url.startsWith("/cart") ||
+    req.url.startsWith("/api/reviews") ||
+    req.url.includes("/reviews")
   ) {
     console.log(`[GATEWAY] Skipping JSON parsing for proxy route: ${req.url}`);
     return next();
@@ -174,6 +177,30 @@ app.use((req, res, next) => {
   next();
 });
 
+// Parse JWT token and add user info to request (but don't require auth)
+app.use((req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+    try {
+      const token = authHeader.startsWith("Bearer ")
+        ? authHeader.slice(7)
+        : authHeader;
+
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        console.log(`[GATEWAY] JWT decoded for user ID: ${decoded.id}`);
+      }
+    } catch (error) {
+      // Don't fail - just log and continue without user info
+      console.log(`[GATEWAY] JWT parse error (continuing):`, error.message);
+    }
+  }
+
+  next();
+});
+
 // Middleware kiểm tra auth cho các routes protected
 app.use((req, res, next) => {
   // Routes không cần auth (public routes)
@@ -198,7 +225,11 @@ app.use((req, res, next) => {
   ];
 
   // Combine all public routes
-  const allPublicRoutes = [...publicRoutes, ...reviewPublicRoutes, ...shopPublicRoutes];
+  const allPublicRoutes = [
+    ...publicRoutes,
+    ...reviewPublicRoutes,
+    ...shopPublicRoutes,
+  ];
 
   // Kiểm tra nếu là public route
   const isPublicRoute = allPublicRoutes.some((route) =>
@@ -206,7 +237,8 @@ app.use((req, res, next) => {
   );
 
   // Special case: Allow GET requests to review endpoints without authentication
-  const isReviewGetRoute = req.originalUrl.includes('/reviews') && req.method === 'GET';
+  const isReviewGetRoute =
+    req.originalUrl.includes("/reviews") && req.method === "GET";
 
   // Debug logs
   console.log(`[GATEWAY] Checking route: ${req.originalUrl}`);
@@ -230,32 +262,159 @@ app.use((req, res, next) => {
   authMiddleware(req, res, next);
 });
 
-// Add specific route for reviews BEFORE setupRoutes
-app.get(/^\/api\/products\/\d+\/reviews/, (req, res) => {
-  console.log(`[GATEWAY] Review route matched: ${req.method} ${req.originalUrl}`);
-  
+// Add specific route for reviews BEFORE setupRoutes - Handle all HTTP methods
+app.all(/^\/api\/products\/\d+\/reviews/, (req, res) => {
+  console.log(
+    `[GATEWAY] Review route matched: ${req.method} ${req.originalUrl}`
+  );
+
   // Proxy to review service
-  const reviewServiceUrl = 'http://localhost:5005';
+  const reviewServiceUrl = "http://localhost:5005";
   const targetUrl = `${reviewServiceUrl}${req.originalUrl}`;
-  
+
   console.log(`[GATEWAY] Proxying to: ${targetUrl}`);
-  
-  // Simple proxy using fetch
-  fetch(targetUrl, {
-    method: req.method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...req.headers
-    }
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log(`[GATEWAY] Review service response received`);
-    res.json(data);
-  })
-  .catch(error => {
-    console.error(`[GATEWAY] Review service error:`, error);
-    res.status(500).json({ error: 'Review service error' });
+
+  // For GET requests, proxy directly
+  if (req.method === "GET") {
+    const requestOptions = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: req.headers.authorization,
+        // Forward user info headers if user is authenticated
+        ...(req.user && {
+          "x-user-id": req.user.id.toString(),
+          "x-user-role": req.user.role,
+          "x-user-type": req.user.userType,
+        }),
+        ...req.headers,
+      },
+    };
+
+    fetch(targetUrl, requestOptions)
+      .then(async (response) => {
+        const data = await response.json();
+        console.log(`[GATEWAY] Review service response received`);
+        res.status(response.status).json(data);
+      })
+      .catch((error) => {
+        console.error(`[GATEWAY] Review service error:`, error);
+        res.status(500).json({ error: "Review service error" });
+      });
+    return;
+  }
+
+  // For POST/PUT requests, collect body and forward
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk.toString();
+  });
+  req.on("end", () => {
+    const requestOptions = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+        Authorization: req.headers.authorization,
+        // Forward user info headers if user is authenticated
+        ...(req.user && {
+          "x-user-id": req.user.id.toString(),
+          "x-user-role": req.user.role,
+          "x-user-type": req.user.userType,
+        }),
+      },
+      body: body,
+    };
+
+    fetch(targetUrl, requestOptions)
+      .then(async (response) => {
+        const data = await response.json();
+        console.log(`[GATEWAY] Review service response received`);
+        res.status(response.status).json(data);
+      })
+      .catch((error) => {
+        console.error(`[GATEWAY] Review service error:`, error);
+        res.status(500).json({ error: "Review service error" });
+      });
+  });
+});
+
+// Add route for creating new reviews (POST /api/reviews)
+app.all(/^\/api\/reviews/, (req, res) => {
+  console.log(
+    `[GATEWAY] Review API route matched: ${req.method} ${req.originalUrl}`
+  );
+
+  // Proxy to review service
+  const reviewServiceUrl = "http://localhost:5005";
+  const targetUrl = `${reviewServiceUrl}${req.originalUrl}`;
+
+  console.log(`[GATEWAY] Proxying to: ${targetUrl}`);
+
+  // For GET requests, proxy directly
+  if (req.method === "GET") {
+    const requestOptions = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: req.headers.authorization,
+        // Forward user info headers if user is authenticated
+        ...(req.user && {
+          "x-user-id": req.user.id.toString(),
+          "x-user-role": req.user.role,
+          "x-user-type": req.user.userType,
+        }),
+        ...req.headers,
+      },
+    };
+
+    fetch(targetUrl, requestOptions)
+      .then(async (response) => {
+        const data = await response.json();
+        console.log(`[GATEWAY] Review service response:`, response.status);
+        res.status(response.status).json(data);
+      })
+      .catch((error) => {
+        console.error(`[GATEWAY] Review service error:`, error);
+        res.status(500).json({ error: "Review service error" });
+      });
+    return;
+  }
+
+  // For POST/PUT requests, collect body and forward
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk.toString();
+  });
+  req.on("end", () => {
+    console.log(`[GATEWAY] Received body:`, body);
+
+    const requestOptions = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+        Authorization: req.headers.authorization,
+        // Forward user info headers if user is authenticated
+        ...(req.user && {
+          "x-user-id": req.user.id.toString(),
+          "x-user-role": req.user.role,
+          "x-user-type": req.user.userType,
+        }),
+      },
+      body: body,
+    };
+
+    fetch(targetUrl, requestOptions)
+      .then(async (response) => {
+        const data = await response.json();
+        console.log(`[GATEWAY] Review service response:`, response.status);
+        res.status(response.status).json(data);
+      })
+      .catch((error) => {
+        console.error(`[GATEWAY] Review service error:`, error);
+        res.status(500).json({ error: "Review service error" });
+      });
   });
 });
 

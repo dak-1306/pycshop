@@ -1,35 +1,35 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 export const reviewService = {
   // Thêm đánh giá mới
   createReview: async (reviewData) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${API_BASE_URL}/api/reviews`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : '',
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
         },
         body: JSON.stringify(reviewData),
       });
 
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.message || 'Lỗi khi tạo đánh giá');
+        throw new Error(data.message || "Lỗi khi tạo đánh giá");
       }
 
       return {
         success: true,
         data: data.data,
-        message: data.message || 'Đánh giá đã được tạo thành công',
+        message: data.message || "Đánh giá đã được tạo thành công",
       };
     } catch (error) {
-      console.error('Error creating review:', error);
+      console.error("Error creating review:", error);
       return {
         success: false,
-        error: error.message || 'Lỗi khi tạo đánh giá',
+        error: error.message || "Lỗi khi tạo đánh giá",
       };
     }
   },
@@ -42,9 +42,9 @@ export const reviewService = {
       );
 
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.message || 'Lỗi khi tải đánh giá');
+        throw new Error(data.message || "Lỗi khi tải đánh giá");
       }
 
       return {
@@ -55,10 +55,10 @@ export const reviewService = {
         total: data.total,
       };
     } catch (error) {
-      console.error('Error fetching reviews:', error);
+      console.error("Error fetching reviews:", error);
       return {
         success: false,
-        error: error.message || 'Lỗi khi tải đánh giá',
+        error: error.message || "Lỗi khi tải đánh giá",
         data: [],
       };
     }
@@ -67,7 +67,7 @@ export const reviewService = {
   // Kiểm tra xem user đã đánh giá sản phẩm này chưa
   checkUserReview: async (productId) => {
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("token");
       if (!token) {
         return { success: false, hasReviewed: false };
       }
@@ -76,15 +76,15 @@ export const reviewService = {
         `${API_BASE_URL}/api/reviews/check/${productId}`,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
 
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.message || 'Lỗi khi kiểm tra đánh giá');
+        throw new Error(data.message || "Lỗi khi kiểm tra đánh giá");
       }
 
       return {
@@ -93,7 +93,7 @@ export const reviewService = {
         review: data.review,
       };
     } catch (error) {
-      console.error('Error checking review:', error);
+      console.error("Error checking review:", error);
       return {
         success: false,
         hasReviewed: false,

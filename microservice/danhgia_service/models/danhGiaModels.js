@@ -1,13 +1,13 @@
-import mysql from 'mysql2/promise';
+import mysql from "mysql2/promise";
 
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'pycshop',
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "pycshop",
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
 };
 
 const pool = mysql.createPool(dbConfig);
@@ -21,7 +21,12 @@ const danhGiaModel = {
       const [result] = await connection.execute(
         `INSERT INTO danhgiasanpham (ID_SanPham, ID_NguoiMua, BinhLuan, TyLe, ThoiGian) 
          VALUES (?, ?, ?, ?, NOW())`,
-        [reviewData.productId, reviewData.userId, reviewData.comment, reviewData.rating]
+        [
+          reviewData.productId,
+          reviewData.userId,
+          reviewData.comment,
+          reviewData.rating,
+        ]
       );
 
       // Get the created review with user info
@@ -43,10 +48,10 @@ const danhGiaModel = {
       return {
         success: true,
         data: review[0],
-        insertId: result.insertId
+        insertId: result.insertId,
       };
     } catch (error) {
-      console.error('Error creating review:', error);
+      console.error("Error creating review:", error);
       throw error;
     } finally {
       connection.release();
@@ -94,11 +99,11 @@ const danhGiaModel = {
           currentPage: page,
           totalPages: totalPages,
           total: total,
-          limit: limit
-        }
+          limit: limit,
+        },
       };
     } catch (error) {
-      console.error('Error getting product reviews:', error);
+      console.error("Error getting product reviews:", error);
       throw error;
     } finally {
       connection.release();
@@ -123,10 +128,10 @@ const danhGiaModel = {
       return {
         success: true,
         hasReviewed: existing.length > 0,
-        review: existing.length > 0 ? existing[0] : null
+        review: existing.length > 0 ? existing[0] : null,
       };
     } catch (error) {
-      console.error('Error checking user review:', error);
+      console.error("Error checking user review:", error);
       throw error;
     } finally {
       connection.release();
@@ -138,20 +143,22 @@ const danhGiaModel = {
     const connection = await pool.getConnection();
     try {
       const [result] = await connection.execute(
-        `SELECT sp.ID_CuaHang 
+        `SELECT ch.ID_CuaHang 
          FROM sanpham sp 
+         left join nguoidung nd on sp.ID_NguoiBan = nd.ID_NguoiDung
+         left join cuahang ch on ch.ID_CuaHang = nd.ID_CuaHang
          WHERE sp.ID_SanPham = ?`,
         [productId]
       );
 
       return result.length > 0 ? result[0].ID_CuaHang : null;
     } catch (error) {
-      console.error('Error getting shop ID:', error);
+      console.error("Error getting shop ID:", error);
       throw error;
     } finally {
       connection.release();
     }
-  }
+  },
 };
 
 export default danhGiaModel;

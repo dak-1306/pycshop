@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import './ReviewList.css';
+import React, { useState, useEffect } from "react";
+import "./ReviewList.css";
 
 const ReviewList = ({ productId, newReview }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const reviewsPerPage = 5;
@@ -17,14 +17,14 @@ const ReviewList = ({ productId, newReview }) => {
   // Add new review to list when received
   useEffect(() => {
     if (newReview) {
-      setReviews(prevReviews => [newReview, ...prevReviews]);
+      setReviews((prevReviews) => [newReview, ...prevReviews]);
     }
   }, [newReview]);
 
   const loadReviews = async () => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
       const response = await fetch(
         `http://localhost:5000/api/products/${productId}/reviews?page=${currentPage}&limit=${reviewsPerPage}`
@@ -33,14 +33,14 @@ const ReviewList = ({ productId, newReview }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Lỗi khi tải đánh giá');
+        throw new Error(data.message || "Lỗi khi tải đánh giá");
       }
 
       setReviews(data.data || []);
       setTotalPages(data.totalPages || 1);
     } catch (error) {
-      console.error('Error loading reviews:', error);
-      setError('Không thể tải đánh giá. Vui lòng thử lại.');
+      console.error("Error loading reviews:", error);
+      setError("Không thể tải đánh giá. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -48,12 +48,12 @@ const ReviewList = ({ productId, newReview }) => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return date.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -61,10 +61,7 @@ const ReviewList = ({ productId, newReview }) => {
     const stars = [];
     for (let i = 1; i <= 5; i++) {
       stars.push(
-        <span
-          key={i}
-          className={`review-star ${i <= rating ? 'active' : ''}`}
-        >
+        <span key={i} className={`review-star ${i <= rating ? "active" : ""}`}>
           ★
         </span>
       );
@@ -108,7 +105,7 @@ const ReviewList = ({ productId, newReview }) => {
   return (
     <div className="reviews-section">
       <h3>Đánh giá sản phẩm</h3>
-      
+
       {reviews.length === 0 ? (
         <div className="reviews-empty">
           <i className="fas fa-comment-slash"></i>
@@ -127,7 +124,7 @@ const ReviewList = ({ productId, newReview }) => {
                     </div>
                     <div className="review-user-details">
                       <div className="review-username">
-                        {review.user_name || 'Người dùng ẩn danh'}
+                        {review.user_name || "Người dùng ẩn danh"}
                       </div>
                       <div className="review-date">
                         {formatDate(review.ThoiGian)}
@@ -155,11 +152,11 @@ const ReviewList = ({ productId, newReview }) => {
                 <i className="fas fa-chevron-left"></i>
                 Trước
               </button>
-              
+
               <div className="pagination-info">
                 Trang {currentPage} / {totalPages}
               </div>
-              
+
               <button
                 className="pagination-btn"
                 onClick={() => handlePageChange(currentPage + 1)}

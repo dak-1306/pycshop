@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 09, 2025 lúc 01:28 PM
+-- Thời gian đã tạo: Th10 10, 2025 lúc 12:17 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -159,7 +159,10 @@ INSERT INTO `anhsanpham` (`ID_Anh`, `ID_SanPham`, `Url`, `Upload_at`) VALUES
 (123, 18, '/uploads/product_images/product_18_1760009153009_lkh63gmw2.webp', '2025-10-09 11:25:53'),
 (124, 19, '/uploads/product_images/product_19_1760009205270_i1vsfxln4.webp', '2025-10-09 11:26:45'),
 (125, 19, '/uploads/product_images/product_19_1760009205273_t3q89h581.webp', '2025-10-09 11:26:45'),
-(126, 19, '/uploads/product_images/product_19_1760009205276_1fwxc782e.webp', '2025-10-09 11:26:45');
+(126, 19, '/uploads/product_images/product_19_1760009205276_1fwxc782e.webp', '2025-10-09 11:26:45'),
+(127, 35, '/uploads/product_images/product_35_1760086835122_4ipy3lc9a.jpg', '2025-10-10 09:00:35'),
+(128, 35, '/uploads/product_images/product_35_1760086835127_gytsbo061.jpg', '2025-10-10 09:00:35'),
+(129, 35, '/uploads/product_images/product_35_1760086835131_bjxw79kz1.png', '2025-10-10 09:00:35');
 
 -- --------------------------------------------------------
 
@@ -264,9 +267,9 @@ CREATE TABLE `cuahang` (
 --
 
 INSERT INTO `cuahang` (`ID_CuaHang`, `TenCuaHang`, `DanhGiaTB`, `ID_DanhMuc`, `DiaChiCH`, `SoDienThoaiCH`, `NgayCapNhat`) VALUES
-(1, 'Thời Trang Nam Unisex', 0.0, 1, '123 Lê Lợi, Quận 1, TP.HCM', '0901234567', '2025-10-02 20:30:56'),
-(3, 'Cửa hàng sách Hải Nam', 0.0, 18, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-02 23:29:55'),
-(7, 'Shop của Bảnh', 0.0, 11, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-06 15:43:56');
+(1, 'Thời Trang Nam Unisex', 4.4, 1, '123 Lê Lợi, Quận 1, TP.HCM', '0901234567', '2025-10-10 15:56:01'),
+(3, 'Cửa hàng sách Hải Nam', 4.8, 18, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-10 15:56:33'),
+(7, 'Shop của Bảnh', 3.0, 11, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-10 16:39:11');
 
 -- --------------------------------------------------------
 
@@ -403,7 +406,14 @@ INSERT INTO `danhgiasanpham` (`ID_DanhGia`, `ID_SanPham`, `ID_NguoiMua`, `BinhLu
 (117, 32, 3, 'Sách chuẩn chương trình.', 5, '2025-10-08 10:22:51'),
 (118, 32, 4, 'Giấy trắng, dễ đọc.', 5, '2025-10-08 10:22:51'),
 (119, 32, 5, 'Giá hợp lý.', 4, '2025-10-08 10:22:51'),
-(120, 32, 6, 'Giao nhanh, đóng gói kỹ.', 5, '2025-10-08 10:22:51');
+(120, 32, 6, 'Giao nhanh, đóng gói kỹ.', 5, '2025-10-08 10:22:51'),
+(121, 3, 7, 'ốp lưng vừa vặn, mẫu mã đẹp', 5, '2025-10-10 08:43:08'),
+(122, 19, 7, 'mỳ ngon vãi', 4, '2025-10-10 08:48:01'),
+(123, 11, 7, 'tai nghe dởm quá', 1, '2025-10-10 08:55:27'),
+(124, 18, 7, 'Con em đọc sách rất hay', 5, '2025-10-10 08:56:01'),
+(125, 31, 7, 'Câu chuyện rất bổ ích', 5, '2025-10-10 08:56:33'),
+(128, 35, 7, 'chống nước thật nha mọi người', 5, '2025-10-10 09:30:29'),
+(129, 35, 3, 'dởm nha, lừa đảo', 1, '2025-10-10 09:39:11');
 
 -- --------------------------------------------------------
 
@@ -524,7 +534,8 @@ INSERT INTO `nguoidung` (`ID_NguoiDung`, `VaiTro`, `HoTen`, `Email`, `MatKhau`, 
 (3, 'seller', 'Nguyễn Văn Test', 'test@gmail.com', '$2b$10$kyTNrvfNiY2YcWIsctNm8O6Z08YJVJRNdIwNmgjlgGANAq7kNjrjm', '0123456789', '123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'active', '2025-09-29 10:46:02', NULL, 3),
 (4, 'seller', 'Trần Tuấn Anh', 'anh@gmail.com', '$2b$10$.nBUefCG4ZtzVCSUhbjb5.tcqiyZfpzfRENMJBdVqu.e.mvrDEJ3W', '01234567689', '357 Điện Biên Phủ, Phường 15, Quận Bình Thạnh, TP.HCM', 'active', '2025-09-30 07:25:46', NULL, 1),
 (5, 'seller', 'Phạm Văn Bành', 'banh@gmail.com', '$2b$10$zdiHx0ziAUGVrMslqzUP9.cw93BaTIzSdAVOId9yQ3B9bg.DAGDZu', '0123456789', '147 Nguyễn Thị Thập, Phường Tân Phú, Quận 7, TP.HCM', 'active', '2025-09-30 07:31:08', NULL, 7),
-(6, 'buyer', 'Trần Hải Đăng', 'dang@gmail.com', '$2b$10$5Q/4QYH1d/TlDwPbiV8HO.JWhdItHwsgkmm9UnVrWQCRQVnHb71OS', '0123435445', 'Số 2 Võ Oanh, Phường 25, Bình Thạnh, Hồ Chí Minh, Việt Nam', 'active', '2025-10-07 13:29:08', NULL, NULL);
+(6, 'buyer', 'Trần Hải Đăng', 'dang@gmail.com', '$2b$10$5Q/4QYH1d/TlDwPbiV8HO.JWhdItHwsgkmm9UnVrWQCRQVnHb71OS', '0123435445', 'Số 2 Võ Oanh, Phường 25, Bình Thạnh, Hồ Chí Minh, Việt Nam', 'active', '2025-10-07 13:29:08', NULL, NULL),
+(7, 'buyer', 'Trần Hoàng Phương', 'phuong@gmail.com', '$2b$10$SwBrTlpGOT1y.rbtgc7bs.Nqo82kWxygXpd6inLf4LjuU5TCkDcyu', '012398234', 'Số 2 Võ Oanh, Phường 25, Bình Thạnh, Hồ Chí Minh, Việt Nam', 'active', '2025-10-10 08:39:52', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -595,7 +606,7 @@ CREATE TABLE `product_rating_cache` (
 INSERT INTO `product_rating_cache` (`ID_SanPham`, `total_reviews`, `count_1_star`, `count_2_star`, `count_3_star`, `count_4_star`, `count_5_star`, `average_rating`, `last_updated`) VALUES
 (1, 4, 0, 0, 1, 2, 1, 4.0, '2025-10-08 12:03:56'),
 (2, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
-(3, 4, 0, 1, 1, 1, 1, 3.5, '2025-10-08 12:03:56'),
+(3, 5, 0, 1, 1, 1, 1, 3.8, '2025-10-10 09:16:24'),
 (4, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
 (5, 4, 0, 0, 0, 2, 2, 4.5, '2025-10-08 12:03:56'),
 (6, 4, 0, 0, 1, 1, 2, 4.3, '2025-10-08 12:03:56'),
@@ -622,7 +633,8 @@ INSERT INTO `product_rating_cache` (`ID_SanPham`, `total_reviews`, `count_1_star
 (29, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
 (30, 4, 0, 0, 0, 0, 4, 5.0, '2025-10-08 12:03:56'),
 (31, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
-(32, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56');
+(32, 4, 0, 0, 0, 1, 3, 4.8, '2025-10-08 12:03:56'),
+(35, 2, 1, 0, 0, 0, 1, 3.0, '2025-10-10 09:39:11');
 
 -- --------------------------------------------------------
 
@@ -677,7 +689,8 @@ INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, 
 (31, 3, 18, 'Sách cổ tích xưa', 'woww', 300000.00, 50, 'active', '2025-10-08 17:51:29'),
 (32, 3, 18, 'Sách lớp 2', 'omg', 300000.00, 30, 'active', '2025-10-08 17:50:56'),
 (33, 4, 1, 'Áo thun xám', 'Chất liệu cotton, mát mẻ', 159000.00, 100, 'active', '2025-10-08 14:37:14'),
-(34, 4, 1, 'Áo thun xanh', 'Áo hot trend cho mùa hè', 199000.00, 100, 'active', '2025-10-08 17:36:31');
+(34, 4, 1, 'Áo thun xanh', 'Áo hot trend cho mùa hè', 199000.00, 100, 'active', '2025-10-08 17:36:31'),
+(35, 5, 11, 'Dàn pc gaming', 'Chống nước, chơi game siêu mượt', 15530999.00, 60, 'active', '2025-10-10 09:00:35');
 
 -- --------------------------------------------------------
 
@@ -940,7 +953,7 @@ ALTER TABLE `admin`
 -- AUTO_INCREMENT cho bảng `anhsanpham`
 --
 ALTER TABLE `anhsanpham`
-  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=127;
+  MODIFY `ID_Anh` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- AUTO_INCREMENT cho bảng `apma`
@@ -970,7 +983,7 @@ ALTER TABLE `cuahang`
 -- AUTO_INCREMENT cho bảng `danhgiasanpham`
 --
 ALTER TABLE `danhgiasanpham`
-  MODIFY `ID_DanhGia` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
+  MODIFY `ID_DanhGia` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=130;
 
 --
 -- AUTO_INCREMENT cho bảng `danhmuc`
@@ -1006,7 +1019,7 @@ ALTER TABLE `hoithoai`
 -- AUTO_INCREMENT cho bảng `nguoidung`
 --
 ALTER TABLE `nguoidung`
-  MODIFY `ID_NguoiDung` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `ID_NguoiDung` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `nhatkythaydoitonkho`
@@ -1024,7 +1037,7 @@ ALTER TABLE `phieugiamgia`
 -- AUTO_INCREMENT cho bảng `sanpham`
 --
 ALTER TABLE `sanpham`
-  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `ID_SanPham` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
 
 --
 -- AUTO_INCREMENT cho bảng `sanphamtronggio`

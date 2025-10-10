@@ -5,11 +5,13 @@ import Footer from "../../../components/buyers/Footer";
 import ReviewForm from "../../../components/buyers/ReviewForm";
 import ReviewList from "../../../components/buyers/ReviewList";
 import { productService } from "../../../services/productService";
+import { useAuth } from "../../../context/AuthContext";
 import "./ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   // State management
   const [product, setProduct] = useState(null);
@@ -21,7 +23,10 @@ const ProductDetail = () => {
   const [similarProducts, setSimilarProducts] = useState([]);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [newReview, setNewReview] = useState(null);
-  const [userReviewStatus, setUserReviewStatus] = useState({ hasReviewed: false, loading: true });
+  const [userReviewStatus, setUserReviewStatus] = useState({
+    hasReviewed: false,
+    loading: true,
+  });
 
   // // Mock data for demo (replace with real API calls)
   // const mockProduct = {
@@ -227,21 +232,24 @@ const ProductDetail = () => {
   // Check if user has reviewed this product
   useEffect(() => {
     const checkUserReview = async () => {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("token");
       if (!token || !id) {
         setUserReviewStatus({ hasReviewed: false, loading: false });
         return;
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/api/reviews/check/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `http://localhost:5000/api/reviews/check/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         const data = await response.json();
-        
+
         if (response.ok) {
           setUserReviewStatus({
             hasReviewed: data.hasReviewed,
@@ -252,7 +260,7 @@ const ProductDetail = () => {
           setUserReviewStatus({ hasReviewed: false, loading: false });
         }
       } catch (error) {
-        console.error('Error checking user review:', error);
+        console.error("Error checking user review:", error);
         setUserReviewStatus({ hasReviewed: false, loading: false });
       }
     };
@@ -322,9 +330,8 @@ const ProductDetail = () => {
   };
 
   const handleShowReviewForm = () => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      alert('Vui lòng đăng nhập để đánh giá sản phẩm');
+    if (!isAuthenticated || !user) {
+      alert("Vui lòng đăng nhập để đánh giá sản phẩm");
       return;
     }
     setShowReviewForm(true);
@@ -676,7 +683,7 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Review Form Modal */}
       {showReviewForm && (
         <ReviewForm
@@ -685,7 +692,7 @@ const ProductDetail = () => {
           onClose={handleCloseReviewForm}
         />
       )}
-      
+
       <Footer />
     </div>
   );

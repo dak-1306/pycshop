@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import './ReviewForm.css';
+import React, { useState } from "react";
+import "./ReviewForm.css";
 
 const ReviewForm = ({ productId, onReviewSubmitted, onClose }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
-  const [comment, setComment] = useState('');
+  const [comment, setComment] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleStarClick = (starRating) => {
     setRating(starRating);
@@ -22,33 +22,33 @@ const ReviewForm = ({ productId, onReviewSubmitted, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (rating === 0) {
-      setError('Vui lòng chọn số sao đánh giá');
+      setError("Vui lòng chọn số sao đánh giá");
       return;
     }
 
     if (comment.trim().length < 10) {
-      setError('Bình luận phải có ít nhất 10 ký tự');
+      setError("Bình luận phải có ít nhất 10 ký tự");
       return;
     }
 
     setIsSubmitting(true);
-    setError('');
+    setError("");
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("token");
       if (!token) {
-        setError('Vui lòng đăng nhập để đánh giá');
+        setError("Vui lòng đăng nhập để đánh giá");
         setIsSubmitting(false);
         return;
       }
 
-      const response = await fetch('http://localhost:5000/api/reviews', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/reviews", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           productId: productId,
@@ -60,13 +60,13 @@ const ReviewForm = ({ productId, onReviewSubmitted, onClose }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Lỗi khi gửi đánh giá');
+        throw new Error(data.message || "Lỗi khi gửi đánh giá");
       }
 
       // Reset form
       setRating(0);
-      setComment('');
-      
+      setComment("");
+
       // Callback để parent component biết đánh giá đã được gửi
       if (onReviewSubmitted) {
         onReviewSubmitted(data.data);
@@ -76,10 +76,9 @@ const ReviewForm = ({ productId, onReviewSubmitted, onClose }) => {
       if (onClose) {
         onClose();
       }
-
     } catch (error) {
-      console.error('Error submitting review:', error);
-      setError(error.message || 'Có lỗi xảy ra khi gửi đánh giá');
+      console.error("Error submitting review:", error);
+      setError(error.message || "Có lỗi xảy ra khi gửi đánh giá");
     } finally {
       setIsSubmitting(false);
     }
@@ -87,12 +86,18 @@ const ReviewForm = ({ productId, onReviewSubmitted, onClose }) => {
 
   const getRatingText = (rating) => {
     switch (rating) {
-      case 1: return 'Rất tệ';
-      case 2: return 'Tệ';
-      case 3: return 'Trung bình';
-      case 4: return 'Tốt';
-      case 5: return 'Rất tốt';
-      default: return 'Chọn số sao';
+      case 1:
+        return "Rất tệ";
+      case 2:
+        return "Tệ";
+      case 3:
+        return "Trung bình";
+      case 4:
+        return "Tốt";
+      case 5:
+        return "Rất tốt";
+      default:
+        return "Chọn số sao";
     }
   };
 
@@ -107,11 +112,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onClose }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="review-form">
-          {error && (
-            <div className="review-form-error">
-              {error}
-            </div>
-          )}
+          {error && <div className="review-form-error">{error}</div>}
 
           <div className="review-form-group">
             <label className="review-form-label">Đánh giá của bạn:</label>
@@ -121,7 +122,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onClose }) => {
                   <span
                     key={star}
                     className={`review-star ${
-                      star <= (hoverRating || rating) ? 'active' : ''
+                      star <= (hoverRating || rating) ? "active" : ""
                     }`}
                     onClick={() => handleStarClick(star)}
                     onMouseEnter={() => handleStarHover(star)}
@@ -176,7 +177,7 @@ const ReviewForm = ({ productId, onReviewSubmitted, onClose }) => {
                   Đang gửi...
                 </>
               ) : (
-                'Gửi đánh giá'
+                "Gửi đánh giá"
               )}
             </button>
           </div>

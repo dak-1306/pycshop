@@ -389,19 +389,29 @@ function setupRoutes(app) {
     // Apply auth middleware for protected review routes
     (req, res, next) => {
       // Skip auth for GET requests to public review routes (viewing reviews)
-      if (req.method === 'GET' && req.path.match(/^\/products\/\d+\/reviews/)) {
-        console.log(`[ROUTES] Skipping auth for public review route: ${req.path}`);
+      if (req.method === "GET" && req.path.match(/^\/products\/\d+\/reviews/)) {
+        console.log(
+          `[ROUTES] Skipping auth for public review route: ${req.path}`
+        );
         return next();
       }
 
       // Skip auth for check route if no auth header (will return hasReviewed: false)
-      if (req.method === 'GET' && req.path.includes('/check/') && !req.headers.authorization) {
-        console.log(`[ROUTES] Skipping auth for check route without token: ${req.path}`);
+      if (
+        req.method === "GET" &&
+        req.path.includes("/check/") &&
+        !req.headers.authorization
+      ) {
+        console.log(
+          `[ROUTES] Skipping auth for check route without token: ${req.path}`
+        );
         return next();
       }
 
       // Apply auth middleware for POST and protected routes
-      console.log(`[ROUTES] Applying auth middleware for review route: ${req.path}`);
+      console.log(
+        `[ROUTES] Applying auth middleware for review route: ${req.path}`
+      );
       authMiddleware(req, res, next);
     },
     createProxyMiddleware({
@@ -419,9 +429,11 @@ function setupRoutes(app) {
           }
 
           console.log(
-            `[PROXY] Adding user headers for review service - user ID: ${req.user.id}, role: ${
-              req.user.role
-            }, userType: ${req.user.userType || "undefined"}`
+            `[PROXY] Adding user headers for review service - user ID: ${
+              req.user.id
+            }, role: ${req.user.role}, userType: ${
+              req.user.userType || "undefined"
+            }`
           );
         }
 
@@ -459,7 +471,7 @@ function setupRoutes(app) {
     "/api/products",
     (req, res, next) => {
       // Only handle requests that end with /reviews
-      if (req.originalUrl.includes('/reviews')) {
+      if (req.originalUrl.includes("/reviews")) {
         console.log(
           `[ROUTES] Matched product reviews route for ${req.method} ${req.originalUrl}`
         );
@@ -471,9 +483,9 @@ function setupRoutes(app) {
     createProxyMiddleware({
       target: process.env.REVIEW_SERVICE_URL || "http://localhost:5005",
       changeOrigin: true,
-      // Filter only review requests  
+      // Filter only review requests
       filter: (pathname, req) => {
-        return pathname.includes('/reviews');
+        return pathname.includes("/reviews");
       },
       pathRewrite: (path, req) => {
         // Keep the path as is since Review Service expects /api/products/:id/reviews

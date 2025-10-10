@@ -98,24 +98,26 @@ WHERE sp.ID_SanPham IN (
       const [productRatingResult] = await connection.execute(
         `
         SELECT 
-          COUNT(*) as total_reviews,
-          SUM(CASE WHEN dg.TyLe = 1 THEN 1 ELSE 0 END) as count_1_star,
-          SUM(CASE WHEN dg.TyLe = 2 THEN 1 ELSE 0 END) as count_2_star,
-          SUM(CASE WHEN dg.TyLe = 3 THEN 1 ELSE 0 END) as count_3_star,
-          SUM(CASE WHEN dg.TyLe = 4 THEN 1 ELSE 0 END) as count_4_star,
-          SUM(CASE WHEN dg.TyLe = 5 THEN 1 ELSE 0 END) as count_5_star,
-          COALESCE(
-            ROUND(
-              (SUM(CASE WHEN dg.TyLe = 1 THEN 1 ELSE 0 END) * 1 +
-               SUM(CASE WHEN dg.TyLe = 2 THEN 1 ELSE 0 END) * 2 +
-               SUM(CASE WHEN dg.TyLe = 3 THEN 1 ELSE 0 END) * 3 +
-               SUM(CASE WHEN dg.TyLe = 4 THEN 1 ELSE 0 END) * 4 +
-               SUM(CASE WHEN dg.TyLe = 5 THEN 1 ELSE 0 END) * 5) /
-              NULLIF(COUNT(*), 0)
-            , 1)
-          , 0) as average_rating
-        FROM danhgiasanpham dg 
-        WHERE dg.ID_SanPham = ?
+    COUNT(*) AS total_reviews,
+    SUM(count_1_star) AS count_1_star,
+    SUM(count_2_star) AS count_2_star,
+    SUM(count_3_star) AS count_3_star,
+    SUM(count_4_star) AS count_4_star,
+    SUM(count_5_star) AS count_5_star,
+    COALESCE(ROUND(
+        (SUM(count_1_star)*1 + SUM(count_2_star)*2 + SUM(count_3_star)*3 +
+         SUM(count_4_star)*4 + SUM(count_5_star)*5) / NULLIF(COUNT(*), 0), 1
+    ), 0) AS average_rating
+FROM (
+    SELECT 
+        CASE WHEN TyLe = 1 THEN 1 ELSE 0 END AS count_1_star,
+        CASE WHEN TyLe = 2 THEN 1 ELSE 0 END AS count_2_star,
+        CASE WHEN TyLe = 3 THEN 1 ELSE 0 END AS count_3_star,
+        CASE WHEN TyLe = 4 THEN 1 ELSE 0 END AS count_4_star,
+        CASE WHEN TyLe = 5 THEN 1 ELSE 0 END AS count_5_star
+    FROM danhgiasanpham
+    WHERE ID_SanPham = ?
+) AS t;
         `,
         [data.productId]
       );
@@ -152,14 +154,14 @@ WHERE sp.ID_SanPham IN (
           WHERE ID_SanPham = ?
           `,
           [
-            productAvgRating, 
-            productTotalReviews, 
+            productAvgRating,
+            productTotalReviews,
             count1Star,
             count2Star,
             count3Star,
             count4Star,
             count5Star,
-            data.productId
+            data.productId,
           ]
         );
       } else {
@@ -171,14 +173,14 @@ WHERE sp.ID_SanPham IN (
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
           `,
           [
-            data.productId, 
-            productAvgRating, 
+            data.productId,
+            productAvgRating,
             productTotalReviews,
             count1Star,
             count2Star,
             count3Star,
             count4Star,
-            count5Star
+            count5Star,
           ]
         );
       }

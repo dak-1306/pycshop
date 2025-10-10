@@ -12,6 +12,57 @@ const adminService = {
     }
   },
 
+  // Chart data methods
+  getRevenueChartData: async (period = "monthly") => {
+    try {
+      const response = await apiService.get(`/admin/charts/revenue?period=${period}`);
+      return response;
+    } catch (error) {
+      console.error("Error fetching revenue chart data:", error);
+      throw error;
+    }
+  },
+
+  getOrderTrendsData: async (period = "monthly") => {
+    try {
+      const response = await apiService.get(`/admin/charts/orders?period=${period}`);
+      return response;
+    } catch (error) {
+      console.error("Error fetching order trends data:", error);
+      throw error;
+    }
+  },
+
+  getUserAnalyticsData: async () => {
+    try {
+      const response = await apiService.get("/admin/charts/user-analytics");
+      return response;
+    } catch (error) {
+      console.error("Error fetching user analytics data:", error);
+      throw error;
+    }
+  },
+
+  getCategoryPerformanceData: async () => {
+    try {
+      const response = await apiService.get("/admin/charts/category-performance");
+      return response;
+    } catch (error) {
+      console.error("Error fetching category performance data:", error);
+      throw error;
+    }
+  },
+
+  getAllChartsData: async () => {
+    try {
+      const response = await apiService.get("/admin/charts/all");
+      return response;
+    } catch (error) {
+      console.error("Error fetching all charts data:", error);
+      throw error;
+    }
+  },
+
   // User management
   getUsers: async (params = {}) => {
     try {

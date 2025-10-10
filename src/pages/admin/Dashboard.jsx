@@ -1,7 +1,10 @@
 import React from "react";
 import RecentOrdersTable from "../../components/common/dashboard/RecentOrdersTable";
 import RecentUsersTable from "../../components/admin/dashboard/RecentUsersTable";
-import ChartsSection from "../../components/common/dashboard/ChartsSection";
+import AdminChartsSection from "../../components/admin/dashboard/charts/AdminChartsSection";
+import ChartRefreshButton from "../../components/admin/dashboard/ChartRefreshButton";
+import SystemPerformanceMetrics from "../../components/admin/dashboard/SystemPerformanceMetrics";
+import DashboardInsights from "../../components/admin/dashboard/DashboardInsights";
 import StatsCards from "../../components/common/dashboard/StatsCards";
 import StatsOverview from "../../components/admin/reports/StatsOverview";
 import { useDashboard } from "../../hooks/useDashboard";
@@ -14,6 +17,7 @@ const Dashboard = () => {
     chartData,
     isLoading: dashboardLoading,
     error: dashboardError,
+    refreshDashboard,
   } = useDashboard();
 
   const {
@@ -48,13 +52,18 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      {/* Page Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">🏠 Dashboard</h1>
-        <p className="text-gray-600">
-          Tổng quan hoạt động và quản lý hệ thống PycShop
-        </p>
+    <div className="min-h-screen bg-gray-50 p-6">      {/* Page Header */}
+      <div className="mb-8 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">🏠 Dashboard</h1>
+          <p className="text-gray-600">
+            Tổng quan hoạt động và quản lý hệ thống PycShop
+          </p>
+        </div>
+        <ChartRefreshButton 
+          onRefresh={refreshDashboard}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Error Notification */}
@@ -68,10 +77,11 @@ const Dashboard = () => {
             Không thể kết nối đến server. Hiển thị dữ liệu mặc định.
           </p>
         </div>
-      )}
-
-      {/* System Overview */}
+      )}      {/* System Overview */}
       <StatsOverview stats={safeOverviewStats} />
+
+      {/* Performance Metrics */}
+      <SystemPerformanceMetrics data={safeOverviewStats} />
 
       {/* Stats Cards */}
       <StatsCards
@@ -82,10 +92,15 @@ const Dashboard = () => {
           totalRevenue: safeOverviewStats.totalRevenue,
           totalProducts: safeOverviewStats.totalProducts,
         }}
+      />      {/* Charts Section */}
+      <AdminChartsSection 
+        chartData={chartData || {}} 
+        isLoading={isLoading}
+        error={dashboardError}
       />
 
-      {/* Charts Section */}
-      <ChartsSection variant="admin" chartData={chartData} />
+      {/* Dashboard Insights */}
+      <DashboardInsights data={safeOverviewStats} />
 
       {/* Data Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">

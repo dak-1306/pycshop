@@ -892,6 +892,430 @@ app.get("/admins", async (req, res) => {
   }
 });
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ 
+    status: "OK", 
+    service: "Admin Service",
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Chart data endpoints
+app.get("/charts/revenue", async (req, res) => {
+  try {
+    const { period = "monthly" } = req.query;
+    
+    // Get revenue data based on period
+    let dateFormat, groupBy;
+    switch(period) {
+      case "yearly":
+        dateFormat = "%Y";
+        groupBy = "YEAR(created_at)";
+        break;
+      case "weekly":
+        dateFormat = "%Y-%u";
+        groupBy = "YEARWEEK(created_at)";
+        break;
+      default: // monthly
+        dateFormat = "%Y-%m";
+        groupBy = "DATE_FORMAT(created_at, '%Y-%m')";
+    }
+
+    const query = `
+      SELECT 
+        ${groupBy} as period,
+        SUM(TongTien) as value,
+        COUNT(*) as order_count
+      FROM DonHang 
+      WHERE TrangThai = 'completed' 
+        AND created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+      GROUP BY ${groupBy}
+      ORDER BY period ASC
+      LIMIT 12
+    `;
+
+    const results = await db.execute(query);
+    
+    // Format data for chart
+    const chartData = results.map((row, index) => ({
+      month: `T${index + 1}`,
+      value: parseInt(row.value) || 0
+    }));
+
+    res.json(chartData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching revenue chart data:", error);
+    res.status(500).json({ error: "Failed to fetch revenue data" });
+  }
+});
+
+app.get("/charts/orders", async (req, res) => {
+  try {
+    const { period = "monthly" } = req.query;
+    
+    let dateFormat, groupBy;
+    switch(period) {
+      case "yearly":
+        dateFormat = "%Y";
+        groupBy = "YEAR(created_at)";
+        break;
+      case "weekly":
+        dateFormat = "%Y-%u";
+        groupBy = "YEARWEEK(created_at)";
+        break;
+      default: // monthly
+        dateFormat = "%Y-%m";
+        groupBy = "DATE_FORMAT(created_at, '%Y-%m')";
+    }
+
+    const query = `
+      SELECT 
+        ${groupBy} as period,
+        COUNT(*) as value
+      FROM DonHang 
+      WHERE created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+      GROUP BY ${groupBy}
+      ORDER BY period ASC
+      LIMIT 12
+    `;
+
+    const results = await db.execute(query);
+    
+    const chartData = results.map((row, index) => ({
+      month: `T${index + 1}`,
+      value: parseInt(row.value) || 0
+    }));
+
+    res.json(chartData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching orders chart data:", error);
+    res.status(500).json({ error: "Failed to fetch orders data" });
+  }
+});
+
+app.get("/charts/user-analytics", async (req, res) => {
+  try {
+    const queries = [
+      "SELECT COUNT(*) as count FROM NguoiDung WHERE VaiTro = 'buyer'",
+      "SELECT COUNT(*) as count FROM NguoiDung WHERE VaiTro = 'seller'", 
+      "SELECT COUNT(*) as count FROM NguoiDung WHERE VaiTro = 'admin'"
+    ];
+
+    const results = await Promise.all(
+      queries.map(query => db.execute(query))
+    );
+
+    const totalUsers = results.reduce((sum, result) => sum + result[0].count, 0);
+    
+    const chartData = [
+      { 
+        name: "Người mua", 
+        value: Math.round((results[0][0].count / totalUsers) * 100),
+        color: "#3b82f6" 
+      },
+      { 
+        name: "Người bán", 
+        value: Math.round((results[1][0].count / totalUsers) * 100),
+        color: "#10b981" 
+      },
+      { 
+        name: "Admin", 
+        value: Math.round((results[2][0].count / totalUsers) * 100),
+        color: "#f59e0b" 
+      }
+    ];
+
+    res.json(chartData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching user analytics data:", error);
+    res.status(500).json({ error: "Failed to fetch user analytics data" });
+  }
+});
+
+app.get("/charts/category-performance", async (req, res) => {
+  try {
+    const query = `
+      SELECT 
+        dm.TenDanhMuc as category,
+        COUNT(DISTINCT sp.ID_SanPham) as sales,
+        COALESCE(SUM(ct.SoLuong * ct.Gia), 0) as revenue
+      FROM DanhMuc dm
+      LEFT JOIN SanPham sp ON dm.ID_DanhMuc = sp.ID_DanhMuc
+      LEFT JOIN ChiTietDonHang ct ON sp.ID_SanPham = ct.ID_SanPham
+      LEFT JOIN DonHang dh ON ct.ID_DonHang = dh.ID_DonHang AND dh.TrangThai = 'completed'
+      GROUP BY dm.ID_DanhMuc, dm.TenDanhMuc
+      ORDER BY revenue DESC
+      LIMIT 6
+    `;
+
+    const results = await db.execute(query);
+    
+    const chartData = results.map(row => ({
+      category: row.category,
+      sales: parseInt(row.sales) || 0,
+      revenue: parseInt(row.revenue) || 0
+    }));
+
+    res.json(chartData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching category performance data:", error);
+    res.status(500).json({ error: "Failed to fetch category performance data" });
+  }
+});
+
+app.get("/charts/all", async (req, res) => {
+  try {
+    // Fetch all chart data in parallel
+    const [revenueResponse, ordersResponse, userAnalyticsResponse, categoryResponse] = await Promise.all([
+      fetch(`http://localhost:${PORT}/charts/revenue`).then(r => r.json()),
+      fetch(`http://localhost:${PORT}/charts/orders`).then(r => r.json()),
+      fetch(`http://localhost:${PORT}/charts/user-analytics`).then(r => r.json()),
+      fetch(`http://localhost:${PORT}/charts/category-performance`).then(r => r.json())
+    ]);
+
+    const allChartsData = {
+      revenue: revenueResponse,
+      orders: ordersResponse,
+      userAnalytics: userAnalyticsResponse,
+      categoryPerformance: categoryResponse
+    };
+
+    res.json(allChartsData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching all charts data:", error);
+    res.status(500).json({ error: "Failed to fetch charts data" });
+  }
+});
+
+// Chart data endpoints
+app.get("/charts/revenue", async (req, res) => {
+  try {
+    const { period = "monthly" } = req.query;
+    
+    // Mock data for now since DonHang table structure may vary
+    const mockData = [
+      { month: "T1", value: 2100000000 },
+      { month: "T2", value: 2350000000 },
+      { month: "T3", value: 2200000000 },
+      { month: "T4", value: 2680000000 },
+      { month: "T5", value: 2900000000 },
+      { month: "T6", value: 3200000000 },
+      { month: "T7", value: 2950000000 },
+      { month: "T8", value: 3100000000 },
+      { month: "T9", value: 2850000000 },
+      { month: "T10", value: 2845600000 },
+    ];
+
+    res.json(mockData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching revenue chart data:", error);
+    res.status(500).json({ error: "Failed to fetch revenue data" });
+  }
+});
+
+app.get("/charts/orders", async (req, res) => {
+  try {
+    const mockData = [
+      { month: "T1", value: 645 },
+      { month: "T2", value: 720 },
+      { month: "T3", value: 680 },
+      { month: "T4", value: 790 },
+      { month: "T5", value: 850 },
+      { month: "T6", value: 920 },
+      { month: "T7", value: 880 },
+      { month: "T8", value: 940 },
+      { month: "T9", value: 820 },
+      { month: "T10", value: 856 },
+    ];
+
+    res.json(mockData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching orders chart data:", error);
+    res.status(500).json({ error: "Failed to fetch orders data" });
+  }
+});
+
+app.get("/charts/user-analytics", async (req, res) => {
+  try {
+    const queries = [
+      "SELECT COUNT(*) as count FROM nguoidung WHERE VaiTro = 'buyer'",
+      "SELECT COUNT(*) as count FROM nguoidung WHERE VaiTro = 'seller'", 
+      "SELECT COUNT(*) as count FROM nguoidung WHERE VaiTro = 'admin'"
+    ];
+
+    const results = await Promise.all(
+      queries.map(query => db.execute(query))
+    );
+
+    const totalUsers = results.reduce((sum, result) => sum + (result[0]?.count || 0), 0);
+    
+    if (totalUsers === 0) {
+      // Return default data if no users found
+      const defaultData = [
+        { name: "Người mua", value: 68, color: "#3b82f6" },
+        { name: "Người bán", value: 22, color: "#10b981" },
+        { name: "Admin", value: 10, color: "#f59e0b" },
+      ];
+      return res.json(defaultData);
+    }
+    
+    const chartData = [
+      { 
+        name: "Người mua", 
+        value: Math.round(((results[0][0]?.count || 0) / totalUsers) * 100),
+        color: "#3b82f6" 
+      },
+      { 
+        name: "Người bán", 
+        value: Math.round(((results[1][0]?.count || 0) / totalUsers) * 100),
+        color: "#10b981" 
+      },
+      { 
+        name: "Admin", 
+        value: Math.round(((results[2][0]?.count || 0) / totalUsers) * 100),
+        color: "#f59e0b" 
+      }
+    ];
+
+    res.json(chartData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching user analytics data:", error);
+    // Return default data on error
+    const defaultData = [
+      { name: "Người mua", value: 68, color: "#3b82f6" },
+      { name: "Người bán", value: 22, color: "#10b981" },
+      { name: "Admin", value: 10, color: "#f59e0b" },
+    ];
+    res.json(defaultData);
+  }
+});
+
+app.get("/charts/category-performance", async (req, res) => {
+  try {
+    // Mock data for category performance
+    const mockData = [
+      { category: "Điện tử", sales: 1250, revenue: 2800000000 },
+      { category: "Thời trang", sales: 980, revenue: 1900000000 },
+      { category: "Gia dụng", sales: 750, revenue: 1200000000 },
+      { category: "Sách", sales: 420, revenue: 350000000 },
+      { category: "Thể thao", sales: 680, revenue: 950000000 },
+      { category: "Làm đẹp", sales: 890, revenue: 1450000000 },
+    ];
+
+    res.json(mockData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching category performance data:", error);
+    res.status(500).json({ error: "Failed to fetch category performance data" });
+  }
+});
+
+app.get("/charts/user-activity", async (req, res) => {
+  try {
+    // Mock user activity data
+    const mockData = [
+      { time: "00:00", users: 120, sessions: 89 },
+      { time: "03:00", users: 95, sessions: 62 },
+      { time: "06:00", users: 180, sessions: 134 },
+      { time: "09:00", users: 380, sessions: 289 },
+      { time: "12:00", users: 520, sessions: 412 },
+      { time: "15:00", users: 480, sessions: 378 },
+      { time: "18:00", users: 640, sessions: 498 },
+      { time: "21:00", users: 580, sessions: 445 },
+    ];
+
+    res.json(mockData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching user activity data:", error);
+    res.status(500).json({ error: "Failed to fetch user activity data" });
+  }
+});
+
+app.get("/charts/all", async (req, res) => {
+  try {
+    // Get all chart data from individual endpoints
+    const baseUrl = `http://localhost:${PORT}`;
+    
+    const [revenueRes, ordersRes, userAnalyticsRes, userActivityRes, categoryRes] = await Promise.all([
+      fetch(`${baseUrl}/charts/revenue`),
+      fetch(`${baseUrl}/charts/orders`),
+      fetch(`${baseUrl}/charts/user-analytics`),
+      fetch(`${baseUrl}/charts/user-activity`),
+      fetch(`${baseUrl}/charts/category-performance`)
+    ]);
+
+    const [revenue, orders, userAnalytics, userActivity, categoryPerformance] = await Promise.all([
+      revenueRes.json(),
+      ordersRes.json(),
+      userAnalyticsRes.json(),
+      userActivityRes.json(),
+      categoryRes.json()
+    ]);
+
+    const allChartsData = {
+      revenue,
+      orders,
+      userAnalytics,
+      userActivity,
+      categoryPerformance
+    };
+
+    res.json(allChartsData);
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error fetching all charts data:", error);
+    // Return mock data on error
+    const mockChartsData = {
+      revenue: [
+        { month: "T1", value: 2100000000 },
+        { month: "T2", value: 2350000000 },
+        { month: "T3", value: 2200000000 },
+        { month: "T4", value: 2680000000 },
+        { month: "T5", value: 2900000000 },
+        { month: "T6", value: 3200000000 },
+        { month: "T7", value: 2950000000 },
+        { month: "T8", value: 3100000000 },
+        { month: "T9", value: 2850000000 },
+        { month: "T10", value: 2845600000 },
+      ],
+      orders: [
+        { month: "T1", value: 645 },
+        { month: "T2", value: 720 },
+        { month: "T3", value: 680 },
+        { month: "T4", value: 790 },
+        { month: "T5", value: 850 },
+        { month: "T6", value: 920 },
+        { month: "T7", value: 880 },
+        { month: "T8", value: 940 },
+        { month: "T9", value: 820 },
+        { month: "T10", value: 856 },
+      ],      userAnalytics: [
+        { name: "Người mua", value: 68, color: "#3b82f6" },
+        { name: "Người bán", value: 22, color: "#10b981" },
+        { name: "Admin", value: 10, color: "#f59e0b" },
+      ],
+      userActivity: [
+        { time: "00:00", users: 120, sessions: 89 },
+        { time: "03:00", users: 95, sessions: 62 },
+        { time: "06:00", users: 180, sessions: 134 },
+        { time: "09:00", users: 380, sessions: 289 },
+        { time: "12:00", users: 520, sessions: 412 },
+        { time: "15:00", users: 480, sessions: 378 },
+        { time: "18:00", users: 640, sessions: 498 },
+        { time: "21:00", users: 580, sessions: 445 },
+      ],
+      categoryPerformance: [
+        { category: "Điện tử", sales: 1250, revenue: 2800000000 },
+        { category: "Thời trang", sales: 980, revenue: 1900000000 },
+        { category: "Gia dụng", sales: 750, revenue: 1200000000 },
+        { category: "Sách", sales: 420, revenue: 350000000 },
+        { category: "Thể thao", sales: 680, revenue: 950000000 },
+        { category: "Làm đẹp", sales: 890, revenue: 1450000000 },
+      ],
+    };
+    res.json(mockChartsData);
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`[ADMIN SERVICE] Server running on port ${PORT}`);

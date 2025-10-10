@@ -186,6 +186,33 @@ const adminService = {
       throw error;
     }
   },
+
+  // Admin management (Super Admin only)
+  createAdmin: async (adminData) => {
+    try {
+      const response = await apiService.post("/admin/create-admin", adminData);
+      return response;
+    } catch (error) {
+      console.error("Error creating admin:", error);
+      throw error;
+    }
+  },
+
+  getAdmins: async () => {
+    try {
+      const response = await apiService.get("/admin/admins");
+      return response;
+    } catch (error) {
+      console.error("Error fetching admins:", error);
+      throw error;
+    }
+  },
+
+  // Check if current user is super admin
+  isSuperAdmin: () => {
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    return user.email === "dat@gmail.com" && user.role === "admin";
+  },
 };
 
 export default adminService;

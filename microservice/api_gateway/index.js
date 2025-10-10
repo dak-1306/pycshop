@@ -110,8 +110,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// Skip parsing for proxy routes giữ nguyên raw data cho proxy
+// Skip JSON parsing for proxy routes - use raw body buffer instead
 app.use((req, res, next) => {
+  // Skip body parsing for proxy routes to avoid consuming the stream
   if (
     req.url.startsWith("/auth") ||
     req.url.startsWith("/products") ||
@@ -124,8 +125,12 @@ app.use((req, res, next) => {
     console.log(`[GATEWAY] Skipping JSON parsing for proxy route: ${req.url}`);
     return next();
   }
-  express.json()(req, res, next);
+  
+  // Parse JSON only for non-proxy routes
+  express.json({ limit: '10mb' })(req, res, next);
 });
+
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 app.use(morgan("dev"));
 
@@ -203,10 +208,16 @@ app.use((req, res, next) => {
 
 // Middleware kiểm tra auth cho các routes protected
 app.use((req, res, next) => {
+  // Debug: Log every request
+  console.log(`\n🔍 [DEBUG] ${req.method} ${req.originalUrl}`);
+  console.log(`🔍 [DEBUG] Headers:`, req.headers);
+  
   // Routes không cần auth (public routes)
   const publicRoutes = [
     "/auth/login",
     "/auth/register",
+    "/auth/admin/login", // Admin login route
+    "/auth/register-admin", // Admin register route
     "/products", // Cho phép xem sản phẩm không cần đăng nhập
     "/uploads", // Static files (product images)
   ];
@@ -419,7 +430,7 @@ app.all(/^\/api\/reviews/, (req, res) => {
 });
 
 // Đăng ký các route proxy
-setupRoutes(app);
+setupRoutes(app); // Using manual routes
 
 // Log after proxy setup
 app.use((req, res, next) => {

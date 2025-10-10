@@ -81,6 +81,15 @@ const requireAdmin = (req, res, next) => {
 app.use(extractUserFromHeaders);
 app.use(requireAdmin);
 
+// Health check route
+app.get("/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Admin Service is running",
+    timestamp: new Date().toISOString()
+  });
+});
+
 // Dashboard stats
 app.get("/dashboard/stats", async (req, res) => {
   try {
@@ -106,38 +115,120 @@ app.get("/dashboard/stats", async (req, res) => {
       FROM sanpham
     `);
 
-    // Get order stats
-    const [orderStats] = await db.execute(`
-      SELECT
-        COUNT(*) as total_orders,
-        SUM(TongGia) as total_revenue,
-        SUM(CASE WHEN TrangThai = 'pending' THEN 1 ELSE 0 END) as pending_orders,
-        SUM(CASE WHEN TrangThai = 'confirmed' THEN 1 ELSE 0 END) as confirmed_orders,
-        SUM(CASE WHEN TrangThai = 'shipped' THEN 1 ELSE 0 END) as shipped_orders,
-        SUM(CASE WHEN TrangThai = 'cancelled' THEN 1 ELSE 0 END) as cancelled_orders
-      FROM donhang
-    `);
+    // Get order stats (handle case where donhang table might not exist or be empty)
+    let orderStats = [{
+      total_orders: 0,
+      total_revenue: 0,
+      pending_orders: 0,
+      confirmed_orders: 0,
+      shipped_orders: 0,
+      cancelled_orders: 0
+    }];
+
+    try {
+      const [orders] = await db.execute(`
+        SELECT
+          COUNT(*) as total_orders,
+          COALESCE(SUM(TongGia), 0) as total_revenue,
+          SUM(CASE WHEN TrangThai = 'pending' THEN 1 ELSE 0 END) as pending_orders,
+          SUM(CASE WHEN TrangThai = 'confirmed' THEN 1 ELSE 0 END) as confirmed_orders,
+          SUM(CASE WHEN TrangThai = 'shipped' THEN 1 ELSE 0 END) as shipped_orders,
+          SUM(CASE WHEN TrangThai = 'cancelled' THEN 1 ELSE 0 END) as cancelled_orders
+        FROM donhang
+      `);
+      orderStats = orders;
+    } catch (orderError) {
+      console.warn("[ADMIN] Could not fetch order stats:", orderError.message);
+    }
 
     // Get recent activity (last 7 days)
     const [recentActivity] = await db.execute(`
       SELECT
         COUNT(*) as new_users_7d,
-        (SELECT COUNT(*) FROM sanpham WHERE CapNhat >= DATE_SUB(NOW(), INTERVAL 7 DAY)) as new_products_7d,
-        (SELECT COUNT(*) FROM donhang WHERE ThoiGianTao >= DATE_SUB(NOW(), INTERVAL 7 DAY)) as new_orders_7d
+        (SELECT COUNT(*) FROM sanpham WHERE CapNhat >= DATE_SUB(NOW(), INTERVAL 7 DAY)) as new_products_7d
       FROM nguoidung
       WHERE ThoiGianTao >= DATE_SUB(NOW(), INTERVAL 7 DAY)
     `);
 
+    // Add new_orders_7d with fallback
+    let newOrders7d = 0;
+    try {
+      const [newOrdersResult] = await db.execute(`
+        SELECT COUNT(*) as new_orders_7d FROM donhang WHERE ThoiGianTao >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+      `);
+      newOrders7d = newOrdersResult[0]?.new_orders_7d || 0;
+    } catch (orderError) {
+      console.warn("[ADMIN] Could not fetch recent orders:", orderError.message);
+    }
+
     const stats = {
-      users: userStats[0] || {},
-      products: productStats[0] || {},
-      orders: orderStats[0] || {},
-      recentActivity: recentActivity[0] || {},
+      totalOrders: orderStats[0]?.total_orders || 0,
+      totalRevenue: orderStats[0]?.total_revenue || 0,
+      totalProducts: productStats[0]?.total_products || 0,
+      totalUsers: userStats[0]?.total_users || 0,
+    };
+
+    const recentOrders = [];
+    const recentUsers = [];
+    
+    // Try to get recent orders
+    try {
+      const [orders] = await db.execute(`
+        SELECT
+          dh.ID_DonHang as id,
+          dh.TongGia as total,
+          dh.ThoiGianTao as created_at,
+          dh.TrangThai as status,
+          u.HoTen as customer_name
+        FROM donhang dh
+        JOIN nguoidung u ON dh.ID_NguoiMua = u.ID_NguoiDung
+        ORDER BY dh.ThoiGianTao DESC
+        LIMIT 10
+      `);
+      recentOrders.push(...orders);
+    } catch (orderError) {
+      console.warn("[ADMIN] Could not fetch recent orders list:", orderError.message);
+    }
+
+    // Get recent users
+    try {
+      const [users] = await db.execute(`
+        SELECT
+          ID_NguoiDung as id,
+          HoTen as name,
+          Email as email,
+          VaiTro as role,
+          TrangThai as status,
+          ThoiGianTao as joinDate,
+          ThoiGianTao as lastLogin
+        FROM nguoidung
+        ORDER BY ThoiGianTao DESC
+        LIMIT 10
+      `);
+      recentUsers.push(...users);
+    } catch (userError) {
+      console.warn("[ADMIN] Could not fetch recent users:", userError.message);
+    }
+
+    // Mock chart data for now
+    const chartData = {
+      labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+      datasets: [
+        {
+          label: "Revenue",
+          data: [12000, 19000, 3000, 5000, 2000, 3000],
+          borderColor: "rgb(75, 192, 192)",
+          backgroundColor: "rgba(75, 192, 192, 0.2)",
+        },
+      ],
     };
 
     res.json({
       success: true,
-      data: stats,
+      stats,
+      recentOrders,
+      recentUsers,
+      chartData,
     });
   } catch (error) {
     console.error("[ADMIN] Error getting dashboard stats:", error);
@@ -150,7 +241,7 @@ app.get("/dashboard/stats", async (req, res) => {
 });
 
 // User management
-router.get("/users", async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const {
       page = 1,
@@ -182,7 +273,9 @@ router.get("/users", async (req, res) => {
     // Get users
     const [users] = await db.execute(
       `
-      SELECT ID_NguoiDung, HoTen, Email, SoDienThoai, DiaChi, VaiTro, TrangThai, ThoiGianTao
+      SELECT ID_NguoiDung as id, HoTen as name, Email as email, SoDienThoai as phone, 
+             DiaChi as address, VaiTro as role, TrangThai as status, 
+             ThoiGianTao as joinDate, ThoiGianTao as lastLogin
       FROM nguoidung
       WHERE ${whereClause}
       ORDER BY ThoiGianTao DESC
@@ -204,14 +297,12 @@ router.get("/users", async (req, res) => {
 
     res.json({
       success: true,
-      data: {
-        users,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages,
-        },
+      data: users,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
       },
     });
   } catch (error) {
@@ -224,7 +315,7 @@ router.get("/users", async (req, res) => {
   }
 });
 
-router.put("/users/:id/status", async (req, res) => {
+app.put("/users/:id/status", async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -255,7 +346,7 @@ router.put("/users/:id/status", async (req, res) => {
   }
 });
 
-router.delete("/users/:id", async (req, res) => {
+app.delete("/users/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -276,7 +367,7 @@ router.delete("/users/:id", async (req, res) => {
 });
 
 // Product management
-router.get("/products", async (req, res) => {
+app.get("/products", async (req, res) => {
   try {
     const { page = 1, limit = 10, search = "", status = "" } = req.query;
     const offset = (page - 1) * limit;
@@ -285,26 +376,26 @@ router.get("/products", async (req, res) => {
     const params = [];
 
     if (search) {
-      whereClause += " AND (TenSanPham LIKE ? OR MoTa LIKE ?)";
+      whereClause += " AND (sp.TenSanPham LIKE ? OR sp.MoTa LIKE ?)";
       params.push(`%${search}%`, `%${search}%`);
     }
 
     if (status) {
-      whereClause += " AND TrangThai = ?";
+      whereClause += " AND sp.TrangThai = ?";
       params.push(status);
     }
 
     const [products] = await db.execute(
       `
       SELECT
-        sp.ID_SanPham,
-        sp.TenSanPham,
-        sp.Gia,
-        sp.TonKho,
-        sp.TrangThai,
-        sp.CapNhat,
-        u.HoTen as TenNguoiBan,
-        dm.TenDanhMuc
+        sp.ID_SanPham as id,
+        sp.TenSanPham as name,
+        sp.Gia as price,
+        sp.TonKho as stock,
+        sp.TrangThai as status,
+        sp.CapNhat as updated_at,
+        u.HoTen as seller_name,
+        dm.TenDanhMuc as category
       FROM sanpham sp
       JOIN nguoidung u ON sp.ID_NguoiBan = u.ID_NguoiDung
       JOIN danhmuc dm ON sp.ID_DanhMuc = dm.ID_DanhMuc
@@ -327,14 +418,12 @@ router.get("/products", async (req, res) => {
 
     res.json({
       success: true,
-      data: {
-        products,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages,
-        },
+      data: products,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
       },
     });
   } catch (error) {
@@ -347,7 +436,7 @@ router.get("/products", async (req, res) => {
   }
 });
 
-router.put("/products/:id/status", async (req, res) => {
+app.put("/products/:id/status", async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -378,7 +467,7 @@ router.put("/products/:id/status", async (req, res) => {
   }
 });
 
-router.delete("/products/:id", async (req, res) => {
+app.delete("/products/:id", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -399,7 +488,7 @@ router.delete("/products/:id", async (req, res) => {
 });
 
 // Order management
-router.get("/orders", async (req, res) => {
+app.get("/orders", async (req, res) => {
   try {
     const { page = 1, limit = 10, status = "" } = req.query;
     const offset = (page - 1) * limit;
@@ -412,44 +501,52 @@ router.get("/orders", async (req, res) => {
       params.push(status);
     }
 
-    const [orders] = await db.execute(
-      `
-      SELECT
-        dh.ID_DonHang,
-        dh.TongGia,
-        dh.ThoiGianTao,
-        dh.TrangThai,
-        u.HoTen as TenNguoiMua,
-        u.Email as EmailNguoiMua
-      FROM donhang dh
-      JOIN nguoidung u ON dh.ID_NguoiMua = u.ID_NguoiDung
-      WHERE ${whereClause}
-      ORDER BY dh.ThoiGianTao DESC
-      LIMIT ? OFFSET ?
-    `,
-      [...params, parseInt(limit), offset]
-    );
+    // Check if donhang table exists and has data
+    let orders = [];
+    let total = 0;
 
-    const [countResult] = await db.execute(
-      `
-      SELECT COUNT(*) as total FROM donhang dh WHERE ${whereClause}
-    `,
-      params
-    );
+    try {
+      const [orderResults] = await db.execute(
+        `
+        SELECT
+          dh.ID_DonHang as id,
+          dh.TongGia as total_amount,
+          dh.ThoiGianTao as created_at,
+          dh.TrangThai as status,
+          u.HoTen as customer_name,
+          u.Email as customer_email
+        FROM donhang dh
+        JOIN nguoidung u ON dh.ID_NguoiMua = u.ID_NguoiDung
+        WHERE ${whereClause}
+        ORDER BY dh.ThoiGianTao DESC
+        LIMIT ? OFFSET ?
+      `,
+        [...params, parseInt(limit), offset]
+      );
 
-    const total = countResult[0].total;
+      const [countResult] = await db.execute(
+        `
+        SELECT COUNT(*) as total FROM donhang dh WHERE ${whereClause}
+      `,
+        params
+      );
+
+      orders = orderResults;
+      total = countResult[0].total;
+    } catch (error) {
+      console.warn("[ADMIN] Orders table may not exist or be empty:", error.message);
+    }
+
     const totalPages = Math.ceil(total / limit);
 
     res.json({
       success: true,
-      data: {
-        orders,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages,
-        },
+      data: orders,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
       },
     });
   } catch (error) {
@@ -462,7 +559,7 @@ router.get("/orders", async (req, res) => {
   }
 });
 
-router.put("/orders/:id/status", async (req, res) => {
+app.put("/orders/:id/status", async (req, res) => {
   try {
     const { id } = req.params;
     const { status } = req.body;
@@ -494,7 +591,7 @@ router.put("/orders/:id/status", async (req, res) => {
 });
 
 // Seller management
-router.get("/sellers", async (req, res) => {
+app.get("/sellers", async (req, res) => {
   try {
     const { page = 1, limit = 10, status = "" } = req.query;
     const offset = (page - 1) * limit;
@@ -510,16 +607,16 @@ router.get("/sellers", async (req, res) => {
     const [sellers] = await db.execute(
       `
       SELECT
-        u.ID_NguoiDung,
-        u.HoTen,
-        u.Email,
-        u.SoDienThoai,
-        u.TrangThai,
-        u.ThoiGianTao,
-        ch.TenCuaHang,
-        ch.DiaChiCH,
-        ch.SoDienThoaiCH,
-        COUNT(sp.ID_SanPham) as SoLuongSanPham
+        u.ID_NguoiDung as id,
+        u.HoTen as name,
+        u.Email as email,
+        u.SoDienThoai as phone,
+        u.TrangThai as status,
+        u.ThoiGianTao as joinDate,
+        ch.TenCuaHang as shopName,
+        ch.DiaChiCH as shopAddress,
+        ch.SoDienThoaiCH as shopPhone,
+        COUNT(sp.ID_SanPham) as totalProducts
       FROM nguoidung u
       LEFT JOIN cuahang ch ON u.ID_CuaHang = ch.ID_CuaHang
       LEFT JOIN sanpham sp ON u.ID_NguoiDung = sp.ID_NguoiBan
@@ -543,14 +640,12 @@ router.get("/sellers", async (req, res) => {
 
     res.json({
       success: true,
-      data: {
-        sellers,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages,
-        },
+      data: sellers,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
       },
     });
   } catch (error) {
@@ -563,8 +658,8 @@ router.get("/sellers", async (req, res) => {
   }
 });
 
-// Reports
-router.get("/reports", async (req, res) => {
+// Reports management
+app.get("/reports", async (req, res) => {
   try {
     const { page = 1, limit = 10, status = "" } = req.query;
     const offset = (page - 1) * limit;
@@ -577,50 +672,58 @@ router.get("/reports", async (req, res) => {
       params.push(status);
     }
 
-    const [reports] = await db.execute(
-      `
-      SELECT
-        bc.ID_BaoCao,
-        bc.LoaiBaoCao,
-        bc.LiDo,
-        bc.TrangThai,
-        bc.ThoiGianTao,
-        nguoi_bc.HoTen as TenNguoiBaoCao,
-        nguoi_bc.Email as EmailNguoiBaoCao,
-        nguoi_bibc.HoTen as TenNguoiBiBaoCao,
-        nguoi_bibc.Email as EmailNguoiBiBaoCao,
-        sp.TenSanPham as TenSanPhamBiBaoCao
-      FROM baocao bc
-      LEFT JOIN nguoidung nguoi_bc ON bc.ID_NguoiBC = nguoi_bc.ID_NguoiDung
-      LEFT JOIN nguoidung nguoi_bibc ON bc.ID_NguoiBiBC = nguoi_bibc.ID_NguoiDung
-      LEFT JOIN sanpham sp ON bc.ID_SpBiBC = sp.ID_SanPham
-      WHERE ${whereClause}
-      ORDER BY bc.ThoiGianTao DESC
-      LIMIT ? OFFSET ?
-    `,
-      [...params, parseInt(limit), offset]
-    );
+    // Check if baocao table exists
+    let reports = [];
+    let total = 0;
 
-    const [countResult] = await db.execute(
-      `
-      SELECT COUNT(*) as total FROM baocao WHERE ${whereClause}
-    `,
-      params
-    );
+    try {
+      const [reportResults] = await db.execute(
+        `
+        SELECT
+          bc.ID_BaoCao as id,
+          bc.LoaiBaoCao as type,
+          bc.LiDo as reason,
+          bc.TrangThai as status,
+          bc.ThoiGianTao as created_at,
+          nguoi_bc.HoTen as reporter_name,
+          nguoi_bc.Email as reporter_email,
+          nguoi_bibc.HoTen as reported_user_name,
+          nguoi_bibc.Email as reported_user_email,
+          sp.TenSanPham as reported_product_name
+        FROM baocao bc
+        LEFT JOIN nguoidung nguoi_bc ON bc.ID_NguoiBC = nguoi_bc.ID_NguoiDung
+        LEFT JOIN nguoidung nguoi_bibc ON bc.ID_NguoiBiBC = nguoi_bibc.ID_NguoiDung
+        LEFT JOIN sanpham sp ON bc.ID_SpBiBC = sp.ID_SanPham
+        WHERE ${whereClause}
+        ORDER BY bc.ThoiGianTao DESC
+        LIMIT ? OFFSET ?
+      `,
+        [...params, parseInt(limit), offset]
+      );
 
-    const total = countResult[0].total;
+      const [countResult] = await db.execute(
+        `
+        SELECT COUNT(*) as total FROM baocao WHERE ${whereClause}
+      `,
+        params
+      );
+
+      reports = reportResults;
+      total = countResult[0].total;
+    } catch (error) {
+      console.warn("[ADMIN] Reports table may not exist:", error.message);
+    }
+
     const totalPages = Math.ceil(total / limit);
 
     res.json({
       success: true,
-      data: {
-        reports,
-        pagination: {
-          page: parseInt(page),
-          limit: parseInt(limit),
-          total,
-          totalPages,
-        },
+      data: reports,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total,
+        totalPages,
       },
     });
   } catch (error) {
@@ -633,7 +736,7 @@ router.get("/reports", async (req, res) => {
   }
 });
 
-router.put("/reports/:id/resolve", async (req, res) => {
+app.put("/reports/:id/resolve", async (req, res) => {
   try {
     const { id } = req.params;
 
@@ -656,4 +759,143 @@ router.put("/reports/:id/resolve", async (req, res) => {
   }
 });
 
-export default router;
+// Super Admin only - Create new admin
+app.post("/create-admin", async (req, res) => {
+  try {
+    console.log(`[ADMIN SERVICE] Create admin request from user:`, req.user);
+      // Only allow super admin (testadmin@pycshop.com) to create new admins
+    const currentUserEmail = req.headers['x-user-email'] || req.user?.email;
+    if (currentUserEmail !== 'testadmin@pycshop.com') {
+      return res.status(403).json({
+        success: false,
+        message: "Chỉ Super Admin mới có thể tạo tài khoản admin mới",
+      });
+    }
+
+    const { name, email, password } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Vui lòng điền đầy đủ thông tin (tên, email, mật khẩu)",
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: "Email không đúng định dạng",
+      });
+    }
+
+    // Check if admin already exists
+    const [existingAdmin] = await db.execute(
+      "SELECT * FROM admin WHERE Email = ?",
+      [email]
+    );
+
+    if (existingAdmin.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Email này đã được sử dụng cho tài khoản admin khác",
+      });
+    }
+
+    // Check if email exists in user table
+    const [existingUser] = await db.execute(
+      "SELECT * FROM nguoidung WHERE Email = ?",
+      [email]
+    );
+
+    if (existingUser.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Email này đã được sử dụng cho tài khoản người dùng",
+      });
+    }
+
+    // Hash password
+    const bcrypt = await import('bcryptjs');
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create new admin
+    const [result] = await db.execute(
+      "INSERT INTO admin (HoTen, Email, MatKhau) VALUES (?, ?, ?)",
+      [name, email, hashedPassword]
+    );
+
+    console.log(`[ADMIN SERVICE] New admin created successfully:`, {
+      id: result.insertId,
+      name,
+      email
+    });
+
+    res.json({
+      success: true,
+      message: "Tạo tài khoản admin mới thành công",
+      data: {
+        id: result.insertId,
+        name,
+        email
+      }
+    });
+
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error creating admin:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi hệ thống khi tạo tài khoản admin",
+      error: error.message,
+    });
+  }
+});
+
+// Get all admins (Super Admin only)
+app.get("/admins", async (req, res) => {
+  try {
+    // Only allow super admin to view admin list
+    const currentUserEmail = req.headers['x-user-email'] || req.user?.email;
+    if (currentUserEmail !== 'dat@gmail.com') {
+      return res.status(403).json({
+        success: false,
+        message: "Chỉ Super Admin mới có thể xem danh sách admin",
+      });
+    }
+
+    const [admins] = await db.execute(`
+      SELECT 
+        ID_NguoiDung as id,
+        HoTen as name, 
+        Email as email,
+        'admin' as role,
+        'active' as status,
+        CURRENT_TIMESTAMP as created_at
+      FROM admin 
+      ORDER BY ID_NguoiDung ASC
+    `);
+
+    res.json({
+      success: true,
+      data: admins
+    });
+
+  } catch (error) {
+    console.error("[ADMIN SERVICE] Error getting admins:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi hệ thống khi lấy danh sách admin",
+      error: error.message,
+    });
+  }
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`[ADMIN SERVICE] Server running on port ${PORT}`);
+  console.log(`[ADMIN SERVICE] Health check: http://localhost:${PORT}/health`);
+});
+
+export default app;

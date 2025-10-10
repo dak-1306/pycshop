@@ -3,7 +3,6 @@ import authMiddleware from "./middleware/authMiddleware.js";
 
 function setupRoutes(app) {
   console.log("[ROUTES] Setting up proxy routes...");
-
   // Auth Service
   app.use(
     "/auth",
@@ -12,14 +11,30 @@ function setupRoutes(app) {
         `[ROUTES] Matched /auth route for ${req.method} ${req.originalUrl}`
       );
       console.log(`[ROUTES] req.user:`, req.user);
+        // Skip auth middleware for login/register routes
+      const publicRoutes = ['/auth/login', '/auth/register', '/auth/admin/login', '/auth/register-admin'];
+      const isPublicRoute = publicRoutes.some(route => req.originalUrl === route || req.originalUrl.startsWith(route + '?'));
+      
+      console.log(`[ROUTES] Checking if ${req.originalUrl} is public route:`, isPublicRoute);
+      
+      if (isPublicRoute) {
+        console.log(`[ROUTES] Skipping auth for public auth route: ${req.originalUrl}`);
+        return next();
+      }
+        // Apply auth middleware for protected auth routes (like logout)
+      authMiddleware(req, res, next);
+    },
+    (req, res, next) => {
+      console.log(`[ROUTES] About to call createProxyMiddleware for ${req.method} ${req.url}`);
       next();
     },
     createProxyMiddleware({
       target: process.env.AUTH_SERVICE_URL || "http://localhost:5001",
       changeOrigin: true,
-      pathRewrite: { "^/auth": "" },
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(`[PROXY] onProxyReq callback triggered`);
+      pathRewrite: { "^/auth": "" },      onProxyReq: (proxyReq, req, res) => {
+        console.log(`🔥 [PROXY] Auth onProxyReq callback CALLED! - ${req.method} ${req.url}`);
+        console.log(`🔥 [PROXY] Target: ${process.env.AUTH_SERVICE_URL || "http://localhost:5001"}${proxyReq.path}`);
+        
         // Truyền thông tin user từ API Gateway xuống auth service
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id);
@@ -61,6 +76,71 @@ function setupRoutes(app) {
         console.error(`[PROXY] Error:`, err.message);
         if (!res.headersSent) {
           res.status(500).json({ error: "Proxy error", details: err.message });
+        }
+      },
+    })
+  );
+
+  // Admin Service
+  app.use(
+    "/admin",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /admin route for ${req.method} ${req.originalUrl}`
+      );
+      console.log(`[ROUTES] req.user:`, req.user);
+      next();
+    },
+    authMiddleware, // Apply auth middleware for all admin routes
+    createProxyMiddleware({
+      target: process.env.ADMIN_SERVICE_URL || "http://localhost:5006",
+      changeOrigin: true,
+      pathRewrite: { "^/admin": "" },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`[PROXY] onProxyReq callback triggered for admin service`);        // Truyền thông tin user từ API Gateway xuống admin service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id);
+          proxyReq.setHeader("x-user-role", req.user.role);
+          proxyReq.setHeader("x-user-email", req.user.email || "");
+
+          // Only set x-user-type if it exists to avoid undefined header
+          if (req.user.userType) {
+            proxyReq.setHeader("x-user-type", req.user.userType);
+          }
+
+          console.log(
+            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${
+              req.user.role
+            }, userType: ${req.user.userType || "undefined"}`
+          );
+        } else {
+          console.log(`[PROXY] No req.user found for this admin request`);
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.ADMIN_SERVICE_URL || "http://localhost:5006"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Admin Service`
+        );
+        
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Admin Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Admin service error", details: err.message });
         }
       },
     })

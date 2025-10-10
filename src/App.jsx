@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ChatProvider } from "./context/ChatContext";
 import GlobalChatWidget from "./components/GlobalChatWidget/GlobalChatWidget";
@@ -22,6 +22,7 @@ import AdminOrders from "./pages/admin/Orders";
 import AdminSellers from "./pages/admin/Sellers";
 import AdminReports from "./pages/admin/Reports";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminManagement from "./components/admin/settings/AdminManagement";
 import Profile from "./pages/buyer/Profile/Profile";
 import ProductDetail from "./pages/buyer/Products/ProductDetail";
 import SearchResults from "./pages/buyer/Products/SearchResults";
@@ -67,12 +68,14 @@ function App() {
                   </AdminRoute>
                 }
               >
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="products" element={<AdminProducts />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="sellers" element={<AdminSellers />} />
                 <Route path="reports" element={<AdminReports />} />
+                <Route path="admin-management" element={<AdminManagement />} />
                 <Route
                   path="settings"
                   element={
@@ -142,6 +145,7 @@ const AppWithChat = () => {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="sellers" element={<AdminSellers />} />
           <Route path="reports" element={<AdminReports />} />
+          <Route path="admin-management" element={<AdminManagement />} />
           <Route
             path="settings"
             element={

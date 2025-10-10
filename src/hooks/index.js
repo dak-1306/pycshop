@@ -7,10 +7,12 @@ export { useCategories } from "./api/useCategories.js";
 // Auth Hooks
 export { useAuth } from "./auth/useAuth.js";
 export { usePermissions } from "./auth/usePermissions.js";
+export { useAdminLogin } from "./auth/useAdminLogin.js";
 
 // UI Hooks
 export { useDashboard } from "./ui/useDashboard.js";
 export { useNotifications } from "./ui/useNotifications.js";
+export { useChatWidget } from "./useChatWidget.js";
 
 // Utility Hooks
 export {
@@ -18,7 +20,7 @@ export {
   useConfirmModal,
   useForm,
   useLocalStorage,
-} from "./utils/useUI.js";
+} from "../utils/useUI.js";
 
 export {
   useDebounce,
@@ -33,4 +35,4 @@ export {
   useInterval,
   useTimeout,
   useArray,
-} from "./utils/useHelpers.js";
+} from "../utils/useHelpers.js";

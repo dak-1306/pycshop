@@ -1,43 +1,23 @@
-import React, { useState, createContext } from "react";
+import React, { createContext, useContext } from "react";
+import { useChatWidget } from "../hooks/useChatWidget";
 
+// Create Chat Context
 const ChatContext = createContext();
 
-export const ChatProvider = ({ children }) => {
-  const [isChatOpen, setIsChatOpen] = useState(false);
-  const [currentShop, setCurrentShop] = useState(null);
-
-  const openChat = (shopInfo = null) => {
-    console.log("ChatContext: Opening chat with shop info:", shopInfo);
-    setCurrentShop(shopInfo);
-    setIsChatOpen(true);
-  };
-
-  const closeChat = () => {
-    setIsChatOpen(false);
-    setCurrentShop(null);
-  };
-
-  const toggleChat = (shopInfo = null) => {
-    if (isChatOpen) {
-      closeChat();
-    } else {
-      openChat(shopInfo);
-    }
-  };
-
-  return (
-    <ChatContext.Provider
-      value={{
-        isChatOpen,
-        currentShop,
-        openChat,
-        closeChat,
-        toggleChat,
-      }}
-    >
-      {children}
-    </ChatContext.Provider>
-  );
+// Custom hook to use chat context
+export const useChat = () => {
+  const context = useContext(ChatContext);
+  if (!context) {
+    throw new Error("useChat must be used within a ChatProvider");
+  }
+  return context;
 };
 
-export { ChatContext };
+// Chat Provider Component
+export const ChatProvider = ({ children }) => {
+  const chatWidget = useChatWidget();
+
+  return (
+    <ChatContext.Provider value={chatWidget}>{children}</ChatContext.Provider>
+  );
+};

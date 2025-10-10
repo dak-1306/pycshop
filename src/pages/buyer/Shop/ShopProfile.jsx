@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
-import { useChatWidget } from "../../../hooks/useChatWidget";
+import { useChat } from "../../../context/ChatContext";
 import { PLACEHOLDER_IMAGES } from "../../../utils/placeholderImages";
 import "./ShopProfile.css";
 
 const ShopProfile = () => {
   const { shopId } = useParams();
   const navigate = useNavigate();
-  const { openChat } = useChatWidget();
+  const { openChat } = useChat();
   const [shop, setShop] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

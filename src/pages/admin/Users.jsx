@@ -9,8 +9,10 @@ import ConfirmDeleteModal from "../../components/admin/user/ConfirmDeleteModal";
 import SuccessNotification from "../../components/common/SuccessNotification";
 import ErrorNotification from "../../components/common/ErrorNotification";
 import { useAdminUsers } from "../../hooks/useAdminUsers";
+import { useLanguage } from "../../context/LanguageContext";
 
 const AdminUsers = () => {
+  const { t } = useLanguage();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -160,11 +162,10 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Quản lý người dùng</h1>
+    <div className="p-6">      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">{t("userManagement")}</h1>
         <p className="text-gray-600">
-          Quản lý tất cả người dùng trong hệ thống
+          {t("manageAllUsers")}
         </p>
       </div>
 

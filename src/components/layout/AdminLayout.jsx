@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { authService } from "../../services/authService";
 import adminService from "../../services/adminService";
 import NotificationPanel from "../common/NotificationPanel";
+import ThemeToggle from "../common/ThemeToggle";
+import LanguageToggle from "../common/LanguageToggle";
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -12,6 +15,7 @@ const AdminLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
+  const { t } = useLanguage();
   const profileDropdownRef = useRef(null);
   // Notification system
   const {
@@ -68,10 +72,9 @@ const AdminLayout = () => {
 
   // Check if current user is super admin
   const isSuperAdmin = adminService.isSuperAdmin();
-
   const navigation = [
     {
-      name: "Dashboard",
+      name: t("dashboard"),
       href: "/admin/dashboard",
       icon: (
         <svg
@@ -96,7 +99,7 @@ const AdminLayout = () => {
       ),
     },
     {
-      name: "Người dùng",
+      name: t("users"),
       href: "/admin/users",
       icon: (
         <svg
@@ -112,10 +115,9 @@ const AdminLayout = () => {
             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
           />
         </svg>
-      ),
-    },
+      ),    },
     {
-      name: "Sản phẩm",
+      name: t("products"),
       href: "/admin/products",
       icon: (
         <svg
@@ -131,10 +133,9 @@ const AdminLayout = () => {
             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
           />
         </svg>
-      ),
-    },
+      ),    },
     {
-      name: "Đơn hàng",
+      name: t("orders"),
       href: "/admin/orders",
       icon: (
         <svg
@@ -150,10 +151,9 @@ const AdminLayout = () => {
             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
           />
         </svg>
-      ),
-    },
+      ),    },
     {
-      name: "Seller",
+      name: t("sellers"),
       href: "/admin/sellers",
       icon: (
         <svg
@@ -169,10 +169,9 @@ const AdminLayout = () => {
             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
           />
         </svg>
-      ),
-    },
+      ),    },
     {
-      name: "Báo cáo",
+      name: t("reports"),
       href: "/admin/reports",
       icon: (
         <svg
@@ -188,9 +187,8 @@ const AdminLayout = () => {
             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H9a2 2 0 01-2-2z"
           />
         </svg>
-      ),
-    },    {
-      name: "Cài đặt",
+      ),    },    {
+      name: t("settings"),
       href: "/admin/settings",
       icon: (
         <svg
@@ -257,7 +255,7 @@ const AdminLayout = () => {
       {/* Sidebar */}
       <div
         className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}
       >
@@ -267,7 +265,7 @@ const AdminLayout = () => {
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
               <span className="text-blue-600 font-bold text-lg">A</span>
             </div>
-            <h1 className="text-white font-semibold text-lg">Admin Panel</h1>
+            <h1 className="text-white font-semibold text-lg">{t("adminSystem")}</h1>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -335,7 +333,7 @@ const AdminLayout = () => {
             onClick={handleLogout}
             className="mt-3 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
           >
-            Đăng xuất
+            {t("logout")}
           </button>
         </div>
       </div>
@@ -343,7 +341,7 @@ const AdminLayout = () => {
       {/* Main content */}
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Top bar */}
-        <header className="bg-white shadow-sm border-b border-gray-200">
+        <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center justify-between px-6 py-4">
             <div className="flex items-center space-x-4">
               <button
@@ -364,13 +362,11 @@ const AdminLayout = () => {
                   />
                 </svg>
               </button>
-              <div>
-                <h1 className="text-xl font-semibold text-gray-900">
+              <div>                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {navigation.find((item) => isCurrentPath(item.href))?.name ||
                     "Admin"}
-                </h1>
-                <p className="text-sm text-gray-500">
-                  Quản lý hệ thống PycShop
+                </h1>                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {t("adminSystem")}
                 </p>
               </div>
             </div>
@@ -418,10 +414,17 @@ const AdminLayout = () => {
                   onDeleteNotification={deleteNotification}
                   onClearAll={clearAllNotifications}
                   getRelativeTime={getRelativeTime}
-                  getPriorityColor={getPriorityColor}
-                  getNotificationIcon={getNotificationIcon}
+                  getPriorityColor={getPriorityColor}                  getNotificationIcon={getNotificationIcon}
                 />
-              </div>              {/* Profile dropdown */}
+              </div>
+
+              {/* Theme Toggle */}
+              <ThemeToggle size="normal" />
+              
+              {/* Language Toggle */}
+              <LanguageToggle size="normal" />
+
+              {/* Profile dropdown */}
               <div className="relative" ref={profileDropdownRef}>
                 <button
                   onClick={() => setShowProfileDropdown(!showProfileDropdown)}
@@ -507,10 +510,8 @@ const AdminLayout = () => {
               </div>
             </div>
           </div>
-        </header>
-
-        {/* Page content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+        </header>        {/* Page content */}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900">
           <Outlet />
         </main>
       </div>

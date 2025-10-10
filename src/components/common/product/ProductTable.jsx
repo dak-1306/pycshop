@@ -1,14 +1,15 @@
 import React from "react";
+import { useLanguage } from "../../../context/LanguageContext";
 
 const ProductTable = ({
   products,
   onViewProduct,
   onEditProduct,
   onDeleteProduct,
-  onApproveProduct,
-  getStatusColor,
-  variant = "seller", // "admin" | "seller"
+  getStatusColor,  variant = "seller", // "admin" | "seller"
 }) => {
+  const { t } = useLanguage();
+  
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -37,19 +38,18 @@ const ProductTable = ({
         return "bg-gray-100 text-gray-800";
     }
   };
-
   const getStatusText = (status) => {
     switch (status) {
       case "active":
-        return "Còn hàng";
+        return t("inStock");
       case "out_of_stock":
-        return "Hết hàng";
+        return t("outOfStock");
       case "pending":
-        return "Chờ duyệt";
+        return t("pending");
       case "inactive":
-        return "Ngưng bán";
+        return t("stopSelling");
       default:
-        return "Không xác định";
+        return t("undefined");
     }
   };
 
@@ -57,34 +57,33 @@ const ProductTable = ({
     return (
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
+          <thead className="bg-gray-50">            <tr>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ảnh
+                {t("image")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tên sản phẩm
+                {t("productName")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Người bán
+                {t("seller")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Giá
+                {t("price")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Tồn kho
+                {t("stock")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Danh mục
+                {t("category")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Trạng thái
+                {t("status")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Ngày tạo
+                {t("createdAt")}
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Hành động
+                {t("actions")}
               </th>
             </tr>
           </thead>
@@ -187,8 +186,7 @@ const ProductTable = ({
                         />
                       </svg>
                       <span className="text-xs">Xem</span>
-                    </button>
-                    <button
+                    </button>                    <button
                       onClick={() => onEditProduct && onEditProduct(product.id)}
                       className="group flex items-center gap-1 px-3 py-1.5 text-indigo-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-all duration-200 border border-indigo-200 hover:border-indigo-600"
                       title="Chỉnh sửa"
@@ -205,30 +203,7 @@ const ProductTable = ({
                           strokeWidth={2}
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                         />
-                      </svg>
-                      <span className="text-xs">Sửa</span>
-                    </button>
-                    <button
-                      onClick={() =>
-                        onApproveProduct && onApproveProduct(product.id)
-                      }
-                      className="group flex items-center gap-1 px-3 py-1.5 text-green-600 hover:text-white hover:bg-green-600 rounded-lg transition-all duration-200 border border-green-200 hover:border-green-600"
-                      title="Phê duyệt"
-                    >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-                        />
-                      </svg>
-                      <span className="text-xs">Duyệt</span>
+                      </svg>                      <span className="text-xs">{t("edit")}</span>
                     </button>
                     <button
                       onClick={() =>
@@ -250,7 +225,7 @@ const ProductTable = ({
                           d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                         />
                       </svg>
-                      <span className="text-xs">Xóa</span>
+                      <span className="text-xs">{t("delete")}</span>
                     </button>
                   </div>
                 </td>
@@ -265,34 +240,32 @@ const ProductTable = ({
   // Seller variant (default)
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
-        <h3 className="text-lg font-semibold text-gray-800">
-          Danh sách sản phẩm
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">        <h3 className="text-lg font-semibold text-gray-800">
+          {t("productList")}
         </h3>
       </div>
       <table className="min-w-full">
-        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
-          <tr>
+        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">          <tr>
             <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Ảnh
+              {t("image")}
             </th>
             <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Tên sản phẩm
+              {t("productName")}
             </th>
             <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Giá
+              {t("price")}
             </th>
             <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Số lượng
+              {t("quantity")}
             </th>
             <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Danh mục
+              {t("category")}
             </th>
             <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Trạng thái
+              {t("status")}
             </th>
             <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
-              Hành động
+              {t("actions")}
             </th>
           </tr>
         </thead>
@@ -364,20 +337,19 @@ const ProductTable = ({
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div className="flex space-x-3">
-                  <button
+                <div className="flex space-x-3">                  <button
                     onClick={() => onViewProduct && onViewProduct(product.id)}
                     className="group flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                   >
                     <span>👁️</span>
-                    <span>Xem</span>
+                    <span>{t("view")}</span>
                   </button>
                   <button
                     onClick={() => onEditProduct && onEditProduct(product.id)}
                     className="group flex items-center space-x-2 bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                   >
                     <span>✏️</span>
-                    <span>Sửa</span>
+                    <span>{t("edit")}</span>
                   </button>
                   <button
                     onClick={() =>
@@ -386,7 +358,7 @@ const ProductTable = ({
                     className="group flex items-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white px-4 py-2.5 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                   >
                     <span>🗑️</span>
-                    <span>Xóa</span>
+                    <span>{t("delete")}</span>
                   </button>
                 </div>
               </td>

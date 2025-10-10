@@ -9,8 +9,10 @@ import StatsCards from "../../components/common/dashboard/StatsCards";
 import StatsOverview from "../../components/admin/reports/StatsOverview";
 import { useDashboard } from "../../hooks/useDashboard";
 import { useAdminReports } from "../../hooks/useAdminReports";
+import { useLanguage } from "../../context/LanguageContext";
 
 const Dashboard = () => {
+  const { t } = useLanguage();
   const {
     recentOrders,
     recentUsers,

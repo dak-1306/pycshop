@@ -6,8 +6,10 @@ import SellersTable from "../../components/admin/sellers/SellersTable";
 import SellerDetailModal from "../../components/admin/sellers/SellerDetailModal";
 import SellerActionModal from "../../components/admin/sellers/SellerActionModal";
 import DeleteModal from "../../components/common/DeleteModal";
+import { useLanguage } from "../../context/LanguageContext";
 
 const Sellers = () => {
+  const { t } = useLanguage();
   const {
     // State
     sellers,
@@ -51,7 +53,7 @@ const Sellers = () => {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải dữ liệu người bán...</p>
+          <p className="mt-4 text-gray-600">{t("loadingSellers")}</p>
         </div>
       </div>
     );
@@ -61,13 +63,12 @@ const Sellers = () => {
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Page Header */}
       <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">          <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              🏪 Quản lý Sellers
+              🏪 {t("sellerManagement")}
             </h1>
             <p className="text-gray-600">
-              Quản lý và giám sát hoạt động của các người bán trên PycShop
+              {t("manageAllSellers")}
             </p>
           </div>
 
@@ -89,7 +90,7 @@ const Sellers = () => {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              Làm mới
+              {t("refresh")}
             </button>
 
             <button
@@ -116,9 +117,7 @@ const Sellers = () => {
       </div>
 
       {/* Sellers Statistics */}
-      <SellersStats stats={sellersStats} isLoading={isLoading} />
-
-      {/* Filters */}
+      <SellersStats stats={sellersStats} isLoading={isLoading} />      {/* Filters */}
       <SellersFilters
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -127,9 +126,6 @@ const Sellers = () => {
         shopTypeFilter={shopTypeFilter}
         setShopTypeFilter={setShopTypeFilter}
         onReset={handleResetFilters}
-        onExport={handleExport}
-        onRefresh={refreshData}
-        isLoading={isLoading}
       />
 
       {/* Sellers Table */}

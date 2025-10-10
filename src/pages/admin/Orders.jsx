@@ -7,8 +7,10 @@ import OrderDetailModal from "../../components/common/order/OrderDetailModal";
 import DeleteModal from "../../components/common/DeleteModal";
 import Pagination from "../../components/common/product/Pagination";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
+import { useLanguage } from "../../context/LanguageContext";
 
 const AdminOrders = () => {
+  const { t } = useLanguage();
   const {
     orders,
     stats,
@@ -52,10 +54,9 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Quản lý đơn hàng</h1>
-        <p className="text-gray-600">Quản lý tất cả đơn hàng trong hệ thống</p>
+    <div className="p-6">      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">{t("orderManagement")}</h1>
+        <p className="text-gray-600">{t("manageAllOrders")}</p>
       </div>
 
       {/* Stats Cards */}

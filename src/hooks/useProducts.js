@@ -37,6 +37,7 @@ export const useProducts = () => {
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedPrice, setSelectedPrice] = useState("");
@@ -46,6 +47,15 @@ export const useProducts = () => {
   const [totalItems, setTotalItems] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Initialize products
   const loadProducts = useCallback(async () => {
     setIsLoading(true);
@@ -54,7 +64,7 @@ export const useProducts = () => {
       const response = await sellerProductService.getSellerProducts({
         page: currentPage,
         limit: 10,
-        search: searchTerm || undefined,
+        search: debouncedSearchTerm || undefined,
         status: selectedStatus || undefined,
         sortBy: "created_date",
         sortOrder: "DESC",
@@ -107,7 +117,7 @@ export const useProducts = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, searchTerm, selectedStatus]);
+  }, [currentPage, debouncedSearchTerm, selectedStatus]);
 
   useEffect(() => {
     loadProducts();

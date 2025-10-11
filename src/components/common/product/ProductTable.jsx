@@ -243,7 +243,7 @@ const ProductTable = ({
 
   // Seller variant (default)
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border overflow-x-auto">
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-4 border-b">
         {" "}
         <h3 className="text-lg font-semibold text-gray-800">
@@ -323,10 +323,10 @@ const ProductTable = ({
               <td className="px-4 py-4 whitespace-nowrap">
                 <div
                   className={`text-lg font-bold ${getStockColor(
-                    product.stock
+                    product.quantity
                   )}`}
                 >
-                  {product.stock}
+                  {product.quantity}
                 </div>
               </td>
               <td className="px-4 py-4 whitespace-nowrap">

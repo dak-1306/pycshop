@@ -243,7 +243,7 @@ const OrderTable = ({
 
   // Seller variant (default)
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border overflow-x-auto">
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
         <h3 className="text-lg font-semibold text-gray-800">
           Danh sách đơn hàng

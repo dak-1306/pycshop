@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ChatProvider } from "./context/ChatContext";
 import { ThemeProvider } from "./context/ThemeContext";
@@ -39,55 +44,62 @@ function App() {
         <AuthProvider>
           <ChatProvider>
             <Router>
-          <div className="app">
-            <Routes>
-              {/* Main Homepage */}
-              <Route path="/" element={<HomePage />} />
+              <div className="app">
+                <Routes>
+                  {/* Main Homepage */}
+                  <Route path="/" element={<HomePage />} />
 
-              {/* Search Results */}
-              <Route path="/search" element={<SearchResults />} />
+                  {/* Search Results */}
+                  <Route path="/search" element={<SearchResults />} />
 
-              {/* Auth Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/become-seller" element={<BecomeSeller />} />
+                  {/* Auth Routes */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/admin/login" element={<AdminLogin />} />
+                  <Route path="/become-seller" element={<BecomeSeller />} />
 
-              {/* Buyer Routes */}
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/product/:id" element={<ProductDetail />} />
-              <Route path="/shop/:shopId" element={<ShopProfile />} />
+                  {/* Buyer Routes */}
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/shop/:shopId" element={<ShopProfile />} />
 
-              {/* Seller Routes */}
-              <Route path="/seller/dashboard" element={<Dashboard />} />
-              <Route path="/seller/products" element={<ManageProduct />} />
-              <Route path="/seller/orders" element={<Order />} />
-              <Route path="/seller/shop" element={<ShopPage />} />
+                  {/* Seller Routes */}
+                  <Route path="/seller/dashboard" element={<Dashboard />} />
+                  <Route path="/seller/products" element={<ManageProduct />} />
+                  <Route path="/seller/orders" element={<Order />} />
+                  <Route path="/seller/shop" element={<ShopPage />} />
 
-              {/* Admin Routes */}
-              <Route
-                path="/admin/*"
-                element={
-                  <AdminRoute>
-                    <AdminLayout />
-                  </AdminRoute>
-                }
-              >
-                <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<AdminDashboard />} />
-                <Route path="users" element={<AdminUsers />} />
-                <Route path="products" element={<AdminProducts />} />
-                <Route path="orders" element={<AdminOrders />} />
-                <Route path="sellers" element={<AdminSellers />} />
-                <Route path="reports" element={<AdminReports />} />
-                <Route path="admin-management" element={<AdminManagement />} />
-                <Route path="settings" element={<AdminSettings />} />
-              </Route>
-            </Routes>
+                  {/* Admin Routes */}
+                  <Route
+                    path="/admin/*"
+                    element={
+                      <AdminRoute>
+                        <AdminLayout />
+                      </AdminRoute>
+                    }
+                  >
+                    <Route
+                      index
+                      element={<Navigate to="/admin/dashboard" replace />}
+                    />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="users" element={<AdminUsers />} />
+                    <Route path="products" element={<AdminProducts />} />
+                    <Route path="orders" element={<AdminOrders />} />
+                    <Route path="sellers" element={<AdminSellers />} />
+                    <Route path="reports" element={<AdminReports />} />
+                    <Route
+                      path="admin-management"
+                      element={<AdminManagement />}
+                    />
+                    <Route path="settings" element={<AdminSettings />} />
+                  </Route>
+                </Routes>
 
-            {/* Global Chat Widget */}
-            <GlobalChatWidget />
-          </div>            </Router>
+                {/* Global Chat Widget */}
+                <GlobalChatWidget />
+              </div>{" "}
+            </Router>
           </ChatProvider>
         </AuthProvider>
       </LanguageProvider>

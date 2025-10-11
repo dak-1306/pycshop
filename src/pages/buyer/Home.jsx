@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../../components/buyers/Header";
 import Banner from "../../components/buyers/Banner";
 import Categories from "../../components/buyers/Categories";
@@ -6,13 +7,16 @@ import ProductGrid from "../../components/buyers/ProductGrid";
 import Footer from "../../components/buyers/Footer";
 
 const HomePage = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
 
   const handleSearch = (query) => {
     console.log("🔍 [HOME] handleSearch called with:", query);
-    setSearchQuery(query);
-    setSelectedCategory(null); // Clear category filter when searching
+    // Navigate to search results page instead of updating local state
+    if (query.trim()) {
+      navigate(`/search?keyword=${encodeURIComponent(query.trim())}`);
+    }
   };
 
   const handleCategorySelect = (categoryId) => {
@@ -30,7 +34,6 @@ const HomePage = () => {
         onCategorySelect={handleCategorySelect}
       />
       <ProductGrid
-        searchQuery={searchQuery}
         selectedCategory={selectedCategory}
         onCategorySelect={handleCategorySelect}
       />

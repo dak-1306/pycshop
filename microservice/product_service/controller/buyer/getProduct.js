@@ -160,10 +160,10 @@ export const searchProducts = async (req, res) => {
       sortOrder,
     });
 
-    if (!search || search.trim().length < 2) {
+    if (!search || search.trim().length < 1) {
       return res.status(400).json({
         success: false,
-        message: "Search query must be at least 2 characters",
+        message: "Search query must be at least 1 character",
       });
     }
 

@@ -524,6 +524,31 @@
   color: #ffa500;
 }
 
+/* Star components for React */
+.sr-product-rating .sr-stars .star {
+  font-size: 12px;
+  color: #e0e0e0; /* Sao trống - màu xám nhạt */
+}
+
+.sr-product-rating .sr-stars .star.filled {
+  color: #ffa500; /* Sao đầy - màu vàng */
+}
+
+.sr-product-rating .sr-stars .star.half {
+  color: #ffa500; /* Sao nửa - màu vàng */
+  position: relative;
+}
+
+.sr-product-rating .sr-stars .star.half::after {
+  content: "★";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 50%;
+  overflow: hidden;
+  color: #ffa500;
+}
+
 .sr-rating-text {
   font-size: 12px;
   color: #666;

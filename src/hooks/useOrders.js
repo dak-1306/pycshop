@@ -39,7 +39,9 @@ export const useOrders = () => {
           search: searchTerm,
           status: selectedFilter !== "Tất cả" ? selectedFilter : undefined,
         });
-        setOrders(response.data || []);
+        // Handle both nested structure (data.orders) and direct array (data)
+        const ordersData = response.data?.orders || response.data || [];
+        setOrders(Array.isArray(ordersData) ? ordersData : []);
       } catch (error) {
         console.error("Error loading orders:", error);
         setError("Failed to load orders");
@@ -55,23 +57,32 @@ export const useOrders = () => {
   // Computed values
   const filteredOrders =
     selectedFilter === "Tất cả"
-      ? orders.filter(
-          (order) =>
-            order.productName
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-            order.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      : orders.filter(
-          (order) =>
-            order.status === selectedFilter &&
-            (order.productName
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase()) ||
-              order.customerName
-                .toLowerCase()
-                .includes(searchTerm.toLowerCase()))
-        );
+      ? orders.filter((order) => {
+          const customerName = order.customerName || order.TenNguoiNhan || "";
+          const productName =
+            order.productName ||
+            (order.ChiTietDonHang && order.ChiTietDonHang[0]?.TenSanPham) ||
+            "";
+
+          return (
+            productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            customerName.toLowerCase().includes(searchTerm.toLowerCase())
+          );
+        })
+      : orders.filter((order) => {
+          const orderStatus = order.status || order.TrangThai || "";
+          const customerName = order.customerName || order.TenNguoiNhan || "";
+          const productName =
+            order.productName ||
+            (order.ChiTietDonHang && order.ChiTietDonHang[0]?.TenSanPham) ||
+            "";
+
+          return (
+            orderStatus === selectedFilter &&
+            (productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+              customerName.toLowerCase().includes(searchTerm.toLowerCase()))
+          );
+        });
 
   const totalPages = Math.ceil(filteredOrders.length / 10);
   const paginatedOrders = filteredOrders.slice(

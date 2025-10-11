@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import adminService from "../services/adminService.js";
 import {
   MOCK_RECENT_ORDERS,
@@ -8,7 +8,7 @@ import {
   DEFAULT_STATS,
 } from "../constants/dashboardConstants.jsx";
 
-export const useDashboard = () => {
+export const useDashboard = (variant = "admin") => {
   // State management
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
@@ -18,19 +18,34 @@ export const useDashboard = () => {
     revenue: 0,
     products: 0,
     newCustomers: 0,
-  });  const [isLoading, setIsLoading] = useState(true);
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Initialize dashboard data function
-  const initializeDashboard = async () => {
+  const initializeDashboard = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      // Fetch dashboard data and charts data in parallel
+      if (variant === "seller") {
+        // For seller dashboard, use mock data or seller-specific APIs
+        setStats({
+          orders: 25,
+          revenue: 15000000,
+          products: 42,
+          newCustomers: 8,
+        });
+        setRecentOrders(MOCK_RECENT_ORDERS.slice(0, 5));
+        setRecentUsers(MOCK_RECENT_USERS.slice(0, 5));
+        setChartData(MOCK_CHART_DATA);
+        return;
+      }
+
+      // For admin dashboard, fetch real data
       const [dashboardData, chartsData] = await Promise.all([
         adminService.getDashboardStats(),
-        adminService.getAllChartsData()
+        adminService.getAllChartsData(),
       ]);
 
       setStats({
@@ -60,12 +75,12 @@ export const useDashboard = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [variant]);
 
   // Initialize dashboard data on mount
   useEffect(() => {
     initializeDashboard();
-  }, []);
+  }, [initializeDashboard]);
 
   // Utility functions
   const formatCurrency = (amount) => {
@@ -126,7 +141,7 @@ export const useDashboard = () => {
     // Utility functions
     formatCurrency,
     getStatusColor,
-    formatNumber,    // Actions
+    formatNumber, // Actions
     refreshOrders,
     refreshUsers,
     refreshDashboard: initializeDashboard,

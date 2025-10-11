@@ -20,7 +20,7 @@ const Dashboard = () => {
     isLoading: dashboardLoading,
     error: dashboardError,
     refreshDashboard,
-  } = useDashboard();
+  } = useDashboard("admin");
 
   const {
     overviewStats,

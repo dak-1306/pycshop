@@ -233,7 +233,7 @@
 
 .retry-btn,
 .clear-search-btn {
-  background: linear-gradient(135deg, #ff6b35, #f7931e);
+  background: #297d4e;
   color: white;
   border: none;
   padding: 12px 24px;
@@ -247,7 +247,7 @@
 .retry-btn:hover,
 .clear-search-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 8px 20px rgba(53, 255, 67, 0.3);
 }
 
 /* Out of stock badge */

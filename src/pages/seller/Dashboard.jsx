@@ -7,7 +7,7 @@ import RecentOrdersTable from "../../components/common/dashboard/RecentOrdersTab
 import { useDashboard } from "../../hooks/useDashboard";
 
 const Dashboard = () => {
-  const { stats, orderData, getStatusColor } = useDashboard();
+  const { stats, orderData, getStatusColor } = useDashboard("seller");
 
   return (
     <SellerLayout title="Dashboard">

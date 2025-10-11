@@ -5,7 +5,18 @@ export const sellerOrderService = {
   // Get seller's orders
   getSellerOrders: async (filters = {}) => {
     try {
-      const queryParams = new URLSearchParams(filters).toString();
+      // Filter out undefined/null values
+      const cleanFilters = Object.entries(filters).reduce(
+        (acc, [key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            acc[key] = value;
+          }
+          return acc;
+        },
+        {}
+      );
+
+      const queryParams = new URLSearchParams(cleanFilters).toString();
       const url = `/seller/orders${queryParams ? `?${queryParams}` : ""}`;
       return await api.get(url);
     } catch (error) {

@@ -112,40 +112,50 @@ const OrderTable = ({
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {orders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
+              <tr
+                key={order.id || order.ID_DonHang}
+                className="hover:bg-gray-50"
+              >
                 <td className="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                  #{order.id}
+                  #{order.id || order.ID_DonHang}
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
-                    {order.customerName || order.customer}
+                    {order.customerName || order.customer || order.TenNguoiNhan}
                   </div>
                   <div className="text-sm text-gray-500">
-                    {order.customerEmail || ""}
+                    {order.customerEmail || order.SoDienThoai || ""}
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
-                    {order.sellerName || order.seller}
+                    {order.sellerName || order.seller || "Shop"}
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {order.productName || order.items?.length + " sản phẩm"}
+                    {order.productName ||
+                      (order.ChiTietDonHang &&
+                        order.ChiTietDonHang[0]?.TenSanPham) ||
+                      (order.items?.length
+                        ? order.items?.length + " sản phẩm"
+                        : "Sản phẩm")}
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-semibold text-gray-900">
-                    {formatPrice(order.total || order.totalAmount)}
+                    {formatPrice(
+                      order.total || order.totalAmount || order.TongTien
+                    )}
                   </div>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColorInternal(
-                      order.status
+                      order.status || order.TrangThai
                     )}`}
                   >
-                    {getStatusText(order.status)}
+                    {getStatusText(order.status || order.TrangThai)}
                   </span>
                 </td>
                 <td className="px-4 py-4 whitespace-nowrap">
@@ -191,7 +201,9 @@ const OrderTable = ({
                       <span className="text-xs">Xem</span>
                     </button>
                     <button
-                      onClick={() => onEditOrder && onEditOrder(order.id)}
+                      onClick={() =>
+                        onEditOrder && onEditOrder(order.id || order.ID_DonHang)
+                      }
                       className="group flex items-center gap-1 px-3 py-1.5 text-indigo-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-all duration-200 border border-indigo-200 hover:border-indigo-600"
                       title="Chỉnh sửa đơn hàng"
                     >
@@ -212,7 +224,10 @@ const OrderTable = ({
                     </button>
 
                     <button
-                      onClick={() => onDeleteOrder && onDeleteOrder(order.id)}
+                      onClick={() =>
+                        onDeleteOrder &&
+                        onDeleteOrder(order.id || order.ID_DonHang)
+                      }
                       className="group flex items-center gap-1 px-3 py-1.5 text-red-600 hover:text-white hover:bg-red-600 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-600"
                       title="Xóa đơn hàng"
                     >
@@ -286,7 +301,12 @@ const OrderTable = ({
                   {order.image ? (
                     <img
                       src={order.image}
-                      alt={order.productName}
+                      alt={
+                        order.productName ||
+                        (order.ChiTietDonHang &&
+                          order.ChiTietDonHang[0]?.TenSanPham) ||
+                        "Sản phẩm"
+                      }
                       className="w-full h-full object-cover rounded-lg"
                     />
                   ) : (
@@ -306,7 +326,10 @@ const OrderTable = ({
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">
-                  {order.productName}
+                  {order.productName ||
+                    (order.ChiTietDonHang &&
+                      order.ChiTietDonHang[0]?.TenSanPham) ||
+                    "Sản phẩm"}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
@@ -323,28 +346,35 @@ const OrderTable = ({
               <td className="px-6 py-4 whitespace-nowrap">
                 <span
                   className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${getStatusColorInternal(
-                    order.status
+                    order.status || order.TrangThai
                   )}`}
                 >
-                  {order.status}
+                  {getStatusText(order.status || order.TrangThai)}
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div className="flex space-x-2">
                   <button
-                    onClick={() => onViewOrder && onViewOrder(order.id)}
+                    onClick={() =>
+                      onViewOrder && onViewOrder(order.id || order.ID_DonHang)
+                    }
                     className="text-blue-600 hover:text-blue-900 font-medium"
                   >
                     Xem
                   </button>
                   <button
-                    onClick={() => onEditOrder && onEditOrder(order.id)}
+                    onClick={() =>
+                      onEditOrder && onEditOrder(order.id || order.ID_DonHang)
+                    }
                     className="text-green-600 hover:text-green-900 font-medium"
                   >
                     Sửa
                   </button>
                   <button
-                    onClick={() => onCancelOrder && onCancelOrder(order.id)}
+                    onClick={() =>
+                      onCancelOrder &&
+                      onCancelOrder(order.id || order.ID_DonHang)
+                    }
                     className="text-red-600 hover:text-red-900 font-medium"
                   >
                     Hủy

@@ -1,16 +1,239 @@
-# React + Vite
+# 🛍️ PyCShop - E-commerce Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+[![React](https://img.shields.io/badge/React-19.1.1-blue.svg)](https://reactjs.org/)
+[![Vite](https://img.shields.io/badge/Vite-5.x-646CFF.svg)](https://vitejs.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933.svg)](https://nodejs.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-4479A1.svg)](https://mysql.com/)
+[![Kafka](https://img.shields.io/badge/Apache%20Kafka-2.8-000?style=flat&logo=apachekafka)](https://kafka.apache.org/)
 
-Currently, two official plugins are available:
+A modern, scalable e-commerce platform built with microservices architecture, featuring seller dashboards, admin management, and real-time messaging.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## React Compiler
+### 🏪 Seller Dashboard
 
-The React Compiler is not enabled on this template. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Product management (CRUD operations)
+- Order management and tracking
+- Sales analytics and reporting
+- Inventory management
+- Customer communication
 
-## Expanding the ESLint configuration
+### 👨‍💼 Admin Panel
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- User management
+- System-wide analytics
+- Content moderation
+- Platform configuration
+
+### 🛒 Customer Experience
+
+- Product browsing and search
+- Shopping cart and checkout
+- Order tracking
+- Review and rating system
+- Real-time notifications
+
+### 🔧 Technical Features
+
+- Microservices architecture
+- Real-time messaging with Kafka
+- JWT authentication
+- File upload handling
+- Rate limiting and security
+- Responsive design
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐
+│   React Frontend│    │   API Gateway   │
+│     (Vite)      │◄──►│   (Express)     │
+└─────────────────┘    └─────────────────┘
+                              │
+                    ┌─────────┼─────────┐
+                    │         │         │
+            ┌───────▼───┐ ┌───▼───┐ ┌───▼───┐
+            │Auth Service│ │Product│ │Admin │
+            │ (Express)  │ │Service│ │Service│
+            └────────────┘ └───────┘ └───────┘
+                    │         │         │
+            ┌───────▼───┐ ┌───▼───┐ ┌───▼───┐
+            │Shop Service│ │Review │ │Kafka │
+            │ (Express)  │ │Service│ │Queue │
+            └────────────┘ └───────┘ └───────┘
+                              │
+                       ┌──────▼──────┐
+                       │   MySQL DB  │
+                       └─────────────┘
+```
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- MySQL 8.0+
+- Docker & Docker Compose (for Kafka)
+
+### Installation
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/dak-1306/pycshop.git
+   cd pycshop
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   ```
+
+3. **Setup database**
+
+   ```bash
+   npm run setup-db
+   ```
+
+4. **Start Kafka infrastructure**
+
+   ```bash
+   npm run kafka:start
+   ```
+
+5. **Start the full application**
+   ```bash
+   npm run start:full
+   ```
+
+The application will be available at:
+
+- Frontend: http://localhost:5173
+- API Gateway: http://localhost:5000
+- Kafka UI: http://localhost:8080
+
+## 📁 Project Structure
+
+```
+pycshop/
+├── src/                          # Frontend React application
+│   ├── components/               # Reusable UI components
+│   ├── pages/                    # Page components
+│   ├── services/                 # API service layer
+│   ├── hooks/                    # Custom React hooks
+│   └── constants/                # Application constants
+├── microservice/                 # Backend microservices
+│   ├── api_gateway/              # API Gateway service
+│   ├── auth_service/             # Authentication service
+│   ├── product_service/          # Product management service
+│   ├── admin_service/            # Admin panel service
+│   ├── shop_service/             # Seller dashboard service
+│   └── danhgia_service/          # Review service
+├── scripts/                      # Utility scripts
+├── public/                       # Static assets
+└── docker-compose-kafka.yml      # Kafka infrastructure
+```
+
+## 🛠️ Available Scripts
+
+| Command               | Description                       |
+| --------------------- | --------------------------------- |
+| `npm run dev`         | Start frontend development server |
+| `npm run build`       | Build for production              |
+| `npm run backend`     | Start all microservices           |
+| `npm run kafka:start` | Start Kafka infrastructure        |
+| `npm run start:full`  | Start frontend + backend + Kafka  |
+| `npm run setup-db`    | Initialize database schema        |
+| `npm run optimize-db` | Optimize database performance     |
+
+## 🔧 Configuration
+
+Create `.env` files in each microservice directory with the following variables:
+
+```env
+# Database
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=pycshop
+
+# JWT
+JWT_SECRET=your_jwt_secret
+
+# Kafka
+KAFKA_BROKERS=localhost:9092
+
+# Services
+PORT=5000
+```
+
+## 📡 API Documentation
+
+### Authentication Endpoints
+
+- `POST /auth/login` - User login
+- `POST /auth/register` - User registration
+- `POST /auth/refresh` - Refresh token
+
+### Product Endpoints
+
+- `GET /products` - Get products with pagination
+- `POST /seller/products` - Create product (Seller)
+- `PUT /seller/products/:id` - Update product (Seller)
+- `DELETE /seller/products/:id` - Delete product (Seller)
+
+### Order Endpoints
+
+- `GET /seller/orders` - Get seller orders
+- `PUT /seller/orders/:id/status` - Update order status
+
+## 🔒 Security Features
+
+- JWT-based authentication
+- Password hashing with bcrypt
+- Rate limiting
+- CORS protection
+- Input validation and sanitization
+- SQL injection prevention
+
+## 📊 Database Schema
+
+The application uses MySQL with the following main tables:
+
+- `nguoidung` - Users
+- `cuahang` - Shops/Sellers
+- `sanpham` - Products
+- `donhang` - Orders
+- `chitietdonhang` - Order details
+- `danhgia` - Reviews
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 👥 Authors
+
+- **dak-1306** - _Initial work_ - [GitHub](https://github.com/dak-1306)
+
+## 🙏 Acknowledgments
+
+- React & Vite for the frontend framework
+- Express.js for backend services
+- Apache Kafka for messaging
+- MySQL for database
+- All contributors and open-source projects used
+
+---
+
+<div align="center">
+  <p>Made with ❤️ for modern e-commerce</p>
+</div>

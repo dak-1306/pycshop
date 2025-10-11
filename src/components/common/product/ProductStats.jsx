@@ -1,10 +1,11 @@
 import React from "react";
+import { useLanguage } from "../../../context/LanguageContext";
 
 const ProductStats = ({ stats }) => {
-  const statsConfig = [
+  const { t } = useLanguage();  const statsConfig = [
     {
       key: "totalProducts",
-      title: "Tổng sản phẩm",
+      title: t("totalProducts"),
       value: stats?.totalProducts || 342,
       bgColor: "bg-white",
       iconBg: "bg-blue-100",
@@ -25,11 +26,10 @@ const ProductStats = ({ stats }) => {
             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
           />
         </svg>
-      ),
-    },
+      ),    },
     {
       key: "activeProducts",
-      title: "Đang hoạt động",
+      title: t("activeProducts"),
       value: stats?.activeProducts || 298,
       bgColor: "bg-white",
       iconBg: "bg-green-100",
@@ -50,11 +50,10 @@ const ProductStats = ({ stats }) => {
             d="M5 13l4 4L19 7"
           />
         </svg>
-      ),
-    },
+      ),    },
     {
       key: "outOfStockProducts",
-      title: "Hết hàng",
+      title: t("outOfStock"),
       value: stats?.outOfStockProducts || 23,
       bgColor: "bg-white",
       iconBg: "bg-red-100",
@@ -75,11 +74,10 @@ const ProductStats = ({ stats }) => {
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.865-.833-2.634 0L5.179 16.5c-.77.833.192 2.5 1.732 2.5z"
           />
         </svg>
-      ),
-    },
+      ),    },
     {
       key: "pendingProducts",
-      title: "Chờ duyệt",
+      title: t("pending"),
       value: stats?.pendingProducts || 21,
       bgColor: "bg-white",
       iconBg: "bg-yellow-100",

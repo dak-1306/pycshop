@@ -1,26 +1,88 @@
 import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 import db from "../db/index.js";
-import authMiddleware from "../api_gateway/middleware/authMiddleware.js";
 
-const router = express.Router();
+dotenv.config();
+
+const app = express();
+const PORT = process.env.ADMIN_SERVICE_PORT || 5006;
+
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      "http://localhost:3000",
+      "http://localhost:5000", 
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "http://localhost:5175",
+      "http://127.0.0.1:5500"
+    ];
+    
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization", 
+    "x-user-id",
+    "x-user-role",
+    "x-user-type"
+  ],
+};
+
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Middleware to extract user info from headers (set by API Gateway)
+const extractUserFromHeaders = (req, res, next) => {
+  const userId = req.headers['x-user-id'];
+  const userRole = req.headers['x-user-role'];
+  const userType = req.headers['x-user-type'];
+  
+  if (userId && userRole) {
+    req.user = {
+      id: userId,
+      role: userRole,
+      userType: userType
+    };
+    console.log(`[ADMIN SERVICE] User extracted from headers:`, req.user);
+  } else {
+    console.log(`[ADMIN SERVICE] No user headers found`);
+  }
+  
+  next();
+};
 
 // Middleware to check admin role
 const requireAdmin = (req, res, next) => {
+  console.log(`[ADMIN SERVICE] Checking admin role for user:`, req.user);
+  
   if (!req.user || req.user.role !== "admin") {
+    console.log(`[ADMIN SERVICE] Access denied - not admin role`);
     return res.status(403).json({
       success: false,
       message: "Access denied. Admin role required.",
     });
   }
+  
+  console.log(`[ADMIN SERVICE] Admin access granted`);
   next();
 };
 
-// Apply admin middleware to all routes
-router.use(authMiddleware);
-router.use(requireAdmin);
+// Apply middlewares to all routes
+app.use(extractUserFromHeaders);
+app.use(requireAdmin);
 
 // Dashboard stats
-router.get("/dashboard/stats", async (req, res) => {
+app.get("/dashboard/stats", async (req, res) => {
   try {
     console.log("[ADMIN] Getting dashboard stats");
 

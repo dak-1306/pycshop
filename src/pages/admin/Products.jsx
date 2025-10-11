@@ -28,16 +28,14 @@ const AdminProducts = () => {
     showDetailModal,
     setShowDetailModal,
     showDeleteModal,
-    setShowDeleteModal,
-    selectedProduct,
+    setShowDeleteModal,    selectedProduct,
     modalMode,
     handleViewProduct,
     handleEditProduct,
-    handleApproveProduct,
     handleDeleteProduct,
-    handleAddProduct,
-    handleSaveProduct,
+    handleAddProduct,    handleSaveProduct,
     confirmDeleteProduct,
+    handleResetFilters,
   } = useAdminProducts();
 
   if (isLoading) {
@@ -51,32 +49,39 @@ const AdminProducts = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Quản lý sản phẩm</h1>
-        <p className="text-gray-600">Quản lý tất cả sản phẩm trong hệ thống</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Quản lý sản phẩm</h1>
+            <p className="text-gray-600">
+              Quản lý tất cả sản phẩm trong hệ thống
+              {(searchValue || categoryFilter || statusFilter) && (
+                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
+                  Hiển thị {totalItems} sản phẩm
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Stats Cards */}
       <ProductStats stats={stats} />
 
       {/* Products Table with Filters */}
-      <div className="bg-white rounded-lg shadow">
-        <ProductFilters
-          variant="admin"
-          searchValue={searchValue}
+      <div className="bg-white rounded-lg shadow">        <ProductFilters
+          searchTerm={searchValue}
+          selectedCategory={categoryFilter}
+          selectedStatus={statusFilter}
           onSearchChange={setSearchValue}
-          categoryFilter={categoryFilter}
           onCategoryChange={setCategoryFilter}
-          statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
-          onAddProduct={handleAddProduct}
-          onExport={() => console.log("Export products")}
-        />
-        <ProductTable
+          onResetFilters={handleResetFilters}
+          showResetButton={searchValue || categoryFilter || statusFilter}
+        />        <ProductTable
           variant="admin"
           products={products}
           onViewProduct={handleViewProduct}
           onEditProduct={handleEditProduct}
-          onApproveProduct={handleApproveProduct}
           onDeleteProduct={handleDeleteProduct}
         />
       </div>

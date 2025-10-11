@@ -15,7 +15,7 @@ const OrderFilters = ({
   onStatusChange,
   paymentFilter,
   onPaymentChange,
-  onUpdateStatus, // Thêm prop cho nút cập nhật trạng thái
+  onUpdateStatus, // Prop cho nút tạo đơn hàng (tên prop giữ nguyên để tương thích)
 }) => {
   // Render Admin variant
   if (variant === "admin") {
@@ -114,13 +114,11 @@ const OrderFilters = ({
                   />
                 </svg>
               </div>
-            </div>
-
-            {/* Update Status Button */}
+            </div>            {/* Create Order Button */}
             <button
               onClick={onUpdateStatus}
-              className="group relative flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg font-medium text-sm transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 shadow-md hover:shadow-lg overflow-hidden"
-              title="Cập nhật trạng thái đơn hàng"
+              className="group relative flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium text-sm transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 shadow-md hover:shadow-lg overflow-hidden"
+              title="Tạo đơn hàng mới"
             >
               <svg
                 className="w-4 h-4"
@@ -132,10 +130,10 @@ const OrderFilters = ({
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  d="M12 4v16m8-8H4"
                 />
               </svg>
-              <span>Cập nhật</span>
+              <span>Tạo đơn hàng</span>
               <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
             </button>
           </div>

@@ -18,49 +18,52 @@ export const useDashboard = () => {
     revenue: 0,
     products: 0,
     newCustomers: 0,
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  });  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Initialize dashboard data
+  // Initialize dashboard data function
+  const initializeDashboard = async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // Fetch dashboard data and charts data in parallel
+      const [dashboardData, chartsData] = await Promise.all([
+        adminService.getDashboardStats(),
+        adminService.getAllChartsData()
+      ]);
+
+      setStats({
+        orders: dashboardData.stats.totalOrders || 0,
+        revenue: dashboardData.stats.totalRevenue || 0,
+        products: dashboardData.stats.totalProducts || 0,
+        newCustomers: dashboardData.stats.totalUsers || 0,
+      });
+
+      setRecentOrders(dashboardData.recentOrders || []);
+      setRecentUsers(dashboardData.recentUsers || []);
+      setChartData(chartsData || MOCK_CHART_DATA);
+    } catch (error) {
+      console.error("Error loading dashboard data:", error);
+      setError(error.message || "Failed to load dashboard data");
+
+      // Fallback to mock data on error
+      setRecentOrders(MOCK_RECENT_ORDERS);
+      setRecentUsers(MOCK_RECENT_USERS);
+      setChartData(MOCK_CHART_DATA);
+      setStats({
+        orders: DEFAULT_STATS.todayOrders,
+        revenue: DEFAULT_STATS.totalRevenue,
+        products: DEFAULT_STATS.totalProducts,
+        newCustomers: DEFAULT_STATS.todayUsers,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Initialize dashboard data on mount
   useEffect(() => {
-    const initializeDashboard = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // Fetch real dashboard data from API
-        const dashboardData = await adminService.getDashboardStats();
-
-        setStats({
-          orders: dashboardData.stats.totalOrders || 0,
-          revenue: dashboardData.stats.totalRevenue || 0,
-          products: dashboardData.stats.totalProducts || 0,
-          newCustomers: dashboardData.stats.totalUsers || 0,
-        });
-
-        setRecentOrders(dashboardData.recentOrders || []);
-        setRecentUsers(dashboardData.recentUsers || []);
-        setChartData(dashboardData.chartData || MOCK_CHART_DATA);
-      } catch (error) {
-        console.error("Error loading dashboard data:", error);
-        setError(error.message || "Failed to load dashboard data");
-
-        // Fallback to mock data on error
-        setRecentOrders(MOCK_RECENT_ORDERS);
-        setRecentUsers(MOCK_RECENT_USERS);
-        setChartData(MOCK_CHART_DATA);
-        setStats({
-          orders: DEFAULT_STATS.todayOrders,
-          revenue: DEFAULT_STATS.totalRevenue,
-          products: DEFAULT_STATS.totalProducts,
-          newCustomers: DEFAULT_STATS.todayUsers,
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     initializeDashboard();
   }, []);
 
@@ -123,10 +126,9 @@ export const useDashboard = () => {
     // Utility functions
     formatCurrency,
     getStatusColor,
-    formatNumber,
-
-    // Actions
+    formatNumber,    // Actions
     refreshOrders,
     refreshUsers,
+    refreshDashboard: initializeDashboard,
   };
 };

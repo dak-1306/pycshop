@@ -10,7 +10,7 @@ import Pagination from "../../components/common/product/Pagination";
 import ErrorDisplay from "../../components/common/ErrorDisplay";
 import EmptyState from "../../components/common/EmptyState";
 import { useProducts } from "../../hooks/useProducts";
-import { useCategories } from "../../hooks/useCategories";
+import { useCategories } from "../../hooks/api/useCategories";
 import { PRODUCT_CATEGORIES } from "../../constants/productConstants";
 
 // CSS animations
@@ -53,8 +53,7 @@ const ManageProduct = () => {
     categories,
     isLoading: categoriesLoading,
     error: categoriesError,
-    getCategoryOptions,
-  } = useCategories();
+  } = useCategories(false); // Sử dụng seller API
 
   const {
     // State

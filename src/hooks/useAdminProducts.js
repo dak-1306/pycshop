@@ -26,6 +26,9 @@ export const useAdminProducts = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
+  // Store all products and filtered products separately
+  const [allProducts, setAllProducts] = useState(MOCK_PRODUCTS);
+  const [filteredProducts, setFilteredProducts] = useState(MOCK_PRODUCTS);
 
   // Initialize data
   useEffect(() => {
@@ -37,6 +40,8 @@ export const useAdminProducts = () => {
         // In real app, these would be API calls
         await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate loading
 
+        setAllProducts(MOCK_PRODUCTS);
+        setFilteredProducts(MOCK_PRODUCTS);
         setProducts(MOCK_PRODUCTS);
         setStats(DEFAULT_PRODUCT_STATS);
         setTotalItems(MOCK_PRODUCTS.length);
@@ -51,6 +56,52 @@ export const useAdminProducts = () => {
     initializeProducts();
   }, []);
 
+  // Filter products based on search and filters
+  useEffect(() => {
+    let filtered = [...allProducts];
+
+    // Apply search filter
+    if (searchValue.trim()) {
+      filtered = filtered.filter(product =>
+        product.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+        product.seller.toLowerCase().includes(searchValue.toLowerCase())
+      );
+    }
+
+    // Apply category filter
+    if (categoryFilter) {
+      filtered = filtered.filter(product => product.category === categoryFilter);
+    }
+
+    // Apply status filter
+    if (statusFilter) {
+      filtered = filtered.filter(product => product.status === statusFilter);
+    }
+
+    setFilteredProducts(filtered);
+    
+    // Update pagination based on filtered results
+    const itemsPerPage = 10;
+    setTotalItems(filtered.length);
+    setTotalPages(Math.ceil(filtered.length / itemsPerPage));
+    
+    // Reset to first page when filters change
+    setCurrentPage(1);
+    
+    // Get products for current page
+    const startIndex = 0; // Always show first page when filters change
+    const endIndex = Math.min(itemsPerPage, filtered.length);
+    setProducts(filtered.slice(startIndex, endIndex));
+  }, [searchValue, categoryFilter, statusFilter, allProducts]);
+
+  // Handle pagination changes
+  useEffect(() => {
+    const itemsPerPage = 10;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
+    setProducts(filteredProducts.slice(startIndex, endIndex));
+  }, [currentPage, filteredProducts]);
+
   // Utility functions
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -62,11 +113,10 @@ export const useAdminProducts = () => {
   const formatNumber = (number) => {
     return number.toLocaleString();
   };
-
   // Event handlers
   const handleViewProduct = (productId) => {
     console.log("View product:", productId);
-    const product = products.find((p) => p.id === productId);
+    const product = allProducts.find((p) => p.id === productId);
     if (product) {
       setSelectedProduct(product);
       setShowDetailModal(true);
@@ -75,27 +125,15 @@ export const useAdminProducts = () => {
 
   const handleEditProduct = (productId) => {
     console.log("Edit product:", productId);
-    const product = products.find((p) => p.id === productId);
+    const product = allProducts.find((p) => p.id === productId);
     if (product) {
       setSelectedProduct(product);
       setModalMode("edit");
       setShowProductModal(true);
-    }
-  };
-
-  const handleApproveProduct = (productId) => {
-    console.log("Approve product:", productId);
-    // Implement approve product logic - update product status
-    setProducts((prevProducts) =>
-      prevProducts.map((product) =>
-        product.id === productId ? { ...product, status: "active" } : product
-      )
-    );
-  };
-
+    }  };
   const handleDeleteProduct = (productId) => {
     console.log("Delete product:", productId);
-    const product = products.find((p) => p.id === productId);
+    const product = allProducts.find((p) => p.id === productId);
     if (product) {
       setSelectedProduct(product);
       setShowDeleteModal(true);
@@ -108,30 +146,29 @@ export const useAdminProducts = () => {
     setModalMode("add");
     setShowProductModal(true);
   };
-
   const confirmDeleteProduct = () => {
     if (selectedProduct) {
-      setProducts((prevProducts) =>
+      setAllProducts((prevProducts) =>
         prevProducts.filter((product) => product.id !== selectedProduct.id)
       );
       setShowDeleteModal(false);
       setSelectedProduct(null);
     }
   };
-
   const handleSaveProduct = (productData) => {
     console.log("Save product:", productData);
     if (modalMode === "add") {
       // Add new product
       const newProduct = {
         ...productData,
-        id: Math.max(...products.map((p) => p.id), 0) + 1,
-        createdAt: new Date().toISOString(),
+        id: Math.max(...allProducts.map((p) => p.id), 0) + 1,
+        createdDate: new Date().toISOString().split('T')[0],
+        status: "pending", // New products start as pending
       };
-      setProducts((prevProducts) => [...prevProducts, newProduct]);
+      setAllProducts((prevProducts) => [...prevProducts, newProduct]);
     } else {
       // Update existing product
-      setProducts((prevProducts) =>
+      setAllProducts((prevProducts) =>
         prevProducts.map((product) =>
           product.id === selectedProduct.id
             ? { ...product, ...productData }
@@ -143,29 +180,54 @@ export const useAdminProducts = () => {
     setSelectedProduct(null);
   };
 
-  // Processed stats
+  // Reset all filters
+  const handleResetFilters = () => {
+    setSearchValue("");
+    setCategoryFilter("");
+    setStatusFilter("");
+  };
+
+  // Calculate stats from current filtered products
+  const calculateFilteredStats = () => {
+    const activeCount = filteredProducts.filter(p => p.status === 'active').length;
+    const pendingCount = filteredProducts.filter(p => p.status === 'pending').length;
+    const outOfStockCount = filteredProducts.filter(p => p.status === 'out_of_stock').length;
+    const inactiveCount = filteredProducts.filter(p => p.status === 'inactive').length;
+
+    return {
+      totalProducts: filteredProducts.length,
+      activeProducts: activeCount,
+      pendingProducts: pendingCount,
+      outOfStockProducts: outOfStockCount,
+      inactiveProducts: inactiveCount,
+    };
+  };
+  // Processed stats - use filtered stats if filters are active
+  const isFiltered = searchValue || categoryFilter || statusFilter;
+  const currentStats = isFiltered ? calculateFilteredStats() : stats;
+  
   const processedStats = {
     totalProducts: {
-      value: stats.totalProducts,
-      formattedValue: formatNumber(stats.totalProducts),
-      label: "Tổng sản phẩm",
+      value: currentStats.totalProducts,
+      formattedValue: formatNumber(currentStats.totalProducts),
+      label: isFiltered ? "Sản phẩm hiển thị" : "Tổng sản phẩm",
       icon: "📦",
     },
     activeProducts: {
-      value: stats.activeProducts,
-      formattedValue: formatNumber(stats.activeProducts),
+      value: currentStats.activeProducts,
+      formattedValue: formatNumber(currentStats.activeProducts),
       label: "Sản phẩm hoạt động",
       icon: "✅",
     },
     outOfStockProducts: {
-      value: stats.outOfStockProducts,
-      formattedValue: formatNumber(stats.outOfStockProducts),
+      value: currentStats.outOfStockProducts,
+      formattedValue: formatNumber(currentStats.outOfStockProducts),
       label: "Hết hàng",
       icon: "⚠️",
     },
     pendingProducts: {
-      value: stats.pendingProducts,
-      formattedValue: formatNumber(stats.pendingProducts),
+      value: currentStats.pendingProducts,
+      formattedValue: formatNumber(currentStats.pendingProducts),
       label: "Chờ duyệt",
       icon: "⏳",
     },
@@ -203,15 +265,13 @@ export const useAdminProducts = () => {
     showDeleteModal,
     setShowDeleteModal,
     selectedProduct,
-    modalMode,
-
-    // Event handlers
+    modalMode,    // Event handlers
     handleViewProduct,
     handleEditProduct,
-    handleApproveProduct,
     handleDeleteProduct,
     handleAddProduct,
     handleSaveProduct,
     confirmDeleteProduct,
+    handleResetFilters,
   };
 };

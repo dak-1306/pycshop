@@ -1,7 +1,9 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { ChatProvider } from "./context/ChatContext";
+import { ThemeProvider } from "./context/ThemeContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import GlobalChatWidget from "./components/GlobalChatWidget/GlobalChatWidget";
 import HomePage from "./pages/buyer/Home";
 import Dashboard from "./pages/seller/Dashboard";
@@ -22,6 +24,8 @@ import AdminOrders from "./pages/admin/Orders";
 import AdminSellers from "./pages/admin/Sellers";
 import AdminReports from "./pages/admin/Reports";
 import AdminLogin from "./pages/admin/AdminLogin";
+import AdminManagement from "./components/admin/settings/AdminManagement";
+import AdminSettings from "./pages/admin/Settings";
 import Profile from "./pages/buyer/Profile/Profile";
 import ProductDetail from "./pages/buyer/Products/ProductDetail";
 import SearchResults from "./pages/buyer/Products/SearchResults";
@@ -30,9 +34,11 @@ import "./App.css";
 
 function App() {
   return (
-    <AuthProvider>
-      <ChatProvider>
-        <Router>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <ChatProvider>
+            <Router>
           <div className="app">
             <Routes>
               {/* Main Homepage */}
@@ -67,30 +73,25 @@ function App() {
                   </AdminRoute>
                 }
               >
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="products" element={<AdminProducts />} />
                 <Route path="orders" element={<AdminOrders />} />
                 <Route path="sellers" element={<AdminSellers />} />
                 <Route path="reports" element={<AdminReports />} />
-                <Route
-                  path="settings"
-                  element={
-                    <div className="p-6">
-                      <h1 className="text-2xl font-bold">Cài đặt</h1>
-                      <p>Trang đang phát triển...</p>
-                    </div>
-                  }
-                />
+                <Route path="admin-management" element={<AdminManagement />} />
+                <Route path="settings" element={<AdminSettings />} />
               </Route>
             </Routes>
 
             {/* Global Chat Widget */}
             <GlobalChatWidget />
-          </div>
-        </Router>
-      </ChatProvider>
-    </AuthProvider>
+          </div>            </Router>
+          </ChatProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }
 
@@ -142,15 +143,8 @@ const AppWithChat = () => {
           <Route path="orders" element={<AdminOrders />} />
           <Route path="sellers" element={<AdminSellers />} />
           <Route path="reports" element={<AdminReports />} />
-          <Route
-            path="settings"
-            element={
-              <div className="p-6">
-                <h1 className="text-2xl font-bold">Cài đặt</h1>
-                <p>Trang đang phát triển...</p>
-              </div>
-            }
-          />
+          <Route path="admin-management" element={<AdminManagement />} />
+          <Route path="settings" element={<AdminSettings />} />
         </Route>
       </Routes>
 

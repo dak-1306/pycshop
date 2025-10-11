@@ -141,6 +141,28 @@ export const MOCK_CHART_DATA = {
     { month: "T8", value: 940 },
     { month: "T9", value: 820 },
     { month: "T10", value: 856 },
+  ],  userAnalytics: [
+    { name: "Người mua", value: 68, color: "#3b82f6" },
+    { name: "Người bán", value: 22, color: "#10b981" },
+    { name: "Admin", value: 10, color: "#f59e0b" },
+  ],
+  userActivity: [
+    { time: "00:00", users: 120, sessions: 89 },
+    { time: "03:00", users: 95, sessions: 62 },
+    { time: "06:00", users: 180, sessions: 134 },
+    { time: "09:00", users: 380, sessions: 289 },
+    { time: "12:00", users: 520, sessions: 412 },
+    { time: "15:00", users: 480, sessions: 378 },
+    { time: "18:00", users: 640, sessions: 498 },
+    { time: "21:00", users: 580, sessions: 445 },
+  ],
+  categoryPerformance: [
+    { category: "Điện tử", sales: 1250, revenue: 2800000000 },
+    { category: "Thời trang", sales: 980, revenue: 1900000000 },
+    { category: "Gia dụng", sales: 750, revenue: 1200000000 },
+    { category: "Sách", sales: 420, revenue: 350000000 },
+    { category: "Thể thao", sales: 680, revenue: 950000000 },
+    { category: "Làm đẹp", sales: 890, revenue: 1450000000 },
   ],
 };
 

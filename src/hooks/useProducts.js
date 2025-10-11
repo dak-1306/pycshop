@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import sellerProductService from "../services/sellerProductService.js";
-import { useCategories } from "./useCategories.js";
+import { useCategories } from "./api/useCategories.js";
 
 const INITIAL_FORM_STATE = {
   name: "",
@@ -20,7 +20,7 @@ const INITIAL_FORM_STATE = {
 
 export const useProducts = () => {
   // Get categories helper
-  const { categories } = useCategories();
+  const { categories } = useCategories(false); // Sử dụng seller API
 
   // Products state
   const [products, setProducts] = useState([]);

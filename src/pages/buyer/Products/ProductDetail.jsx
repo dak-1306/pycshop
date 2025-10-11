@@ -28,101 +28,6 @@ const ProductDetail = () => {
     loading: true,
   });
 
-  // // Mock data for demo (replace with real API calls)
-  // const mockProduct = {
-  //   id: 1,
-  //   name: "iPhone 14 Pro Max 256GB - Chính hãng VN/A",
-  //   images: [
-  //     "https://via.placeholder.com/400x400/ff6b35/ffffff?text=iPhone+14+Pro",
-  //     "https://via.placeholder.com/400x400/333333/ffffff?text=Back+View",
-  //     "https://via.placeholder.com/400x400/666666/ffffff?text=Side+View",
-  //     "https://via.placeholder.com/400x400/999999/ffffff?text=Accessories",
-  //   ],
-  //   price: 27990000,
-  //   originalPrice: 32990000,
-  //   discount: 15,
-  //   rating: 4.8,
-  //   reviewCount: 2847,
-  //   soldCount: 1520,
-  //   stock: 45,
-  //   variants: [
-  //     {
-  //       name: "Màu sắc",
-  //       options: [
-  //         "Tím Deep Purple",
-  //         "Vàng Gold",
-  //         "Bạc Silver",
-  //         "Đen Space Black",
-  //       ],
-  //     },
-  //     {
-  //       name: "Dung lượng",
-  //       options: ["128GB", "256GB", "512GB", "1TB"],
-  //     },
-  //   ],
-  //   description: `
-  //     <h3>Đặc điểm nổi bật</h3>
-  //     <ul>
-  //       <li>Màn hình Dynamic Island mới lạ, thú vị</li>
-  //       <li>Camera chính 48MP, zoom quang học 3x</li>
-  //       <li>Chip A16 Bionic mạnh mẽ, hiệu năng vượt trội</li>
-  //       <li>Pin cải thiện, sạc nhanh 20W</li>
-  //       <li>Khung viền titanium cao cấp, bền bỉ</li>
-  //     </ul>
-
-  //     <h3>Thông số kỹ thuật</h3>
-  //     <ul>
-  //       <li>Màn hình: 6.7 inch, Super Retina XDR OLED</li>
-  //       <li>Chip: A16 Bionic</li>
-  //       <li>Camera sau: 48MP + 12MP + 12MP</li>
-  //       <li>Camera trước: 12MP</li>
-  //       <li>Pin: 4323 mAh</li>
-  //       <li>Hệ điều hành: iOS 16</li>
-  //     </ul>
-  //   `,
-  //   shop: {
-  //     id: 1,
-  //     name: "PycShop Official Store",
-  //     avatar: "🏪",
-  //     rating: 4.9,
-  //     followers: 125000,
-  //     products: 2847,
-  //     responseRate: 98,
-  //     responseTime: "trong vài phút",
-  //   },
-  // };
-
-  const mockSimilarProducts = [
-    {
-      id: 2,
-      name: "iPhone 14 Pro 128GB",
-      image:
-        "https://via.placeholder.com/200x200/ff6b35/ffffff?text=iPhone+14+Pro",
-      price: 24990000,
-    },
-    {
-      id: 3,
-      name: "iPhone 14 Plus 256GB",
-      image:
-        "https://via.placeholder.com/200x200/ff6b35/ffffff?text=iPhone+14+Plus",
-      price: 22990000,
-    },
-    {
-      id: 4,
-      name: "iPhone 13 Pro Max 256GB",
-      image:
-        "https://via.placeholder.com/200x200/ff6b35/ffffff?text=iPhone+13+Pro",
-      price: 25990000,
-    },
-    {
-      id: 5,
-      name: "Samsung Galaxy S23 Ultra",
-      image:
-        "https://via.placeholder.com/200x200/ff6b35/ffffff?text=Galaxy+S23",
-      price: 28990000,
-    },
-  ];
-
   // Load product data
   useEffect(() => {
     const loadProduct = async () => {
@@ -181,7 +86,6 @@ const ProductDetail = () => {
 
           setProduct(transformedProduct);
           console.log("Product loaded successfully:", transformedProduct);
-
           // Load similar products from API
           try {
             const similarResponse = await productService.getSimilarProducts(

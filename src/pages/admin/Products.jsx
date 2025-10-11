@@ -28,20 +28,25 @@ const AdminProducts = () => {
     showDetailModal,
     setShowDetailModal,
     showDeleteModal,
-    setShowDeleteModal,    selectedProduct,
+    setShowDeleteModal,
+    selectedProduct,
     modalMode,
     handleViewProduct,
     handleEditProduct,
     handleDeleteProduct,
-    handleAddProduct,    handleSaveProduct,
+    handleAddProduct,
+    handleSaveProduct,
     confirmDeleteProduct,
     handleResetFilters,
   } = useAdminProducts();
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu sản phẩm...</p>
+        </div>
       </div>
     );
   }
@@ -51,7 +56,9 @@ const AdminProducts = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Quản lý sản phẩm</h1>
+            <h1 className="text-3xl font-bold text-gray-900">
+              📦 Quản lý sản phẩm
+            </h1>
             <p className="text-gray-600">
               Quản lý tất cả sản phẩm trong hệ thống
               {(searchValue || categoryFilter || statusFilter) && (
@@ -68,7 +75,8 @@ const AdminProducts = () => {
       <ProductStats stats={stats} />
 
       {/* Products Table with Filters */}
-      <div className="bg-white rounded-lg shadow">        <ProductFilters
+      <div className="bg-white rounded-lg shadow">
+        <ProductFilters
           searchTerm={searchValue}
           selectedCategory={categoryFilter}
           selectedStatus={statusFilter}
@@ -77,7 +85,8 @@ const AdminProducts = () => {
           onStatusChange={setStatusFilter}
           onResetFilters={handleResetFilters}
           showResetButton={searchValue || categoryFilter || statusFilter}
-        />        <ProductTable
+        />
+        <ProductTable
           variant="admin"
           products={products}
           onViewProduct={handleViewProduct}

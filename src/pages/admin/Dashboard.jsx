@@ -47,27 +47,32 @@ const Dashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dashboard...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">      {/* Page Header */}
+    <div className="p-6">
+      {/* Page Header */}
       <div className="mb-8 flex justify-between items-start">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">🏠 Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            🏠 Dashboard
+          </h1>
           <p className="text-gray-600">
             Tổng quan hoạt động và quản lý hệ thống PycShop
           </p>
         </div>
-        <ChartRefreshButton 
+        <ChartRefreshButton
           onRefresh={refreshDashboard}
           isLoading={isLoading}
         />
       </div>
-
       {/* Error Notification */}
       {hasErrors && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
@@ -79,7 +84,9 @@ const Dashboard = () => {
             Không thể kết nối đến server. Hiển thị dữ liệu mặc định.
           </p>
         </div>
-      )}      {/* System Overview */}
+      )}
+
+      {/* System Overview */}
       <StatsOverview stats={safeOverviewStats} />
 
       {/* Performance Metrics */}
@@ -94,16 +101,15 @@ const Dashboard = () => {
           totalRevenue: safeOverviewStats.totalRevenue,
           totalProducts: safeOverviewStats.totalProducts,
         }}
-      />      {/* Charts Section */}
-      <AdminChartsSection 
-        chartData={chartData || {}} 
+      />
+      {/* Charts Section */}
+      <AdminChartsSection
+        chartData={chartData || {}}
         isLoading={isLoading}
         error={dashboardError}
       />
-
       {/* Dashboard Insights */}
       <DashboardInsights data={safeOverviewStats} />
-
       {/* Data Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-8">
         <RecentOrdersTable

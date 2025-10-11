@@ -50,7 +50,7 @@ const Sellers = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">{t("loadingSellers")}</p>
@@ -60,16 +60,15 @@ const Sellers = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="p-6">
       {/* Page Header */}
       <div className="mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">          <div>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
               🏪 {t("sellerManagement")}
             </h1>
-            <p className="text-gray-600">
-              {t("manageAllSellers")}
-            </p>
+            <p className="text-gray-600">{t("manageAllSellers")}</p>
           </div>
 
           <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
@@ -117,7 +116,9 @@ const Sellers = () => {
       </div>
 
       {/* Sellers Statistics */}
-      <SellersStats stats={sellersStats} isLoading={isLoading} />      {/* Filters */}
+      <SellersStats stats={sellersStats} isLoading={isLoading} />
+
+      {/* Filters */}
       <SellersFilters
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -129,16 +130,18 @@ const Sellers = () => {
       />
 
       {/* Sellers Table */}
-      <SellersTable
-        sellers={sellers}
-        isLoading={isLoading}
-        formatDate={formatDate}
-        onViewSeller={handleViewSeller}
-        onBlockSeller={handleBlockSeller}
-        onUnblockSeller={handleUnblockSeller}
-        onVerifySeller={handleVerifySeller}
-        onDeleteSeller={handleDeleteSeller}
-      />
+      <div className="bg-white rounded-lg shadow">
+        <SellersTable
+          sellers={sellers}
+          isLoading={isLoading}
+          formatDate={formatDate}
+          onViewSeller={handleViewSeller}
+          onBlockSeller={handleBlockSeller}
+          onUnblockSeller={handleUnblockSeller}
+          onVerifySeller={handleVerifySeller}
+          onDeleteSeller={handleDeleteSeller}
+        />
+      </div>
 
       {/* Modals */}
       <SellerDetailModal
@@ -148,7 +151,6 @@ const Sellers = () => {
         formatCurrency={formatCurrency}
         formatDate={formatDate}
       />
-
       <SellerActionModal
         isOpen={showActionModal}
         onClose={handleCloseModals}
@@ -156,7 +158,6 @@ const Sellers = () => {
         seller={selectedSeller}
         actionType={actionType}
       />
-
       <DeleteModal
         isOpen={showDeleteModal}
         onClose={handleCloseModals}

@@ -47,15 +47,21 @@ const AdminOrders = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu đơn hàng...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">{t("orderManagement")}</h1>
+    <div className="p-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold text-gray-900">
+          📋 {t("orderManagement")}
+        </h1>
         <p className="text-gray-600">{t("manageAllOrders")}</p>
       </div>
 

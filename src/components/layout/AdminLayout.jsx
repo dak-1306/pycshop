@@ -35,14 +35,17 @@ const AdminLayout = () => {
   // Handle click outside to close dropdown
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+      if (
+        profileDropdownRef.current &&
+        !profileDropdownRef.current.contains(event.target)
+      ) {
         setShowProfileDropdown(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -50,25 +53,25 @@ const AdminLayout = () => {
   const handleLogout = async () => {
     try {
       console.log("[ADMIN LOGOUT] Starting logout process...");
-      
+
       // Call logout from AuthContext which handles cleanup
       await logout();
-      
+
       // Clear any admin-specific data
       localStorage.removeItem("loginTime");
-      
+
       console.log("[ADMIN LOGOUT] Logout successful, redirecting...");
-      
+
       // Redirect to admin login page
       navigate("/admin/login", { replace: true });
-      
     } catch (error) {
       console.error("[ADMIN LOGOUT] Error during logout:", error);
-      
+
       // Even if there's an error, force logout by clearing storage and redirecting
       localStorage.clear();
       navigate("/admin/login", { replace: true });
-    }  };
+    }
+  };
 
   // Check if current user is super admin
   const isSuperAdmin = adminService.isSuperAdmin();
@@ -115,7 +118,8 @@ const AdminLayout = () => {
             d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
           />
         </svg>
-      ),    },
+      ),
+    },
     {
       name: t("products"),
       href: "/admin/products",
@@ -133,7 +137,8 @@ const AdminLayout = () => {
             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
           />
         </svg>
-      ),    },
+      ),
+    },
     {
       name: t("orders"),
       href: "/admin/orders",
@@ -151,7 +156,8 @@ const AdminLayout = () => {
             d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
           />
         </svg>
-      ),    },
+      ),
+    },
     {
       name: t("sellers"),
       href: "/admin/sellers",
@@ -169,7 +175,8 @@ const AdminLayout = () => {
             d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
           />
         </svg>
-      ),    },
+      ),
+    },
     {
       name: t("reports"),
       href: "/admin/reports",
@@ -187,7 +194,9 @@ const AdminLayout = () => {
             d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v4a2 2 0 01-2 2H9a2 2 0 01-2-2z"
           />
         </svg>
-      ),    },    {
+      ),
+    },
+    {
       name: t("settings"),
       href: "/admin/settings",
       icon: (
@@ -213,25 +222,30 @@ const AdminLayout = () => {
       ),
     },
     // Only show for Super Admin
-    ...(isSuperAdmin ? [{
-      name: "Quản lý Admin",
-      href: "/admin/admin-management",
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-          />
-        </svg>
-      ),
-    }] : []),  ];
+    ...(isSuperAdmin
+      ? [
+          {
+            name: "Quản lý Admin",
+            href: "/admin/admin-management",
+            icon: (
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+                />
+              </svg>
+            ),
+          },
+        ]
+      : []),
+  ];
 
   const isCurrentPath = (path) => {
     if (path === "/admin") {
@@ -265,7 +279,9 @@ const AdminLayout = () => {
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
               <span className="text-blue-600 font-bold text-lg">A</span>
             </div>
-            <h1 className="text-white font-semibold text-lg">{t("adminSystem")}</h1>
+            <h1 className="text-white font-semibold text-lg">
+              {t("adminSystem")}
+            </h1>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -329,7 +345,8 @@ const AdminLayout = () => {
               <p className="text-sm font-medium text-gray-900">Admin User</p>
               <p className="text-xs text-gray-500">admin@pycshop.com</p>
             </div>
-          </div>          <button 
+          </div>{" "}
+          <button
             onClick={handleLogout}
             className="mt-3 w-full bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors"
           >
@@ -362,10 +379,13 @@ const AdminLayout = () => {
                   />
                 </svg>
               </button>
-              <div>                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
+              <div>
+                {" "}
+                <h1 className="text-xl font-semibold text-gray-900 dark:text-white">
                   {navigation.find((item) => isCurrentPath(item.href))?.name ||
                     "Admin"}
-                </h1>                <p className="text-sm text-gray-500 dark:text-gray-400">
+                </h1>{" "}
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   {t("adminSystem")}
                 </p>
               </div>
@@ -414,13 +434,14 @@ const AdminLayout = () => {
                   onDeleteNotification={deleteNotification}
                   onClearAll={clearAllNotifications}
                   getRelativeTime={getRelativeTime}
-                  getPriorityColor={getPriorityColor}                  getNotificationIcon={getNotificationIcon}
+                  getPriorityColor={getPriorityColor}
+                  getNotificationIcon={getNotificationIcon}
                 />
               </div>
 
               {/* Theme Toggle */}
               <ThemeToggle size="normal" />
-              
+
               {/* Language Toggle */}
               <LanguageToggle size="normal" />
 
@@ -441,7 +462,7 @@ const AdminLayout = () => {
                   </div>
                   <svg
                     className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${
-                      showProfileDropdown ? 'rotate-180' : ''
+                      showProfileDropdown ? "rotate-180" : ""
                     }`}
                     fill="none"
                     stroke="currentColor"
@@ -460,10 +481,12 @@ const AdminLayout = () => {
                 {showProfileDropdown && (
                   <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <p className="text-sm font-medium text-gray-900">Admin User</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        Admin User
+                      </p>
                       <p className="text-xs text-gray-500">admin@pycshop.com</p>
                     </div>
-                    
+
                     <button
                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                       onClick={() => {
@@ -471,12 +494,22 @@ const AdminLayout = () => {
                         // Add profile settings logic here if needed
                       }}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                        />
                       </svg>
                       <span>Hồ sơ</span>
                     </button>
-                    
+
                     <button
                       className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                       onClick={() => {
@@ -484,13 +517,28 @@ const AdminLayout = () => {
                         // Add settings logic here if needed
                       }}
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
                       </svg>
                       <span>Cài đặt</span>
                     </button>
-                    
+
                     <div className="border-t border-gray-100 mt-2 pt-2">
                       <button
                         className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2"
@@ -499,8 +547,18 @@ const AdminLayout = () => {
                           handleLogout();
                         }}
                       >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        <svg
+                          className="w-4 h-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                          />
                         </svg>
                         <span>Đăng xuất</span>
                       </button>
@@ -510,8 +568,9 @@ const AdminLayout = () => {
               </div>
             </div>
           </div>
-        </header>        {/* Page content */}
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900">
+        </header>{" "}
+        {/* Page content */}
+        <main className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 dark:bg-gray-900">
           <Outlet />
         </main>
       </div>

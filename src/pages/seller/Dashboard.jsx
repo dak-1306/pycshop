@@ -11,7 +11,7 @@ const Dashboard = () => {
 
   return (
     <SellerLayout title="Dashboard">
-      <div className="p-8">
+      <div className="p-6">
         {/* Stats Cards */}
         <StatsCards variant="seller" stats={stats} />
 

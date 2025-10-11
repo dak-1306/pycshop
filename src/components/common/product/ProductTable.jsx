@@ -6,10 +6,11 @@ const ProductTable = ({
   onViewProduct,
   onEditProduct,
   onDeleteProduct,
-  getStatusColor,  variant = "seller", // "admin" | "seller"
+  getStatusColor,
+  variant = "seller", // "admin" | "seller"
 }) => {
   const { t } = useLanguage();
-  
+
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -57,32 +58,33 @@ const ProductTable = ({
     return (
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("image")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("productName")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("seller")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("price")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("stock")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("category")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("status")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("createdAt")}
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 {t("actions")}
               </th>
             </tr>
@@ -90,7 +92,7 @@ const ProductTable = ({
           <tbody className="bg-white divide-y divide-gray-200">
             {products.map((product) => (
               <tr key={product.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
                     {product.image ? (
                       <img
@@ -113,7 +115,7 @@ const ProductTable = ({
                     )}
                   </div>
                 </td>
-                <td className="px-6 py-4">
+                <td className="px-4 py-4">
                   <div className="text-sm font-medium text-gray-900">
                     {product.name}
                   </div>
@@ -121,17 +123,17 @@ const ProductTable = ({
                     {product.description?.substring(0, 50)}...
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
                     {product.sellerName || product.seller}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm font-semibold text-gray-900">
                     {formatPrice(product.price)}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div
                     className={`text-sm font-semibold ${getStockColor(
                       product.stock
@@ -140,12 +142,12 @@ const ProductTable = ({
                     {product.stock}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
                     {product.category}
                   </div>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-4 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColorInternal(
                       product.status
@@ -154,12 +156,12 @@ const ProductTable = ({
                     {getStatusText(product.status)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                   {new Date(
                     product.createdAt || product.dateAdded
                   ).toLocaleDateString("vi-VN")}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-2">
                     <button
                       onClick={() => onViewProduct && onViewProduct(product.id)}
@@ -186,7 +188,8 @@ const ProductTable = ({
                         />
                       </svg>
                       <span className="text-xs">Xem</span>
-                    </button>                    <button
+                    </button>{" "}
+                    <button
                       onClick={() => onEditProduct && onEditProduct(product.id)}
                       className="group flex items-center gap-1 px-3 py-1.5 text-indigo-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-all duration-200 border border-indigo-200 hover:border-indigo-600"
                       title="Chỉnh sửa"
@@ -203,7 +206,8 @@ const ProductTable = ({
                           strokeWidth={2}
                           d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                         />
-                      </svg>                      <span className="text-xs">{t("edit")}</span>
+                      </svg>{" "}
+                      <span className="text-xs">{t("edit")}</span>
                     </button>
                     <button
                       onClick={() =>
@@ -239,32 +243,35 @@ const ProductTable = ({
 
   // Seller variant (default)
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
-      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">        <h3 className="text-lg font-semibold text-gray-800">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border overflow-x-auto">
+      <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-4 py-4 border-b">
+        {" "}
+        <h3 className="text-lg font-semibold text-gray-800">
           {t("productList")}
         </h3>
       </div>
       <table className="min-w-full">
-        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">          <tr>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+        <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
+          <tr>
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               {t("image")}
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               {t("productName")}
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               {t("price")}
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               {t("quantity")}
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               {t("category")}
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               {t("status")}
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               {t("actions")}
             </th>
           </tr>
@@ -277,7 +284,7 @@ const ProductTable = ({
                 index % 2 === 0 ? "bg-white" : "bg-gray-50/30"
               }`}
             >
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div className="w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center overflow-hidden shadow-inner">
                   {product.image ? (
                     <img
@@ -300,7 +307,7 @@ const ProductTable = ({
                   )}
                 </div>
               </td>
-              <td className="px-6 py-4">
+              <td className="px-4 py-4">
                 <div className="text-lg font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
                   {product.name}
                 </div>
@@ -308,26 +315,26 @@ const ProductTable = ({
                   {product.description}
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div className="text-xl font-bold text-green-600">
                   {formatPrice(product.price)}
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <div
                   className={`text-lg font-bold ${getStockColor(
-                    product.stock
+                    product.quantity
                   )}`}
                 >
-                  {product.stock}
+                  {product.quantity}
                 </div>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800">
                   {product.category}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap">
+              <td className="px-4 py-4 whitespace-nowrap">
                 <span
                   className={`inline-flex px-3 py-1.5 text-xs font-bold rounded-full ${getStatusColorInternal(
                     product.status
@@ -336,8 +343,10 @@ const ProductTable = ({
                   {getStatusText(product.status)}
                 </span>
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <div className="flex space-x-3">                  <button
+              <td className="px-4 py-4 whitespace-nowrap text-sm font-medium">
+                <div className="flex space-x-3">
+                  {" "}
+                  <button
                     onClick={() => onViewProduct && onViewProduct(product.id)}
                     className="group flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-4 py-2.5 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
                   >

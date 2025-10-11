@@ -24,7 +24,7 @@ const AdminUsers = () => {
   const [showErrorNotification, setShowErrorNotification] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  
+
   const {
     users,
     stats,
@@ -55,17 +55,19 @@ const AdminUsers = () => {
     try {
       await handleAddUser(userData);
       setIsAddModalOpen(false);
-      setSuccessMessage(`Người dùng "${userData.name}" đã được tạo thành công!`);
+      setSuccessMessage(
+        `Người dùng "${userData.name}" đã được tạo thành công!`
+      );
       setShowSuccessNotification(true);
     } catch (error) {
       let errorMsg = "Có lỗi xảy ra khi tạo người dùng";
-      
+
       if (error.message.includes("Email already exists")) {
         errorMsg = "Email này đã được sử dụng bởi người dùng khác";
       } else if (error.message.includes("Failed to create user")) {
         errorMsg = "Không thể tạo người dùng. Vui lòng thử lại";
       }
-      
+
       setErrorMessage(errorMsg);
       setShowErrorNotification(true);
       console.error("Error creating user:", error);
@@ -92,15 +94,17 @@ const AdminUsers = () => {
       await handleDeleteUser(userToDelete);
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
-      setSuccessMessage(`Người dùng "${userToDelete.name}" đã được xóa thành công!`);
+      setSuccessMessage(
+        `Người dùng "${userToDelete.name}" đã được xóa thành công!`
+      );
       setShowSuccessNotification(true);
     } catch (error) {
       let errorMsg = "Có lỗi xảy ra khi xóa người dùng";
-      
+
       if (error.message.includes("constraint")) {
         errorMsg = "Không thể xóa người dùng này vì có dữ liệu liên quan";
       }
-      
+
       setErrorMessage(errorMsg);
       setShowErrorNotification(true);
     } finally {
@@ -139,17 +143,19 @@ const AdminUsers = () => {
       await handleEditUser(userData);
       setIsEditModalOpen(false);
       setSelectedUser(null);
-      setSuccessMessage(`Người dùng "${userData.name}" đã được cập nhật thành công!`);
+      setSuccessMessage(
+        `Người dùng "${userData.name}" đã được cập nhật thành công!`
+      );
       setShowSuccessNotification(true);
     } catch (error) {
       let errorMsg = "Có lỗi xảy ra khi cập nhật người dùng";
-      
+
       if (error.message.includes("Email already exists")) {
         errorMsg = "Email này đã được sử dụng bởi người dùng khác";
       } else if (error.message.includes("Failed to update user")) {
         errorMsg = "Không thể cập nhật người dùng. Vui lòng thử lại";
       }
-      
+
       setErrorMessage(errorMsg);
       setShowErrorNotification(true);
     }
@@ -157,8 +163,11 @@ const AdminUsers = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu người dùng...</p>
+        </div>
       </div>
     );
   }
@@ -168,8 +177,8 @@ const AdminUsers = () => {
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              Quản lý người dùng
+            <h1 className="text-3xl font-bold text-gray-900">
+              👥 Quản lý người dùng
             </h1>
             <p className="text-gray-600">
               Quản lý tất cả người dùng trong hệ thống
@@ -219,12 +228,11 @@ const AdminUsers = () => {
           </div>
         )}
       </div>
-
       {/* Stats Cards */}
       <UserStats stats={stats} />
-
       {/* Users Table with Filters */}
-      <div className="bg-white rounded-lg shadow">        <AdminUserFilters
+      <div className="bg-white rounded-lg shadow">
+        <AdminUserFilters
           searchValue={searchValue}
           onSearchChange={setSearchValue}
           roleFilter={roleFilter}
@@ -232,26 +240,26 @@ const AdminUsers = () => {
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
           onAddUser={handleOpenAddModal}
-        />        <AdminUserTable
+        />
+        <AdminUserTable
           users={users}
           onViewUser={handleViewUserRequest}
           onEditUser={handleEditUserRequest}
           onDeleteUser={handleDeleteUserRequest}
         />
-      </div>      {/* Add User Modal */}
+      </div>
+      {/* Add User Modal */}
       <AddUserModal
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
         onSubmit={handleCreateUser}
       />
-
       {/* View User Modal */}
       <ViewUserModal
         isOpen={isViewModalOpen}
         onClose={handleCloseViewModal}
         user={selectedUser}
       />
-
       {/* Edit User Modal */}
       <EditUserModal
         isOpen={isEditModalOpen}
@@ -259,7 +267,6 @@ const AdminUsers = () => {
         onSubmit={handleUpdateUser}
         user={selectedUser}
       />
-
       {/* Confirm Delete Modal */}
       <ConfirmDeleteModal
         isOpen={isDeleteModalOpen}
@@ -268,14 +275,12 @@ const AdminUsers = () => {
         userName={userToDelete?.name || ""}
         isDeleting={isDeleting}
       />
-
       {/* Success Notification */}
       <SuccessNotification
         message={successMessage}
         isVisible={showSuccessNotification}
         onClose={handleCloseSuccessNotification}
       />
-
       {/* Error Notification */}
       <ErrorNotification
         message={errorMessage}

@@ -30,176 +30,229 @@ const kafka = new Kafka({
 const consumer = kafka.consumer({ groupId: "shop-rating-group" });
 
 class ShopRatingConsumer {
+  constructor() {
+    this.retryAttempts = 3;
+    this.retryDelay = 5000; // 5 seconds
+    this.isConnected = false;
+  }
+
   async initialize() {
-    try {
-      await consumer.connect();
-      await consumer.subscribe({ topic: "shop-rating-update" });
+    let attempt = 0;
+    while (attempt < this.retryAttempts) {
+      try {
+        console.log(
+          `[KAFKA] Connection attempt ${attempt + 1}/${this.retryAttempts}`
+        );
 
-      console.log("Shop rating consumer connected and subscribed");
+        await consumer.connect();
+        await consumer.subscribe({ topic: "shop-rating-update" });
 
-      await consumer.run({
-        eachMessage: async ({ topic, partition, message }) => {
-          try {
-            const data = JSON.parse(message.value.toString());
-            await this.handleReviewCreated(data);
-          } catch (error) {
-            console.error("Error processing message:", error);
-          }
-        },
-      });
-    } catch (error) {
-      console.error("Failed to initialize consumer:", error);
-      throw error;
+        console.log("✅ [KAFKA] Shop rating consumer connected and subscribed");
+        this.isConnected = true;
+
+        await consumer.run({
+          eachMessage: async ({ topic, partition, message }) => {
+            try {
+              const data = JSON.parse(message.value.toString());
+              console.log(`📨 [KAFKA] Received message:`, data);
+              await this.handleReviewCreated(data);
+            } catch (error) {
+              console.error("❌ [KAFKA] Error processing message:", error);
+              // Don't throw error here to prevent consumer from crashing
+            }
+          },
+        });
+
+        // If we reach here, connection was successful
+        return;
+      } catch (error) {
+        attempt++;
+        console.error(
+          `❌ [KAFKA] Connection attempt ${attempt} failed:`,
+          error.message
+        );
+
+        if (attempt < this.retryAttempts) {
+          console.log(
+            `⏳ [KAFKA] Retrying in ${this.retryDelay / 1000} seconds...`
+          );
+          await new Promise((resolve) => setTimeout(resolve, this.retryDelay));
+        } else {
+          console.error(
+            "💥 [KAFKA] Failed to initialize consumer after all attempts"
+          );
+          throw error;
+        }
+      }
     }
   }
 
   async handleReviewCreated(data) {
     if (data.eventType !== "REVIEW_CREATED") {
+      console.log(`⚠️ [KAFKA] Skipping non-review event: ${data.eventType}`);
       return;
     }
 
-    console.log(`Processing review created event for shop ${data.shopId}`);
+    console.log(
+      `🔄 [KAFKA] Processing review created event for shop ${data.shopId}, product ${data.productId}`
+    );
 
-    const connection = await pool.getConnection();
-    try {
-      await connection.beginTransaction();
+    let attempt = 0;
+    const maxRetries = 3;
 
-      // Calculate average rating for the shop
-      const [ratingResult] = await connection.execute(
-        `
-        SELECT AVG(dg.TyLe) AS average_rating
-FROM danhgiasanpham dg
-JOIN sanpham sp ON dg.ID_SanPham = sp.ID_SanPham
-WHERE sp.ID_SanPham IN (
-    SELECT sp2.ID_SanPham
-    FROM sanpham sp2
-    JOIN nguoidung nd2 ON nd2.ID_NguoiDung = sp2.ID_NguoiBan
-    WHERE nd2.ID_CuaHang = ?
-);
+    while (attempt < maxRetries) {
+      const connection = await pool.getConnection();
+      try {
+        await connection.beginTransaction();
+        console.log(`📊 [DB] Transaction started (attempt ${attempt + 1})`);
 
-      `,
-        [data.shopId]
-      );
+        // Calculate average rating for the shop
+        const [ratingResult] = await connection.execute(
+          `
+          SELECT AVG(dg.TyLe) AS average_rating
+  FROM danhgiasanpham dg
+  JOIN sanpham sp ON dg.ID_SanPham = sp.ID_SanPham
+  WHERE sp.ID_SanPham IN (
+      SELECT sp2.ID_SanPham
+      FROM sanpham sp2
+      JOIN nguoidung nd2 ON nd2.ID_NguoiDung = sp2.ID_NguoiBan
+      WHERE nd2.ID_CuaHang = ?
+  );
 
-      const averageRating = ratingResult[0].average_rating || 0;
-
-      // Update shop rating
-      await connection.execute(
-        `
-        UPDATE cuahang 
-        SET DanhGiaTB = ?, NgayCapNhat = NOW()
-        WHERE ID_CuaHang = ?
-      `,
-        [averageRating, data.shopId]
-      );
-
-      // Update or insert into product rating cache for the specific product
-      // Calculate complete rating statistics including star distribution
-      const [productRatingResult] = await connection.execute(
-        `
-        SELECT 
-    COUNT(*) AS total_reviews,
-    SUM(count_1_star) AS count_1_star,
-    SUM(count_2_star) AS count_2_star,
-    SUM(count_3_star) AS count_3_star,
-    SUM(count_4_star) AS count_4_star,
-    SUM(count_5_star) AS count_5_star,
-    COALESCE(ROUND(
-        (SUM(count_1_star)*1 + SUM(count_2_star)*2 + SUM(count_3_star)*3 +
-         SUM(count_4_star)*4 + SUM(count_5_star)*5) / NULLIF(COUNT(*), 0), 1
-    ), 0) AS average_rating
-FROM (
-    SELECT 
-        CASE WHEN TyLe = 1 THEN 1 ELSE 0 END AS count_1_star,
-        CASE WHEN TyLe = 2 THEN 1 ELSE 0 END AS count_2_star,
-        CASE WHEN TyLe = 3 THEN 1 ELSE 0 END AS count_3_star,
-        CASE WHEN TyLe = 4 THEN 1 ELSE 0 END AS count_4_star,
-        CASE WHEN TyLe = 5 THEN 1 ELSE 0 END AS count_5_star
-    FROM danhgiasanpham
-    WHERE ID_SanPham = ?
-) AS t;
         `,
-        [data.productId]
-      );
+          [data.shopId]
+        );
 
-      const stats = productRatingResult[0];
-      const productAvgRating = stats.average_rating || 0;
-      const productTotalReviews = stats.total_reviews || 0;
-      const count1Star = stats.count_1_star || 0;
-      const count2Star = stats.count_2_star || 0;
-      const count3Star = stats.count_3_star || 0;
-      const count4Star = stats.count_4_star || 0;
-      const count5Star = stats.count_5_star || 0;
+        const averageRating = ratingResult[0].average_rating || 0;
 
-      // Check if cache record exists for this product
-      const [existingCache] = await connection.execute(
-        `SELECT ID_SanPham FROM product_rating_cache WHERE ID_SanPham = ?`,
-        [data.productId]
-      );
-
-      if (existingCache.length > 0) {
-        // Update existing cache record with complete star distribution
+        // Update shop rating
         await connection.execute(
           `
-          UPDATE product_rating_cache 
-          SET 
-            average_rating = ?, 
-            total_reviews = ?,
-            count_1_star = ?,
-            count_2_star = ?,
-            count_3_star = ?,
-            count_4_star = ?,
-            count_5_star = ?,
-            last_updated = NOW()
-          WHERE ID_SanPham = ?
-          `,
-          [
-            productAvgRating,
-            productTotalReviews,
-            count1Star,
-            count2Star,
-            count3Star,
-            count4Star,
-            count5Star,
-            data.productId,
-          ]
+          UPDATE cuahang 
+          SET DanhGiaTB = ?, NgayCapNhat = NOW()
+          WHERE ID_CuaHang = ?
+        `,
+          [averageRating, data.shopId]
         );
-      } else {
-        // Insert new cache record with complete star distribution
-        await connection.execute(
+
+        // Update or insert into product rating cache for the specific product
+        // Calculate complete rating statistics including star distribution
+        const [productRatingResult] = await connection.execute(
           `
-          INSERT INTO product_rating_cache 
-          (ID_SanPham, average_rating, total_reviews, count_1_star, count_2_star, count_3_star, count_4_star, count_5_star, last_updated) 
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+         SELECT 
+  COUNT(*) AS total_reviews,
+  SUM(TyLe = 1) AS count_1_star,
+  SUM(TyLe = 2) AS count_2_star,
+  SUM(TyLe = 3) AS count_3_star,
+  SUM(TyLe = 4) AS count_4_star,
+  SUM(TyLe = 5) AS count_5_star,
+  COALESCE(ROUND(AVG(TyLe), 1), 0) AS average_rating
+FROM danhgiasanpham
+WHERE ID_SanPham = ?;
+
           `,
-          [
-            data.productId,
-            productAvgRating,
-            productTotalReviews,
-            count1Star,
-            count2Star,
-            count3Star,
-            count4Star,
-            count5Star,
-          ]
+          [data.productId]
         );
+
+        const stats = productRatingResult[0];
+        const productAvgRating = stats.average_rating || 0;
+        const productTotalReviews = stats.total_reviews || 0;
+        const count1Star = stats.count_1_star || 0;
+        const count2Star = stats.count_2_star || 0;
+        const count3Star = stats.count_3_star || 0;
+        const count4Star = stats.count_4_star || 0;
+        const count5Star = stats.count_5_star || 0;
+
+        // Check if cache record exists for this product
+        const [existingCache] = await connection.execute(
+          `SELECT ID_SanPham FROM product_rating_cache WHERE ID_SanPham = ?`,
+          [data.productId]
+        );
+
+        if (existingCache.length > 0) {
+          // Update existing cache record with complete star distribution
+          await connection.execute(
+            `
+            UPDATE product_rating_cache 
+            SET 
+              average_rating = ?, 
+              total_reviews = ?,
+              count_1_star = ?,
+              count_2_star = ?,
+              count_3_star = ?,
+              count_4_star = ?,
+              count_5_star = ?,
+              last_updated = NOW()
+            WHERE ID_SanPham = ?
+            `,
+            [
+              productAvgRating,
+              productTotalReviews,
+              count1Star,
+              count2Star,
+              count3Star,
+              count4Star,
+              count5Star,
+              data.productId,
+            ]
+          );
+        } else {
+          // Insert new cache record with complete star distribution
+          await connection.execute(
+            `
+            INSERT INTO product_rating_cache 
+            (ID_SanPham, average_rating, total_reviews, count_1_star, count_2_star, count_3_star, count_4_star, count_5_star, last_updated) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+            `,
+            [
+              data.productId,
+              productAvgRating,
+              productTotalReviews,
+              count1Star,
+              count2Star,
+              count3Star,
+              count4Star,
+              count5Star,
+            ]
+          );
+        }
+
+        await connection.commit();
+        console.log(`✅ [DB] Transaction committed successfully`);
+
+        console.log(
+          `✅ [SHOP] Updated shop ${data.shopId} rating to ${averageRating}`
+        );
+        console.log(
+          `✅ [CACHE] Updated product ${data.productId} cache: ${productAvgRating}/5 (${productTotalReviews} reviews)`
+        );
+        console.log(
+          `⭐ [CACHE] Star distribution - 1⭐: ${count1Star}, 2⭐: ${count2Star}, 3⭐: ${count3Star}, 4⭐: ${count4Star}, 5⭐: ${count5Star}`
+        );
+
+        // Success - break out of retry loop
+        return;
+      } catch (error) {
+        await connection.rollback();
+        attempt++;
+
+        console.error(
+          `❌ [DB] Transaction failed (attempt ${attempt}/${maxRetries}):`,
+          error.message
+        );
+
+        if (attempt < maxRetries) {
+          console.log(`⏳ [DB] Retrying in 2 seconds...`);
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        } else {
+          console.error(
+            `💥 [DB] All retry attempts failed for shop ${data.shopId}, product ${data.productId}`
+          );
+          throw error;
+        }
+      } finally {
+        connection.release();
       }
-
-      await connection.commit();
-
-      console.log(`Updated shop ${data.shopId} rating to ${averageRating}`);
-      console.log(
-        `Updated product ${data.productId} cache: ${productAvgRating}/5 (${productTotalReviews} reviews)`
-      );
-      console.log(
-        `Star distribution - 1⭐: ${count1Star}, 2⭐: ${count2Star}, 3⭐: ${count3Star}, 4⭐: ${count4Star}, 5⭐: ${count5Star}`
-      );
-    } catch (error) {
-      await connection.rollback();
-      console.error(`Error updating shop ${data.shopId} rating:`, error);
-      throw error;
-    } finally {
-      connection.release();
     }
   }
 

@@ -243,7 +243,7 @@ const OrderTable = ({
 
   // Seller variant (default)
   return (
-    <div className="bg-white rounded-xl shadow-lg overflow-hidden border">
+    <div className="bg-white rounded-xl shadow-lg overflow-hidden border overflow-x-auto">
       <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b">
         <h3 className="text-lg font-semibold text-gray-800">
           Danh sách đơn hàng
@@ -255,25 +255,25 @@ const OrderTable = ({
       <table className="min-w-full">
         <thead className="bg-gradient-to-r from-gray-50 to-gray-100">
           <tr>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               Ảnh
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               Tên sản phẩm
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               Giá
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               Số lượng
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               Danh mục
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               Trạng thái
             </th>
-            <th className="px-6 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
+            <th className="px-4 py-4 text-left text-xs font-bold text-gray-600 uppercase tracking-wider">
               Hành động
             </th>
           </tr>

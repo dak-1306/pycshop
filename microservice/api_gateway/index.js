@@ -125,20 +125,22 @@ app.use((req, res, next) => {
     console.log(`[GATEWAY] Skipping JSON parsing for proxy route: ${req.url}`);
     return next();
   }
-  
+
   // Parse JSON only for non-proxy routes
-  express.json({ limit: '10mb' })(req, res, next);
+  express.json({ limit: "10mb" })(req, res, next);
 });
 
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(morgan("dev"));
 
-// Rate limiter (chống DDoS: max 100 request / 15 phút / 1 IP)
+// Rate limiter (chống DDoS: max 1000 request / 15 phút / 1 IP cho development)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 phút
-  max: 100,
+  max: process.env.NODE_ENV === "production" ? 100 : 1000, // Cho phép nhiều hơn trong development
   message: { message: "Too many requests, please try again later." },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 app.use(limiter);
@@ -211,7 +213,7 @@ app.use((req, res, next) => {
   // Debug: Log every request
   console.log(`\n🔍 [DEBUG] ${req.method} ${req.originalUrl}`);
   console.log(`🔍 [DEBUG] Headers:`, req.headers);
-  
+
   // Routes không cần auth (public routes)
   const publicRoutes = [
     "/auth/login",
@@ -225,6 +227,7 @@ app.use((req, res, next) => {
   // Review public routes - allow viewing reviews without authentication
   const reviewPublicRoutes = [
     "/api/products", // Allow GET /api/products/:id/reviews
+    "/api/reviews", // Allow GET /api/reviews (for checking user reviews)
   ];
 
   // Shop public routes

@@ -3,7 +3,6 @@ import SellerLayout from "../../components/layout/SellerLayout";
 import ProductModal from "../../components/common/modals/ProductModal";
 import DeleteModal from "../../components/common/DeleteModal";
 import ProductDetailModal from "../../components/common/product/ProductDetailModal";
-import SearchBar from "../../components/common/ui/SearchBar";
 import ProductFilters from "../../components/common/product/ProductFilters";
 import ProductTable from "../../components/common/product/ProductTable";
 import Pagination from "../../components/common/product/Pagination";
@@ -109,26 +108,22 @@ const ManageProduct = () => {
 
   return (
     <SellerLayout title="Manage Product">
-      <div className="p-6 bg-gray-50 min-h-screen">
-        {/* Search Bar */}
-        <SearchBar
-          searchTerm={searchTerm}
-          setSearchTerm={setSearchTerm}
-          variant="seller"
-        />
-
+      <div className="p-6">
         {/* Filters and Action Buttons */}
         <ProductFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
           selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
+          onCategoryChange={setSelectedCategory}
           selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
+          onStatusChange={setSelectedStatus}
           selectedPrice={selectedPrice}
           setSelectedPrice={setSelectedPrice}
           onResetFilters={handleResetFilters}
           onAddProduct={handleAddProduct}
           onExport={handleExport}
           categories={filterCategories} // Use categories from API with "Tất cả" option
+          showResetButton={searchTerm || selectedCategory || selectedStatus}
         />
 
         {/* Products Table */}

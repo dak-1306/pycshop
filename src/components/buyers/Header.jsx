@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./Header.css";
 import logoImage from "../../images/logo.png";
 
-const Header = () => {
+const Header = ({ onSearch }) => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -18,19 +18,22 @@ const Header = () => {
     if (searchKeyword.trim()) {
       const keyword = searchKeyword.trim();
 
-      // Kiểm tra nếu tìm kiếm shop (bắt đầu bằng "shop:" hoặc chứa từ khóa shop)
+      // If onSearch prop is provided (for home page), use it
+      if (onSearch) {
+        onSearch(keyword);
+        return;
+      }
+
+      // Otherwise, navigate to search page (existing logic)
       if (keyword.toLowerCase().startsWith("shop:")) {
         const shopName = keyword.slice(5).trim();
-        // Giả lập tìm shop bằng tên, có thể redirect đến shop cụ thể
         navigate(`/shop/1?name=${encodeURIComponent(shopName)}`);
       } else if (
         keyword.toLowerCase().includes("shop") ||
         keyword.toLowerCase().includes("cửa hàng")
       ) {
-        // Tìm kiếm shop chung
         navigate(`/search?type=shop&keyword=${encodeURIComponent(keyword)}`);
       } else {
-        // Tìm kiếm sản phẩm bình thường
         navigate(`/search?keyword=${encodeURIComponent(keyword)}`);
       }
     }
@@ -45,6 +48,13 @@ const Header = () => {
       handleSearch(e);
     }
   };
+
+  // Note: Removed automatic search clearing to prevent conflicts with category selection
+  // useEffect(() => {
+  //   if (onSearch && !searchKeyword) {
+  //     onSearch("");
+  //   }
+  // }, [searchKeyword, onSearch]);
 
   const handleSellerChannelClick = (e) => {
     e.preventDefault();

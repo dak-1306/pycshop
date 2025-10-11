@@ -103,40 +103,45 @@ export const useOrders = () => {
     setShowOrderModal(true);
   };
 
-  const handleSaveOrder = async () => {
-    if (
-      !currentOrder.productName ||
-      !currentOrder.price ||
-      !currentOrder.quantity ||
-      !currentOrder.customerName ||
-      !currentOrder.customerPhone ||
-      !currentOrder.address
-    ) {
+  const handleSaveOrder = async (formData) => {
+    if (!formData.customer || !formData.email || !formData.total) {
       alert("😱 Vui lòng điền đầy đủ thông tin!");
       return;
     }
 
     try {
       if (modalMode === "add") {
-        // Seller cannot create new orders, only update existing ones
-        alert("Seller không thể tạo đơn hàng mới!");
-        return;
+        // Create new order with formData format
+        const newOrder = {
+          id: `ORD-${Date.now()}`,
+          customer: formData.customer,
+          customerName: formData.customer,
+          email: formData.email,
+          total: formData.total,
+          totalAmount: formData.total,
+          items: formData.items,
+          productName: formData.items,
+          status: formData.status,
+          paymentStatus: formData.paymentStatus,
+          seller: formData.seller,
+          sellerName: formData.seller,
+          createdAt: new Date().toISOString(),
+        };
+        setOrders([...orders, newOrder]);
+        alert("🎉 Tạo đơn hàng thành công!");
       } else {
-        await sellerOrderService.updateOrderStatus(
-          currentOrder.id,
-          currentOrder.status
-        );
-        alert("🎉 Cập nhật đơn hàng thành công!");
+        // Update existing order with formData
+        const updatedOrder = { ...currentOrder, ...formData };
+        const response = await sellerOrderService.updateOrder(updatedOrder);
+        if (response.success) {
+          setOrders(
+            orders.map((order) =>
+              order.id === currentOrder.id ? updatedOrder : order
+            )
+          );
+          alert("🎉 Cập nhật đơn hàng thành công!");
+        }
       }
-
-      // Reload orders
-      const response = await sellerOrderService.getSellerOrders({
-        page: currentPage,
-        limit: 10,
-        search: searchTerm,
-        status: selectedFilter !== "Tất cả" ? selectedFilter : undefined,
-      });
-      setOrders(response.data || []);
 
       handleCloseOrderModal();
     } catch (error) {

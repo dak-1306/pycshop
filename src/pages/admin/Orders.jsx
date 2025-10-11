@@ -1,13 +1,16 @@
 import React from "react";
-import OrderStats from "../../components/order/OrderStats";
-import AdminOrderFilters from "../../components/order/AdminOrderFilters";
-import AdminOrderTable from "../../components/order/AdminOrderTable";
-import OrderModal from "../../components/modals/OrderModal";
-import OrderDetailModal from "../../components/modals/OrderDetailModal";
-import DeleteModal from "../../components/modals/DeleteModal";
+import OrderStats from "../../components/common/order/OrderStats";
+import OrderFilters from "../../components/common/order/OrderFilters";
+import OrderTable from "../../components/common/order/OrderTable";
+import OrderModal from "../../components/common/modals/OrderModal";
+import OrderDetailModal from "../../components/common/order/OrderDetailModal";
+import DeleteModal from "../../components/common/DeleteModal";
+import Pagination from "../../components/common/product/Pagination";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
+import { useLanguage } from "../../context/LanguageContext";
 
 const AdminOrders = () => {
+  const { t } = useLanguage();
   const {
     orders,
     stats,
@@ -18,6 +21,10 @@ const AdminOrders = () => {
     setStatusFilter,
     paymentFilter,
     setPaymentFilter,
+    currentPage,
+    setCurrentPage,
+    totalItems,
+    totalPages,
     showOrderModal,
     setShowOrderModal,
     showDetailModal,
@@ -40,8 +47,11 @@ const AdminOrders = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Đang tải dữ liệu đơn hàng...</p>
+        </div>
       </div>
     );
   }
@@ -49,8 +59,10 @@ const AdminOrders = () => {
   return (
     <div className="p-6">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Quản lý đơn hàng</h1>
-        <p className="text-gray-600">Quản lý tất cả đơn hàng trong hệ thống</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          📋 {t("orderManagement")}
+        </h1>
+        <p className="text-gray-600">{t("manageAllOrders")}</p>
       </div>
 
       {/* Stats Cards */}
@@ -58,17 +70,21 @@ const AdminOrders = () => {
 
       {/* Orders Table with Filters */}
       <div className="bg-white rounded-lg shadow">
-        <AdminOrderFilters
-          searchValue={searchValue}
+        <OrderFilters
+          variant="admin"
+          searchTerm={searchValue}
           onSearchChange={setSearchValue}
           statusFilter={statusFilter}
           onStatusChange={setStatusFilter}
           paymentFilter={paymentFilter}
           onPaymentChange={setPaymentFilter}
+          onUpdateStatus={() => {
+            handleAddOrder();
+          }}
           onExport={handleExport}
-          onAddOrder={handleAddOrder}
         />
-        <AdminOrderTable
+        <OrderTable
+          variant="admin"
           orders={orders}
           onViewOrder={handleViewOrder}
           onEditOrder={handleEditOrder}
@@ -77,15 +93,27 @@ const AdminOrders = () => {
         />
       </div>
 
+      {/* Pagination */}
+      {totalItems > 0 && (
+        <Pagination
+          currentPage={currentPage}
+          setCurrentPage={setCurrentPage}
+          totalItems={totalItems}
+          itemsPerPage={10}
+          variant="admin"
+        />
+      )}
+
       {/* Order Modal */}
       <OrderModal
         isOpen={showOrderModal}
         onClose={() => setShowOrderModal(false)}
-        mode={modalMode}
         order={selectedOrder}
-        orderForm={orderForm}
-        onOrderFormChange={setOrderForm}
+        variant="admin"
+        modalMode={modalMode}
         onSave={handleSaveOrder}
+        onUpdateStatus={handleUpdateOrderStatus}
+        onViewDetails={handleViewOrder}
       />
 
       {/* Order Detail Modal */}
@@ -95,8 +123,9 @@ const AdminOrders = () => {
         order={selectedOrder}
         onEdit={() => {
           setShowDetailModal(false);
-          handleEditOrder(selectedOrder);
+          handleEditOrder(selectedOrder?.id);
         }}
+        variant="admin"
       />
 
       {/* Delete Confirmation Modal */}
@@ -104,8 +133,10 @@ const AdminOrders = () => {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDeleteOrder}
-        title="Xóa đơn hàng"
-        message={`Bạn có chắc chắn muốn xóa đơn hàng ${selectedOrder?.id} của khách hàng ${selectedOrder?.customer}? Hành động này không thể hoàn tác.`}
+        item={selectedOrder}
+        itemType="đơn hàng"
+        title="Xác nhận xóa đơn hàng"
+        subtitle="Hành động này không thể hoàn tác"
       />
     </div>
   );

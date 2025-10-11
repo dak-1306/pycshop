@@ -1,13 +1,15 @@
 import React from "react";
 import { useAdminSellers } from "../../hooks/useAdminSellers";
-import SellersStats from "../../components/seller/SellersStats";
-import SellersFilters from "../../components/seller/SellersFilters";
-import SellersTable from "../../components/seller/SellersTable";
-import SellerDetailModal from "../../components/seller/SellerDetailModal";
-import SellerActionModal from "../../components/seller/SellerActionModal";
-import DeleteModal from "../../components/modals/DeleteModal";
+import SellersStats from "../../components/admin/sellers/SellersStats";
+import SellersFilters from "../../components/admin/sellers/SellersFilters";
+import SellersTable from "../../components/admin/sellers/SellersTable";
+import SellerDetailModal from "../../components/admin/sellers/SellerDetailModal";
+import SellerActionModal from "../../components/admin/sellers/SellerActionModal";
+import DeleteModal from "../../components/common/DeleteModal";
+import { useLanguage } from "../../context/LanguageContext";
 
 const Sellers = () => {
+  const { t } = useLanguage();
   const {
     // State
     sellers,
@@ -48,27 +50,25 @@ const Sellers = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải dữ liệu người bán...</p>
+          <p className="mt-4 text-gray-600">{t("loadingSellers")}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="p-6">
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              🏪 Quản lý Sellers
+              🏪 {t("sellerManagement")}
             </h1>
-            <p className="text-gray-600">
-              Quản lý và giám sát hoạt động của các người bán trên PycShop
-            </p>
+            <p className="text-gray-600">{t("manageAllSellers")}</p>
           </div>
 
           <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
@@ -89,7 +89,7 @@ const Sellers = () => {
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
               </svg>
-              Làm mới
+              {t("refresh")}
             </button>
 
             <button
@@ -127,22 +127,21 @@ const Sellers = () => {
         shopTypeFilter={shopTypeFilter}
         setShopTypeFilter={setShopTypeFilter}
         onReset={handleResetFilters}
-        onExport={handleExport}
-        onRefresh={refreshData}
-        isLoading={isLoading}
       />
 
       {/* Sellers Table */}
-      <SellersTable
-        sellers={sellers}
-        isLoading={isLoading}
-        formatDate={formatDate}
-        onViewSeller={handleViewSeller}
-        onBlockSeller={handleBlockSeller}
-        onUnblockSeller={handleUnblockSeller}
-        onVerifySeller={handleVerifySeller}
-        onDeleteSeller={handleDeleteSeller}
-      />
+      <div className="bg-white rounded-lg shadow">
+        <SellersTable
+          sellers={sellers}
+          isLoading={isLoading}
+          formatDate={formatDate}
+          onViewSeller={handleViewSeller}
+          onBlockSeller={handleBlockSeller}
+          onUnblockSeller={handleUnblockSeller}
+          onVerifySeller={handleVerifySeller}
+          onDeleteSeller={handleDeleteSeller}
+        />
+      </div>
 
       {/* Modals */}
       <SellerDetailModal
@@ -152,7 +151,6 @@ const Sellers = () => {
         formatCurrency={formatCurrency}
         formatDate={formatDate}
       />
-
       <SellerActionModal
         isOpen={showActionModal}
         onClose={handleCloseModals}
@@ -160,7 +158,6 @@ const Sellers = () => {
         seller={selectedSeller}
         actionType={actionType}
       />
-
       <DeleteModal
         isOpen={showDeleteModal}
         onClose={handleCloseModals}

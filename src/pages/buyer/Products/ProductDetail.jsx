@@ -2,12 +2,16 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
-// import { productService } from '../../../services/productService';
+import ReviewForm from "../../../components/buyers/ReviewForm";
+import ReviewList from "../../../components/buyers/ReviewList";
+import { productService } from "../../../services/productService";
+import { useAuth } from "../../../context/AuthContext";
 import "./ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
 
   // State management
   const [product, setProduct] = useState(null);
@@ -17,120 +21,108 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [selectedVariants, setSelectedVariants] = useState({});
   const [similarProducts, setSimilarProducts] = useState([]);
-
-  // Mock data for demo (replace with real API calls)
-  const mockProduct = {
-    id: 1,
-    name: "iPhone 14 Pro Max 256GB - Chính hãng VN/A",
-    images: [
-      "https://via.placeholder.com/400x400/ff6b35/ffffff?text=iPhone+14+Pro",
-      "https://via.placeholder.com/400x400/333333/ffffff?text=Back+View",
-      "https://via.placeholder.com/400x400/666666/ffffff?text=Side+View",
-      "https://via.placeholder.com/400x400/999999/ffffff?text=Accessories",
-    ],
-    price: 27990000,
-    originalPrice: 32990000,
-    discount: 15,
-    rating: 4.8,
-    reviewCount: 2847,
-    soldCount: 1520,
-    stock: 45,
-    variants: [
-      {
-        name: "Màu sắc",
-        options: [
-          "Tím Deep Purple",
-          "Vàng Gold",
-          "Bạc Silver",
-          "Đen Space Black",
-        ],
-      },
-      {
-        name: "Dung lượng",
-        options: ["128GB", "256GB", "512GB", "1TB"],
-      },
-    ],
-    description: `
-      <h3>Đặc điểm nổi bật</h3>
-      <ul>
-        <li>Màn hình Dynamic Island mới lạ, thú vị</li>
-        <li>Camera chính 48MP, zoom quang học 3x</li>
-        <li>Chip A16 Bionic mạnh mẽ, hiệu năng vượt trội</li>
-        <li>Pin cải thiện, sạc nhanh 20W</li>
-        <li>Khung viền titanium cao cấp, bền bỉ</li>
-      </ul>
-      
-      <h3>Thông số kỹ thuật</h3>
-      <ul>
-        <li>Màn hình: 6.7 inch, Super Retina XDR OLED</li>
-        <li>Chip: A16 Bionic</li>
-        <li>Camera sau: 48MP + 12MP + 12MP</li>
-        <li>Camera trước: 12MP</li>
-        <li>Pin: 4323 mAh</li>
-        <li>Hệ điều hành: iOS 16</li>
-      </ul>
-    `,
-    shop: {
-      id: 1,
-      name: "PycShop Official Store",
-      avatar: "🏪",
-      rating: 4.9,
-      followers: 125000,
-      products: 2847,
-      responseRate: 98,
-      responseTime: "trong vài phút",
-    },
-  };
-
-  const mockSimilarProducts = [
-    {
-      id: 2,
-      name: "iPhone 14 Pro 128GB",
-      image:
-        "https://via.placeholder.com/200x200/ff6b35/ffffff?text=iPhone+14+Pro",
-      price: 24990000,
-    },
-    {
-      id: 3,
-      name: "iPhone 14 Plus 256GB",
-      image:
-        "https://via.placeholder.com/200x200/ff6b35/ffffff?text=iPhone+14+Plus",
-      price: 22990000,
-    },
-    {
-      id: 4,
-      name: "iPhone 13 Pro Max 256GB",
-      image:
-        "https://via.placeholder.com/200x200/ff6b35/ffffff?text=iPhone+13+Pro",
-      price: 25990000,
-    },
-    {
-      id: 5,
-      name: "Samsung Galaxy S23 Ultra",
-      image:
-        "https://via.placeholder.com/200x200/ff6b35/ffffff?text=Galaxy+S23",
-      price: 28990000,
-    },
-  ];
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [newReview, setNewReview] = useState(null);
+  const [userReviewStatus, setUserReviewStatus] = useState({
+    hasReviewed: false,
+    loading: true,
+  });
 
   // Load product data
   useEffect(() => {
     const loadProduct = async () => {
       try {
         setLoading(true);
-        // Try to fetch from API first
-        // const response = await productService.getProductById(id);
-        // setProduct(response.data);
+        setError(null);
 
-        // For now, use mock data
-        setTimeout(() => {
-          setProduct(mockProduct);
-          setSimilarProducts(mockSimilarProducts);
+        console.log(`Loading product with ID: ${id}`);
+
+        // Fetch product data from API via productService
+        const response = await productService.getProductById(id);
+
+        if (response.success && response.data) {
+          const productData = response.data;
+
+          // Calculate original price based on discount formula
+          // P(original) = P(current) / (1 - discount%/100)
+          const discountPercent = 15; // Mock discount rate - you can get this from productData if available
+          const currentPrice = parseFloat(productData.price);
+          const originalPrice = currentPrice / (1 - discountPercent / 100);
+
+          // Transform API data to component format
+          const transformedProduct = {
+            id: productData.id,
+            name: productData.name,
+            description: productData.description || "Không có mô tả chi tiết.",
+            price: currentPrice,
+            originalPrice: originalPrice,
+            discount: discountPercent,
+            rating: productData.average_rating || 0,
+            reviewCount: productData.review_count || 0,
+            soldCount: productData.review_count || 0, // Use review count as sold count
+            stock: productData.stock_quantity || 0,
+            images:
+              productData.images && productData.images.length > 0
+                ? productData.images.map(
+                    (img) => `../../../../microservice/product_service${img}`
+                  )
+                : [
+                    "https://via.placeholder.com/400x400/ff6b35/ffffff?text=No+Image",
+                  ],
+            category: productData.category,
+            categoryId: productData.category_id,
+            shop: {
+              id: productData.shop_id || 1,
+              name: productData.shop_name || "PycShop Store",
+              avatar: "🏪",
+              rating: productData.shop_average_rating || 0,
+              followers: 1000, // Mock data
+              products: productData.shop_product_count || 0,
+              responseRate: 98,
+              responseTime: "trong vài phút",
+            },
+            variants: [], // Mock variants for now - can be expanded later
+          };
+
+          setProduct(transformedProduct);
+          console.log("Product loaded successfully:", transformedProduct);
+          // Load similar products from API
+          try {
+            const similarResponse = await productService.getSimilarProducts(
+              id,
+              4
+            );
+            if (similarResponse.success && similarResponse.data) {
+              const transformedSimilarProducts = similarResponse.data.map(
+                (item) => ({
+                  id: item.id,
+                  name: item.name,
+                  price: item.price,
+                  image: item.image
+                    ? `../../../../microservice/product_service${item.image}`
+                    : "https://via.placeholder.com/200x200/ff6b35/ffffff?text=PycShop",
+                  rating: item.rating,
+                })
+              );
+              setSimilarProducts(transformedSimilarProducts);
+              console.log(
+                "Similar products loaded:",
+                transformedSimilarProducts
+              );
+            }
+          } catch (similarError) {
+            console.error("Error loading similar products:", similarError);
+            // Keep mock similar products as fallback
+            setSimilarProducts(mockSimilarProducts);
+          }
+
           setLoading(false);
-        }, 1000);
+        } else {
+          throw new Error(response.message || "Product not found");
+        }
       } catch (error) {
         console.error("Error loading product:", error);
-        setError("Không thể tải thông tin sản phẩm");
+        setError(error.message || "Không thể tải thông tin sản phẩm");
         setLoading(false);
       }
     };
@@ -140,6 +132,47 @@ const ProductDetail = () => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]); // Only depend on id
+
+  // Check if user has reviewed this product
+  useEffect(() => {
+    const checkUserReview = async () => {
+      const token = localStorage.getItem("token");
+      if (!token || !id) {
+        setUserReviewStatus({ hasReviewed: false, loading: false });
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:5000/api/reviews/check/${id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        const data = await response.json();
+
+        if (response.ok) {
+          setUserReviewStatus({
+            hasReviewed: data.hasReviewed,
+            loading: false,
+            review: data.review,
+          });
+        } else {
+          setUserReviewStatus({ hasReviewed: false, loading: false });
+        }
+      } catch (error) {
+        console.error("Error checking user review:", error);
+        setUserReviewStatus({ hasReviewed: false, loading: false });
+      }
+    };
+
+    if (id) {
+      checkUserReview();
+    }
+  }, [id]);
 
   // Utility functions
   const formatPrice = (price) => {
@@ -200,6 +233,24 @@ const ProductDetail = () => {
     }
   };
 
+  const handleShowReviewForm = () => {
+    if (!isAuthenticated || !user) {
+      alert("Vui lòng đăng nhập để đánh giá sản phẩm");
+      return;
+    }
+    setShowReviewForm(true);
+  };
+
+  const handleCloseReviewForm = () => {
+    setShowReviewForm(false);
+  };
+
+  const handleReviewSubmitted = (review) => {
+    setNewReview(review);
+    setUserReviewStatus({ hasReviewed: true, loading: false, review: review });
+    setShowReviewForm(false);
+  };
+
   // Loading state
   if (loading) {
     return (
@@ -230,8 +281,8 @@ const ProductDetail = () => {
     );
   }
 
-  // Product not found
-  if (!product) {
+  // Product not found - only show this if not loading and no error
+  if (!loading && !error && !product) {
     return (
       <div className="product-detail-page">
         <Header />
@@ -244,6 +295,11 @@ const ProductDetail = () => {
         <Footer />
       </div>
     );
+  }
+
+  // Only render main component if we have a product
+  if (!product) {
+    return null;
   }
 
   return (
@@ -466,6 +522,30 @@ const ProductDetail = () => {
           />
         </div>
 
+        {/* Review Section */}
+        <div className="pd-review-section">
+          <div className="pd-review-header">
+            <h2>Đánh giá sản phẩm</h2>
+            {!userReviewStatus.loading && !userReviewStatus.hasReviewed && (
+              <button
+                className="pd-btn-write-review"
+                onClick={handleShowReviewForm}
+              >
+                <i className="fas fa-star"></i>
+                Viết đánh giá
+              </button>
+            )}
+            {userReviewStatus.hasReviewed && (
+              <div className="pd-review-status">
+                <i className="fas fa-check-circle"></i>
+                Bạn đã đánh giá sản phẩm này
+              </div>
+            )}
+          </div>
+
+          <ReviewList productId={id} newReview={newReview} />
+        </div>
+
         {/* Similar Products */}
         <div className="pd-similar-products">
           <h2 className="pd-similar-title">Sản phẩm tương tự</h2>
@@ -491,12 +571,32 @@ const ProductDetail = () => {
                   <div className="pd-similar-price">
                     {formatPrice(item.price)}
                   </div>
+                  {item.rating > 0 && (
+                    <div className="pd-similar-rating">
+                      <span className="pd-similar-rating-stars">
+                        {renderStars(Math.floor(item.rating))}
+                      </span>
+                      <span className="pd-similar-rating-text">
+                        ({item.rating.toFixed(1)})
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
         </div>
       </div>
+
+      {/* Review Form Modal */}
+      {showReviewForm && (
+        <ReviewForm
+          productId={id}
+          onReviewSubmitted={handleReviewSubmitted}
+          onClose={handleCloseReviewForm}
+        />
+      )}
+
       <Footer />
     </div>
   );

@@ -6,6 +6,7 @@ import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
+import jwt from "jsonwebtoken";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import setupRoutes from "./routes.js"; // Import routes
 import authMiddleware from "./middleware/authMiddleware.js"; // Import auth middleware
@@ -109,28 +110,37 @@ app.use((req, res, next) => {
   next();
 });
 
-// Skip parsing for proxy routes giữ nguyên raw data cho proxy
+// Skip JSON parsing for proxy routes - use raw body buffer instead
 app.use((req, res, next) => {
+  // Skip body parsing for proxy routes to avoid consuming the stream
   if (
     req.url.startsWith("/auth") ||
     req.url.startsWith("/products") ||
     req.url.startsWith("/seller") ||
     req.url.startsWith("/shops") ||
-    req.url.startsWith("/cart")
+    req.url.startsWith("/cart") ||
+    req.url.startsWith("/api/reviews") ||
+    req.url.includes("/reviews")
   ) {
     console.log(`[GATEWAY] Skipping JSON parsing for proxy route: ${req.url}`);
     return next();
   }
-  express.json()(req, res, next);
+
+  // Parse JSON only for non-proxy routes
+  express.json({ limit: "10mb" })(req, res, next);
 });
+
+app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 app.use(morgan("dev"));
 
-// Rate limiter (chống DDoS: max 100 request / 15 phút / 1 IP)
+// Rate limiter (chống DDoS: max 1000 request / 15 phút / 1 IP cho development)
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 phút
-  max: 100,
+  max: process.env.NODE_ENV === "production" ? 100 : 1000, // Cho phép nhiều hơn trong development
   message: { message: "Too many requests, please try again later." },
+  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
 
 app.use(limiter);
@@ -174,13 +184,50 @@ app.use((req, res, next) => {
   next();
 });
 
+// Parse JWT token and add user info to request (but don't require auth)
+app.use((req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (authHeader) {
+    try {
+      const token = authHeader.startsWith("Bearer ")
+        ? authHeader.slice(7)
+        : authHeader;
+
+      if (token) {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded;
+        console.log(`[GATEWAY] JWT decoded for user ID: ${decoded.id}`);
+      }
+    } catch (error) {
+      // Don't fail - just log and continue without user info
+      console.log(`[GATEWAY] JWT parse error (continuing):`, error.message);
+    }
+  }
+
+  next();
+});
+
 // Middleware kiểm tra auth cho các routes protected
 app.use((req, res, next) => {
+  // Debug: Log every request
+  console.log(`\n🔍 [DEBUG] ${req.method} ${req.originalUrl}`);
+  console.log(`🔍 [DEBUG] Headers:`, req.headers);
+
   // Routes không cần auth (public routes)
   const publicRoutes = [
     "/auth/login",
     "/auth/register",
+    "/auth/admin/login", // Admin login route
+    "/auth/register-admin", // Admin register route
     "/products", // Cho phép xem sản phẩm không cần đăng nhập
+    "/uploads", // Static files (product images)
+  ];
+
+  // Review public routes - allow viewing reviews without authentication
+  const reviewPublicRoutes = [
+    "/api/products", // Allow GET /api/products/:id/reviews
+    "/api/reviews", // Allow GET /api/reviews (for checking user reviews)
   ];
 
   // Shop public routes
@@ -192,19 +239,33 @@ app.use((req, res, next) => {
   ];
 
   // Combine all public routes
-  const allPublicRoutes = [...publicRoutes, ...shopPublicRoutes];
+  const allPublicRoutes = [
+    ...publicRoutes,
+    ...reviewPublicRoutes,
+    ...shopPublicRoutes,
+  ];
 
   // Kiểm tra nếu là public route
   const isPublicRoute = allPublicRoutes.some((route) =>
     req.originalUrl.startsWith(route)
   );
 
+  // Special case: Allow GET requests to review endpoints without authentication
+  const isReviewGetRoute =
+    req.originalUrl.includes("/reviews") && req.method === "GET";
+
+  // Debug logs
+  console.log(`[GATEWAY] Checking route: ${req.originalUrl}`);
+  console.log(`[GATEWAY] Public routes:`, allPublicRoutes);
+  console.log(`[GATEWAY] Is public route:`, isPublicRoute);
+  console.log(`[GATEWAY] Is review GET route:`, isReviewGetRoute);
+
   // Kiểm tra nếu là shop route với ID (GET /shops/123)
   const isShopByIdRoute =
     /^\/shops\/\d+$/.test(req.originalUrl) && req.method === "GET";
 
-  if (isPublicRoute || isShopByIdRoute) {
-    console.log(`[GATEWAY] Public route: ${req.originalUrl}`);
+  if (isPublicRoute || isShopByIdRoute || isReviewGetRoute) {
+    console.log(`[GATEWAY] Public route allowed: ${req.originalUrl}`);
     return next();
   }
 
@@ -215,8 +276,164 @@ app.use((req, res, next) => {
   authMiddleware(req, res, next);
 });
 
+// Add specific route for reviews BEFORE setupRoutes - Handle all HTTP methods
+app.all(/^\/api\/products\/\d+\/reviews/, (req, res) => {
+  console.log(
+    `[GATEWAY] Review route matched: ${req.method} ${req.originalUrl}`
+  );
+
+  // Proxy to review service
+  const reviewServiceUrl = "http://localhost:5005";
+  const targetUrl = `${reviewServiceUrl}${req.originalUrl}`;
+
+  console.log(`[GATEWAY] Proxying to: ${targetUrl}`);
+
+  // For GET requests, proxy directly
+  if (req.method === "GET") {
+    const requestOptions = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: req.headers.authorization,
+        // Forward user info headers if user is authenticated
+        ...(req.user && {
+          "x-user-id": req.user.id.toString(),
+          "x-user-role": req.user.role,
+          "x-user-type": req.user.userType,
+        }),
+        ...req.headers,
+      },
+    };
+
+    fetch(targetUrl, requestOptions)
+      .then(async (response) => {
+        const data = await response.json();
+        console.log(`[GATEWAY] Review service response received`);
+        res.status(response.status).json(data);
+      })
+      .catch((error) => {
+        console.error(`[GATEWAY] Review service error:`, error);
+        res.status(500).json({ error: "Review service error" });
+      });
+    return;
+  }
+
+  // For POST/PUT requests, collect body and forward
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk.toString();
+  });
+  req.on("end", () => {
+    const requestOptions = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+        Authorization: req.headers.authorization,
+        // Forward user info headers if user is authenticated
+        ...(req.user && {
+          "x-user-id": req.user.id.toString(),
+          "x-user-role": req.user.role,
+          "x-user-type": req.user.userType,
+        }),
+      },
+      body: body,
+    };
+
+    fetch(targetUrl, requestOptions)
+      .then(async (response) => {
+        const data = await response.json();
+        console.log(`[GATEWAY] Review service response received`);
+        res.status(response.status).json(data);
+      })
+      .catch((error) => {
+        console.error(`[GATEWAY] Review service error:`, error);
+        res.status(500).json({ error: "Review service error" });
+      });
+  });
+});
+
+// Add route for creating new reviews (POST /api/reviews)
+app.all(/^\/api\/reviews/, (req, res) => {
+  console.log(
+    `[GATEWAY] Review API route matched: ${req.method} ${req.originalUrl}`
+  );
+
+  // Proxy to review service
+  const reviewServiceUrl = "http://localhost:5005";
+  const targetUrl = `${reviewServiceUrl}${req.originalUrl}`;
+
+  console.log(`[GATEWAY] Proxying to: ${targetUrl}`);
+
+  // For GET requests, proxy directly
+  if (req.method === "GET") {
+    const requestOptions = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: req.headers.authorization,
+        // Forward user info headers if user is authenticated
+        ...(req.user && {
+          "x-user-id": req.user.id.toString(),
+          "x-user-role": req.user.role,
+          "x-user-type": req.user.userType,
+        }),
+        ...req.headers,
+      },
+    };
+
+    fetch(targetUrl, requestOptions)
+      .then(async (response) => {
+        const data = await response.json();
+        console.log(`[GATEWAY] Review service response:`, response.status);
+        res.status(response.status).json(data);
+      })
+      .catch((error) => {
+        console.error(`[GATEWAY] Review service error:`, error);
+        res.status(500).json({ error: "Review service error" });
+      });
+    return;
+  }
+
+  // For POST/PUT requests, collect body and forward
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk.toString();
+  });
+  req.on("end", () => {
+    console.log(`[GATEWAY] Received body:`, body);
+
+    const requestOptions = {
+      method: req.method,
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": Buffer.byteLength(body),
+        Authorization: req.headers.authorization,
+        // Forward user info headers if user is authenticated
+        ...(req.user && {
+          "x-user-id": req.user.id.toString(),
+          "x-user-role": req.user.role,
+          "x-user-type": req.user.userType,
+        }),
+      },
+      body: body,
+    };
+
+    fetch(targetUrl, requestOptions)
+      .then(async (response) => {
+        const data = await response.json();
+        console.log(`[GATEWAY] Review service response:`, response.status);
+        res.status(response.status).json(data);
+      })
+      .catch((error) => {
+        console.error(`[GATEWAY] Review service error:`, error);
+        res.status(500).json({ error: "Review service error" });
+      });
+  });
+});
+
 // Đăng ký các route proxy
-setupRoutes(app);
+setupRoutes(app); // Using manual routes
 
 // Log after proxy setup
 app.use((req, res, next) => {

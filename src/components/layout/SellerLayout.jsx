@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import CollaboratorModal from "../modals/CollaboratorModal";
+import CollaboratorModal from "../seller/CollaboratorModal";
 import { useNotifications } from "../../hooks/useNotifications";
 import { useShopInfo } from "../../hooks/useShopInfo";
 import NotificationPanel from "../common/NotificationPanel";
@@ -66,9 +66,9 @@ const SellerLayout = ({ children }) => {
   useEffect(() => {
     const path = location.pathname;
     if (path.includes("/dashboard")) setActiveMenu("dashboard");
-    else if (path.includes("/manage-product")) setActiveMenu("manageProduct");
-    else if (path.includes("/order")) setActiveMenu("order");
-    else if (path.includes("/shop-page")) setActiveMenu("shopPage");
+    else if (path.includes("/products")) setActiveMenu("manageProduct");
+    else if (path.includes("/orders")) setActiveMenu("order");
+    else if (path.includes("/shop")) setActiveMenu("shopPage");
   }, [location.pathname]);
 
   const menuItems = [
@@ -282,15 +282,17 @@ const SellerLayout = ({ children }) => {
                 <Link
                   key={item.id}
                   to={item.href}
-                  className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
+                  className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
                     activeMenu === item.id
-                      ? "bg-gray-100 text-gray-900"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                      ? "bg-green-50 text-green-800 border-r-4 border-green-600 shadow-sm"
+                      : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm"
                   }`}
                 >
                   <span
-                    className={`mr-3 ${
-                      activeMenu === item.id ? "text-gray-500" : "text-gray-400"
+                    className={`mr-3 transition-colors duration-200 ${
+                      activeMenu === item.id
+                        ? "text-green-600"
+                        : "text-gray-400 group-hover:text-gray-600"
                     }`}
                   >
                     {getIcon(item.icon)}
@@ -303,7 +305,9 @@ const SellerLayout = ({ children }) => {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50">
+          {children}
+        </main>
       </div>
 
       {/* Collaborator Modal */}

@@ -1,19 +1,24 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../../services/authService";
+import { useAuth } from "../../context/AuthContext";
+import { useCategories } from "../../hooks/api/useCategories";
+import { useFormValidation } from "../../hooks/useFormValidation";
 import ShopService from "../../services/shopService";
 
 const BecomeSeller = () => {
   const navigate = useNavigate();
+  const { user, isAuthenticated, loading, login } = useAuth();
+  const { categories, isLoading: categoriesLoading } = useCategories(true);
+  const { validateShopForm, errors } = useFormValidation();
 
   // Check if user is logged in
   useEffect(() => {
-    if (!authService.isAuthenticated()) {
+    if (!loading && !isAuthenticated) {
       alert("Vui lòng đăng nhập trước khi đăng ký seller");
       navigate("/auth/login");
       return;
     }
-  }, [navigate]);
+  }, [loading, isAuthenticated, navigate]);
 
   const [formData, setFormData] = useState({
     shopName: "",
@@ -24,42 +29,6 @@ const BecomeSeller = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
-
-  // Load categories from Shop Service
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await ShopService.getCategories();
-        if (response && response.success && response.categories) {
-          setCategories(response.categories);
-        } else {
-          // Fallback categories if API fails
-          setCategories([
-            { id: 1, name: "Thời Trang Nam" },
-            { id: 2, name: "Thời Trang Nữ" },
-            { id: 3, name: "Điện Thoại & Phụ Kiện" },
-            { id: 4, name: "Máy Tính & Laptop" },
-            { id: 18, name: "Nhà Sách Online" },
-            { id: 19, name: "Bách Hóa Online" },
-          ]);
-        }
-      } catch (error) {
-        console.error("Error loading categories:", error);
-        // Fallback categories
-        setCategories([
-          { id: 1, name: "Thời Trang Nam" },
-          { id: 2, name: "Thời Trang Nữ" },
-          { id: 3, name: "Điện Thoại & Phụ Kiện" },
-          { id: 4, name: "Máy Tính & Laptop" },
-          { id: 18, name: "Nhà Sách Online" },
-          { id: 19, name: "Bách Hóa Online" },
-        ]);
-      }
-    };
-
-    loadCategories();
-  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -67,54 +36,18 @@ const BecomeSeller = () => {
       ...prev,
       [name]: value,
     }));
-  };
-
-  const validateForm = () => {
-    const errors = [];
-
-    if (!formData.shopName.trim()) {
-      errors.push("Tên shop không được để trống");
+    // Clear validation errors when user starts typing
+    if (errors.length > 0) {
+      validateShopForm({ ...formData, [name]: value });
     }
-
-    if (!formData.shopDescription.trim()) {
-      errors.push("Mô tả shop không được để trống");
-    }
-
-    if (!formData.shopCategory) {
-      errors.push("Vui lòng chọn danh mục shop");
-    }
-
-    if (!formData.shopAddress.trim()) {
-      errors.push("Địa chỉ shop không được để trống");
-    }
-
-    if (!formData.shopPhone.trim()) {
-      errors.push("Số điện thoại shop không được để trống");
-    } else {
-      // Validate phone number format
-      const phoneRegex = /^[0-9]{10,11}$/;
-      if (!phoneRegex.test(formData.shopPhone.trim())) {
-        errors.push("Số điện thoại phải có 10-11 chữ số");
-      }
-    }
-
-    return errors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validation
-    const errors = validateForm();
-    if (errors.length > 0) {
+    // Validation using custom hook
+    if (!validateShopForm(formData)) {
       alert(errors.join("\n"));
-      return;
-    }
-
-    // Phone validation
-    const phoneRegex = /^[0-9]{10,11}$/;
-    if (!phoneRegex.test(formData.shopPhone)) {
-      alert("Số điện thoại không hợp lệ");
       return;
     }
 
@@ -122,28 +55,18 @@ const BecomeSeller = () => {
 
     try {
       console.log("Sending data to becomeSeller:", formData);
-      console.log("Current user:", authService.getCurrentUser());
-      console.log("Is authenticated:", authService.isAuthenticated());
+      console.log("Current user:", user);
+      console.log("Is authenticated:", isAuthenticated);
 
       const result = await ShopService.becomeSeller(formData);
-      console.log("becomeSeller result:", result);
-      console.log("result.success:", result.success);
-      console.log("result type:", typeof result);
-      console.log("result keys:", Object.keys(result));
 
       if (result.success) {
         // Update user context with new token and user info
-        if (result.token) {
-          authService.setToken(result.token);
-        }
-        if (result.user) {
-          authService.updateUser(result.user);
+        if (result.token && result.user) {
+          login(result.user, result.token);
         }
 
-        console.log("Auth data updated successfully");
         alert("Đăng ký thành seller thành công!");
-
-        // Redirect to seller dashboard
         navigate("/seller/dashboard");
       } else {
         console.error("becomeSeller failed:", result);
@@ -151,14 +74,9 @@ const BecomeSeller = () => {
       }
     } catch (error) {
       console.error("Become seller error:", error);
-      console.error("Error details:", error);
 
       // Handle specific error messages
-      if (
-        error.response &&
-        error.response.data &&
-        error.response.data.message
-      ) {
+      if (error.response?.data?.message) {
         alert(error.response.data.message);
       } else {
         alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
@@ -179,6 +97,28 @@ const BecomeSeller = () => {
             Điền thông tin shop của bạn để bắt đầu bán hàng
           </p>
         </div>
+
+        {/* Loading state */}
+        {loading && (
+          <div className="text-center py-4">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <p className="mt-2 text-gray-600">Đang kiểm tra thông tin...</p>
+          </div>
+        )}
+
+        {/* Error messages */}
+        {errors.length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
+            <h3 className="text-red-800 font-medium mb-2">
+              Có lỗi trong form:
+            </h3>
+            <ul className="text-red-700 text-sm space-y-1">
+              {errors.map((error, index) => (
+                <li key={index}>• {error}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Shop Name */}
@@ -236,8 +176,13 @@ const BecomeSeller = () => {
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
+              disabled={categoriesLoading}
             >
-              <option value="">Chọn danh mục shop</option>
+              <option value="">
+                {categoriesLoading
+                  ? "Đang tải danh mục..."
+                  : "Chọn danh mục shop"}
+              </option>
               {categories.map((category) => (
                 <option
                   key={category.id || category.ID_DanhMuc}
@@ -283,8 +228,10 @@ const BecomeSeller = () => {
               name="shopPhone"
               value={formData.shopPhone}
               onChange={handleInputChange}
+              pattern="[0-9]{10,11}"
+              title="Số điện thoại phải có 10-11 số"
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Nhập số điện thoại liên hệ"
+              placeholder="Nhập số điện thoại liên hệ (VD: 0123456789)"
               required
             />
           </div>

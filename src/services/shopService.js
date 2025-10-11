@@ -4,8 +4,19 @@ class ShopService {
   // Get all categories for shop creation
   static async getCategories() {
     try {
-      const response = await apiService.get("/shops/categories");
-      return response; // Return full response object with success and categories
+      // Call Shop Service directly for categories
+      const response = await fetch("http://localhost:5003/shops/categories", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("ShopService - getCategories error:", error);
       throw error;
@@ -63,6 +74,17 @@ class ShopService {
   // Get seller's products
   static async getSellerProducts(params = {}) {
     try {
+      // Use same headers pattern as sellerProductService
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const headers = {
+        "Content-Type": "application/json",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const queryParams = new URLSearchParams();
       if (params.page) queryParams.append("page", params.page);
       if (params.limit) queryParams.append("limit", params.limit);
@@ -71,11 +93,20 @@ class ShopService {
       if (params.sortBy) queryParams.append("sortBy", params.sortBy);
       if (params.sortOrder) queryParams.append("sortOrder", params.sortOrder);
 
-      const url = `/seller/products${
+      const url = `http://localhost:5002/seller/products${
         queryParams.toString() ? "?" + queryParams.toString() : ""
       }`;
-      const response = await apiService.get(url);
-      return response.data;
+
+      const response = await fetch(url, {
+        method: "GET",
+        headers,
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("ShopService - getSellerProducts error:", error);
       throw error;
@@ -85,8 +116,29 @@ class ShopService {
   // Add new product
   static async addProduct(productData) {
     try {
-      const response = await apiService.post("/seller/products", productData);
-      return response.data;
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const headers = {
+        "Content-Type": "application/json",
+        "x-user-id": "1", // TODO: Get from auth context
+        "x-user-role": "seller",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch("http://localhost:5002/seller/products", {
+        method: "POST",
+        headers,
+        body: JSON.stringify(productData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("ShopService - addProduct error:", error);
       throw error;
@@ -96,11 +148,32 @@ class ShopService {
   // Update product
   static async updateProduct(productId, productData) {
     try {
-      const response = await apiService.put(
-        `/seller/products/${productId}`,
-        productData
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const headers = {
+        "Content-Type": "application/json",
+        "x-user-id": "1", // TODO: Get from auth context
+        "x-user-role": "seller",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `http://localhost:5002/seller/products/${productId}`,
+        {
+          method: "PUT",
+          headers,
+          body: JSON.stringify(productData),
+        }
       );
-      return response.data;
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("ShopService - updateProduct error:", error);
       throw error;
@@ -110,8 +183,31 @@ class ShopService {
   // Delete product
   static async deleteProduct(productId) {
     try {
-      const response = await apiService.delete(`/seller/products/${productId}`);
-      return response.data;
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+      const headers = {
+        "Content-Type": "application/json",
+        "x-user-id": "1", // TODO: Get from auth context
+        "x-user-role": "seller",
+      };
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await fetch(
+        `http://localhost:5002/seller/products/${productId}`,
+        {
+          method: "DELETE",
+          headers,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return await response.json();
     } catch (error) {
       console.error("ShopService - deleteProduct error:", error);
       throw error;

@@ -1,12 +1,13 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import ProductModal from "../../components/modals/ProductModal";
-import ShopEditModal from "../../components/modals/ShopEditModal";
-import ShopHeader from "../../components/shop/ShopHeader";
-import ShopInfoCard from "../../components/shop/ShopInfoCard";
-import QuickStatsCard from "../../components/shop/QuickStatsCard";
-import FeaturedProducts from "../../components/shop/FeaturedProducts";
-import DeleteModal from "../../components/modals/DeleteModal";
+import ProductModal from "../../components/common/modals/ProductModal";
+import ProductDetailModal from "../../components/common/product/ProductDetailModal";
+import ShopEditModal from "../../components/seller/shop/ShopEditModal";
+import ShopHeader from "../../components/seller/shop/ShopHeader";
+import ShopInfoCard from "../../components/seller/shop/ShopInfoCard";
+import QuickStatsCard from "../../components/seller/shop/QuickStatsCard";
+import FeaturedProducts from "../../components/seller/shop/FeaturedProducts";
+import DeleteModal from "../../components/common/DeleteModal";
 import { useShopPage } from "../../hooks/useShopPage";
 
 const ShopPage = () => {
@@ -51,6 +52,7 @@ const ShopPage = () => {
 
     // Product Operations
     handleAddProduct,
+    handleViewProduct,
     handleEditProduct,
     handleDeleteProduct,
     handleSaveProduct,
@@ -113,6 +115,7 @@ const ShopPage = () => {
           formatPrice={formatPrice}
           getStatusColor={getStatusColor}
           onAddProduct={handleAddProduct}
+          onViewProduct={handleViewProduct} // Sử dụng handleViewProduct để mở ProductDetailModal
           onEditProduct={handleEditProduct}
           onDeleteProduct={handleDeleteProduct}
           onResetFilters={handleResetFilters}
@@ -126,7 +129,17 @@ const ShopPage = () => {
           product={currentProduct}
           onProductChange={setCurrentProduct}
           onSave={handleSaveProduct}
-          categories={categories}
+          categories={categories.map((cat) => cat.name || cat)} // Convert to array of strings
+          variant="seller"
+        />
+
+        {/* Product Detail Modal - same as ManageProduct */}
+        <ProductDetailModal
+          isOpen={currentProduct && modalMode === "view"}
+          onClose={() => setCurrentProduct(null)}
+          product={currentProduct}
+          onEdit={handleEditProduct}
+          onDelete={handleDeleteProduct}
         />
 
         {/* Delete Modal */}

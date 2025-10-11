@@ -1,6 +1,17 @@
 import db from "../../../db/index.js";
 
 class Seller {
+  // Initialize connection settings for GROUP_CONCAT
+  static async initializeConnection() {
+    try {
+      await db.execute("SET SESSION group_concat_max_len = 10000");
+    } catch (error) {
+      console.warn(
+        "[SELLER] Warning: Could not set group_concat_max_len:",
+        error.message
+      );
+    }
+  }
   // Get seller's products with pagination
   static async getSellerProducts({
     sellerId,
@@ -12,6 +23,8 @@ class Seller {
     sortOrder = "DESC",
   }) {
     try {
+      // Initialize connection settings
+      await this.initializeConnection();
       const offset = (page - 1) * limit;
       let whereConditions = ["p.ID_NguoiBan = ?"];
       let params = [sellerId];
@@ -45,7 +58,7 @@ class Seller {
         ? sortOrder.toUpperCase()
         : "DESC";
 
-      // Main query
+      // Main query - Fix GROUP_CONCAT with pagination
       const query = `
         SELECT 
           p.ID_SanPham,
@@ -54,7 +67,7 @@ class Seller {
           p.Gia,
           p.TonKho,
           p.TrangThai,
-          GROUP_CONCAT(a.Url) as image_urls,
+          COALESCE(GROUP_CONCAT(DISTINCT a.Url ORDER BY a.Upload_at ASC SEPARATOR ','), '') as image_urls,
           p.CapNhat as created_date,
           dm.TenDanhMuc,
           dm.ID_DanhMuc,
@@ -63,7 +76,7 @@ class Seller {
         LEFT JOIN nguoidung n ON p.ID_NguoiBan = n.ID_NguoiDung
         LEFT JOIN cuahang c ON n.ID_CuaHang = c.ID_CuaHang
         LEFT JOIN danhmuc dm ON p.ID_DanhMuc = dm.ID_DanhMuc
-        LEFT JOIN AnhSanPham a ON p.ID_SanPham = a.ID_SanPham
+        LEFT JOIN anhsanpham a ON p.ID_SanPham = a.ID_SanPham
         ${whereClause}
         GROUP BY p.ID_SanPham, p.TenSanPham, p.MoTa, p.Gia, p.TonKho, p.TrangThai, p.CapNhat, dm.TenDanhMuc, dm.ID_DanhMuc, c.TenCuaHang
         ORDER BY p.${finalSortBy} ${finalSortOrder}
@@ -170,7 +183,7 @@ class Seller {
   static async updateProduct(sellerId, productId, productData) {
     let connection;
     try {
-      const { tenSanPham, moTa, gia, danhMuc, trangThai } = productData;
+      const { tenSanPham, moTa, gia, danhMuc } = productData;
 
       // Get connection for transaction
       connection = await db.getConnection();
@@ -197,7 +210,7 @@ class Seller {
       // Update product info
       const updateProductQuery = `
         UPDATE SanPham 
-        SET TenSanPham = ?, MoTa = ?, Gia = ?, ID_DanhMuc = ?, TrangThai = ?, CapNhat = CURRENT_TIMESTAMP
+        SET TenSanPham = ?, MoTa = ?, Gia = ?, ID_DanhMuc = ?, TrangThai = 'active', CapNhat = CURRENT_TIMESTAMP
         WHERE ID_SanPham = ?
       `;
 
@@ -206,7 +219,6 @@ class Seller {
         moTa,
         gia,
         danhMuc,
-        trangThai,
         productId,
       ]);
 
@@ -449,7 +461,7 @@ class Seller {
           p.Gia,
           p.TonKho,
           p.TrangThai,
-          GROUP_CONCAT(a.Url) as image_urls,
+          COALESCE(GROUP_CONCAT(DISTINCT a.Url ORDER BY a.Upload_at ASC SEPARATOR ','), '') as image_urls,
           p.CapNhat as created_date,
           dm.TenDanhMuc,
           dm.ID_DanhMuc,
@@ -458,7 +470,7 @@ class Seller {
         LEFT JOIN nguoidung n ON p.ID_NguoiBan = n.ID_NguoiDung
         LEFT JOIN cuahang c ON n.ID_CuaHang = c.ID_CuaHang
         LEFT JOIN danhmuc dm ON p.ID_DanhMuc = dm.ID_DanhMuc
-        LEFT JOIN AnhSanPham a ON p.ID_SanPham = a.ID_SanPham
+        LEFT JOIN anhsanpham a ON p.ID_SanPham = a.ID_SanPham
         WHERE p.ID_SanPham = ? AND p.ID_NguoiBan = ?
         GROUP BY p.ID_SanPham, p.TenSanPham, p.MoTa, p.Gia, p.TonKho, p.TrangThai, p.CapNhat, dm.TenDanhMuc, dm.ID_DanhMuc, c.TenCuaHang
       `;
@@ -550,6 +562,92 @@ class Seller {
     } catch (error) {
       console.error("[SELLER] Error in deleteProductImage:", error);
       throw error;
+    }
+  }
+
+  // Cập nhật thứ tự ảnh sản phẩm
+  static async updateImageOrder(productId, imageOrder, sellerId) {
+    let connection;
+    try {
+      console.log(
+        `[SELLER] updateImageOrder - ProductID: ${productId}, Order: ${imageOrder}`
+      );
+
+      // Verify product ownership
+      const isOwner = await this.checkProductOwnership(productId, sellerId);
+      if (!isOwner) {
+        throw new Error("Không có quyền thay đổi thứ tự ảnh của sản phẩm này");
+      }
+
+      // Get connection for transaction
+      connection = await db.getConnection();
+      await connection.query("START TRANSACTION");
+
+      // Get current images for this product
+      const getCurrentImagesQuery = `
+        SELECT ID_Anh, Url FROM anhsanpham 
+        WHERE ID_SanPham = ? 
+        ORDER BY Upload_at ASC
+      `;
+      const [currentImages] = await connection.execute(getCurrentImagesQuery, [
+        productId,
+      ]);
+
+      // Create mapping of URL/ID to database ID
+      const imageMap = new Map();
+      currentImages.forEach((img) => {
+        imageMap.set(img.ID_Anh.toString(), img.ID_Anh);
+        imageMap.set(img.Url, img.ID_Anh);
+      });
+
+      // Update order by modifying Upload_at timestamp with sequence
+      const baseTimestamp = new Date();
+
+      for (let i = 0; i < imageOrder.length; i++) {
+        const identifier = imageOrder[i];
+        const dbImageId =
+          imageMap.get(identifier.toString()) || imageMap.get(identifier);
+
+        if (dbImageId) {
+          // Set timestamp with sequence to maintain order
+          const newTimestamp = new Date(baseTimestamp.getTime() + i * 1000);
+
+          const updateQuery = `
+            UPDATE anhsanpham 
+            SET Upload_at = ? 
+            WHERE ID_Anh = ? AND ID_SanPham = ?
+          `;
+
+          await connection.execute(updateQuery, [
+            newTimestamp.toISOString().slice(0, 19).replace("T", " "),
+            dbImageId,
+            productId,
+          ]);
+
+          console.log(`[SELLER] Updated image ${dbImageId} to position ${i}`);
+        } else {
+          console.warn(
+            `[SELLER] Could not find image for identifier: ${identifier}`
+          );
+        }
+      }
+
+      await connection.query("COMMIT");
+      console.log(
+        `[SELLER] Successfully reordered ${imageOrder.length} images`
+      );
+
+      return true;
+    } catch (error) {
+      if (connection) {
+        await connection.query("ROLLBACK");
+      }
+      console.error("[SELLER] Error in updateImageOrder:", error);
+      throw error;
+    } finally {
+      if (connection) {
+        connection.release();
+      }
     }
   }
 

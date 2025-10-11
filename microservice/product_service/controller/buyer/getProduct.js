@@ -80,11 +80,33 @@ export const getProductById = async (req, res) => {
       });
     }
 
+    // Transform the data for frontend compatibility
+    const transformedProduct = {
+      id: product.ID_SanPham,
+      name: product.TenSanPham,
+      description: product.MoTa,
+      price: parseFloat(product.Gia),
+      stock_quantity: product.TonKho,
+      category: product.TenDanhMuc,
+      category_id: product.ID_DanhMuc,
+      images: product.image_urls ? product.image_urls.split(",") : [],
+      average_rating: parseFloat(product.average_rating) || 0,
+      review_count: product.review_count || 0,
+      shop_name: product.TenCuaHang,
+      shop_id: product.ID_CuaHang,
+      shop_location: product.shop_location
+        ? product.shop_location.trim()
+        : "TP.HCM",
+      shop_product_count: product.shop_product_count || 0,
+      shop_average_rating: parseFloat(product.shop_average_rating) || 0,
+      created_date: product.created_date,
+    };
+
     console.log(`[PRODUCT_CONTROLLER] Found product: ${product.TenSanPham}`);
 
     res.json({
       success: true,
-      data: product,
+      data: transformedProduct,
     });
   } catch (error) {
     console.error("[PRODUCT_CONTROLLER] Error in getProductById:", error);
@@ -138,10 +160,10 @@ export const searchProducts = async (req, res) => {
       sortOrder,
     });
 
-    if (!search || search.trim().length < 2) {
+    if (!search || search.trim().length < 1) {
       return res.status(400).json({
         success: false,
-        message: "Search query must be at least 2 characters",
+        message: "Search query must be at least 1 character",
       });
     }
 
@@ -178,6 +200,138 @@ export const searchProducts = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Search failed",
+      error: error.message,
+    });
+  }
+};
+
+// Get product reviews
+export const getProductReviews = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { page = 1, limit = 10 } = req.query;
+
+    console.log(`[PRODUCT_CONTROLLER] Get reviews for product ID: ${id}`);
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    const pageNum = Math.max(1, parseInt(page));
+    const limitNum = Math.min(Math.max(1, parseInt(limit)), 50);
+
+    const result = await Product.getProductReviews(id, pageNum, limitNum);
+
+    console.log(`[PRODUCT_CONTROLLER] Found ${result.reviews.length} reviews`);
+
+    res.json({
+      success: true,
+      data: result.reviews,
+      pagination: result.pagination,
+    });
+  } catch (error) {
+    console.error("[PRODUCT_CONTROLLER] Error in getProductReviews:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch reviews",
+      error: error.message,
+    });
+  }
+};
+
+// Get product rating statistics
+export const getProductRatingStats = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    console.log(`[PRODUCT_CONTROLLER] Get rating stats for product ID: ${id}`);
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    const stats = await Product.getProductRatingStats(id);
+
+    console.log(
+      `[PRODUCT_CONTROLLER] Rating stats: ${stats.average_rating}/5 (${stats.total_reviews} reviews)`
+    );
+
+    res.json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    console.error(
+      "[PRODUCT_CONTROLLER] Error in getProductRatingStats:",
+      error
+    );
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch rating statistics",
+      error: error.message,
+    });
+  }
+};
+
+// Get similar products by category
+export const getSimilarProducts = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { limit = 4 } = req.query;
+
+    console.log(`[PRODUCT_CONTROLLER] Get similar products for ID: ${id}`);
+
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid product ID",
+      });
+    }
+
+    // First get the product to know its category
+    const product = await Product.getProductById(id);
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
+
+    // Get similar products
+    const similarProducts = await Product.getSimilarProducts(
+      id,
+      product.ID_DanhMuc,
+      parseInt(limit)
+    );
+
+    // Transform data
+    const transformedProducts = similarProducts.map((item) => ({
+      id: item.ID_SanPham,
+      name: item.TenSanPham,
+      price: parseFloat(item.Gia),
+      image: item.first_image || null,
+      rating: parseFloat(item.average_rating) || 0,
+    }));
+
+    console.log(
+      `[PRODUCT_CONTROLLER] Found ${transformedProducts.length} similar products`
+    );
+
+    res.json({
+      success: true,
+      data: transformedProducts,
+    });
+  } catch (error) {
+    console.error("[PRODUCT_CONTROLLER] Error in getSimilarProducts:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch similar products",
       error: error.message,
     });
   }

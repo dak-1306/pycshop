@@ -14,7 +14,6 @@ import {
   getStockHistory,
   // Image management functions
   uploadProductImages,
-  addProductImages,
   getProductImages,
   deleteProductImage,
   // Order management functions
@@ -46,6 +45,9 @@ const upload = multer({
   limits: {
     fileSize: 5 * 1024 * 1024, // 5MB per file
     files: 15, // Max 15 files
+    fieldSize: 2 * 1024 * 1024, // 2MB for field values (for imageOrder array)
+    fieldNameSize: 100, // 100 bytes for field names
+    fields: 50, // Max number of non-file fields
   },
 });
 
@@ -53,7 +55,12 @@ const upload = multer({
 router.get("/products", sellerAuthMiddleware, getSellerProducts);
 router.post("/products", sellerAuthMiddleware, addProduct);
 router.get("/products/:id", sellerAuthMiddleware, getProductById);
-router.put("/products/:id", sellerAuthMiddleware, updateProduct);
+router.put(
+  "/products/:id",
+  sellerAuthMiddleware,
+  upload.array("newImages", 15),
+  updateProduct
+);
 router.delete("/products/:id", sellerAuthMiddleware, deleteProduct);
 
 // Stock management routes
@@ -71,9 +78,8 @@ router.get(
   getStockHistory
 );
 
-// Image management routes - sử dụng SellerController
+// Image management routes - chỉ giữ endpoint cần thiết
 router.get("/products/:id/images", sellerAuthMiddleware, getProductImages);
-router.post("/products/:id/images", sellerAuthMiddleware, addProductImages);
 router.post(
   "/products/:productId/upload-images",
   sellerAuthMiddleware,

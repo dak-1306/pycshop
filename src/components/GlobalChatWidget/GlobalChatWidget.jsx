@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useChatWidget } from "../../hooks/useChatWidget";
+import { useChat } from "../../context/ChatContext";
 import { PLACEHOLDER_IMAGES } from "../../utils/placeholderImages";
 import "./GlobalChatWidget.css";
 
 const GlobalChatWidget = () => {
-  const { isChatOpen, currentShop, closeChat } = useChatWidget();
+  const { isChatOpen, currentShop, closeChat } = useChat();
   const [isMinimized, setIsMinimized] = useState(false);
   const [selectedShop, setSelectedShop] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");

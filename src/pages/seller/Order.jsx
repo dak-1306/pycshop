@@ -1,12 +1,12 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import OrderModal from "../../components/modals/OrderModal";
-import DeleteModal from "../../components/modals/DeleteModal";
-import OrderDetailModal from "../../components/modals/OrderDetailModal";
-import OrderSearchBar from "../../components/order/OrderSearchBar";
-import OrderFilters from "../../components/order/OrderFilters";
-import OrderTable from "../../components/order/OrderTable";
-import OrderPagination from "../../components/order/OrderPagination";
+import OrderModal from "../../components/common/modals/OrderModal";
+import DeleteModal from "../../components/common/DeleteModal";
+import OrderDetailModal from "../../components/common/order/OrderDetailModal";
+import OrderSearchBar from "../../components/common/order/OrderSearchBar";
+import OrderFilters from "../../components/common/order/OrderFilters";
+import OrderTable from "../../components/common/order/OrderTable";
+import OrderPagination from "../../components/common/order/OrderPagination";
 import { useOrders } from "../../hooks/useOrders";
 
 // CSS animations (giữ nguyên)
@@ -83,7 +83,7 @@ const Order = () => {
 
   return (
     <SellerLayout title="Order">
-      <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="p-6">
         {/* Search Bar */}
         <OrderSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
 
@@ -100,6 +100,7 @@ const Order = () => {
 
         {/* Orders Table */}
         <OrderTable
+          variant="seller"
           orders={orders}
           onViewOrder={handleViewOrder}
           onEditOrder={handleEditOrder}
@@ -119,12 +120,14 @@ const Order = () => {
         <OrderModal
           isOpen={showOrderModal}
           onClose={handleCloseOrderModal}
-          mode={modalMode}
           order={currentOrder}
-          onOrderChange={setCurrentOrder}
+          variant="seller"
+          modalMode={modalMode}
           onSave={handleSaveOrder}
-          categories={orderCategories}
-          orderStatuses={orderStatuses.filter((f) => f !== "Tất cả")}
+          onUpdateStatus={(orderId, status) =>
+            console.log("Update status:", orderId, status)
+          }
+          onViewDetails={handleViewOrder}
         />
 
         <OrderDetailModal
@@ -132,6 +135,7 @@ const Order = () => {
           onClose={handleCloseDetailModal}
           order={currentOrder}
           onEdit={handleEditOrder}
+          variant="seller"
         />
 
         <DeleteModal

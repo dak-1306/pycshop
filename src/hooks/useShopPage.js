@@ -6,6 +6,7 @@ import {
   MODAL_MODES,
   SHOP_STATUS_COLORS,
   RECENT_ACTIVITIES,
+  MOCK_PRODUCTS,
 } from "../constants/shopPageConstants";
 import ShopService from "../services/shopService";
 
@@ -17,6 +18,9 @@ export const useShopPage = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Categories State
+  const [categories, setCategories] = useState([]);
 
   // Search and Filter States
   const [searchTerm, setSearchTerm] = useState("");
@@ -64,17 +68,75 @@ export const useShopPage = () => {
       });
 
       console.log("Products response:", response);
+      console.log("First product structure:", response.data?.[0]);
 
       if (response && response.success) {
-        setProducts(response.data || []);
+        // Map API response to frontend format
+        const mappedProducts = (response.data || []).map((product) => {
+          console.log("Processing product:", product);
+          return {
+            id: product.ID_SanPham,
+            name: product.TenSanPham,
+            description: product.MoTa,
+            price: parseFloat(product.Gia),
+            stock: product.TonKho,
+            stock_quantity: product.TonKho, // Alternative field name
+            quantity: product.TonKho, // Alternative field name
+            category: product.Category || product.TenDanhMuc,
+            status: product.TrangThai || "Còn hàng",
+            images: product.images || product.HinhAnh || [],
+            created_at: product.NgayTao,
+            updated_at: product.NgayCapNhat,
+            // Add any other fields that might be needed
+          };
+        });
+
+        console.log("Mapped products:", mappedProducts);
+
+        // Load images for each product
+        const productsWithImages = await Promise.all(
+          mappedProducts.map(async (product) => {
+            try {
+              const token =
+                localStorage.getItem("token") ||
+                sessionStorage.getItem("token");
+              const imageResponse = await fetch(
+                `http://localhost:5002/seller/products/${product.id}/images`,
+                {
+                  headers: {
+                    "Content-Type": "application/json",
+                    ...(token && { Authorization: `Bearer ${token}` }),
+                  },
+                }
+              );
+
+              if (imageResponse.ok) {
+                const imageData = await imageResponse.json();
+                console.log(`Images for product ${product.id}:`, imageData);
+                return {
+                  ...product,
+                  images: imageData.data || imageData.images || [],
+                };
+              }
+            } catch (error) {
+              console.log(
+                `Failed to load images for product ${product.id}:`,
+                error
+              );
+            }
+            return product;
+          })
+        );
+
+        setProducts(productsWithImages);
         setTotalPages(
           Math.ceil(
             (response.pagination?.total || 0) / PAGINATION_CONFIG.itemsPerPage
           )
         );
         console.log(
-          "Products loaded successfully:",
-          response.data?.length || 0,
+          "Products with images loaded successfully:",
+          productsWithImages.length,
           "products"
         );
       } else {
@@ -84,13 +146,28 @@ export const useShopPage = () => {
       }
     } catch (error) {
       console.error("Error loading products:", error);
-      setError("Không thể tải danh sách sản phẩm");
-      setProducts([]);
+      console.log("Using mock products as fallback");
+
+      // Use mock products as fallback for testing UI
+      setProducts(MOCK_PRODUCTS);
       setTotalPages(1);
+      setError(null);
     } finally {
       setLoading(false);
     }
   }, [searchTerm, selectedCategory, selectedStatus, sortBy, currentPage]);
+
+  // Load categories
+  const loadCategories = useCallback(async () => {
+    try {
+      const response = await ShopService.getCategories();
+      if (response && response.success) {
+        setCategories(response.categories || []);
+      }
+    } catch (error) {
+      console.error("Error loading categories:", error);
+    }
+  }, []);
 
   // Load shop info separately
   const loadShopInfo = useCallback(async () => {
@@ -111,10 +188,11 @@ export const useShopPage = () => {
     }
   }, []);
 
-  // Initial load for shop info
+  // Initial load for shop info and categories
   useEffect(() => {
     loadShopInfo();
-  }, [loadShopInfo]);
+    loadCategories();
+  }, [loadShopInfo, loadCategories]);
 
   // Load products when filters change
   useEffect(() => {
@@ -141,9 +219,20 @@ export const useShopPage = () => {
 
   // Product CRUD operations
   const handleAddProduct = () => {
+    console.log("useShopPage - handleAddProduct called");
+    console.log("MODAL_MODES.ADD:", MODAL_MODES.ADD);
+    console.log("INITIAL_PRODUCT_STATE:", INITIAL_PRODUCT_STATE);
+
     setCurrentProduct(INITIAL_PRODUCT_STATE);
     setModalMode(MODAL_MODES.ADD);
     setShowProductModal(true);
+
+    console.log("Modal state should be set to true");
+  };
+
+  const handleViewProduct = (product) => {
+    setCurrentProduct({ ...product });
+    setModalMode("view"); // Set mode to view for ProductDetailModal
   };
 
   const handleEditProduct = (product) => {
@@ -167,7 +256,8 @@ export const useShopPage = () => {
           setShowProductModal(false);
           setCurrentProduct(INITIAL_PRODUCT_STATE);
           alert("Thêm sản phẩm thành công!");
-          loadProducts(); // Reload products
+          // Force reload products to show new product
+          await loadProducts();
         } else {
           alert(response.message || "Có lỗi xảy ra khi thêm sản phẩm");
         }
@@ -180,7 +270,8 @@ export const useShopPage = () => {
           setShowProductModal(false);
           setCurrentProduct(INITIAL_PRODUCT_STATE);
           alert("Cập nhật sản phẩm thành công!");
-          loadProducts(); // Reload products
+          // Force reload products to show updated product
+          await loadProducts();
         } else {
           alert(response.message || "Có lỗi xảy ra khi cập nhật sản phẩm");
         }
@@ -202,7 +293,8 @@ export const useShopPage = () => {
         setShowDeleteModal(false);
         setProductToDelete(null);
         alert("Xóa sản phẩm thành công!");
-        loadProducts(); // Reload products
+        // Force reload products to update list
+        await loadProducts();
       } else {
         alert(response.message || "Có lỗi xảy ra khi xóa sản phẩm");
       }
@@ -304,6 +396,7 @@ export const useShopPage = () => {
 
     // CRUD Operations
     handleAddProduct,
+    handleViewProduct,
     handleEditProduct,
     handleDeleteProduct,
     handleSaveProduct,
@@ -321,7 +414,10 @@ export const useShopPage = () => {
     // Statistics
     shopStats,
 
+    // Categories
+    categories,
+
     // Constants
-    recentActivities: RECENT_ACTIVITIES,
+    recentActivities: [], // TODO: Load from API
   };
 };

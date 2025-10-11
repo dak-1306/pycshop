@@ -3,7 +3,6 @@ import authMiddleware from "./middleware/authMiddleware.js";
 
 function setupRoutes(app) {
   console.log("[ROUTES] Setting up proxy routes...");
-
   // Auth Service
   app.use(
     "/auth",
@@ -12,14 +11,30 @@ function setupRoutes(app) {
         `[ROUTES] Matched /auth route for ${req.method} ${req.originalUrl}`
       );
       console.log(`[ROUTES] req.user:`, req.user);
+        // Skip auth middleware for login/register routes
+      const publicRoutes = ['/auth/login', '/auth/register', '/auth/admin/login', '/auth/register-admin'];
+      const isPublicRoute = publicRoutes.some(route => req.originalUrl === route || req.originalUrl.startsWith(route + '?'));
+      
+      console.log(`[ROUTES] Checking if ${req.originalUrl} is public route:`, isPublicRoute);
+      
+      if (isPublicRoute) {
+        console.log(`[ROUTES] Skipping auth for public auth route: ${req.originalUrl}`);
+        return next();
+      }
+        // Apply auth middleware for protected auth routes (like logout)
+      authMiddleware(req, res, next);
+    },
+    (req, res, next) => {
+      console.log(`[ROUTES] About to call createProxyMiddleware for ${req.method} ${req.url}`);
       next();
     },
     createProxyMiddleware({
       target: process.env.AUTH_SERVICE_URL || "http://localhost:5001",
       changeOrigin: true,
-      pathRewrite: { "^/auth": "" },
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(`[PROXY] onProxyReq callback triggered`);
+      pathRewrite: { "^/auth": "" },      onProxyReq: (proxyReq, req, res) => {
+        console.log(`🔥 [PROXY] Auth onProxyReq callback CALLED! - ${req.method} ${req.url}`);
+        console.log(`🔥 [PROXY] Target: ${process.env.AUTH_SERVICE_URL || "http://localhost:5001"}${proxyReq.path}`);
+        
         // Truyền thông tin user từ API Gateway xuống auth service
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id);
@@ -61,6 +76,111 @@ function setupRoutes(app) {
         console.error(`[PROXY] Error:`, err.message);
         if (!res.headersSent) {
           res.status(500).json({ error: "Proxy error", details: err.message });
+        }
+      },
+    })
+  );
+
+  // Admin Service
+  app.use(
+    "/admin",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /admin route for ${req.method} ${req.originalUrl}`
+      );
+      console.log(`[ROUTES] req.user:`, req.user);
+      next();
+    },
+    authMiddleware, // Apply auth middleware for all admin routes
+    createProxyMiddleware({
+      target: process.env.ADMIN_SERVICE_URL || "http://localhost:5006",
+      changeOrigin: true,
+      pathRewrite: { "^/admin": "" },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`[PROXY] onProxyReq callback triggered for admin service`);        // Truyền thông tin user từ API Gateway xuống admin service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id);
+          proxyReq.setHeader("x-user-role", req.user.role);
+          proxyReq.setHeader("x-user-email", req.user.email || "");
+
+          // Only set x-user-type if it exists to avoid undefined header
+          if (req.user.userType) {
+            proxyReq.setHeader("x-user-type", req.user.userType);
+          }
+
+          console.log(
+            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${
+              req.user.role
+            }, userType: ${req.user.userType || "undefined"}`
+          );
+        } else {
+          console.log(`[PROXY] No req.user found for this admin request`);
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.ADMIN_SERVICE_URL || "http://localhost:5006"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Admin Service`
+        );
+        
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Admin Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Admin service error", details: err.message });
+        }
+      },
+    })
+  );
+
+  // Static files (uploads) - route to Product Service
+  app.use(
+    "/uploads",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /uploads route for ${req.method} ${req.originalUrl}`
+      );
+      next();
+    },
+    createProxyMiddleware({
+      target: process.env.PRODUCT_SERVICE_URL || "http://localhost:5002",
+      changeOrigin: true,
+      // Keep /uploads prefix
+      pathRewrite: (path, req) => {
+        console.log(`[PROXY] Uploads path rewrite: ${path} -> ${path}`);
+        return path;
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `[PROXY] Forwarding uploads ${req.method} ${req.url} to ${
+            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Product Service (uploads)`
+        );
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Uploads Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Upload service error", details: err.message });
         }
       },
     })
@@ -332,6 +452,143 @@ function setupRoutes(app) {
           res
             .status(500)
             .json({ error: "Admin service error", details: err.message });
+        }
+      },
+    })
+  );
+
+  // Review Service - For reviews and ratings
+  app.use(
+    "/api/reviews",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /api/reviews route for ${req.method} ${req.originalUrl}`
+      );
+      next();
+    },
+    // Apply auth middleware for protected review routes
+    (req, res, next) => {
+      // Skip auth for GET requests to public review routes (viewing reviews)
+      if (req.method === "GET" && req.path.match(/^\/products\/\d+\/reviews/)) {
+        console.log(
+          `[ROUTES] Skipping auth for public review route: ${req.path}`
+        );
+        return next();
+      }
+
+      // Skip auth for check route if no auth header (will return hasReviewed: false)
+      if (
+        req.method === "GET" &&
+        req.path.includes("/check/") &&
+        !req.headers.authorization
+      ) {
+        console.log(
+          `[ROUTES] Skipping auth for check route without token: ${req.path}`
+        );
+        return next();
+      }
+
+      // Apply auth middleware for POST and protected routes
+      console.log(
+        `[ROUTES] Applying auth middleware for review route: ${req.path}`
+      );
+      authMiddleware(req, res, next);
+    },
+    createProxyMiddleware({
+      target: process.env.REVIEW_SERVICE_URL || "http://localhost:5005",
+      changeOrigin: true,
+      pathRewrite: { "^/api/reviews": "/api/reviews" },
+      onProxyReq: (proxyReq, req, res) => {
+        // Truyền thông tin user từ API Gateway xuống review service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id);
+          proxyReq.setHeader("x-user-role", req.user.role);
+
+          if (req.user.userType) {
+            proxyReq.setHeader("x-user-type", req.user.userType);
+          }
+
+          console.log(
+            `[PROXY] Adding user headers for review service - user ID: ${
+              req.user.id
+            }, role: ${req.user.role}, userType: ${
+              req.user.userType || "undefined"
+            }`
+          );
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.REVIEW_SERVICE_URL || "http://localhost:5005"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Review Service`
+        );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Review Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Review service error", details: err.message });
+        }
+      },
+    })
+  );
+
+  // Product reviews route (public access)
+  app.use(
+    "/api/products",
+    (req, res, next) => {
+      // Only handle requests that end with /reviews
+      if (req.originalUrl.includes("/reviews")) {
+        console.log(
+          `[ROUTES] Matched product reviews route for ${req.method} ${req.originalUrl}`
+        );
+        next();
+      } else {
+        next(); // Pass to other middleware
+      }
+    },
+    createProxyMiddleware({
+      target: process.env.REVIEW_SERVICE_URL || "http://localhost:5005",
+      changeOrigin: true,
+      // Filter only review requests
+      filter: (pathname, req) => {
+        return pathname.includes("/reviews");
+      },
+      pathRewrite: (path, req) => {
+        // Keep the path as is since Review Service expects /api/products/:id/reviews
+        return path;
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.REVIEW_SERVICE_URL || "http://localhost:5005"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Review Service (products route)`
+        );
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Review Service (products) Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Review service error", details: err.message });
         }
       },
     })

@@ -1,10 +1,21 @@
 import { useState, useEffect } from "react";
+import reportExportService from "../services/reportExportService";
 
 export const useAdminReports = () => {
   // Date range state
   const [dateRange, setDateRange] = useState({
     startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30 days ago
     endDate: new Date(),
+  });
+
+  // Advanced filters state
+  const [filters, setFilters] = useState({
+    reportType: 'all',
+    category: 'all',
+    status: 'all',
+    minAmount: '',
+    maxAmount: '',
+    userType: 'all'
   });
 
   // Loading state
@@ -63,23 +74,18 @@ export const useAdminReports = () => {
     revenueByCategory: [],
   });
 
-  const [violationData, setViolationData] = useState({
-    totalReports: 0,
-    pendingReports: 0,
-    resolvedReports: 0,
-    reportsByType: {
-      User: 0,
-      Product: 0,
-    },
-    recentReports: [],
-  });
+  // Filter change handler
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    // Regenerate data based on filters
+    generateMockData(newFilters);
+  };
 
   // Mock data generation
-  useEffect(() => {
-    const generateMockData = () => {
-      setIsLoading(true);
+  const generateMockData = (currentFilters = filters) => {
+    setIsLoading(true);
 
-      setTimeout(() => {
+    setTimeout(() => {
         // Overview Stats
         setOverviewStats({
           totalUsers: 1547,
@@ -202,72 +208,42 @@ export const useAdminReports = () => {
             { category: "Đồng hồ", revenue: 45670000, percentage: 9.4 },
             { category: "Khác", revenue: 20280000, percentage: 4.1 },
           ],
-        });
-
-        // Violation Data
-        setViolationData({
-          totalReports: 27,
-          pendingReports: 8,
-          resolvedReports: 19,
-          reportsByType: {
-            User: 15,
-            Product: 12,
-          },
-          recentReports: [
-            {
-              id: 1,
-              type: "Product",
-              reason: "Sản phẩm giả mạo",
-              reportedBy: "Nguyễn Văn A",
-              status: "in_progress",
-              createdAt: "2025-10-03T10:30:00Z",
-            },
-            {
-              id: 2,
-              type: "User",
-              reason: "Hành vi lừa đảo",
-              reportedBy: "Trần Thị B",
-              status: "in_progress",
-              createdAt: "2025-10-02T14:15:00Z",
-            },
-          ],
-        });
-
-        setIsLoading(false);
+        });setIsLoading(false);
       }, 1000);
     };
 
+  // Initial data load and when dependencies change
+  useEffect(() => {
     generateMockData();
-  }, [dateRange]);
+  }, [dateRange, filters]);  // Actions
+  const handleExportReport = async (format = 'json') => {
+    try {
+      const reportData = {
+        generatedAt: new Date().toISOString(),
+        dateRange: {
+          startDate: dateRange.startDate.toISOString(),
+          endDate: dateRange.endDate.toISOString(),
+        },
+        overviewStats,
+        userAnalytics,
+        orderAnalytics,
+        productAnalytics,
+        financialData,
+        violationData,
+        filters
+      };
 
-  // Actions
-  const handleExportReport = () => {
-    const reportData = {
-      generatedAt: new Date().toISOString(),
-      dateRange,
-      overviewStats,
-      userAnalytics,
-      orderAnalytics,
-      productAnalytics,
-      financialData,
-      violationData,
-    };
-
-    const dataStr = JSON.stringify(reportData, null, 2);
-    const dataUri =
-      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-
-    const exportFileDefaultName = `admin-report-${
-      new Date().toISOString().split("T")[0]
-    }.json`;
-
-    const linkElement = document.createElement("a");
-    linkElement.setAttribute("href", dataUri);
-    linkElement.setAttribute("download", exportFileDefaultName);
-    linkElement.click();
-
-    // Show success message
-    alert("📊 Đã xuất báo cáo thành công!");
+      const result = await reportExportService.exportReport(reportData, format);
+      
+      // Show success message
+      alert(`📊 ${result.message}`);
+      
+      return result;
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert(`❌ Xuất báo cáo thất bại: ${error.message}`);
+      throw error;
+    }
   };
 
   const handleRefreshData = () => {
@@ -276,20 +252,20 @@ export const useAdminReports = () => {
     setDateRange({ ...dateRange });
   };
 
-  return {
-    // State
+  return {    // State
     dateRange,
     setDateRange,
-    overviewStats,
+    filters,
+    setFilters,    overviewStats,
     userAnalytics,
     orderAnalytics,
     productAnalytics,
     financialData,
-    violationData,
     isLoading,
 
     // Actions
     handleExportReport,
     handleRefreshData,
+    handleFilterChange,
   };
 };

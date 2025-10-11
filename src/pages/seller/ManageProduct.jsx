@@ -1,16 +1,15 @@
 import React from "react";
 import SellerLayout from "../../components/layout/SellerLayout";
-import ProductModal from "../../components/modals/ProductModal";
-import DeleteModal from "../../components/modals/DeleteModal";
-import ProductDetailModal from "../../components/modals/ProductDetailModal";
-import SearchBar from "../../components/product/SearchBar";
-import ProductFilters from "../../components/product/ProductFilters";
-import ProductTable from "../../components/product/ProductTable";
-import Pagination from "../../components/product/Pagination";
+import ProductModal from "../../components/common/modals/ProductModal";
+import DeleteModal from "../../components/common/DeleteModal";
+import ProductDetailModal from "../../components/common/product/ProductDetailModal";
+import ProductFilters from "../../components/common/product/ProductFilters";
+import ProductTable from "../../components/common/product/ProductTable";
+import Pagination from "../../components/common/product/Pagination";
 import ErrorDisplay from "../../components/common/ErrorDisplay";
 import EmptyState from "../../components/common/EmptyState";
 import { useProducts } from "../../hooks/useProducts";
-import { useCategories } from "../../hooks/useCategories";
+import { useCategories } from "../../hooks/api/useCategories";
 import { PRODUCT_CATEGORIES } from "../../constants/productConstants";
 
 // CSS animations
@@ -53,8 +52,7 @@ const ManageProduct = () => {
     categories,
     isLoading: categoriesLoading,
     error: categoriesError,
-    getCategoryOptions,
-  } = useCategories();
+  } = useCategories(false); // Sử dụng seller API
 
   const {
     // State
@@ -76,6 +74,8 @@ const ManageProduct = () => {
     setSelectedPrice,
     currentPage,
     setCurrentPage,
+    totalItems,
+    totalPages,
     isLoading,
     error,
 
@@ -108,22 +108,22 @@ const ManageProduct = () => {
 
   return (
     <SellerLayout title="Manage Product">
-      <div className="p-6 bg-gray-50 min-h-screen">
-        {/* Search Bar */}
-        <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
+      <div className="p-6">
         {/* Filters and Action Buttons */}
         <ProductFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
           selectedCategory={selectedCategory}
-          setSelectedCategory={setSelectedCategory}
+          onCategoryChange={setSelectedCategory}
           selectedStatus={selectedStatus}
-          setSelectedStatus={setSelectedStatus}
+          onStatusChange={setSelectedStatus}
           selectedPrice={selectedPrice}
           setSelectedPrice={setSelectedPrice}
           onResetFilters={handleResetFilters}
           onAddProduct={handleAddProduct}
           onExport={handleExport}
           categories={filterCategories} // Use categories from API with "Tất cả" option
+          showResetButton={searchTerm || selectedCategory || selectedStatus}
         />
 
         {/* Products Table */}
@@ -146,6 +146,7 @@ const ManageProduct = () => {
           </div>
         ) : (
           <ProductTable
+            variant="seller"
             products={products}
             onViewProduct={handleViewProduct}
             onEditProduct={handleEditProduct}
@@ -156,11 +157,11 @@ const ManageProduct = () => {
         )}
 
         {/* Pagination - only show if there are products and no error */}
-        {!error && products.length > 0 && (
+        {!error && totalItems > 0 && (
           <Pagination
             currentPage={currentPage}
             setCurrentPage={setCurrentPage}
-            totalItems={products.length}
+            totalItems={totalItems}
             itemsPerPage={10}
           />
         )}
@@ -174,6 +175,7 @@ const ManageProduct = () => {
           onProductChange={setCurrentProduct}
           onSave={handleSaveProduct}
           categories={categoryNames} // Use categories from API
+          variant="seller"
           onImageUpload={handleImageUpload}
           onRemoveImage={handleRemoveImage}
           onSetFeaturedImage={handleSetFeaturedImage}

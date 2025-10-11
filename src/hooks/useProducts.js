@@ -1,21 +1,26 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import sellerProductService from "../services/sellerProductService.js";
-import { useCategories } from "./useCategories.js";
+import { useCategories } from "./api/useCategories.js";
 
 const INITIAL_FORM_STATE = {
   name: "",
-  price: "",
-  quantity: "",
-  category: "",
-  status: "active",
-  images: [],
-  imageFiles: [],
   description: "",
+  price: 0,
+  stock: 0,
+  category: "",
+  weight: 1, // Default 1kg
+  unit: "cái", // Default unit
+  images: [],
+  imageFiles: [], // For new image files
+  imagesToDelete: [], // For tracking images to delete
+  newImageUrls: [], // For new image URLs
+  hasImageReorder: false, // For tracking image reordering
+  featured: false,
 };
 
 export const useProducts = () => {
   // Get categories helper
-  const { getCategoryName, categories } = useCategories();
+  const { categories } = useCategories(false); // Sử dụng seller API
 
   // Products state
   const [products, setProducts] = useState([]);
@@ -32,67 +37,91 @@ export const useProducts = () => {
 
   // Filter states
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
   const [selectedPrice, setSelectedPrice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Pagination states
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Debounce search term
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
   // Initialize products
-  const loadProducts = async () => {
+  const loadProducts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      console.log("[useProducts] Loading products from API...");
       const response = await sellerProductService.getSellerProducts({
         page: currentPage,
         limit: 10,
-        search: searchTerm || undefined,
+        search: debouncedSearchTerm || undefined,
         status: selectedStatus || undefined,
         sortBy: "created_date",
         sortOrder: "DESC",
       });
 
-      console.log("[useProducts] API Response:", response);
-
       if (response.success && response.data) {
         // Map backend data to frontend format
-        const mappedProducts = response.data.map((product) => ({
-          id: product.ID_SanPham,
-          name: product.TenSanPham,
-          price: product.Gia?.toLocaleString("vi-VN"),
-          quantity: product.TonKho,
-          category: product.TenDanhMuc || "Chưa phân loại",
-          categoryId: product.ID_DanhMuc,
-          status: product.TrangThai === "active" ? "Còn hàng" : "Hết hàng",
-          description: product.MoTa || "",
-          images: product.image_urls
+        const mappedProducts = response.data.map((product) => {
+          const imageArray = product.image_urls
             ? product.image_urls.split(",").filter((url) => url.trim())
-            : [],
-          imageFiles: [],
-          shopName: product.TenCuaHang || "",
-          created_date: product.created_date,
-          actions: ["view", "edit", "delete"],
-        }));
+            : [];
 
-        console.log("[useProducts] Mapped products:", mappedProducts);
+          return {
+            id: product.ID_SanPham,
+            name: product.TenSanPham,
+            price: product.Gia?.toLocaleString("vi-VN"),
+            quantity: product.TonKho,
+            category: product.TenDanhMuc || "Chưa phân loại",
+            categoryId: product.ID_DanhMuc,
+            status: product.TrangThai,
+            description: product.MoTa || "",
+            images: imageArray,
+            image:
+              imageArray.length > 0
+                ? `http://localhost:5002${imageArray[0]}`
+                : null,
+            imageFiles: [],
+            shopName: product.TenCuaHang || "",
+            created_date: product.created_date,
+            actions: ["view", "edit", "delete"],
+          };
+        });
+
         setProducts(mappedProducts);
+
+        // Update pagination info
+        if (response.pagination) {
+          setTotalItems(response.pagination.total || 0);
+          setTotalPages(response.pagination.totalPages || 1);
+        }
       } else {
-        console.warn("[useProducts] No data in response");
         setError("Không có dữ liệu sản phẩm từ server");
         setProducts([]);
+        setTotalItems(0);
+        setTotalPages(1);
       }
     } catch (error) {
-      console.error("[useProducts] Error loading products:", error);
       setError("Lỗi khi tải danh sách sản phẩm: " + error.message);
       setProducts([]);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage, debouncedSearchTerm, selectedStatus]);
 
   useEffect(() => {
     loadProducts();
-  }, [currentPage, searchTerm, selectedCategory, selectedStatus]);
+  }, [loadProducts]);
 
   // Product operations
   const handleViewProduct = (productId) => {
@@ -111,7 +140,7 @@ export const useProducts = () => {
 
   // Image handling functions
   const handleImageUpload = (files) => {
-    const maxImages = 5;
+    const maxImages = 15;
     const currentImages = currentProduct.images || [];
     const remainingSlots = maxImages - currentImages.length;
 
@@ -171,86 +200,184 @@ export const useProducts = () => {
   };
 
   const handleRemoveImage = (index) => {
+    const imageToRemove = currentProduct.images[index];
     const newImages = currentProduct.images.filter((_, i) => i !== index);
     const newImageFiles = currentProduct.imageFiles
       ? currentProduct.imageFiles.filter((_, i) => i !== index)
       : [];
 
+    // Track images that need to be deleted from database
+    const imagesToDelete = currentProduct.imagesToDelete || [];
+
+    // If the image has an ID (existing image from DB), add it to delete list
+    if (imageToRemove && imageToRemove.id) {
+      imagesToDelete.push(imageToRemove.id);
+      console.log(
+        `[useProducts] Added image ID ${imageToRemove.id} to delete list`,
+        imagesToDelete
+      );
+    } else if (
+      typeof imageToRemove === "string" &&
+      imageToRemove.includes("/uploads/")
+    ) {
+      // Handle legacy string URLs by trying to extract ID from backend
+      console.warn(
+        `[useProducts] Cannot delete image without ID: ${imageToRemove}`
+      );
+    }
+
     setCurrentProduct({
       ...currentProduct,
       images: newImages,
       imageFiles: newImageFiles,
+      imagesToDelete: imagesToDelete,
     });
   };
 
   const handleSetFeaturedImage = (index) => {
-    if (index === 0) return; // Already featured
+    console.log(`[useProducts] Setting image at index ${index} as featured`);
 
+    if (index === 0) {
+      console.log("[useProducts] Image is already featured");
+      alert("ℹ️ Ảnh này đã là ảnh chính!");
+      return; // Already featured
+    }
+
+    // Move selected image to first position
+    const selectedImage = currentProduct.images[index];
     const newImages = [
-      currentProduct.images[index],
+      selectedImage,
       ...currentProduct.images.filter((_, i) => i !== index),
     ];
+
+    // Also reorder imageFiles if they exist
     const newImageFiles = currentProduct.imageFiles
       ? [
-          currentProduct.imageFiles[index],
+          currentProduct.imageFiles[index] || null,
           ...currentProduct.imageFiles.filter((_, i) => i !== index),
-        ]
+        ].filter(Boolean)
       : [];
+
+    console.log("[useProducts] New image order:", {
+      oldOrder: currentProduct.images.map(
+        (img, i) => `${i}: ${img.url || img}`
+      ),
+      newOrder: newImages.map((img, i) => `${i}: ${img.url || img}`),
+    });
 
     setCurrentProduct({
       ...currentProduct,
       images: newImages,
       imageFiles: newImageFiles,
+      hasImageReorder: true, // Flag to indicate images were reordered
     });
+
+    // Show success feedback
+    alert("⭐ Đã đặt ảnh làm ảnh chính!");
   };
 
-  const handleEditProduct = (productId) => {
+  const handleEditProduct = async (productId) => {
     const product = products.find((p) => p.id === productId);
     if (product) {
       setModalMode("edit");
-      setCurrentProduct({
-        ...product,
-        price: product.price.replace(/,/g, ""), // Remove commas for editing
-        addStock: "", // Initialize add stock field for editing
-      });
+
+      // Load detailed image information for editing
+      try {
+        console.log(
+          `[useProducts] Loading detailed images for product ${productId}`
+        );
+        const imageResponse = await sellerProductService.getProductImages(
+          productId
+        );
+
+        let detailedImages = [];
+        if (imageResponse.success && imageResponse.data) {
+          detailedImages = imageResponse.data.map((img) => ({
+            id: img.ID_Anh, // Image ID for deletion
+            url: `../../../../microservice/product_service${img.Url}`, // Image URL
+            Upload_at: img.Upload_at, // Upload timestamp
+          }));
+          console.log(
+            `[useProducts] Loaded ${detailedImages.length} detailed images:`,
+            detailedImages
+          );
+        }
+
+        setCurrentProduct({
+          ...product,
+          price: product.price.replace(/,/g, ""), // Remove commas for editing
+          stock: product.quantity, // Ensure stock field exists for edit
+          images: detailedImages, // Use detailed images with IDs
+          imagesToDelete: [], // Initialize empty array to track deleted images
+          newImageUrls: [], // Initialize empty array for new URL images
+          imageFiles: [], // Initialize empty array for new files
+          hasImageReorder: false, // Initialize reorder flag
+        });
+      } catch (error) {
+        console.error("[useProducts] Error loading images for edit:", error);
+        // Fallback to original images without IDs
+        setCurrentProduct({
+          ...product,
+          price: product.price.replace(/,/g, ""),
+          stock: product.quantity,
+          imagesToDelete: [],
+          newImageUrls: [],
+          imageFiles: [],
+          hasImageReorder: false,
+        });
+      }
+
       setShowProductModal(true);
     }
   };
 
-  const handleSaveProduct = async () => {
-    if (
-      !currentProduct.name ||
-      !currentProduct.price ||
-      (!currentProduct.quantity && !currentProduct.addStock) ||
-      !currentProduct.category
-    ) {
+  const handleSaveProduct = async (productData = null) => {
+    // Use product data from modal (if provided) or current product
+    const productToSave = productData || currentProduct;
+
+    // Different validation for add vs edit mode
+    const isValidForAdd =
+      modalMode === "add" &&
+      productToSave.name &&
+      productToSave.price &&
+      (productToSave.quantity || productToSave.stock) &&
+      productToSave.category;
+
+    const isValidForEdit =
+      modalMode === "edit" &&
+      productToSave.name &&
+      productToSave.price &&
+      productToSave.category;
+
+    if (!isValidForAdd && !isValidForEdit) {
+      console.log("[useProducts] Validation failed:", productToSave);
       alert("😱 Vui lòng điền đầy đủ thông tin!");
       return;
     }
 
     try {
       if (modalMode === "add") {
-        console.log("[useProducts] Adding new product:", currentProduct);
+        console.log("[useProducts] Adding new product:", productToSave);
 
         // Find category ID from category name
         const categoryId =
-          categories.find((cat) => cat.name === currentProduct.category)?.id ||
-          currentProduct.categoryId ||
+          categories.find((cat) => cat.name === productToSave.category)?.id ||
+          productToSave.categoryId ||
           1;
 
         const newProduct = await sellerProductService.addProduct({
-          tenSanPham: currentProduct.name,
-          gia: currentProduct.price,
-          tonKho: Number(currentProduct.quantity),
+          tenSanPham: productToSave.name,
+          moTa: productToSave.description || "",
+          gia: productToSave.price,
+          tonKho: Number(productToSave.quantity || productToSave.stock),
           danhMuc: categoryId, // Use category ID for backend
-          moTa: currentProduct.description || "",
-          trangThai: currentProduct.status || "active",
+          trangThai: productToSave.status || "active",
         });
 
         console.log("[useProducts] Product created successfully:", newProduct);
 
         // Upload images if any files were selected
-        if (currentProduct.imageFiles && currentProduct.imageFiles.length > 0) {
+        if (productToSave.imageFiles && productToSave.imageFiles.length > 0) {
           console.log(
             "[useProducts] Uploading images for new product:",
             newProduct.data.productId
@@ -259,7 +386,7 @@ export const useProducts = () => {
             const imageUploadResult =
               await sellerProductService.uploadProductImages(
                 newProduct.data.productId,
-                currentProduct.imageFiles
+                productToSave.imageFiles
               );
             console.log(
               "[useProducts] Images uploaded successfully:",
@@ -277,46 +404,80 @@ export const useProducts = () => {
           alert("🎉 Thêm sản phẩm thành công!");
         }
       } else {
-        console.log("[useProducts] Updating product:", currentProduct);
-
-        // In edit mode, calculate new quantity by adding addStock to existing quantity
-        const currentQuantity = Number(currentProduct.quantity) || 0;
-        const addStock = Number(currentProduct.addStock) || 0;
-        const newQuantity =
-          addStock > 0 ? currentQuantity + addStock : currentQuantity;
+        console.log("[useProducts] Updating product:", productToSave);
 
         // Find category ID from category name
         const categoryId =
-          categories.find((cat) => cat.name === currentProduct.category)?.id ||
-          currentProduct.categoryId ||
+          categories.find((cat) => cat.name === productToSave.category)?.id ||
+          productToSave.categoryId ||
           1;
 
-        // Prepare image URLs for backend
-        const imageUrls = currentProduct.images || [];
+        // Prepare update data
+        const updateData = {
+          tenSanPham: productToSave.name,
+          gia: productToSave.price,
+          danhMuc: categoryId,
+          moTa: productToSave.description || "",
+          trangThai: productToSave.status || "active",
+        };
 
-        await sellerProductService.updateProduct(currentProduct.id, {
-          tenSanPham: currentProduct.name,
-          gia: currentProduct.price,
-          tonKho: newQuantity,
-          danhMuc: categoryId, // Use category ID for backend
-          moTa: currentProduct.description || "",
-          trangThai: currentProduct.status || "active",
+        // Prepare image options
+        const imageOptions = {
+          newImageFiles: productToSave.imageFiles || [],
+          imagesToDelete: productToSave.imagesToDelete || [],
+          newImageUrls: productToSave.newImageUrls || [],
+          // Send image order if images were reordered
+          imageOrder: productToSave.hasImageReorder
+            ? productToSave.images
+                .map((img) => img.id || img.ID_Anh)
+                .filter(Boolean)
+            : undefined,
+        };
+
+        // Check if we need to handle images
+        const hasImageChanges =
+          imageOptions.newImageFiles.length > 0 ||
+          imageOptions.imagesToDelete.length > 0 ||
+          imageOptions.newImageUrls.length > 0 ||
+          productToSave.hasImageReorder; // Include image reordering
+
+        // Always use unified updateProduct function
+        console.log("[useProducts] Updating product with unified function:", {
+          hasImageChanges,
+          hasImageReorder: productToSave.hasImageReorder,
+          imageOptions: hasImageChanges ? imageOptions : "none",
+          productToSave: {
+            id: productToSave.id,
+            name: productToSave.name,
+            imagesToDelete: productToSave.imagesToDelete,
+            imageFiles: productToSave.imageFiles?.length || 0,
+            imagesCount: productToSave.images?.length || 0,
+          },
         });
 
-        // If we added stock, also call the stock management API
-        if (addStock > 0) {
-          await sellerProductService.addStock(
-            currentProduct.id,
-            addStock,
-            "import"
-          );
-        }
-
-        alert(
-          addStock > 0
-            ? `🎉 Cập nhật sản phẩm thành công! Đã thêm ${addStock} sản phẩm vào kho.`
-            : `🎉 Cập nhật sản phẩm thành công!`
+        await sellerProductService.updateProduct(
+          productToSave.id,
+          updateData,
+          hasImageChanges ? imageOptions : {}
         );
+
+        // Check if we need to add stock (additionalStock from ProductModal)
+        const additionalStock = Number(productToSave.additionalStock) || 0;
+
+        if (additionalStock > 0) {
+          console.log(
+            `[useProducts] Adding ${additionalStock} stock to product ${productToSave.id}`
+          );
+          await sellerProductService.addStock(productToSave.id, {
+            soLuongThayDoi: additionalStock,
+            hanhDong: "import",
+          });
+          alert(
+            `🎉 Cập nhật sản phẩm thành công! Đã nhập thêm ${additionalStock} sản phẩm vào kho.`
+          );
+        } else {
+          alert(`🎉 Cập nhật sản phẩm thành công!`);
+        }
       }
 
       // Reload products
@@ -569,6 +730,8 @@ export const useProducts = () => {
     setSelectedPrice,
     currentPage,
     setCurrentPage,
+    totalItems,
+    totalPages,
     isLoading,
     error,
 

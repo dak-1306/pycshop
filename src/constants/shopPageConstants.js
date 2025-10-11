@@ -16,24 +16,11 @@ export const SHOP_STATUS_COLORS = {
 };
 
 export const DEFAULT_SHOP_INFO = {
-  name: "My Awesome Shop",
-  description: "Chuyên cung cấp các sản phẩm chất lượng cao",
-  avatar: null,
-  isEditing: false,
-  email: "contact@myawesomeshop.com",
-  phone: "+84 123 456 789",
-  address: "TP. Hồ Chí Minh, Việt Nam",
-  website: "https://myawesomeshop.com",
-  socialMedia: {
-    facebook: "https://facebook.com/myawesomeshop",
-    instagram: "@myawesomeshop",
-    zalo: "0123456789",
-  },
-  policies: {
-    returnPolicy: "Đổi trả miễn phí trong vòng 7 ngày",
-    shippingPolicy: "Giao hàng nhanh trong 2-3 ngày",
-    warrantyPolicy: "Bảo hành 12 tháng cho sản phẩm điện tử",
-  },
+  name: "",
+  description: "",
+  category_id: "",
+  phone: "",
+  address: "",
 };
 
 export const INITIAL_PRODUCT_STATE = {
@@ -51,40 +38,120 @@ export const MOCK_PRODUCTS = [
     id: 1,
     name: "iPhone 15 Pro Max",
     price: 29990000,
+    original_price: 32990000,
+    stock_quantity: 50,
     quantity: 50,
     category: "Điện tử",
+    category_name: "Điện tử",
     description: "Smartphone cao cấp với chip A17 Pro",
     status: "Còn hàng",
+    average_rating: 4.8,
+    images: [
+      {
+        image_url: "/images/iphone15.jpg",
+        is_featured: true,
+      },
+    ],
     image: null,
   },
   {
     id: 2,
     name: "Áo thun nam cotton",
     price: 199000,
+    original_price: 299000,
+    stock_quantity: 100,
     quantity: 100,
     category: "Thời trang",
+    category_name: "Thời trang",
     description: "Áo thun cotton 100% thoáng mát",
     status: "Còn hàng",
+    average_rating: 4.5,
+    images: [
+      {
+        image_url: "/images/aothun.jpg",
+        is_featured: true,
+      },
+    ],
     image: null,
   },
   {
     id: 3,
     name: "Laptop Gaming ASUS",
     price: 25990000,
+    original_price: 28990000,
+    stock_quantity: 0,
     quantity: 0,
     category: "Điện tử",
+    category_name: "Điện tử",
     description: "Laptop gaming hiệu năng cao",
     status: "Hết hàng",
+    average_rating: 4.7,
+    images: [
+      {
+        image_url: "/images/laptop.jpg",
+        is_featured: true,
+      },
+    ],
     image: null,
   },
   {
     id: 4,
-    name: "Giày thể thao Nike",
+    name: "Giày thể thao Nike Air Max",
     price: 2990000,
+    original_price: 3490000,
+    stock_quantity: 75,
     quantity: 75,
     category: "Thể thao",
-    description: "Giày chạy bộ chuyên nghiệp",
+    category_name: "Thể thao",
+    description: "Giày chạy bộ chuyên nghiệp với công nghệ Air Max",
     status: "Còn hàng",
+    average_rating: 4.6,
+    images: [
+      {
+        image_url: "/images/nike.jpg",
+        is_featured: true,
+      },
+    ],
+    image: null,
+  },
+  {
+    id: 5,
+    name: "Túi xách nữ cao cấp",
+    price: 1290000,
+    original_price: 1590000,
+    stock_quantity: 30,
+    quantity: 30,
+    category: "Thời trang",
+    category_name: "Thời trang",
+    description: "Túi xách da thật thiết kế sang trọng",
+    status: "Còn hàng",
+    average_rating: 4.9,
+    images: [
+      {
+        image_url: "/images/bag.jpg",
+        is_featured: true,
+      },
+    ],
+    image: null,
+  },
+  {
+    id: 6,
+    name: "Đồng hồ thông minh Apple Watch",
+    price: 8990000,
+    original_price: 9990000,
+    stock_quantity: 20,
+    quantity: 20,
+    category: "Điện tử",
+    category_name: "Điện tử",
+    description: "Đồng hồ thông minh theo dõi sức khỏe",
+    status: "Còn hàng",
+    average_rating: 4.8,
+    images: [
+      {
+        image_url: "/images/watch.jpg",
+        is_featured: true,
+      },
+    ],
     image: null,
   },
 ];
@@ -99,33 +166,5 @@ export const MODAL_MODES = {
   EDIT: "edit",
 };
 
-export const RECENT_ACTIVITIES = [
-  {
-    id: 1,
-    message: "Có đơn hàng mới từ Nguyễn Văn A",
-    time: "5 phút trước",
-    type: "order",
-    color: "green",
-  },
-  {
-    id: 2,
-    message: 'Cập nhật sản phẩm "iPhone 15 Pro Max"',
-    time: "2 giờ trước",
-    type: "update",
-    color: "blue",
-  },
-  {
-    id: 3,
-    message: 'Thêm sản phẩm mới "Áo thun nam cotton"',
-    time: "1 ngày trước",
-    type: "add",
-    color: "orange",
-  },
-];
-
-export const SHOP_TABS = [
-  { id: "basic", label: "Thông tin cơ bản", icon: "📋" },
-  { id: "contact", label: "Thông tin liên hệ", icon: "📞" },
-  { id: "social", label: "Mạng xã hội", icon: "🌐" },
-  { id: "policies", label: "Chính sách", icon: "📜" },
-];
+// Recent activities will be loaded from API
+export const RECENT_ACTIVITIES = [];

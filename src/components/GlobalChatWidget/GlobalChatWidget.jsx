@@ -129,7 +129,7 @@ const GlobalChatWidget = () => {
     setIsMinimized(false);
   };
 
-  const filteredShops = shopList.filter(shop =>
+  const filteredShops = shopList.filter((shop) =>
     shop.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -155,7 +155,7 @@ const GlobalChatWidget = () => {
             <div className="chat-sidebar-header">
               <h3>Đoạn chat</h3>
             </div>
-            
+
             <div className="chat-search">
               <input
                 type="text"
@@ -169,7 +169,9 @@ const GlobalChatWidget = () => {
               {filteredShops.map((shop) => (
                 <div
                   key={shop.id}
-                  className={`shop-item ${selectedShop?.id === shop.id ? "active" : ""}`}
+                  className={`shop-item ${
+                    selectedShop?.id === shop.id ? "active" : ""
+                  }`}
                   onClick={() => handleSelectShop(shop)}
                 >
                   <img
@@ -181,7 +183,13 @@ const GlobalChatWidget = () => {
                     <div className="shop-item-name">{shop.name}</div>
                     <div className="shop-item-preview">{shop.lastMessage}</div>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "flex-end",
+                    }}
+                  >
                     <div className="shop-item-time">{shop.time}</div>
                     {shop.unreadCount > 0 && (
                       <div className="shop-item-badge">{shop.unreadCount}</div>
@@ -204,15 +212,25 @@ const GlobalChatWidget = () => {
                 <div className="shop-details">
                   <h4>{selectedShop?.name || "PycShop"}</h4>
                   <span className="online-status">
-                    {selectedShop?.isOnline ? "🟢 Đang hoạt động" : "⚪ Không hoạt động"}
+                    {selectedShop?.isOnline
+                      ? "🟢 Đang hoạt động"
+                      : "⚪ Không hoạt động"}
                   </span>
                 </div>
               </div>
               <div className="chat-controls">
-                <button className="minimize-btn" onClick={handleMinimize} title="Thu nhỏ">
+                <button
+                  className="minimize-btn"
+                  onClick={handleMinimize}
+                  title="Thu nhỏ"
+                >
                   ➖
                 </button>
-                <button className="close-btn" onClick={handleClose} title="Đóng">
+                <button
+                  className="close-btn"
+                  onClick={handleClose}
+                  title="Đóng"
+                >
                   ✕
                 </button>
               </div>
@@ -257,8 +275,8 @@ const GlobalChatWidget = () => {
                   </button>
                 </div>
               </div>
-              <button 
-                onClick={handleSendMessage} 
+              <button
+                onClick={handleSendMessage}
                 className="send-btn"
                 disabled={!newMessage.trim()}
                 title="Gửi tin nhắn"

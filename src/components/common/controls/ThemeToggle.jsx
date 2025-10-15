@@ -1,19 +1,19 @@
-import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
+import React from "react";
+import { useTheme } from "../../../context/ThemeContext";
 
 const ThemeToggle = ({ className = "", size = "normal" }) => {
   const { theme, toggleTheme, isLight, isDark } = useTheme();
-  
+
   const sizeClasses = {
     small: "w-8 h-8",
-    normal: "w-10 h-10", 
-    large: "w-12 h-12"
+    normal: "w-10 h-10",
+    large: "w-12 h-12",
   };
-  
+
   const iconSize = {
     small: "w-4 h-4",
     normal: "w-5 h-5",
-    large: "w-6 h-6"
+    large: "w-6 h-6",
   };
 
   return (
@@ -31,15 +31,19 @@ const ThemeToggle = ({ className = "", size = "normal" }) => {
         transition-all duration-200 ease-in-out
         shadow-sm hover:shadow-md
       `}
-      title={isLight ? 'Chuyển sang chế độ tối' : 'Chuyển sang chế độ sáng'}
-      aria-label={isLight ? 'Switch to dark mode' : 'Switch to light mode'}
+      title={isLight ? "Chuyển sang chế độ tối" : "Chuyển sang chế độ sáng"}
+      aria-label={isLight ? "Switch to dark mode" : "Switch to light mode"}
     >
       {/* Light Mode Icon */}
       <svg
         className={`
           ${iconSize[size]} 
           absolute transition-all duration-300 ease-in-out
-          ${isLight ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 rotate-90 scale-75'}
+          ${
+            isLight
+              ? "opacity-100 rotate-0 scale-100"
+              : "opacity-0 rotate-90 scale-75"
+          }
         `}
         fill="currentColor"
         viewBox="0 0 20 20"
@@ -50,13 +54,17 @@ const ThemeToggle = ({ className = "", size = "normal" }) => {
           clipRule="evenodd"
         />
       </svg>
-      
+
       {/* Dark Mode Icon */}
       <svg
         className={`
           ${iconSize[size]} 
           absolute transition-all duration-300 ease-in-out
-          ${isDark ? 'opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-75'}
+          ${
+            isDark
+              ? "opacity-100 rotate-0 scale-100"
+              : "opacity-0 -rotate-90 scale-75"
+          }
         `}
         fill="currentColor"
         viewBox="0 0 20 20"

@@ -1,4 +1,4 @@
-import { api } from "./apiService.js";
+import { api } from "../lib/services/apiService.js";
 
 // Product Service
 export const productService = {

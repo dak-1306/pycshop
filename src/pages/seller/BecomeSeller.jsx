@@ -2,14 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCategories } from "../../hooks/api/useCategories";
-import { useFormValidation } from "../../hooks/useFormValidation";
-import ShopService from "../../services/shopService";
+import { useFormValidation } from "../../hooks/form/useFormValidation";
+import useBecomeSeller from "../../hooks/seller/useBecomeSeller";
 
 const BecomeSeller = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, loading, login } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const { categories, isLoading: categoriesLoading } = useCategories(true);
   const { validateShopForm, errors } = useFormValidation();
+  const { becomeSeller, loading: becomeLoading } = useBecomeSeller();
 
   // Check if user is logged in
   useEffect(() => {
@@ -27,8 +28,6 @@ const BecomeSeller = () => {
     shopAddress: "",
     shopPhone: "",
   });
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -51,38 +50,13 @@ const BecomeSeller = () => {
       return;
     }
 
-    setIsLoading(true);
+    // Hook handles all business logic
+    const result = await becomeSeller(formData);
 
-    try {
-      console.log("Sending data to becomeSeller:", formData);
-      console.log("Current user:", user);
-      console.log("Is authenticated:", isAuthenticated);
-
-      const result = await ShopService.becomeSeller(formData);
-
-      if (result.success) {
-        // Update user context with new token and user info
-        if (result.token && result.user) {
-          login(result.user, result.token);
-        }
-
-        alert("Đăng ký thành seller thành công!");
-        navigate("/seller/dashboard");
-      } else {
-        console.error("becomeSeller failed:", result);
-        alert(result.message || "Có lỗi xảy ra trong quá trình đăng ký");
-      }
-    } catch (error) {
-      console.error("Become seller error:", error);
-
-      // Handle specific error messages
-      if (error.response?.data?.message) {
-        alert(error.response.data.message);
-      } else {
-        alert("Có lỗi xảy ra. Vui lòng thử lại sau.");
-      }
-    } finally {
-      setIsLoading(false);
+    // UI feedback and navigation only
+    alert(result.message);
+    if (result.success) {
+      navigate("/seller/dashboard");
     }
   };
 
@@ -247,10 +221,10 @@ const BecomeSeller = () => {
             </button>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={becomeLoading}
               className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 disabled:bg-blue-300 disabled:cursor-not-allow"
             >
-              {isLoading ? "Đang xử lý..." : "Đăng ký Seller"}
+              {becomeLoading ? "Đang xử lý..." : "Đăng ký Seller"}
             </button>
           </div>
         </form>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import sellerProductService from "../services/sellerProductService.js";
-import { useCategories } from "./api/useCategories.js";
+import sellerProductService from "../../services/sellerProductService.js";
+import { useCategories } from "../api/useCategories.js";
 
 const INITIAL_FORM_STATE = {
   name: "",

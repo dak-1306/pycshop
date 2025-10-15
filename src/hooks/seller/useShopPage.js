@@ -8,7 +8,7 @@ import {
   RECENT_ACTIVITIES,
   MOCK_PRODUCTS,
 } from "../constants/shopPageConstants";
-import ShopService from "../services/shopService";
+import ShopService from "../../services/shopService";
 
 export const useShopPage = () => {
   // Shop Info State

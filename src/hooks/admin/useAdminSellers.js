@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import adminService from "../services/adminService.js";
+import adminService from "../../services/adminService.js";
 
 // Mock data for fallback
 const MOCK_SELLERS = [

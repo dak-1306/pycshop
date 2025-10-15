@@ -7,7 +7,7 @@ import ShopHeader from "../../components/seller/shop/ShopHeader";
 import ShopInfoCard from "../../components/seller/shop/ShopInfoCard";
 import QuickStatsCard from "../../components/seller/shop/QuickStatsCard";
 import FeaturedProducts from "../../components/seller/shop/FeaturedProducts";
-import DeleteModal from "../../components/common/DeleteModal";
+import DeleteModal from "../../components/common/modals/DeleteModal";
 import { useShopPage } from "../../hooks/useShopPage";
 
 const ShopPage = () => {

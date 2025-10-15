@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import sellerOrderService from "../services/sellerOrderService.js";
+import sellerOrderService from "../../services/sellerOrderService.js";
 import {
   ORDER_STATUSES,
   ORDER_CATEGORIES,

@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useChat } from "../../context/ChatContext";
-import { PLACEHOLDER_IMAGES } from "../../utils/placeholderImages";
+import { useChat } from "../../../context/ChatContext";
+import { PLACEHOLDER_IMAGES } from "../../../utils/placeholderImages";
 import "./GlobalChatWidget.css";
 
 const GlobalChatWidget = () => {

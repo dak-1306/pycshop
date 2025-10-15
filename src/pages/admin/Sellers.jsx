@@ -5,7 +5,7 @@ import SellersFilters from "../../components/admin/sellers/SellersFilters";
 import SellersTable from "../../components/admin/sellers/SellersTable";
 import SellerDetailModal from "../../components/admin/sellers/SellerDetailModal";
 import SellerActionModal from "../../components/admin/sellers/SellerActionModal";
-import DeleteModal from "../../components/common/DeleteModal";
+import DeleteModal from "../../components/common/modals/DeleteModal";
 import { useLanguage } from "../../context/LanguageContext";
 
 const Sellers = () => {

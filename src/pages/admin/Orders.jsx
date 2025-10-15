@@ -4,7 +4,7 @@ import OrderFilters from "../../components/common/order/OrderFilters";
 import OrderTable from "../../components/common/order/OrderTable";
 import OrderModal from "../../components/common/modals/OrderModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
-import DeleteModal from "../../components/common/DeleteModal";
+import DeleteModal from "../../components/common/modals/DeleteModal";
 import Pagination from "../../components/common/product/Pagination";
 import { useAdminOrders } from "../../hooks/useAdminOrders";
 import { useLanguage } from "../../context/LanguageContext";

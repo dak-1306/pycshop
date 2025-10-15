@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import adminService from "../services/adminService.js";
+import adminService from "../../services/adminService.js";
 import {
   MOCK_RECENT_ORDERS,
   MOCK_RECENT_USERS,

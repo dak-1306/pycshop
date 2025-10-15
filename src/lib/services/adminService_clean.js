@@ -15,7 +15,9 @@ const adminService = {
   // Chart data methods
   getRevenueChartData: async (period = "monthly") => {
     try {
-      const response = await apiService.get(`/admin/charts/revenue?period=${period}`);
+      const response = await apiService.get(
+        `/admin/charts/revenue?period=${period}`
+      );
       return response;
     } catch (error) {
       console.error("Error fetching revenue chart data:", error);
@@ -25,7 +27,9 @@ const adminService = {
 
   getOrderTrendsData: async (period = "monthly") => {
     try {
-      const response = await apiService.get(`/admin/charts/orders?period=${period}`);
+      const response = await apiService.get(
+        `/admin/charts/orders?period=${period}`
+      );
       return response;
     } catch (error) {
       console.error("Error fetching order trends data:", error);
@@ -45,7 +49,9 @@ const adminService = {
 
   getCategoryPerformanceData: async () => {
     try {
-      const response = await apiService.get("/admin/charts/category-performance");
+      const response = await apiService.get(
+        "/admin/charts/category-performance"
+      );
       return response;
     } catch (error) {
       console.error("Error fetching category performance data:", error);

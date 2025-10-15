@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
-import { useUsers } from "./api/useUsers.js";
-import adminService from "../services/adminService.js";
+import { useUsers } from "../api/useUsers.js";
+import adminService from "../../services/adminService.js";
 import {
   DEFAULT_USER_STATS,
   USER_STATUS_COLORS,

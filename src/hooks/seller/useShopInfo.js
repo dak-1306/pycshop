@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import ShopService from "../../services/shopService";
+import ShopService from "../../lib/services/shopService.js";
 
 export const useShopInfo = () => {
   const [shopInfo, setShopInfo] = useState(null);

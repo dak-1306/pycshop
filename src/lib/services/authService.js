@@ -1,4 +1,4 @@
-import { api } from "../lib/services/apiService";
+import { api } from "./apiService";
 
 // Auth service để xử lý các API liên quan đến authentication
 export const authService = {

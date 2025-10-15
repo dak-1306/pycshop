@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { productService } from "../../services/productService.js";
+import { productService } from "../../lib/services/productService.js";
 import sellerProductService from "../../lib/services/sellerProductService.js";
 
 // Fallback categories khi API lỗi

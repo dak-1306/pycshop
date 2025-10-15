@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import reportExportService from "../../services/reportExportService";
+import reportExportService from "../../lib/services/reportExportService.js";
 
 export const useAdminReports = () => {
   // Date range state

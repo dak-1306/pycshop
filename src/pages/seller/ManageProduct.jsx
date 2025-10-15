@@ -6,11 +6,11 @@ import ProductDetailModal from "../../components/common/product/ProductDetailMod
 import ProductFilters from "../../components/common/product/ProductFilters";
 import ProductTable from "../../components/common/product/ProductTable";
 import Pagination from "../../components/common/product/Pagination";
-import ErrorDisplay from "../../components/common/ErrorDisplay";
-import EmptyState from "../../components/common/EmptyState";
-import { useProducts } from "../../hooks/useProducts";
+import ErrorDisplay from "../../components/common/feedback/ErrorDisplay";
+import EmptyState from "../../components/common/feedback/EmptyState";
+import { useProducts } from "../../hooks/seller/useProducts";
 import { useCategories } from "../../hooks/api/useCategories";
-import { PRODUCT_CATEGORIES } from "../../constants/productConstants";
+import { PRODUCT_CATEGORIES } from "../../lib/constants/productConstants";
 
 // CSS animations
 const styles = `

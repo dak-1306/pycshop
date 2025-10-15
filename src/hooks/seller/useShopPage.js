@@ -7,8 +7,8 @@ import {
   SHOP_STATUS_COLORS,
   RECENT_ACTIVITIES,
   MOCK_PRODUCTS,
-} from "../constants/shopPageConstants";
-import ShopService from "../../services/shopService";
+} from "../../lib/constants/shopPageConstants.js";
+import ShopService from "../../lib/services/shopService.js";
 
 export const useShopPage = () => {
   // Shop Info State

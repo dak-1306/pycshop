@@ -4,7 +4,7 @@ import SellerLayout from "../../components/layout/SellerLayout";
 import StatsCards from "../../components/common/dashboard/StatsCards";
 import ChartsSection from "../../components/common/dashboard/ChartsSection";
 import RecentOrdersTable from "../../components/common/dashboard/RecentOrdersTable";
-import { useDashboard } from "../../hooks/useDashboard";
+import { useDashboard } from "../../hooks/common/useDashboard";
 
 const Dashboard = () => {
   const { stats, orderData, getStatusColor } = useDashboard("seller");

@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
-import { useNotifications } from "../../hooks/useNotifications";
+import { useNotifications } from "../../hooks/common/useNotifications";
 import { useAuth } from "../../context/AuthContext";
 import { useLanguage } from "../../context/LanguageContext";
-import { authService } from "../../services/authService";
-import adminService from "../../services/adminService";
-import NotificationPanel from "../common/NotificationPanel";
-import ThemeToggle from "../common/ThemeToggle";
-import LanguageToggle from "../common/LanguageToggle";
+import { authService } from "../../lib/services/authService.js";
+import adminService from "../../lib/services/adminService.js";
+import NotificationPanel from "../common/notifications/NotificationPanel";
+import ThemeToggle from "../common/controls/ThemeToggle";
+import LanguageToggle from "../common/controls/LanguageToggle";
 
 const AdminLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);

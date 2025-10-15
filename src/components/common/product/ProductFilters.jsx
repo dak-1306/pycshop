@@ -3,7 +3,7 @@ import {
   PRODUCT_CATEGORIES,
   PRODUCT_STATUSES,
   PRODUCT_STATUS_LABELS,
-} from "../../../constants/productConstants";
+} from "../../../lib/constants/productConstants.js";
 import { useLanguage } from "../../../context/LanguageContext";
 
 const ProductFilters = ({

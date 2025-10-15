@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import CollaboratorModal from "../seller/CollaboratorModal";
-import { useNotifications } from "../../hooks/useNotifications";
-import { useShopInfo } from "../../hooks/useShopInfo";
-import NotificationPanel from "../common/NotificationPanel";
+import { useNotifications } from "../../hooks/common/useNotifications";
+import { useShopInfo } from "../../hooks/seller/useShopInfo";
+import NotificationPanel from "../common/notifications/NotificationPanel";
 import "../../assets/css/logo.css";
 
 const SellerLayout = ({ children }) => {

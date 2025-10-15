@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from "react";
-import { useChatWidget } from "../hooks/useChatWidget";
+import { useChatWidget } from "../hooks/ui/useChatWidget";
 
 // Create Chat Context
 const ChatContext = createContext();

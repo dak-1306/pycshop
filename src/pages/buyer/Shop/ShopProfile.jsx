@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import { useChat } from "../../../context/ChatContext";
-import { PLACEHOLDER_IMAGES } from "../../../utils/placeholderImages";
+import { PLACEHOLDER_IMAGES } from "../../../lib/utils/placeholderImages";
 import "./ShopProfile.css";
 
 const ShopProfile = () => {

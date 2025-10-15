@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useAdminLogin } from "../../hooks/auth/useAdminLogin";
 import FormField from "../../components/common/ui/FormField";
 import PasswordField from "../../components/common/ui/PasswordField";
-import { ADMIN_CONSTANTS } from "../../constants/adminConstants";
+import { ADMIN_CONSTANTS } from "../../lib/constants/adminConstants.js";
 
 const AdminLogin = () => {
   const {

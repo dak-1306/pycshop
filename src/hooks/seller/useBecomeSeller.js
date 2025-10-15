@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "../../context/AuthContext";
-import ShopService from "../../services/ShopService";
+import ShopService from "../../lib/services/shopService.js";
 
 const useBecomeSeller = () => {
   const [loading, setLoading] = useState(false);

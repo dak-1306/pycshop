@@ -1,4 +1,4 @@
-import apiService from "../lib/services/apiService.js";
+import apiService from "../services/apiService.js";
 
 class ShopService {
   // Get all categories for shop creation

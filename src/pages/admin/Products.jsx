@@ -6,7 +6,7 @@ import Pagination from "../../components/common/product/Pagination";
 import ProductModal from "../../components/common/modals/ProductModal";
 import ProductDetailModal from "../../components/common/product/ProductDetailModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
-import { useAdminProducts } from "../../hooks/useAdminProducts";
+import { useAdminProducts } from "../../hooks/admin/useAdminProducts";
 
 const AdminProducts = () => {
   const {

@@ -1,5 +1,5 @@
 import React from "react";
-import { useAdminSellers } from "../../hooks/useAdminSellers";
+import { useAdminSellers } from "../../hooks/admin/useAdminSellers";
 import SellersStats from "../../components/admin/sellers/SellersStats";
 import SellersFilters from "../../components/admin/sellers/SellersFilters";
 import SellersTable from "../../components/admin/sellers/SellersTable";

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { authService } from "../services/authService";
+import { authService } from "../lib/services/authService.js";
 
 const AuthContext = createContext();
 
@@ -13,7 +13,7 @@ export const AuthProvider = ({ children }) => {
     const initAuth = () => {
       const savedUser = authService.getCurrentUser();
       const token = localStorage.getItem("token");
-      
+
       if (savedUser && token) {
         setUser(savedUser);
         setIsAuthenticated(true);
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
   const login = (userData, token) => {
     setUser(userData);
     setIsAuthenticated(true);
-    
+
     // Lưu vào localStorage
     if (token) {
       localStorage.setItem("token", token);

@@ -8,7 +8,7 @@ import ShopInfoCard from "../../components/seller/shop/ShopInfoCard";
 import QuickStatsCard from "../../components/seller/shop/QuickStatsCard";
 import FeaturedProducts from "../../components/seller/shop/FeaturedProducts";
 import DeleteModal from "../../components/common/modals/DeleteModal";
-import { useShopPage } from "../../hooks/useShopPage";
+import { useShopPage } from "../../hooks/seller/useShopPage";
 
 const ShopPage = () => {
   const {

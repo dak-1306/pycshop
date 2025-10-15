@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../../../context/LanguageContext';
-import { useRecentReports } from '../../../hooks/useRecentReports';
+import { useRecentReports } from '../../../hooks/admin/useRecentReports';
 import RecentReports from './RecentReports';
 import RecentReportFilters from './RecentReportFilters';
 

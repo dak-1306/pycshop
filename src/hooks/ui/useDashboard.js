@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
-import adminService from "../../services/adminService.js";
+import adminService from "../../lib/services/adminService.js";
 import {
   MOCK_RECENT_ORDERS,
   MOCK_RECENT_USERS,
   MOCK_CHART_DATA,
   DASHBOARD_ORDER_STATUS_COLORS,
   DEFAULT_STATS,
-} from "../../constants/dashboardConstants.jsx";
+} from "../../lib/constants/dashboardConstants.jsx";
 
 export const useDashboard = () => {
   // State management

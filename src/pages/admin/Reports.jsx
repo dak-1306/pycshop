@@ -1,5 +1,5 @@
 import React from "react";
-import { useAdminReports } from "../../hooks/useAdminReports";
+import { useAdminReports } from "../../hooks/admin/useAdminReports";
 import { useLanguage } from "../../context/LanguageContext";
 import UserAnalytics from "../../components/admin/reports/UserAnalytics";
 import OrderAnalytics from "../../components/admin/reports/OrderAnalytics";

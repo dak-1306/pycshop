@@ -6,9 +6,9 @@ import AddUserModal from "../../components/admin/user/AddUserModal_v2";
 import ViewUserModal from "../../components/admin/user/ViewUserModal";
 import EditUserModal from "../../components/admin/user/EditUserModal";
 import ConfirmDeleteModal from "../../components/admin/user/ConfirmDeleteModal";
-import SuccessNotification from "../../components/common/SuccessNotification";
-import ErrorNotification from "../../components/common/ErrorNotification";
-import { useAdminUsers } from "../../hooks/useAdminUsers";
+import SuccessNotification from "../../components/common/notifications/SuccessNotification";
+import ErrorNotification from "../../components/common/notifications/ErrorNotification";
+import { useAdminUsers } from "../../hooks/admin/useAdminUsers";
 import { useLanguage } from "../../context/LanguageContext";
 
 const AdminUsers = () => {

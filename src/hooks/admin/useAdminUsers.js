@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from "react";
 import { useUsers } from "../api/useUsers.js";
-import adminService from "../../services/adminService.js";
+import adminService from "../../lib/services/adminService.js";
 import {
   DEFAULT_USER_STATS,
   USER_STATUS_COLORS,
   USER_ROLE_COLORS,
-} from "../constants/userConstants";
+} from "../../lib/constants/userConstants.js";
 
 export const useAdminUsers = () => {
   // Use the existing useUsers hook as base

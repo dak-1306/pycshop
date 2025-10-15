@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import ShopService from "../../../services/shopService";
+import ShopService from "../../../lib/services/shopService.js";
 
 const ShopEditModal = ({ isOpen, onClose, shopInfo, onSave }) => {
   const [tempShopInfo, setTempShopInfo] = useState({

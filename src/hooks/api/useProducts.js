@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { productService } from "../../lib/services/product";
-import sellerProductService from "../../services/sellerProductService.js";
+import sellerProductService from "../../lib/services/sellerProductService.js";
 
 export const useProducts = () => {
   const [products, setProducts] = useState([]);

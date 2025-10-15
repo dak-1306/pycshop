@@ -9,7 +9,7 @@ import { AuthProvider } from "./context/AuthContext";
 import { ChatProvider } from "./context/ChatContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
-import GlobalChatWidget from "./components/GlobalChatWidget/GlobalChatWidget";
+import GlobalChatWidget from "./components/common/GlobalChatWidget/GlobalChatWidget";
 import HomePage from "./pages/buyer/Home";
 import Dashboard from "./pages/seller/Dashboard";
 import ManageProduct from "./pages/seller/ManageProduct";

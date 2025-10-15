@@ -6,7 +6,7 @@ import OrderModal from "../../components/common/modals/OrderModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
 import Pagination from "../../components/common/product/Pagination";
-import { useAdminOrders } from "../../hooks/useAdminOrders";
+import { useAdminOrders } from "../../hooks/admin/useAdminOrders";
 import { useLanguage } from "../../context/LanguageContext";
 
 const AdminOrders = () => {

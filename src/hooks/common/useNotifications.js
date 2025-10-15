@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import notificationService from "../../services/notificationService.js";
+import notificationService from "../../lib/services/notification";
 
 export const useNotifications = (userType = "admin") => {
   const [notifications, setNotifications] = useState([]);

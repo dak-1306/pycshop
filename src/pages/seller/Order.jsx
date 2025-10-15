@@ -7,7 +7,7 @@ import OrderSearchBar from "../../components/common/order/OrderSearchBar";
 import OrderFilters from "../../components/common/order/OrderFilters";
 import OrderTable from "../../components/common/order/OrderTable";
 import OrderPagination from "../../components/common/order/OrderPagination";
-import { useOrders } from "../../hooks/useOrders";
+import { useOrders } from "../../hooks/seller/useOrders";
 
 // CSS animations (giữ nguyên)
 const styles = `

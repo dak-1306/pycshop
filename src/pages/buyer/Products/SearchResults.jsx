@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
-import { productService } from "../../../services/productService";
+import { productService } from "../../../lib/services/productService.js";
 import "./SearchResults.css";
 
 const SearchResults = () => {

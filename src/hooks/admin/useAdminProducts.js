@@ -1,108 +1,99 @@
-import { useState, useEffect } from "react";
+import useProductsCommon from "../common/useProducts.js";
 import {
   MOCK_PRODUCTS,
   DEFAULT_PRODUCT_STATS,
-} from "../constants/productConstants";
+} from "../../lib/constants/productConstants.js";
+
+// Mock service for admin products
+const adminProductService = {
+  getProducts: async () => ({
+    success: true,
+    data: MOCK_PRODUCTS,
+    pagination: {
+      total: MOCK_PRODUCTS.length,
+      totalPages: Math.ceil(MOCK_PRODUCTS.length / 10),
+    },
+  }),
+  // Add other mock methods as needed for admin
+  createProduct: async (product) => ({
+    success: true,
+    data: { id: Date.now(), ...product },
+  }),
+  updateProduct: async (id, updates) => ({
+    success: true,
+    data: { id, ...updates },
+  }),
+  deleteProduct: async (id) => ({ success: true, data: { id } }),
+};
 
 export const useAdminProducts = () => {
-  // State management
-  const [products, setProducts] = useState(MOCK_PRODUCTS);
-  const [stats, setStats] = useState(DEFAULT_PRODUCT_STATS);
-  const [isLoading, setIsLoading] = useState(true);
+  // Use common hook with admin-specific configuration
+  const commonHook = useProductsCommon({
+    role: "admin",
+    service: adminProductService,
+    canDelete: true, // Admins can delete products
+    pageSize: 10,
+    hasImageManagement: false, // Simpler admin interface
+    hasStockManagement: false, // Admin doesn't manage stock directly
+    useMockData: true, // Use mock data for admin
+    initialData: MOCK_PRODUCTS, // Provide initial mock data
+  });
 
-  // Filter states
-  const [searchValue, setSearchValue] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
+  // Admin-specific stats calculation from filtered products
+  const calculateStats = () => {
+    const products = commonHook.products || [];
+    const activeCount = products.filter((p) => p.status === "active").length;
+    const pendingCount = products.filter((p) => p.status === "pending").length;
+    const outOfStockCount = products.filter(
+      (p) => p.status === "out_of_stock"
+    ).length;
+    const inactiveCount = products.filter(
+      (p) => p.status === "inactive"
+    ).length;
 
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalItems, setTotalItems] = useState(0);
-  const [totalPages, setTotalPages] = useState(1);
-
-  // Modal states
-  const [showProductModal, setShowProductModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [modalMode, setModalMode] = useState("add"); // "add" or "edit"
-  // Store all products and filtered products separately
-  const [allProducts, setAllProducts] = useState(MOCK_PRODUCTS);
-  const [filteredProducts, setFilteredProducts] = useState(MOCK_PRODUCTS);
-
-  // Initialize data
-  useEffect(() => {
-    const initializeProducts = async () => {
-      setIsLoading(true);
-
-      // Simulate API calls
-      try {
-        // In real app, these would be API calls
-        await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate loading
-
-        setAllProducts(MOCK_PRODUCTS);
-        setFilteredProducts(MOCK_PRODUCTS);
-        setProducts(MOCK_PRODUCTS);
-        setStats(DEFAULT_PRODUCT_STATS);
-        setTotalItems(MOCK_PRODUCTS.length);
-        setTotalPages(Math.ceil(MOCK_PRODUCTS.length / 10));
-      } catch (error) {
-        console.error("Error loading products data:", error);
-      } finally {
-        setIsLoading(false);
-      }
+    return {
+      totalProducts: products.length,
+      activeProducts: activeCount,
+      pendingProducts: pendingCount,
+      outOfStockProducts: outOfStockCount,
+      inactiveProducts: inactiveCount,
     };
+  };
 
-    initializeProducts();
-  }, []);
+  // Format stats for display
+  const formatNumber = (number) => {
+    return number.toLocaleString();
+  };
 
-  // Filter products based on search and filters
-  useEffect(() => {
-    let filtered = [...allProducts];
+  const rawStats = calculateStats();
+  const processedStats = {
+    totalProducts: {
+      value: rawStats.totalProducts,
+      formattedValue: formatNumber(rawStats.totalProducts),
+      label: "Tổng sản phẩm",
+      icon: "📦",
+    },
+    activeProducts: {
+      value: rawStats.activeProducts,
+      formattedValue: formatNumber(rawStats.activeProducts),
+      label: "Sản phẩm hoạt động",
+      icon: "✅",
+    },
+    outOfStockProducts: {
+      value: rawStats.outOfStockProducts,
+      formattedValue: formatNumber(rawStats.outOfStockProducts),
+      label: "Hết hàng",
+      icon: "⚠️",
+    },
+    pendingProducts: {
+      value: rawStats.pendingProducts,
+      formattedValue: formatNumber(rawStats.pendingProducts),
+      label: "Chờ duyệt",
+      icon: "⏳",
+    },
+  };
 
-    // Apply search filter
-    if (searchValue.trim()) {
-      filtered = filtered.filter(product =>
-        product.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-        product.seller.toLowerCase().includes(searchValue.toLowerCase())
-      );
-    }
-
-    // Apply category filter
-    if (categoryFilter) {
-      filtered = filtered.filter(product => product.category === categoryFilter);
-    }
-
-    // Apply status filter
-    if (statusFilter) {
-      filtered = filtered.filter(product => product.status === statusFilter);
-    }
-
-    setFilteredProducts(filtered);
-    
-    // Update pagination based on filtered results
-    const itemsPerPage = 10;
-    setTotalItems(filtered.length);
-    setTotalPages(Math.ceil(filtered.length / itemsPerPage));
-    
-    // Reset to first page when filters change
-    setCurrentPage(1);
-    
-    // Get products for current page
-    const startIndex = 0; // Always show first page when filters change
-    const endIndex = Math.min(itemsPerPage, filtered.length);
-    setProducts(filtered.slice(startIndex, endIndex));
-  }, [searchValue, categoryFilter, statusFilter, allProducts]);
-
-  // Handle pagination changes
-  useEffect(() => {
-    const itemsPerPage = 10;
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = Math.min(startIndex + itemsPerPage, filteredProducts.length);
-    setProducts(filteredProducts.slice(startIndex, endIndex));
-  }, [currentPage, filteredProducts]);
-
-  // Utility functions
+  // Format currency for admin view
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -110,168 +101,47 @@ export const useAdminProducts = () => {
     }).format(amount);
   };
 
-  const formatNumber = (number) => {
-    return number.toLocaleString();
-  };
-  // Event handlers
-  const handleViewProduct = (productId) => {
-    console.log("View product:", productId);
-    const product = allProducts.find((p) => p.id === productId);
-    if (product) {
-      setSelectedProduct(product);
-      setShowDetailModal(true);
-    }
-  };
-
-  const handleEditProduct = (productId) => {
-    console.log("Edit product:", productId);
-    const product = allProducts.find((p) => p.id === productId);
-    if (product) {
-      setSelectedProduct(product);
-      setModalMode("edit");
-      setShowProductModal(true);
-    }  };
-  const handleDeleteProduct = (productId) => {
-    console.log("Delete product:", productId);
-    const product = allProducts.find((p) => p.id === productId);
-    if (product) {
-      setSelectedProduct(product);
-      setShowDeleteModal(true);
-    }
-  };
-
-  const handleAddProduct = () => {
-    console.log("Add new product");
-    setSelectedProduct(null);
-    setModalMode("add");
-    setShowProductModal(true);
-  };
-  const confirmDeleteProduct = () => {
-    if (selectedProduct) {
-      setAllProducts((prevProducts) =>
-        prevProducts.filter((product) => product.id !== selectedProduct.id)
-      );
-      setShowDeleteModal(false);
-      setSelectedProduct(null);
-    }
-  };
-  const handleSaveProduct = (productData) => {
-    console.log("Save product:", productData);
-    if (modalMode === "add") {
-      // Add new product
-      const newProduct = {
-        ...productData,
-        id: Math.max(...allProducts.map((p) => p.id), 0) + 1,
-        createdDate: new Date().toISOString().split('T')[0],
-        status: "pending", // New products start as pending
-      };
-      setAllProducts((prevProducts) => [...prevProducts, newProduct]);
-    } else {
-      // Update existing product
-      setAllProducts((prevProducts) =>
-        prevProducts.map((product) =>
-          product.id === selectedProduct.id
-            ? { ...product, ...productData }
-            : product
-        )
-      );
-    }
-    setShowProductModal(false);
-    setSelectedProduct(null);
-  };
-
-  // Reset all filters
-  const handleResetFilters = () => {
-    setSearchValue("");
-    setCategoryFilter("");
-    setStatusFilter("");
-  };
-
-  // Calculate stats from current filtered products
-  const calculateFilteredStats = () => {
-    const activeCount = filteredProducts.filter(p => p.status === 'active').length;
-    const pendingCount = filteredProducts.filter(p => p.status === 'pending').length;
-    const outOfStockCount = filteredProducts.filter(p => p.status === 'out_of_stock').length;
-    const inactiveCount = filteredProducts.filter(p => p.status === 'inactive').length;
-
-    return {
-      totalProducts: filteredProducts.length,
-      activeProducts: activeCount,
-      pendingProducts: pendingCount,
-      outOfStockProducts: outOfStockCount,
-      inactiveProducts: inactiveCount,
-    };
-  };
-  // Processed stats - use filtered stats if filters are active
-  const isFiltered = searchValue || categoryFilter || statusFilter;
-  const currentStats = isFiltered ? calculateFilteredStats() : stats;
-  
-  const processedStats = {
-    totalProducts: {
-      value: currentStats.totalProducts,
-      formattedValue: formatNumber(currentStats.totalProducts),
-      label: isFiltered ? "Sản phẩm hiển thị" : "Tổng sản phẩm",
-      icon: "📦",
-    },
-    activeProducts: {
-      value: currentStats.activeProducts,
-      formattedValue: formatNumber(currentStats.activeProducts),
-      label: "Sản phẩm hoạt động",
-      icon: "✅",
-    },
-    outOfStockProducts: {
-      value: currentStats.outOfStockProducts,
-      formattedValue: formatNumber(currentStats.outOfStockProducts),
-      label: "Hết hàng",
-      icon: "⚠️",
-    },
-    pendingProducts: {
-      value: currentStats.pendingProducts,
-      formattedValue: formatNumber(currentStats.pendingProducts),
-      label: "Chờ duyệt",
-      icon: "⏳",
-    },
-  };
-
   return {
-    // State
-    products,
+    // State - map from common hook for backward compatibility
+    products: commonHook.products,
     stats: processedStats,
-    isLoading,
+    isLoading: commonHook.isLoading,
 
     // Filter states
-    searchValue,
-    setSearchValue,
-    categoryFilter,
-    setCategoryFilter,
-    statusFilter,
-    setStatusFilter,
+    searchValue: commonHook.searchValue,
+    setSearchValue: commonHook.setSearchValue,
+    categoryFilter: commonHook.categoryFilter,
+    setCategoryFilter: commonHook.setCategoryFilter,
+    statusFilter: commonHook.statusFilter,
+    setStatusFilter: commonHook.setStatusFilter,
 
     // Pagination states
-    currentPage,
-    setCurrentPage,
-    totalItems,
-    totalPages,
+    currentPage: commonHook.currentPage,
+    setCurrentPage: commonHook.setCurrentPage,
+    totalItems: commonHook.totalItems,
+    totalPages: commonHook.totalPages,
+
+    // Modal states
+    showProductModal: commonHook.showProductModal,
+    setShowProductModal: commonHook.setShowProductModal,
+    showDetailModal: commonHook.showDetailModal,
+    setShowDetailModal: commonHook.setShowDetailModal,
+    showDeleteModal: commonHook.showDeleteModal,
+    setShowDeleteModal: commonHook.setShowDeleteModal,
+    selectedProduct: commonHook.selectedProduct,
+    modalMode: commonHook.modalMode,
+
+    // Event handlers - use common hook functions
+    handleViewProduct: commonHook.viewProduct,
+    handleEditProduct: commonHook.editProduct,
+    handleDeleteProduct: commonHook.showDeleteConfirm,
+    handleAddProduct: commonHook.addProduct,
+    handleSaveProduct: commonHook.saveProduct,
+    confirmDeleteProduct: commonHook.deleteProduct,
+    handleResetFilters: commonHook.resetFilters,
 
     // Utility functions
     formatCurrency,
     formatNumber,
-
-    // Modal states
-    showProductModal,
-    setShowProductModal,
-    showDetailModal,
-    setShowDetailModal,
-    showDeleteModal,
-    setShowDeleteModal,
-    selectedProduct,
-    modalMode,    // Event handlers
-    handleViewProduct,
-    handleEditProduct,
-    handleDeleteProduct,
-    handleAddProduct,
-    handleSaveProduct,
-    confirmDeleteProduct,
-    handleResetFilters,
   };
 };

@@ -7,8 +7,8 @@ import SystemPerformanceMetrics from "../../components/admin/dashboard/SystemPer
 import DashboardInsights from "../../components/admin/dashboard/DashboardInsights";
 import StatsCards from "../../components/common/dashboard/StatsCards";
 import StatsOverview from "../../components/admin/reports/StatsOverview";
-import { useDashboard } from "../../hooks/useDashboard";
-import { useAdminReports } from "../../hooks/useAdminReports";
+import { useDashboard } from "../../hooks/common/useDashboard";
+import { useAdminReports } from "../../hooks/admin/useAdminReports";
 import { useLanguage } from "../../context/LanguageContext";
 
 const Dashboard = () => {

@@ -4,7 +4,7 @@ import {
   PRODUCT_STATUSES,
   PRODUCT_STATUS_LABELS,
   PRICE_RANGES,
-} from "../../../constants/productConstants";
+} from "../../../lib/constants/productConstants.js";
 
 const ProductFilters = ({
   // Seller props (existing)
@@ -35,8 +35,18 @@ const ProductFilters = ({
             {/* Filter Results Count */}
             {(searchValue || categoryFilter || statusFilter) && (
               <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586l-4-4v-.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586l-4-4v-.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"
+                  />
                 </svg>
                 <span className="text-sm font-medium">Đã áp dụng bộ lọc</span>
               </div>

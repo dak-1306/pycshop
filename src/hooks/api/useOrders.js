@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import orderService from "../../services/orderService.js";
-import sellerOrderService from "../../services/sellerOrderService.js";
+import orderService from "../../lib/services/orderService.js";
+import sellerOrderService from "../../lib/services/sellerOrderService.js";
 
 export const useOrders = () => {
   const [orders, setOrders] = useState([]);

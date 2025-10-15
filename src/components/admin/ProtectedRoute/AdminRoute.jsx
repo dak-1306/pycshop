@@ -1,6 +1,6 @@
 import React from "react";
 import { Navigate } from "react-router-dom";
-import { authService } from "../../../services/authService";
+import { authService } from "../../../lib/services/authService.js";
 
 const AdminRoute = ({ children }) => {
   // Sử dụng authService để kiểm tra authentication và admin role

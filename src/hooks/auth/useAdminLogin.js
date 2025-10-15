@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { authService } from "../../services/authService";
-import { ADMIN_CONSTANTS } from "../../constants/adminConstants";
+import { authService } from "../../lib/services/authService.js";
+import { ADMIN_CONSTANTS } from "../../lib/constants/adminConstants.js";
 
 export const useAdminLogin = () => {
   const navigate = useNavigate();

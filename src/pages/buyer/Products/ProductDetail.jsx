@@ -4,7 +4,7 @@ import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 import ReviewForm from "../../../components/buyers/ReviewForm";
 import ReviewList from "../../../components/buyers/ReviewList";
-import { productService } from "../../../services/productService";
+import { productService } from "../../../lib/services/productService.js";
 import { useAuth } from "../../../context/AuthContext";
 import "./ProductDetail.css";
 

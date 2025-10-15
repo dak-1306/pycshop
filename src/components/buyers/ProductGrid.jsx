@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "./ProductGrid.css";
-import { productService } from "../../services/productService";
+import { productService } from "../../lib/services/productService.js";
 
 const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
   const navigate = useNavigate();

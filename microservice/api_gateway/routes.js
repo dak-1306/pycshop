@@ -11,30 +11,52 @@ function setupRoutes(app) {
         `[ROUTES] Matched /auth route for ${req.method} ${req.originalUrl}`
       );
       console.log(`[ROUTES] req.user:`, req.user);
-        // Skip auth middleware for login/register routes
-      const publicRoutes = ['/auth/login', '/auth/register', '/auth/admin/login', '/auth/register-admin'];
-      const isPublicRoute = publicRoutes.some(route => req.originalUrl === route || req.originalUrl.startsWith(route + '?'));
-      
-      console.log(`[ROUTES] Checking if ${req.originalUrl} is public route:`, isPublicRoute);
-      
+      // Skip auth middleware for login/register routes
+      const publicRoutes = [
+        "/auth/login",
+        "/auth/register",
+        "/auth/admin/login",
+        "/auth/register-admin",
+      ];
+      const isPublicRoute = publicRoutes.some(
+        (route) =>
+          req.originalUrl === route || req.originalUrl.startsWith(route + "?")
+      );
+
+      console.log(
+        `[ROUTES] Checking if ${req.originalUrl} is public route:`,
+        isPublicRoute
+      );
+
       if (isPublicRoute) {
-        console.log(`[ROUTES] Skipping auth for public auth route: ${req.originalUrl}`);
+        console.log(
+          `[ROUTES] Skipping auth for public auth route: ${req.originalUrl}`
+        );
         return next();
       }
-        // Apply auth middleware for protected auth routes (like logout)
+      // Apply auth middleware for protected auth routes (like logout)
       authMiddleware(req, res, next);
     },
     (req, res, next) => {
-      console.log(`[ROUTES] About to call createProxyMiddleware for ${req.method} ${req.url}`);
+      console.log(
+        `[ROUTES] About to call createProxyMiddleware for ${req.method} ${req.url}`
+      );
       next();
     },
     createProxyMiddleware({
       target: process.env.AUTH_SERVICE_URL || "http://localhost:5001",
       changeOrigin: true,
-      pathRewrite: { "^/auth": "" },      onProxyReq: (proxyReq, req, res) => {
-        console.log(`🔥 [PROXY] Auth onProxyReq callback CALLED! - ${req.method} ${req.url}`);
-        console.log(`🔥 [PROXY] Target: ${process.env.AUTH_SERVICE_URL || "http://localhost:5001"}${proxyReq.path}`);
-        
+      pathRewrite: { "^/auth": "" },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `🔥 [PROXY] Auth onProxyReq callback CALLED! - ${req.method} ${req.url}`
+        );
+        console.log(
+          `🔥 [PROXY] Target: ${
+            process.env.AUTH_SERVICE_URL || "http://localhost:5001"
+          }${proxyReq.path}`
+        );
+
         // Truyền thông tin user từ API Gateway xuống auth service
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id);
@@ -97,7 +119,7 @@ function setupRoutes(app) {
       changeOrigin: true,
       pathRewrite: { "^/admin": "" },
       onProxyReq: (proxyReq, req, res) => {
-        console.log(`[PROXY] onProxyReq callback triggered for admin service`);        // Truyền thông tin user từ API Gateway xuống admin service
+        console.log(`[PROXY] onProxyReq callback triggered for admin service`); // Truyền thông tin user từ API Gateway xuống admin service
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id);
           proxyReq.setHeader("x-user-role", req.user.role);
@@ -127,7 +149,7 @@ function setupRoutes(app) {
         console.log(
           `[PROXY] Response ${proxyRes.statusCode} from Admin Service`
         );
-        
+
         // Ensure CORS headers are set
         const origin = req.headers.origin;
         if (origin) {
@@ -593,6 +615,150 @@ function setupRoutes(app) {
       },
     })
   );
+
+  // Temporary Notifications endpoint (until proper notification service is implemented)
+  app.get("/notifications", authMiddleware, (req, res) => {
+    console.log(`[ROUTES] Handling /notifications request for user:`, req.user);
+
+    const { userType = "admin", limit = 50 } = req.query;
+
+    // Mock notification data based on user type
+    const mockNotifications = {
+      admin: [
+        {
+          id: 1,
+          title: "Đơn hàng mới",
+          message: "Có đơn hàng mới cần xử lý từ khách hàng Nguyễn Văn A",
+          type: "order",
+          isRead: false,
+          createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
+        },
+        {
+          id: 2,
+          title: "Sản phẩm hết hàng",
+          message: "Sản phẩm iPhone 15 Pro Max đã hết hàng",
+          type: "inventory",
+          isRead: false,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
+        },
+        {
+          id: 3,
+          title: "Người bán mới đăng ký",
+          message: "Có người bán mới đăng ký tài khoản: TechStore VN",
+          type: "user",
+          isRead: true,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
+        },
+      ],
+      seller: [
+        {
+          id: 1,
+          title: "Đơn hàng được xác nhận",
+          message: "Đơn hàng #ORD-001 đã được khách hàng xác nhận",
+          type: "order",
+          isRead: false,
+          createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
+        },
+        {
+          id: 2,
+          title: "Sản phẩm được duyệt",
+          message: "Sản phẩm MacBook Air M2 đã được duyệt và hiển thị",
+          type: "product",
+          isRead: false,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1 hour ago
+        },
+        {
+          id: 3,
+          title: "Đánh giá mới",
+          message: "Bạn có đánh giá 5 sao mới từ khách hàng",
+          type: "review",
+          isRead: true,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12 hours ago
+        },
+      ],
+      buyer: [
+        {
+          id: 1,
+          title: "Đơn hàng đang giao",
+          message: "Đơn hàng #ORD-123 đang được giao đến bạn",
+          type: "shipping",
+          isRead: false,
+          createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 minutes ago
+        },
+        {
+          id: 2,
+          title: "Khuyến mãi đặc biệt",
+          message: "Giảm giá 20% cho tất cả sản phẩm điện tử",
+          type: "promotion",
+          isRead: false,
+          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(), // 3 hours ago
+        },
+      ],
+    };
+
+    const notifications =
+      mockNotifications[userType] || mockNotifications.admin;
+    const limitedNotifications = notifications.slice(0, parseInt(limit));
+    const unreadCount = limitedNotifications.filter((n) => !n.isRead).length;
+
+    res.json({
+      success: true,
+      data: limitedNotifications,
+      unreadCount,
+      total: notifications.length,
+    });
+  });
+
+  // Mark notification as read
+  app.patch("/notifications/:id/read", authMiddleware, (req, res) => {
+    console.log(
+      `[ROUTES] Marking notification ${req.params.id} as read for user:`,
+      req.user
+    );
+    res.json({ success: true, message: "Notification marked as read" });
+  });
+
+  // Mark all notifications as read
+  app.patch("/notifications/read-all", authMiddleware, (req, res) => {
+    console.log(
+      `[ROUTES] Marking all notifications as read for user:`,
+      req.user
+    );
+    res.json({ success: true, message: "All notifications marked as read" });
+  });
+
+  // Delete notification
+  app.delete("/notifications/:id", authMiddleware, (req, res) => {
+    console.log(
+      `[ROUTES] Deleting notification ${req.params.id} for user:`,
+      req.user
+    );
+    res.json({ success: true, message: "Notification deleted" });
+  });
+
+  // Clear all notifications
+  app.delete("/notifications/clear-all", authMiddleware, (req, res) => {
+    console.log(`[ROUTES] Clearing all notifications for user:`, req.user);
+    res.json({ success: true, message: "All notifications cleared" });
+  });
+
+  // Get unread count
+  app.get("/notifications/unread-count", authMiddleware, (req, res) => {
+    console.log(`[ROUTES] Getting unread count for user:`, req.user);
+    const { userType = "admin" } = req.query;
+
+    // Mock unread counts based on user type
+    const unreadCounts = {
+      admin: 2,
+      seller: 2,
+      buyer: 2,
+    };
+
+    res.json({
+      success: true,
+      unreadCount: unreadCounts[userType] || 0,
+    });
+  });
 }
 
 export default setupRoutes;

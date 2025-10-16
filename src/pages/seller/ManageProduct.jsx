@@ -10,7 +10,6 @@ import ErrorDisplay from "../../components/common/feedback/ErrorDisplay";
 import EmptyState from "../../components/common/feedback/EmptyState";
 import { useProducts } from "../../hooks/seller/useProducts";
 import { useCategories } from "../../hooks/api/useCategories";
-import { PRODUCT_CATEGORIES } from "../../lib/constants/productConstants";
 
 // CSS animations
 const styles = `

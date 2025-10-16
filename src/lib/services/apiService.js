@@ -39,27 +39,110 @@ const makeAuthenticatedRequest = async (url, options = {}) => {
   return response.json();
 };
 
+// Response interceptor for handling common errors
+const handleApiError = (error) => {
+  if (error.message.includes("401") || error.message.includes("Unauthorized")) {
+    // Clear auth tokens on unauthorized
+    localStorage.removeItem("token");
+    sessionStorage.removeItem("token");
+    // Redirect to login if needed
+    if (window.location.pathname !== "/auth/login") {
+      window.location.href = "/auth/login";
+    }
+  }
+  throw error;
+};
+
 // Generic API methods
 export const api = {
-  get: (url, options = {}) =>
-    makeAuthenticatedRequest(url, { ...options, method: "GET" }),
+  get: async (url, options = {}) => {
+    try {
+      return await makeAuthenticatedRequest(url, { ...options, method: "GET" });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 
-  post: (url, data, options = {}) =>
-    makeAuthenticatedRequest(url, {
-      ...options,
-      method: "POST",
-      body: JSON.stringify(data),
-    }),
+  post: async (url, data, options = {}) => {
+    try {
+      return await makeAuthenticatedRequest(url, {
+        ...options,
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 
-  put: (url, data, options = {}) =>
-    makeAuthenticatedRequest(url, {
-      ...options,
-      method: "PUT",
-      body: JSON.stringify(data),
-    }),
+  put: async (url, data, options = {}) => {
+    try {
+      return await makeAuthenticatedRequest(url, {
+        ...options,
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 
-  delete: (url, options = {}) =>
-    makeAuthenticatedRequest(url, { ...options, method: "DELETE" }),
+  patch: async (url, data, options = {}) => {
+    try {
+      return await makeAuthenticatedRequest(url, {
+        ...options,
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  delete: async (url, options = {}) => {
+    try {
+      return await makeAuthenticatedRequest(url, {
+        ...options,
+        method: "DELETE",
+      });
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
+
+  // File upload method
+  upload: async (url, formData, options = {}) => {
+    const token = getAuthToken();
+
+    const headers = {
+      ...options.headers,
+    };
+
+    // Don't set Content-Type for FormData, let browser set it
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}${url}`, {
+        ...options,
+        method: "POST",
+        headers,
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({
+          message: "Upload failed",
+        }));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+
+      return response.json();
+    } catch (error) {
+      return handleApiError(error);
+    }
+  },
 };
 
 export default api;

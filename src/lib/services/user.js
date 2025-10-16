@@ -1,4 +1,4 @@
-import api from "./api.js";
+import { api } from "./apiService.js";
 
 export const userService = {
   // Get all users (admin only)

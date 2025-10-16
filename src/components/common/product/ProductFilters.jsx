@@ -1,9 +1,9 @@
 import React from "react";
 import {
-  PRODUCT_CATEGORIES,
-  PRODUCT_STATUSES,
+  PRODUCT_CATEGORIES_ARRAY as PRODUCT_CATEGORIES,
+  PRODUCT_STATUSES_ARRAY as PRODUCT_STATUSES,
   PRODUCT_STATUS_LABELS,
-} from "../../../lib/constants/productConstants.js";
+} from "../../../lib/constants/product.js";
 import { useLanguage } from "../../../context/LanguageContext";
 
 const ProductFilters = ({

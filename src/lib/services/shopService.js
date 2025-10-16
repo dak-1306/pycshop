@@ -1,4 +1,4 @@
-import apiService from "../services/apiService.js";
+import { api } from "./apiService";
 
 class ShopService {
   // Get all categories for shop creation
@@ -26,7 +26,7 @@ class ShopService {
   // Get shop information for current seller
   static async getShopInfo() {
     try {
-      const response = await apiService.get("/shops/info");
+      const response = await api.get("/shops/info");
       return response;
     } catch (error) {
       console.error("ShopService - getShopInfo error:", error);
@@ -37,7 +37,7 @@ class ShopService {
   // Create new shop
   static async createShop(shopData) {
     try {
-      const response = await apiService.post("/shops/create", shopData);
+      const response = await api.post("/shops/create", shopData);
       return response.data;
     } catch (error) {
       console.error("ShopService - createShop error:", error);
@@ -48,7 +48,7 @@ class ShopService {
   // Update shop information
   static async updateShop(shopData) {
     try {
-      const response = await apiService.put("/shops/update", shopData);
+      const response = await api.put("/shops/update", shopData);
       return response.data;
     } catch (error) {
       console.error("ShopService - updateShop error:", error);
@@ -60,10 +60,10 @@ class ShopService {
   static async becomeSeller(shopData) {
     try {
       console.log("ShopService - becomeSeller called with:", shopData);
-      const response = await apiService.post("/shops/become-seller", shopData);
+      const response = await api.post("/shops/become-seller", shopData);
       console.log("ShopService - becomeSeller response:", response);
 
-      // apiService returns direct JSON, not wrapped in .data
+      // api returns direct JSON, not wrapped in .data
       return response;
     } catch (error) {
       console.error("ShopService - becomeSeller error:", error);
@@ -217,7 +217,7 @@ class ShopService {
   // Add stock to product (restock)
   static async restockProduct(productId, stockData) {
     try {
-      const response = await apiService.post(
+      const response = await api.post(
         `/seller/products/${productId}/stock`,
         stockData
       );
@@ -231,7 +231,7 @@ class ShopService {
   // Get product categories for seller
   static async getSellerCategories() {
     try {
-      const response = await apiService.get("/seller/categories");
+      const response = await api.get("/seller/categories");
       return response.data;
     } catch (error) {
       console.error("ShopService - getSellerCategories error:", error);
@@ -250,7 +250,7 @@ class ShopService {
         formData.append("images", files[i]);
       }
 
-      const response = await apiService.post("/images/upload", formData, {
+      const response = await api.post("/images/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -265,7 +265,7 @@ class ShopService {
   // Get product by ID (for editing)
   static async getProductById(productId) {
     try {
-      const response = await apiService.get(`/seller/products/${productId}`);
+      const response = await api.get(`/seller/products/${productId}`);
       return response.data;
     } catch (error) {
       console.error("ShopService - getProductById error:", error);
@@ -283,7 +283,7 @@ class ShopService {
       const url = `/seller/products/${productId}/stock/history${
         queryParams.toString() ? "?" + queryParams.toString() : ""
       }`;
-      const response = await apiService.get(url);
+      const response = await api.get(url);
       return response.data;
     } catch (error) {
       console.error("ShopService - getStockHistory error:", error);

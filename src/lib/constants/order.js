@@ -73,3 +73,87 @@ export const ORDER_FILTERS = [
     label: ORDER_STATUS_LABELS[ORDER_STATUSES.CANCELLED],
   },
 ];
+
+// Additional constants from orderConstants.js
+export const ORDER_STATUSES_ARRAY = [
+  "Tất cả",
+  "Đang xử lý",
+  "Đang giao",
+  "Hoàn tất",
+  "Đã hủy",
+];
+
+export const ORDER_CATEGORIES = [
+  "Tất cả",
+  "Điện thoại",
+  "Laptop",
+  "Máy tính bảng",
+  "Phụ kiện",
+  "Khác",
+];
+
+export const PAGINATION_CONFIG = {
+  itemsPerPage: 10,
+  maxVisiblePages: 5,
+};
+
+export const ORDER_EXPORT_HEADERS = [
+  "ID",
+  "Tên sản phẩm",
+  "Giá (đ)",
+  "Số lượng",
+  "Danh mục",
+  "Trạng thái",
+  "Ngày tạo",
+  "Người bán",
+];
+
+// Mock orders data
+export const MOCK_ORDERS = [
+  {
+    id: 1,
+    productName: "iPhone 14 Pro",
+    price: 25990000,
+    quantity: 2,
+    category: "Điện thoại",
+    status: "Hoàn tất",
+    createdDate: "2024-10-01",
+    seller: "Apple Store",
+  },
+  {
+    id: 2,
+    productName: "MacBook Air M2",
+    price: 28990000,
+    quantity: 1,
+    category: "Laptop",
+    status: "Đang giao",
+    createdDate: "2024-09-30",
+    seller: "Computer World",
+  },
+];
+
+// Default stats data
+export const DEFAULT_ORDER_STATS = {
+  totalOrders: 856,
+  pendingOrders: 23,
+  completedOrders: 789,
+  totalRevenue: 285460000,
+};
+
+// Default order shape used across the app for initial/empty state
+export const DEFAULT_ORDER = {
+  id: null,
+  customer: "",
+  customerName: "",
+  email: "",
+  total: 0,
+  totalAmount: 0,
+  items: [],
+  productName: "",
+  status: ORDER_STATUSES.PENDING,
+  paymentStatus: PAYMENT_STATUSES.PENDING,
+  seller: "",
+  sellerName: "",
+  createdAt: null,
+  createdDate: null,
+};

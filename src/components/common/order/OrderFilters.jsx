@@ -17,6 +17,12 @@ const OrderFilters = ({
   onPaymentChange,
   onUpdateStatus, // Prop cho nút tạo đơn hàng (tên prop giữ nguyên để tương thích)
 }) => {
+  // Ensure filters is an array for safe mapping. Support legacy object form as fallback.
+  const normalizedFilters = Array.isArray(filters)
+    ? filters
+    : filters && typeof filters === "object"
+    ? Object.values(filters)
+    : [];
   // Render Admin variant
   if (variant === "admin") {
     return (
@@ -50,7 +56,6 @@ const OrderFilters = ({
                 className="pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-300"
               />
             </div>
-
             {/* Status Filter */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
@@ -83,7 +88,6 @@ const OrderFilters = ({
                 </svg>
               </div>
             </div>
-
             {/* Payment Filter */}
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
@@ -114,7 +118,8 @@ const OrderFilters = ({
                   />
                 </svg>
               </div>
-            </div>            {/* Create Order Button */}
+            </div>{" "}
+            {/* Create Order Button */}
             <button
               onClick={onUpdateStatus}
               className="group relative flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium text-sm transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 shadow-md hover:shadow-lg overflow-hidden"
@@ -171,7 +176,7 @@ const OrderFilters = ({
       <div className="flex flex-wrap items-center justify-between gap-6">
         {/* Filter Buttons */}
         <div className="flex flex-wrap items-center gap-3">
-          {filters.map((filter) => (
+          {normalizedFilters.map((filter) => (
             <button
               key={filter}
               onClick={() => onFilterChange(filter)}

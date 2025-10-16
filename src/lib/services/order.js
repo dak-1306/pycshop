@@ -1,4 +1,4 @@
-import api from "./api.js";
+import { api } from "./apiService.js";
 
 export const orderService = {
   // Get all orders
@@ -77,6 +77,49 @@ export const orderService = {
       return response;
     } catch (error) {
       console.error("Get buyer orders error:", error);
+      throw error;
+    }
+  },
+
+  // Additional methods from orderService.js
+  // Get all orders (admin view)
+  getAllOrders: async (filters = {}) => {
+    try {
+      const queryParams = new URLSearchParams(filters).toString();
+      const url = `/orders${queryParams ? `?${queryParams}` : ""}`;
+      return await api.get(url);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      throw error;
+    }
+  },
+
+  // Get order by ID (alias for getOrder)
+  getOrderById: async (id) => {
+    try {
+      return await api.get(`/orders/${id}`);
+    } catch (error) {
+      console.error("Error fetching order:", error);
+      throw error;
+    }
+  },
+
+  // Update order (full update)
+  updateOrder: async (id, orderData) => {
+    try {
+      return await api.put(`/orders/${id}`, orderData);
+    } catch (error) {
+      console.error("Error updating order:", error);
+      throw error;
+    }
+  },
+
+  // Delete order
+  deleteOrder: async (id) => {
+    try {
+      return await api.delete(`/orders/${id}`);
+    } catch (error) {
+      console.error("Error deleting order:", error);
       throw error;
     }
   },

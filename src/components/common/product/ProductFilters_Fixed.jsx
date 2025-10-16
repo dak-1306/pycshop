@@ -1,10 +1,10 @@
 import React from "react";
 import {
-  PRODUCT_CATEGORIES,
-  PRODUCT_STATUSES,
+  PRODUCT_CATEGORIES_ARRAY as PRODUCT_CATEGORIES,
+  PRODUCT_STATUSES_ARRAY as PRODUCT_STATUSES,
   PRODUCT_STATUS_LABELS,
-  PRICE_RANGES,
-} from "../../../lib/constants/productConstants.js";
+  PRICE_RANGES_ARRAY as PRICE_RANGES,
+} from "../../../lib/constants/product.js";
 
 const ProductFilters = ({
   // Seller props (existing)

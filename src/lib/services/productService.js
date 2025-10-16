@@ -129,9 +129,58 @@ export const productService = {
   // Get product statistics
   getProductStats: async () => {
     try {
-      return await api.get("/products/stats");
+      return await api.get("/admin/products/stats");
     } catch (error) {
       console.error("Error fetching product stats:", error);
+      throw error;
+    }
+  },
+
+  // Additional methods from product.js
+  // Upload product images
+  uploadProductImages: async (productId, images) => {
+    try {
+      const formData = new FormData();
+
+      // Handle multiple files
+      if (Array.isArray(images)) {
+        images.forEach((image) => {
+          formData.append(`images`, image);
+        });
+      } else {
+        formData.append("images", images);
+      }
+
+      const response = await api.upload(
+        `/products/${productId}/images`,
+        formData
+      );
+      return response;
+    } catch (error) {
+      console.error("Upload product images error:", error);
+      throw error;
+    }
+  },
+
+  // Get seller products
+  getSellerProducts: async (params = {}) => {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await api.get(`/seller/products?${queryString}`);
+      return response;
+    } catch (error) {
+      console.error("Get seller products error:", error);
+      throw error;
+    }
+  },
+
+  // Update product status
+  updateProductStatus: async (id, status) => {
+    try {
+      const response = await api.patch(`/products/${id}/status`, { status });
+      return response;
+    } catch (error) {
+      console.error("Update product status error:", error);
       throw error;
     }
   },

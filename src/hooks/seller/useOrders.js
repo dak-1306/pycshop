@@ -2,9 +2,10 @@ import sellerOrderService from "../../lib/services/sellerOrderService.js";
 import useOrdersCommon from "../common/useOrders.js";
 import {
   ORDER_STATUSES,
+  ORDER_STATUSES_ARRAY,
   ORDER_CATEGORIES,
   DEFAULT_ORDER,
-} from "../../lib/constants/orderConstants.js";
+} from "../../lib/constants/order.js";
 
 export const useOrders = () => {
   // Use common hook with seller-specific configuration
@@ -26,8 +27,6 @@ export const useOrders = () => {
   const setSelectedFilter = (filter) =>
     commonHook.setStatusFilter(filter === "Tất cả" ? "" : filter);
 
-  // Use common hook's data
-  const orders = commonHook.orders;
   const isLoading = commonHook.isLoading;
   const error = commonHook.error;
   const totalPages = commonHook.totalPages;
@@ -118,7 +117,8 @@ export const useOrders = () => {
     formatNumber,
 
     // Constants
-    orderStatuses: ORDER_STATUSES,
+    // Return array form for UI filters (backwards-compatible mapping)
+    orderStatuses: ORDER_STATUSES_ARRAY || Object.values(ORDER_STATUSES),
     orderCategories: ORDER_CATEGORIES,
 
     // Additional common hook features

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { productService } from "../../lib/services/product";
+import { productService } from "../../lib/services/productService.js";
 import sellerProductService from "../../lib/services/sellerProductService.js";
 
 export const useProducts = () => {

@@ -2,7 +2,7 @@ import useProductsCommon from "../common/useProducts.js";
 import {
   MOCK_PRODUCTS,
   DEFAULT_PRODUCT_STATS,
-} from "../../lib/constants/productConstants.js";
+} from "../../lib/constants/product.js";
 
 // Mock service for admin products
 const adminProductService = {

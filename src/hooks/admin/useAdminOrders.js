@@ -1,8 +1,5 @@
 import useOrdersCommon from "../common/useOrders.js";
-import {
-  MOCK_ORDERS,
-  DEFAULT_ORDER_STATS,
-} from "../../lib/constants/orderConstants.js";
+import { MOCK_ORDERS, DEFAULT_ORDER_STATS } from "../../lib/constants/order.js";
 
 export const useAdminOrders = () => {
   // Use common hook with admin-specific configuration

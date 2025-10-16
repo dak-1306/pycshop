@@ -295,7 +295,10 @@ const OrderTable = ({
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {orders.map((order) => (
-            <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+            <tr
+              key={order.id || order.ID_DonHang}
+              className="hover:bg-gray-50 transition-colors"
+            >
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
                   {order.image ? (

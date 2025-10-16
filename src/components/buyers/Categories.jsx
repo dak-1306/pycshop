@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Categories.css";
-import { productService } from "../../lib/services/product.js";
+import { productService } from "../../lib/services/productService.js";
 
 const Categories = ({ selectedCategory, onCategorySelect }) => {
   const [categories, setCategories] = useState([]);

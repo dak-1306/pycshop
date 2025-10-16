@@ -5,7 +5,7 @@ import {
   DEFAULT_USER_STATS,
   USER_STATUS_COLORS,
   USER_ROLE_COLORS,
-} from "../../lib/constants/userConstants.js";
+} from "../../lib/constants/user.js";
 
 export const useAdminUsers = () => {
   // Use the existing useUsers hook as base

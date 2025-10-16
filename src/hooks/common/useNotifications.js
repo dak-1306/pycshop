@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import notificationService from "../../lib/services/notification";
+import notificationService from "../../lib/services/notification.js";
 
 export const useNotifications = (userType = "admin") => {
   const [notifications, setNotifications] = useState([]);
@@ -198,5 +198,7 @@ export const useNotifications = (userType = "admin") => {
     getNotificationIcon,
     getPriorityColor,
     formatNotificationTime,
+    // Backwards-compatible alias used by components expecting `getRelativeTime`
+    getRelativeTime: formatNotificationTime,
   };
 };

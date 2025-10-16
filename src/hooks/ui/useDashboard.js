@@ -6,7 +6,7 @@ import {
   MOCK_CHART_DATA,
   DASHBOARD_ORDER_STATUS_COLORS,
   DEFAULT_STATS,
-} from "../../lib/constants/dashboardConstants.jsx";
+} from "../../lib/constants/dashboard.js";
 
 export const useDashboard = () => {
   // State management

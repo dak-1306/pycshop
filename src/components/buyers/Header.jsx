@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "./Header.css";
-import logoImage from "../../images/logo.png";
+import logoImage from "../../images/logo.svg";
 
 const Header = ({ onSearch }) => {
   const { user, isAuthenticated, logout } = useAuth();

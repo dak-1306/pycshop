@@ -1,6 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const OrderStats = ({ stats }) => {
+const OrderStats = ({ stats = {} }) => {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
@@ -129,7 +130,7 @@ const OrderStats = ({ stats }) => {
               <p className={`text-2xl font-bold ${config.textColor}`}>
                 {config.isRevenue
                   ? formatCurrency(config.value)
-                  : config.value.toLocaleString()}
+                  : (Number(config.value) || 0).toLocaleString()}
               </p>
               <p className={`text-sm ${config.subTextColor}`}>{config.title}</p>
             </div>
@@ -138,6 +139,15 @@ const OrderStats = ({ stats }) => {
       ))}
     </div>
   );
+};
+
+OrderStats.propTypes = {
+  stats: PropTypes.shape({
+    totalOrders: PropTypes.number,
+    pendingOrders: PropTypes.number,
+    completedOrders: PropTypes.number,
+    totalRevenue: PropTypes.number,
+  }),
 };
 
 export default OrderStats;

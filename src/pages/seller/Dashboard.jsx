@@ -1,13 +1,18 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import SellerLayout from "../../components/layout/SellerLayout";
 import StatsCards from "../../components/common/dashboard/StatsCards";
-import ChartsSection from "../../components/common/dashboard/ChartsSection";
+import SharedChartsSection from "../../components/common/dashboard/charts/SharedChartsSection";
 import RecentOrdersTable from "../../components/common/dashboard/RecentOrdersTable";
 import { useDashboard } from "../../hooks/common/useDashboard";
 
 const Dashboard = () => {
-  const { stats, orderData, getStatusColor } = useDashboard("seller");
+  const { stats, orderData, chartData, getStatusColor, isLoading, error } =
+    useDashboard("seller");
+
+  const handleChartDetailClick = (chartType) => {
+    console.log(`Opening ${chartType} chart detail for seller`);
+    // TODO: Navigate to detailed chart view or open modal
+  };
 
   return (
     <SellerLayout title="Dashboard">
@@ -16,7 +21,13 @@ const Dashboard = () => {
         <StatsCards variant="seller" stats={stats} />
 
         {/* Charts Section */}
-        <ChartsSection variant="seller" />
+        <SharedChartsSection
+          variant="seller"
+          chartData={chartData}
+          isLoading={isLoading}
+          error={error}
+          onChartDetailClick={handleChartDetailClick}
+        />
 
         {/* Recent Orders Table */}
         <RecentOrdersTable

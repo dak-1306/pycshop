@@ -1,6 +1,7 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const OrderSearchBar = ({ searchTerm, setSearchTerm }) => {
+const OrderSearchBar = React.memo(({ searchTerm = "", setSearchTerm }) => {
   return (
     <div className="mb-8">
       <div className="relative max-w-lg mx-auto">
@@ -32,6 +33,13 @@ const OrderSearchBar = ({ searchTerm, setSearchTerm }) => {
       </div>
     </div>
   );
+});
+
+OrderSearchBar.displayName = "OrderSearchBar";
+
+OrderSearchBar.propTypes = {
+  searchTerm: PropTypes.string,
+  setSearchTerm: PropTypes.func.isRequired,
 };
 
 export default OrderSearchBar;

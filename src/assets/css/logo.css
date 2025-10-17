@@ -39,3 +39,28 @@
 .pycshop-gradient {
   background-size: 200% 200%;
 }
+
+/* Force logo image to white in header (fallbacks included) */
+.logo-img {
+  width: 140px;
+  height: auto;
+  display: inline-block;
+  object-fit: contain;
+  /* Try to make SVG/PNG appear white: filter is simple fallback */
+  filter: brightness(0) invert(1) saturate(0) contrast(100%);
+}
+
+/* If the logo is an SVG and mask is supported, use mask to color it white precisely */
+@supports (mask: url("data:image/svg+xml;utf8,<svg></svg>")) {
+  .logo-img {
+    -webkit-mask-size: contain;
+    mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    background-color: #ffffff; /* white logo */
+    /* hide the img src when mask used (keep for accessibility) */
+    color: transparent;
+  }
+}

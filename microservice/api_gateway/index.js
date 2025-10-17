@@ -31,9 +31,9 @@ const corsOptions = {
   origin: function (origin, callback) {
     console.log(`[GATEWAY] Checking origin: ${origin}`);
 
-    // Allow requests with no origin (mobile apps, etc.)
-    if (!origin) {
-      console.log(`[GATEWAY] Allowing request with no origin`);
+    // Allow requests with no origin (mobile apps, Postman, etc.) or file:// protocol
+    if (!origin || origin === 'null') {
+      console.log(`[GATEWAY] Allowing request with no origin or null origin`);
       return callback(null, true);
     }
 
@@ -430,6 +430,103 @@ app.all(/^\/api\/reviews/, (req, res) => {
         res.status(500).json({ error: "Review service error" });
       });
   });
+});
+
+// Handle users route specifically (route to admin service) - BEFORE setupRoutes
+app.all('/users', authMiddleware, (req, res) => {
+  console.log(`[GATEWAY] 🎯 Users route matched: ${req.method} ${req.originalUrl}`);
+  console.log(`[GATEWAY] User for users:`, req.user);
+  
+  const targetUrl = `http://localhost:5006${req.originalUrl}`;
+  console.log(`[GATEWAY] Proxying users to: ${targetUrl}`);
+  
+  const requestOptions = {
+    method: req.method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': req.headers.authorization,
+      'x-user-id': req.user.id.toString(),
+      'x-user-role': req.user.role,
+      'x-user-type': req.user.userType
+    }
+  };
+
+  if (req.body && Object.keys(req.body).length > 0) {
+    requestOptions.body = JSON.stringify(req.body);
+  }
+
+  fetch(targetUrl, requestOptions)
+    .then(async (response) => {
+      const data = await response.json();
+      console.log(`[GATEWAY] Users response:`, response.status);
+      res.status(response.status).json(data);
+    })
+    .catch((error) => {
+      console.error(`[GATEWAY] Users error:`, error);
+      res.status(500).json({ error: "Users service error" });
+    });
+});
+
+// Handle notifications route specifically (route to admin service)
+app.get('/notifications', authMiddleware, (req, res) => {
+  console.log(`[GATEWAY] Notifications route: ${req.method} ${req.originalUrl}`);
+  console.log(`[GATEWAY] User for notifications:`, req.user);
+  
+  const targetUrl = `http://localhost:5006${req.originalUrl}`;
+  console.log(`[GATEWAY] Proxying notifications to: ${targetUrl}`);
+  
+  const requestOptions = {
+    method: req.method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': req.headers.authorization,
+      'x-user-id': req.user.id.toString(),
+      'x-user-role': req.user.role,
+      'x-user-type': req.user.userType
+    }
+  };
+  
+  fetch(targetUrl, requestOptions)
+    .then(async (response) => {
+      const data = await response.json();
+      console.log(`[GATEWAY] Notifications response:`, response.status);
+      res.status(response.status).json(data);
+    })
+    .catch((error) => {
+      console.error(`[GATEWAY] Notifications error:`, error);
+      res.status(500).json({ error: "Notifications service error" });
+    });
+});
+
+// Handle dashboard stats route specifically (route to admin service)
+app.get('/dashboard/stats', authMiddleware, (req, res) => {
+  console.log(`[GATEWAY] Dashboard stats route: ${req.method} ${req.originalUrl}`);
+  console.log(`[GATEWAY] User for dashboard:`, req.user);
+  
+  const targetUrl = `http://localhost:5006${req.originalUrl}`;
+  console.log(`[GATEWAY] Proxying dashboard to: ${targetUrl}`);
+  
+  const requestOptions = {
+    method: req.method,
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': req.headers.authorization,
+      'x-user-id': req.user.id.toString(),
+      'x-user-role': req.user.role,
+      'x-user-type': req.user.userType
+    }
+  };
+  
+  fetch(targetUrl, requestOptions)
+    .then(async (response) => {
+      const data = await response.json();
+      console.log(`[GATEWAY] Dashboard response:`, response.status);
+      res.status(response.status).json(data);
+    })
+    .catch((error) => {
+      console.error(`[GATEWAY] Dashboard error:`, error);
+      res.status(500).json({ error: "Dashboard service error" });
+    });
 });
 
 // Đăng ký các route proxy

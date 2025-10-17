@@ -1,8 +1,10 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { useLanguage } from "../../../context/LanguageContext";
 
-const ProductStats = ({ stats }) => {
-  const { t } = useLanguage();  const statsConfig = [
+const ProductStats = ({ stats = {} }) => {
+  const { t } = useLanguage();
+  const statsConfig = [
     {
       key: "totalProducts",
       title: t("totalProducts"),
@@ -26,7 +28,8 @@ const ProductStats = ({ stats }) => {
             d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
           />
         </svg>
-      ),    },
+      ),
+    },
     {
       key: "activeProducts",
       title: t("activeProducts"),
@@ -50,7 +53,8 @@ const ProductStats = ({ stats }) => {
             d="M5 13l4 4L19 7"
           />
         </svg>
-      ),    },
+      ),
+    },
     {
       key: "outOfStockProducts",
       title: t("outOfStock"),
@@ -74,7 +78,8 @@ const ProductStats = ({ stats }) => {
             d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.865-.833-2.634 0L5.179 16.5c-.77.833.192 2.5 1.732 2.5z"
           />
         </svg>
-      ),    },
+      ),
+    },
     {
       key: "pendingProducts",
       title: t("pending"),
@@ -117,7 +122,7 @@ const ProductStats = ({ stats }) => {
             </div>
             <div>
               <p className={`text-2xl font-bold ${config.textColor}`}>
-                {config.value.toLocaleString()}
+                {(Number(config.value) || 0).toLocaleString()}
               </p>
               <p className={`text-sm ${config.subTextColor}`}>{config.title}</p>
             </div>
@@ -126,6 +131,15 @@ const ProductStats = ({ stats }) => {
       ))}
     </div>
   );
+};
+
+ProductStats.propTypes = {
+  stats: PropTypes.shape({
+    totalProducts: PropTypes.number,
+    activeProducts: PropTypes.number,
+    outOfStockProducts: PropTypes.number,
+    pendingProducts: PropTypes.number,
+  }),
 };
 
 export default ProductStats;

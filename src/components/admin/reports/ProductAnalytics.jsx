@@ -1,15 +1,15 @@
 import React from "react";
+import PropTypes from "prop-types";
+import { formatCurrency } from "../../common/dashboard/charts/chartUtils";
 
-const ProductAnalytics = ({ data }) => {
+const ProductAnalytics = ({ data = {} }) => {
   const formatNumber = (num) => {
+    if (typeof num !== "number") {
+      const numValue = Number(num);
+      if (isNaN(numValue)) return "0";
+      num = numValue;
+    }
     return new Intl.NumberFormat("vi-VN").format(num);
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
   };
 
   return (
@@ -139,4 +139,13 @@ const ProductAnalytics = ({ data }) => {
   );
 };
 
-export default ProductAnalytics;
+ProductAnalytics.propTypes = {
+  data: PropTypes.shape({
+    topProducts: PropTypes.array,
+    categoryPerformance: PropTypes.array,
+    inventoryStatus: PropTypes.object,
+    productTrends: PropTypes.array,
+  }),
+};
+
+export default React.memo(ProductAnalytics);

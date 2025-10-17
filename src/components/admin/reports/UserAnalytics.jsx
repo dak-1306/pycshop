@@ -1,15 +1,15 @@
 import React from "react";
+import PropTypes from "prop-types";
+import { formatCurrency } from "../../common/dashboard/charts/chartUtils";
 
-const UserAnalytics = ({ data }) => {
+const UserAnalytics = ({ data = {} }) => {
   const formatNumber = (num) => {
+    if (typeof num !== "number") {
+      const numValue = Number(num);
+      if (isNaN(numValue)) return "0";
+      num = numValue;
+    }
     return new Intl.NumberFormat("vi-VN").format(num);
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
   };
 
   return (
@@ -151,4 +151,13 @@ const UserAnalytics = ({ data }) => {
   );
 };
 
-export default UserAnalytics;
+UserAnalytics.propTypes = {
+  data: PropTypes.shape({
+    userGrowth: PropTypes.array,
+    userEngagement: PropTypes.object,
+    topUsers: PropTypes.array,
+    userSegmentation: PropTypes.array,
+  }),
+};
+
+export default React.memo(UserAnalytics);

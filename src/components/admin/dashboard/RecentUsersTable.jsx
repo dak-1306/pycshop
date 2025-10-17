@@ -1,11 +1,17 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const RecentUsersTable = ({ recentUsers }) => {
+const RecentUsersTable = ({ recentUsers = [] }) => {
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("vi-VN");
+    if (!date) return "N/A";
+    try {
+      return new Date(date).toLocaleDateString("vi-VN");
+    } catch {
+      return "Invalid Date";
+    }
   };
 
-  if (!recentUsers || recentUsers.length === 0) {
+  if (!Array.isArray(recentUsers) || recentUsers.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm border">
         <div className="p-6 border-b border-gray-200">
@@ -72,29 +78,36 @@ const RecentUsersTable = ({ recentUsers }) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {recentUsers.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50">
+              <tr
+                key={user?.id || `user-${Math.random()}`}
+                className="hover:bg-gray-50"
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center mr-3">
                       <span className="text-sm font-medium text-gray-600">
-                        {user.name.charAt(0)}
+                        {(user?.name || "?").charAt(0).toUpperCase()}
                       </span>
                     </div>
                     <div className="text-sm font-medium text-gray-900">
-                      {user.name}
+                      {user?.name || "N/A"}
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{user.email}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">
-                    {formatDate(user.joinDate)}
+                    {user?.email || "N/A"}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{user.orders}</div>
+                  <div className="text-sm text-gray-900">
+                    {formatDate(user?.joinDate)}
+                  </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">
+                    {user?.orders || 0}
+                  </div>
                 </td>
               </tr>
             ))}
@@ -105,4 +118,19 @@ const RecentUsersTable = ({ recentUsers }) => {
   );
 };
 
-export default RecentUsersTable;
+RecentUsersTable.propTypes = {
+  recentUsers: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      name: PropTypes.string,
+      email: PropTypes.string,
+      joinDate: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.instanceOf(Date),
+      ]),
+      orders: PropTypes.number,
+    })
+  ),
+};
+
+export default React.memo(RecentUsersTable);

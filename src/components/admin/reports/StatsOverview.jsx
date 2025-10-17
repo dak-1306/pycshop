@@ -1,83 +1,78 @@
-import React from "react";
+import React, { useMemo } from "react";
+import PropTypes from "prop-types";
+import { formatCurrency } from "../../common/dashboard/charts/chartUtils";
 
-const StatsOverview = ({ stats }) => {
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
-
+const StatsOverview = ({ stats = {} }) => {
   const formatNumber = (num) => {
+    if (typeof num !== "number") {
+      const numValue = Number(num);
+      if (isNaN(numValue)) return "0";
+      num = numValue;
+    }
     return new Intl.NumberFormat("vi-VN").format(num);
   };
 
-  const statsCards = [
-    {
-      title: "Tổng người dùng",
-      value: formatNumber(stats.totalUsers),
-      icon: "👥",
-      color: "from-blue-500 to-blue-600",
-      bgColor: "bg-blue-50",
-      textColor: "text-blue-600",
-    },
-    {
-      title: "Tổng đơn hàng",
-      value: formatNumber(stats.totalOrders),
-      icon: "📦",
-      color: "from-green-500 to-green-600",
-      bgColor: "bg-green-50",
-      textColor: "text-green-600",
-    },
-    {
-      title: "Tổng sản phẩm",
-      value: formatNumber(stats.totalProducts),
-      icon: "🛍️",
-      color: "from-purple-500 to-purple-600",
-      bgColor: "bg-purple-50",
-      textColor: "text-purple-600",
-    },
-    {
-      title: "Tổng doanh thu",
-      value: formatCurrency(stats.totalRevenue),
-      icon: "💰",
-      color: "from-yellow-500 to-yellow-600",
-      bgColor: "bg-yellow-50",
-      textColor: "text-yellow-600",
-    },
-    {
-      title: "Người dùng đang hoạt động",
-      value: formatNumber(stats.activeUsers),
-      icon: "🟢",
-      color: "from-emerald-500 to-emerald-600",
-      bgColor: "bg-emerald-50",
-      textColor: "text-emerald-600",
-    },
-    {
-      title: "Đơn hàng chờ xử lý",
-      value: formatNumber(stats.pendingOrders),
-      icon: "⏳",
-      color: "from-orange-500 to-orange-600",
-      bgColor: "bg-orange-50",
-      textColor: "text-orange-600",
-    },
-    {
-      title: "Sản phẩm hết hàng",
-      value: formatNumber(stats.outOfStockProducts),
-      icon: "📉",
-      color: "from-red-500 to-red-600",
-      bgColor: "bg-red-50",
-      textColor: "text-red-600",
-    },
-    {
-      title: "Báo cáo vi phạm",
-      value: formatNumber(stats.violationReports),
-      icon: "⚠️",
-      color: "from-pink-500 to-pink-600",
-      bgColor: "bg-pink-50",
-      textColor: "text-pink-600",
-    },
-  ];
+  const statsCards = useMemo(
+    () => [
+      {
+        title: "Tổng người dùng",
+        value: formatNumber(stats.totalUsers || 0),
+        icon: "👥",
+        color: "from-blue-500 to-blue-600",
+        bgColor: "bg-blue-50",
+        textColor: "text-blue-600",
+      },
+      {
+        title: "Tổng đơn hàng",
+        value: formatNumber(stats.totalOrders || 0),
+        icon: "📦",
+        color: "from-green-500 to-green-600",
+        bgColor: "bg-green-50",
+        textColor: "text-green-600",
+      },
+      {
+        title: "Tổng sản phẩm",
+        value: formatNumber(stats.totalProducts || 0),
+        icon: "🛍️",
+        color: "from-purple-500 to-purple-600",
+        bgColor: "bg-purple-50",
+        textColor: "text-purple-600",
+      },
+      {
+        title: "Tổng doanh thu",
+        value: formatCurrency(stats.totalRevenue || 0),
+        icon: "💰",
+        color: "from-yellow-500 to-yellow-600",
+        bgColor: "bg-yellow-50",
+        textColor: "text-yellow-600",
+      },
+      {
+        title: "Người dùng hoạt động",
+        value: formatNumber(stats.activeUsers || 0),
+        icon: "🟢",
+        color: "from-emerald-500 to-emerald-600",
+        bgColor: "bg-emerald-50",
+        textColor: "text-emerald-600",
+      },
+      {
+        title: "Đơn hàng chờ xử lý",
+        value: formatNumber(stats.pendingOrders || 0),
+        icon: "⏳",
+        color: "from-orange-500 to-orange-600",
+        bgColor: "bg-orange-50",
+        textColor: "text-orange-600",
+      },
+      {
+        title: "Sản phẩm hết hàng",
+        value: formatNumber(stats.outOfStockProducts || 0),
+        icon: "📉",
+        color: "from-red-500 to-red-600",
+        bgColor: "bg-red-50",
+        textColor: "text-red-600",
+      },
+    ],
+    [stats]
+  );
 
   return (
     <div className="mb-8">
@@ -125,4 +120,16 @@ const StatsOverview = ({ stats }) => {
   );
 };
 
-export default StatsOverview;
+StatsOverview.propTypes = {
+  stats: PropTypes.shape({
+    totalUsers: PropTypes.number,
+    totalOrders: PropTypes.number,
+    totalProducts: PropTypes.number,
+    totalRevenue: PropTypes.number,
+    activeUsers: PropTypes.number,
+    pendingOrders: PropTypes.number,
+    outOfStockProducts: PropTypes.number,
+  }),
+};
+
+export default React.memo(StatsOverview);

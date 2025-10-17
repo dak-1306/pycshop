@@ -1,15 +1,15 @@
 import React from "react";
+import PropTypes from "prop-types";
+import { formatCurrency } from "../../common/dashboard/charts/chartUtils";
 
-const AdminRecentOrdersTable = ({ recentOrders }) => {
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
-
+const AdminRecentOrdersTable = ({ recentOrders = [] }) => {
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("vi-VN");
+    if (!date) return "N/A";
+    try {
+      return new Date(date).toLocaleDateString("vi-VN");
+    } catch {
+      return "Invalid Date";
+    }
   };
 
   const getStatusColor = (status) => {
@@ -42,7 +42,7 @@ const AdminRecentOrdersTable = ({ recentOrders }) => {
     }
   };
 
-  if (!recentOrders || recentOrders.length === 0) {
+  if (!Array.isArray(recentOrders) || recentOrders.length === 0) {
     return (
       <div className="bg-white rounded-xl shadow-sm border">
         <div className="p-6 border-b border-gray-200">
@@ -109,32 +109,37 @@ const AdminRecentOrdersTable = ({ recentOrders }) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {recentOrders.map((order) => (
-              <tr key={order.id} className="hover:bg-gray-50">
+              <tr
+                key={order?.id || `order-${Math.random()}`}
+                className="hover:bg-gray-50"
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div>
                     <div className="text-sm font-medium text-gray-900">
-                      {order.id}
+                      {order?.id || "N/A"}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {formatDate(order.date)}
+                      {formatDate(order?.date)}
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{order.customer}</div>
+                  <div className="text-sm text-gray-900">
+                    {order?.customer || "N/A"}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
-                    {formatCurrency(order.amount)}
+                    {formatCurrency(order?.amount || 0)}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                      order.status
+                      order?.status
                     )}`}
                   >
-                    {getStatusText(order.status)}
+                    {getStatusText(order?.status)}
                   </span>
                 </td>
               </tr>
@@ -146,4 +151,16 @@ const AdminRecentOrdersTable = ({ recentOrders }) => {
   );
 };
 
-export default AdminRecentOrdersTable;
+AdminRecentOrdersTable.propTypes = {
+  recentOrders: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      customer: PropTypes.string,
+      date: PropTypes.oneOfType([PropTypes.string, PropTypes.instanceOf(Date)]),
+      amount: PropTypes.number,
+      status: PropTypes.string,
+    })
+  ),
+};
+
+export default React.memo(AdminRecentOrdersTable);

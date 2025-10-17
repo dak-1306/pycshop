@@ -7,27 +7,27 @@ import ProductAnalytics from "../../components/admin/reports/ProductAnalytics";
 import FinancialReports from "../../components/admin/reports/FinancialReports";
 import ReportFilters from "../../components/admin/reports/ReportFilters";
 import ExportDropdown from "../../components/admin/reports/ExportDropdown";
-import AdvancedReportFilters from "../../components/admin/reports/AdvancedReportFilters";
-import RealTimeStats from "../../components/admin/reports/RealTimeStats";
-import DetailedAnalytics from "../../components/admin/reports/DetailedAnalytics";
-import RecentReportsManager from "../../components/admin/reports/RecentReportsManager";
+import StatsOverview from "../../components/admin/reports/StatsOverview";
 
 const Reports = () => {
   const { t } = useLanguage();
   const {
     // Date range filters
     dateRange,
-    setDateRange,    // Analytics data
+    setDateRange,
+
+    // Analytics data
     userAnalytics,
     orderAnalytics,
     productAnalytics,
     financialData,
 
     // Loading states
-    isLoading,    // Actions
+    isLoading,
+
+    // Actions
     handleExportReport,
     handleRefreshData,
-    handleFilterChange,
   } = useAdminReports();
 
   if (isLoading) {
@@ -46,12 +46,12 @@ const Reports = () => {
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-          <div>            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          <div>
+            {" "}
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
               📊 {t("reportsAnalytics")}
             </h1>
-            <p className="text-gray-600">
-              {t("systemOverview")}
-            </p>
+            <p className="text-gray-600">{t("systemOverview")}</p>
           </div>
 
           <div className="mt-4 sm:mt-0 flex flex-col sm:flex-row gap-3">
@@ -71,21 +71,29 @@ const Reports = () => {
                   strokeWidth={2}
                   d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                 />
-              </svg>              {t("refreshData")}
-            </button>            <ExportDropdown onExport={handleExportReport} />
+              </svg>{" "}
+              {t("refreshData")}
+            </button>{" "}
+            <ExportDropdown onExport={handleExportReport} />
           </div>
         </div>
-      </div>      {/* Real-time Statistics */}
-      <RealTimeStats />      {/* Advanced Filters */}
-      <AdvancedReportFilters 
-        dateRange={dateRange} 
-        onDateRangeChange={setDateRange}
-        onFilterChange={handleFilterChange}
-      />
-
+      </div>
+      {/* Date Range Filters */}
+      <ReportFilters dateRange={dateRange} onDateRangeChange={setDateRange} />
+      {/* System Overview */}
+      <StatsOverview
+        stats={{
+          totalUsers: userAnalytics?.totalUsers || 0,
+          totalOrders: orderAnalytics?.totalOrders || 0,
+          totalProducts: productAnalytics?.totalProducts || 0,
+          totalRevenue: financialData?.totalRevenue || 0,
+          activeUsers: userAnalytics?.activeUsers || 0,
+          pendingOrders: orderAnalytics?.pendingOrders || 0,
+          outOfStockProducts: productAnalytics?.outOfStockProducts || 0,
+        }}
+      />{" "}
+      {/* Advanced Filters */}
       {/* Detailed Analytics */}
-      <DetailedAnalytics />
-
       {/* Analytics Sections */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
         {/* User Analytics */}
@@ -94,15 +102,14 @@ const Reports = () => {
         {/* Order Analytics */}
         <OrderAnalytics data={orderAnalytics} />
       </div>
-
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
         {/* Product Analytics */}
         <ProductAnalytics data={productAnalytics} />
 
         {/* Financial Reports */}
         <FinancialReports data={financialData} />
-      </div>      {/* Recent Reports Management */}
-      <RecentReportsManager />
+      </div>{" "}
+      {/* Recent Reports Management */}
     </div>
   );
 };

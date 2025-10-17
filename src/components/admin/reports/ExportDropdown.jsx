@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useLanguage } from '../../../context/LanguageContext';
+import React, { useState, useRef, useEffect } from "react";
+import PropTypes from "prop-types";
+import { useLanguage } from "../../../context/LanguageContext";
 
 const ExportDropdown = ({ onExport }) => {
   const { t } = useLanguage();
@@ -13,36 +14,36 @@ const ExportDropdown = ({ onExport }) => {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
   const exportOptions = [
     {
-      format: 'json',
-      label: 'JSON',
-      icon: '📄',
-      description: 'Dữ liệu đầy đủ cho developers'
+      format: "json",
+      label: "JSON",
+      icon: "📄",
+      description: "Dữ liệu đầy đủ cho developers",
     },
     {
-      format: 'csv',
-      label: 'CSV',
-      icon: '📊',
-      description: 'Dữ liệu bảng cho Excel'
+      format: "csv",
+      label: "CSV",
+      icon: "📊",
+      description: "Dữ liệu bảng cho Excel",
     },
     {
-      format: 'excel',
-      label: 'Excel',
-      icon: '📈',
-      description: 'Báo cáo định dạng Excel'
+      format: "excel",
+      label: "Excel",
+      icon: "📈",
+      description: "Báo cáo định dạng Excel",
     },
     {
-      format: 'pdf',
-      label: 'PDF',
-      icon: '📋',
-      description: 'Báo cáo PDF để in ấn'
-    }
+      format: "pdf",
+      label: "PDF",
+      icon: "📋",
+      description: "Báo cáo PDF để in ấn",
+    },
   ];
 
   const handleExport = (format) => {
@@ -71,7 +72,9 @@ const ExportDropdown = ({ onExport }) => {
         </svg>
         {t("exportReport")}
         <svg
-          className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 transition-transform ${
+            isOpen ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -99,8 +102,12 @@ const ExportDropdown = ({ onExport }) => {
               >
                 <span className="text-xl mt-0.5">{option.icon}</span>
                 <div>
-                  <div className="font-medium text-gray-900">{option.label}</div>
-                  <div className="text-sm text-gray-500">{option.description}</div>
+                  <div className="font-medium text-gray-900">
+                    {option.label}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {option.description}
+                  </div>
                 </div>
               </button>
             ))}
@@ -111,4 +118,8 @@ const ExportDropdown = ({ onExport }) => {
   );
 };
 
-export default ExportDropdown;
+ExportDropdown.propTypes = {
+  onExport: PropTypes.func.isRequired,
+};
+
+export default React.memo(ExportDropdown);

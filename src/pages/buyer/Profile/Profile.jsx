@@ -1,11 +1,23 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { useProfile } from "../../../hooks/user/useProfile.js";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 import "./Profile.css";
 
 const Profile = () => {
-  const { user } = useAuth();
+  const { user, isAuthenticated, loading, login } = useAuth();
+  const { 
+    profile, 
+    addresses,
+    loading: profileLoading, 
+    uploading, 
+    error,
+    updateProfile, 
+    uploadAvatar,
+    clearError 
+  } = useProfile();
+  
   const [activeTab, setActiveTab] = useState("profile");
   const [editMode, setEditMode] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
@@ -19,55 +31,136 @@ const Profile = () => {
     avatar: null
   });
 
+  // Quick login for database testing
+  const handleQuickLogin = () => {
+    const mockUserData = {
+      ID_NguoiDung: 1,
+      TenDangNhap: "user_test", 
+      HoTen: "Nguyễn Văn Test",
+      Email: "test@pycshop.com",
+      SoDienThoai: "0123456789",
+      DiaChi: "123 Đường Test, Quận 1, TP.HCM",
+      GioiTinh: "male",
+      NgaySinh: "1990-01-01",
+      VaiTro: "buyer",
+      Avatar: null
+    };
+
+    const mockToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsInJvbGUiOiJidXllciIsImlhdCI6MTYzNzM0NTY3OH0.mock_token_for_testing";
+    login(mockUserData, mockToken);
+  };
+
   useEffect(() => {
-    if (user) {
+    const currentUser = profile || user;
+    if (currentUser) {
       setFormData({
-        name: user.TenDangNhap || "Người dùng PycShop",
-        email: user.Email || "user@pycshop.com", 
-        phone: user.SoDienThoai || "0123456789",
-        gender: user.GioiTinh || "male",
-        birthDate: user.NgaySinh || "1990-01-01",
-        address: user.DiaChi || "TP.HCM, Việt Nam",
-        avatar: user.Avatar || null
+        name: currentUser.TenDangNhap || currentUser.HoTen || "Người dùng PycShop",
+        email: currentUser.Email || "user@pycshop.com", 
+        phone: currentUser.SoDienThoai || "0123456789",
+        gender: currentUser.GioiTinh || "male",
+        birthDate: currentUser.NgaySinh || "1990-01-01",
+        address: currentUser.DiaChi || "TP.HCM, Việt Nam",
+        avatar: currentUser.Avatar || null
       });
-      setProfileImage(user.Avatar);
+      setProfileImage(currentUser.Avatar);
     }
-  }, [user]);
+  }, [profile, user]);
+
+  // Show login prompt if not authenticated
+  if (!loading && (!isAuthenticated || !user)) {
+    return (
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center', 
+        alignItems: 'center',
+        height: '100vh',
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        textAlign: 'center'
+      }}>
+        <div>
+          <i className="fas fa-user-circle" style={{ fontSize: '4rem', marginBottom: '20px', color: '#ffd700' }}></i>
+          <h1>Database Profile Test</h1>
+          <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>
+            Click để test profile với database
+          </p>
+          <button 
+            onClick={handleQuickLogin}
+            style={{
+              padding: '15px 30px',
+              background: '#28a745',
+              color: 'white', 
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '600'
+            }}
+          >
+            <i className="fas fa-database"></i> Login & Load Database
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Show preview immediately
       const reader = new FileReader();
       reader.onload = (e) => setProfileImage(e.target.result);
       reader.readAsDataURL(file);
+
+      // Upload to server
+      try {
+        await uploadAvatar(file);
+        // Profile will be refreshed automatically by the hook
+      } catch (error) {
+        console.error("Failed to upload avatar:", error);
+        // Revert preview on error
+        setProfileImage(formData.avatar);
+      }
     }
   };
 
-  const handleSave = () => {
-    setEditMode(false);
-    console.log("Saving data:", formData);
+  const handleSave = async () => {
+    try {
+      await updateProfile({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        gender: formData.gender,
+        birthDate: formData.birthDate,
+        address: formData.address
+      });
+      setEditMode(false);
+    } catch (error) {
+      console.error("Failed to save profile:", error);
+      // Keep edit mode open on error
+    }
   };
 
   const sidebarMenuItems = [
     {
-      icon: "👤",
+      icon: <i className="fas fa-user"></i>,
       title: "Tài khoản của tôi",
       isExpandable: true,
       subItems: [
-        { key: "profile", label: "Hồ Sơ", icon: "📝" },
-        { key: "addresses", label: "Địa Chỉ", icon: "📍" },
-        { key: "payment", label: "Thẻ Tín Dụng/Ghi Nợ", icon: "💳" },
+        { key: "profile", label: "Hồ Sơ", icon: <i className="fas fa-edit"></i> },
+        { key: "addresses", label: "Địa Chỉ", icon: <i className="fas fa-map-marker-alt"></i> },
+        { key: "payment", label: "Thẻ Tín Dụng/Ghi Nợ", icon: <i className="fas fa-credit-card"></i> },
       ]
     },
-    { icon: "📦", title: "Đơn Mua", key: "orders" },
-    { icon: "🔔", title: "Thông Báo", key: "notifications" },
-    { icon: "🎫", title: "Kho Voucher", key: "vouchers" },
-    { icon: "💰", title: "PycShop Xu", key: "coins" },
+    { icon: <i className="fas fa-shopping-bag"></i>, title: "Đơn Mua", key: "orders" },
+    { icon: <i className="fas fa-bell"></i>, title: "Thông Báo", key: "notifications" },
+    { icon: <i className="fas fa-ticket-alt"></i>, title: "Kho Voucher", key: "vouchers" },
+    { icon: <i className="fas fa-coins"></i>, title: "PycShop Xu", key: "coins" },
   ];
 
   const renderMainContent = () => {
@@ -181,15 +274,27 @@ const Profile = () => {
 
                 {editMode && (
                   <div className="form-actions">
-                    <button className="save-btn" onClick={handleSave}>
-                      Lưu
+                    <button 
+                      className="save-btn" 
+                      onClick={handleSave}
+                      disabled={loading}
+                    >
+                      {loading ? "Đang lưu..." : "Lưu"}
                     </button>
                     <button 
                       className="cancel-btn" 
                       onClick={() => setEditMode(false)}
+                      disabled={loading}
                     >
                       Hủy
                     </button>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="error-message">
+                    <p>{error}</p>
+                    <button onClick={clearError} className="error-close">×</button>
                   </div>
                 )}
               </div>
@@ -214,7 +319,7 @@ const Profile = () => {
                     id="avatar-upload"
                   />
                   <label htmlFor="avatar-upload" className="avatar-upload-btn">
-                    Chọn Ảnh
+                    {uploading ? "Đang tải..." : "Chọn Ảnh"}
                   </label>
                   <div className="avatar-note">
                     <p>Dung lượng file tối đa 1 MB</p>
@@ -233,22 +338,58 @@ const Profile = () => {
               <h2>Địa Chỉ Của Tôi</h2>
             </div>
             <div className="addresses-content">
-              <div className="address-item">
-                <div className="address-info">
-                  <div className="address-header">
-                    <span className="address-name">{formData.name}</span>
-                    <span className="address-phone">{formData.phone}</span>
-                    <span className="address-default">Mặc định</span>
+              {addresses && addresses.length > 0 ? (
+                addresses.map((address) => (
+                  <div key={address.id} className="address-item">
+                    <div className="address-info">
+                      <div className="address-header">
+                        <span className="address-name">{address.name || formData.name}</span>
+                        <span className="address-phone">{address.phone || formData.phone}</span>
+                        {address.isDefault && <span className="address-default">Mặc định</span>}
+                      </div>
+                      <div className="address-detail">
+                        {address.address || address.fullAddress}
+                      </div>
+                    </div>
+                    <div className="address-actions">
+                      <button 
+                        className="edit-address-btn"
+                        onClick={() => {
+                          // Handle edit address
+                          console.log("Edit address:", address);
+                        }}
+                      >
+                        Cập nhật
+                      </button>
+                    </div>
                   </div>
-                  <div className="address-detail">
-                    {formData.address}
+                ))
+              ) : (
+                <div className="address-item">
+                  <div className="address-info">
+                    <div className="address-header">
+                      <span className="address-name">{formData.name}</span>
+                      <span className="address-phone">{formData.phone}</span>
+                      <span className="address-default">Mặc định</span>
+                    </div>
+                    <div className="address-detail">
+                      {formData.address}
+                    </div>
+                  </div>
+                  <div className="address-actions">
+                    <button className="edit-address-btn">Cập nhật</button>
                   </div>
                 </div>
-                <div className="address-actions">
-                  <button className="edit-address-btn">Cập nhật</button>
-                </div>
-              </div>
-              <button className="add-address-btn">+ Thêm Địa Chỉ Mới</button>
+              )}
+              <button 
+                className="add-address-btn"
+                onClick={() => {
+                  // Handle add address
+                  console.log("Add new address");
+                }}
+              >
+                + Thêm Địa Chỉ Mới
+              </button>
             </div>
           </div>
         );
@@ -261,7 +402,9 @@ const Profile = () => {
             </div>
             <div className="payment-content">
               <div className="no-payment">
-                <div className="no-payment-icon">💳</div>
+                <div className="no-payment-icon">
+                  <i className="fas fa-credit-card"></i>
+                </div>
                 <p>Chưa có thẻ nào được liên kết</p>
                 <button className="add-card-btn">+ Thêm Thẻ Mới</button>
               </div>
@@ -286,7 +429,9 @@ const Profile = () => {
             </div>
             <div className="orders-content">
               <div className="no-orders">
-                <div className="no-orders-icon">📦</div>
+                <div className="no-orders-icon">
+                  <i className="fas fa-shopping-bag"></i>
+                </div>
                 <p>Chưa có đơn hàng</p>
               </div>
             </div>
@@ -301,7 +446,9 @@ const Profile = () => {
             </div>
             <div className="notifications-content">
               <div className="no-notifications">
-                <div className="no-notifications-icon">🔔</div>
+                <div className="no-notifications-icon">
+                  <i className="fas fa-bell"></i>
+                </div>
                 <p>Không có thông báo mới</p>
               </div>
             </div>
@@ -316,7 +463,9 @@ const Profile = () => {
             </div>
             <div className="vouchers-content">
               <div className="no-vouchers">
-                <div className="no-vouchers-icon">🎫</div>
+                <div className="no-vouchers-icon">
+                  <i className="fas fa-ticket-alt"></i>
+                </div>
                 <p>Chưa có voucher nào</p>
               </div>
             </div>
@@ -332,7 +481,9 @@ const Profile = () => {
             <div className="coins-content">
               <div className="coins-balance">
                 <div className="balance-card">
-                  <div className="balance-icon">💰</div>
+                  <div className="balance-icon">
+                    <i className="fas fa-coins"></i>
+                  </div>
                   <div className="balance-info">
                     <h3>Số dư PycShop Xu</h3>
                     <div className="balance-amount">0</div>
@@ -380,7 +531,7 @@ const Profile = () => {
                     className="profile-edit-link"
                     onClick={() => setActiveTab("profile")}
                   >
-                    <span className="edit-icon">✏️</span>
+                    <i className="fas fa-edit"></i>
                     Sửa Hồ Sơ
                   </div>
                 </div>

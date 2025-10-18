@@ -6,3 +6,4 @@ export { default as orderService } from "./order.js";
 export { default as userService } from "./user.js";
 export { default as categoryService } from "./category.js";
 export { default as notificationService } from "./notification.js";
+export { default as profileService } from "./profileService.js";

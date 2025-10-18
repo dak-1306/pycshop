@@ -9,6 +9,9 @@ export { useAuth } from "./auth/useAuth.js";
 export { usePermissions } from "./auth/usePermissions.js";
 export { useAdminLogin } from "./auth/useAdminLogin.js";
 
+// User Hooks
+export { useProfile } from "./user/useProfile.js";
+
 // UI Hooks
 export { useDashboard } from "./ui/useDashboard.js";
 export { useNotifications } from "./ui/useNotifications.js";

@@ -36,6 +36,29 @@ export const productService = {
     }
   },
 
+  // Get products by category
+  getProductsByCategory: async (categoryId, filters = {}) => {
+    try {
+      const params = {
+        category: categoryId,
+        ...filters,
+        // Handle price range
+        ...(filters.priceRange?.min && { minPrice: filters.priceRange.min }),
+        ...(filters.priceRange?.max && { maxPrice: filters.priceRange.max }),
+      };
+      
+      // Remove priceRange from params since we converted it to minPrice/maxPrice
+      delete params.priceRange;
+      
+      const queryParams = new URLSearchParams(params).toString();
+      const url = `/products${queryParams ? `?${queryParams}` : ""}`;
+      return await api.get(url);
+    } catch (error) {
+      console.error("Error fetching products by category:", error);
+      throw error;
+    }
+  },
+
   // Get product by ID
   getProductById: async (id) => {
     try {

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Categories.css";
 import { productService } from "../../lib/services/productService.js";
 
-const Categories = ({ selectedCategory, onCategorySelect }) => {
+const Categories = () => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   // Category icons mapping
   const categoryIcons = {
@@ -33,7 +35,7 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
   // Load categories from API
   useEffect(() => {
     loadCategories();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadCategories = async () => {
     try {
@@ -63,16 +65,9 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
 
   const handleCategoryClick = (categoryId) => {
     console.log("🏷️ [CATEGORY] Clicked category:", categoryId);
-    console.log("🏷️ [CATEGORY] Current selected:", selectedCategory);
 
-    if (selectedCategory === categoryId) {
-      // If clicking the same category, deselect it
-      console.log("🏷️ [CATEGORY] Deselecting category");
-      onCategorySelect(null);
-    } else {
-      console.log("🏷️ [CATEGORY] Selecting new category:", categoryId);
-      onCategorySelect(categoryId);
-    }
+    // Navigate to category products page
+    navigate(`/category/${categoryId}`);
   };
 
   if (loading) {
@@ -114,22 +109,12 @@ const Categories = ({ selectedCategory, onCategorySelect }) => {
       <div className="container">
         <div className="section-header">
           <h2 className="section-title">Danh Mục</h2>
-          {selectedCategory && (
-            <button
-              className="clear-filter-btn"
-              onClick={() => onCategorySelect(null)}
-            >
-              Xóa bộ lọc
-            </button>
-          )}
         </div>
         <div className="categories-grid">
           {categories.map((category) => (
             <div
               key={category.ID_DanhMuc}
-              className={`category-item ${
-                selectedCategory === category.ID_DanhMuc ? "active" : ""
-              }`}
+              className="category-item"
               onClick={() => handleCategoryClick(category.ID_DanhMuc)}
             >
               <div className="category-icon">

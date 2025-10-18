@@ -81,7 +81,14 @@
   margin-left: 10px;
   gap: 10px;
 }
-
+.logo-img {
+  width: 90px;
+  height: 100px;
+  display: inline-block;
+  object-fit: contain;
+  /* Try to make SVG/PNG appear white: filter is simple fallback */
+  filter: brightness(0) invert(1) saturate(0) contrast(100%);
+}
 .social-link {
   color: #fff;
   text-decoration: none;
@@ -106,23 +113,36 @@
 
 /* Header Main */
 .header-main {
-  padding: 12px 0;
+  padding: 5px 0; /* Giảm padding để header không quá cao với logo 85px */
 }
 
 .header-main-content {
   display: flex;
   align-items: center;
   gap: 20px;
-  min-height: 60px;
+  min-height: 95px; /* Tăng để phù hợp với logo 85px */
 }
 
 .logo {
   flex-shrink: 0;
+  display: flex;
+  align-items: center; /* Căn giữa logo theo chiều dọc */
+  height: 85px; /* Giới hạn chiều cao container logo */
+  overflow: hidden; /* Ẩn phần thừa nếu có */
 }
 
 .logo-img {
-  height: 40px;
+  height: 85px; /* Tăng lên 85px như yêu cầu */
   width: auto;
+  max-width: 130px; /* Tăng max-width một chút */
+  object-fit: contain;
+  filter: brightness(0) invert(1) saturate(0) contrast(100%); /* Giữ filter để logo màu trắng */
+  transition: transform 0.2s ease; /* Thêm hiệu ứng hover */
+}
+
+/* Thêm hiệu ứng hover để logo nổi bật hơn */
+.logo:hover .logo-img {
+  transform: scale(1.05); /* Logo to lên 5% khi hover */
 }
 
 /* Search Container */
@@ -513,10 +533,16 @@
 
   .header-main-content {
     gap: 10px;
+    min-height: 60px; /* Điều chỉnh cho mobile */
+  }
+
+  .logo {
+    height: 50px; /* Giới hạn chiều cao logo container trên mobile */
   }
 
   .logo-img {
-    height: 30px;
+    height: 50px; /* Tăng từ 40px lên 50px cho mobile nhưng vẫn nhỏ hơn desktop */
+    max-width: 100px; /* Tăng max-width một chút */
   }
 
   .search-input {

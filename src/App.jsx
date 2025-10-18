@@ -34,6 +34,7 @@ import AdminSettings from "./pages/admin/Settings";
 import Profile from "./pages/buyer/Profile/Profile";
 import ProductDetail from "./pages/buyer/Products/ProductDetail";
 import SearchResults from "./pages/buyer/Products/SearchResults";
+import CategoryProducts from "./pages/buyer/Products/CategoryProducts";
 import ShopProfile from "./pages/buyer/Shop/ShopProfile";
 import "./App.css";
 
@@ -51,6 +52,9 @@ function App() {
 
                   {/* Search Results */}
                   <Route path="/search" element={<SearchResults />} />
+
+                  {/* Category Products */}
+                  <Route path="/category/:categoryId" element={<CategoryProducts />} />
 
                   {/* Auth Routes */}
                   <Route path="/login" element={<Login />} />
@@ -116,6 +120,9 @@ const AppWithChat = () => {
 
         {/* Search Results */}
         <Route path="/search" element={<SearchResults />} />
+
+        {/* Category Products */}
+        <Route path="/category/:categoryId" element={<CategoryProducts />} />
 
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />

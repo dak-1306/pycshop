@@ -1,5 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { formatCurrency } from "../dashboard/charts/chartUtils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const OrderTable = React.memo(
   ({
@@ -14,30 +16,14 @@ const OrderTable = React.memo(
     // Defensive check for orders array
     const safeOrders = Array.isArray(orders) ? orders : [];
 
-    const formatPrice = (price) => {
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(price || 0);
-    };
-
     // Show empty state if no orders
     if (safeOrders.length === 0) {
       return (
         <div className="bg-white rounded-xl shadow-lg p-8 text-center">
-          <svg
+          <FontAwesomeIcon
+            icon={["fas", "box-open"]}
             className="w-16 h-16 mx-auto text-gray-300 mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1}
-              d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-            />
-          </svg>
+          />
           <h3 className="text-lg font-medium text-gray-900 mb-2">
             Chưa có đơn hàng
           </h3>
@@ -175,7 +161,7 @@ const OrderTable = React.memo(
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div className="text-sm font-semibold text-gray-900">
-                      {formatPrice(
+                      {formatCurrency(
                         order.total || order.totalAmount || order.TongTien
                       )}
                     </div>
@@ -210,25 +196,10 @@ const OrderTable = React.memo(
                         className="group flex items-center gap-1 px-3 py-1.5 text-blue-600 hover:text-white hover:bg-blue-600 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-600"
                         title="Xem chi tiết đơn hàng"
                       >
-                        <svg
+                        <FontAwesomeIcon
+                          icon={["fas", "eye"]}
                           className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                          />
-                        </svg>
+                        />
                         <span className="text-xs">Xem</span>
                       </button>
                       <button
@@ -239,19 +210,10 @@ const OrderTable = React.memo(
                         className="group flex items-center gap-1 px-3 py-1.5 text-indigo-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-all duration-200 border border-indigo-200 hover:border-indigo-600"
                         title="Chỉnh sửa đơn hàng"
                       >
-                        <svg
+                        <FontAwesomeIcon
+                          icon={["fas", "edit"]}
                           className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
+                        />
                         <span className="text-xs">Sửa</span>
                       </button>
 
@@ -263,19 +225,10 @@ const OrderTable = React.memo(
                         className="group flex items-center gap-1 px-3 py-1.5 text-red-600 hover:text-white hover:bg-red-600 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-600"
                         title="Xóa đơn hàng"
                       >
-                        <svg
+                        <FontAwesomeIcon
+                          icon={["fas", "trash"]}
                           className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                          />
-                        </svg>
+                        />
                         <span className="text-xs">Xóa</span>
                       </button>
                     </div>
@@ -345,17 +298,10 @@ const OrderTable = React.memo(
                         className="w-full h-full object-cover rounded-lg"
                       />
                     ) : (
-                      <svg
+                      <FontAwesomeIcon
+                        icon={["fas", "image"]}
                         className="w-8 h-8 text-gray-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M4 3a2 2 0 00-2 2v1.007a1 1 0 00.293.707L3 7.414V15a2 2 0 002 2h10a2 2 0 002-2V7.414l.707-.707A1 1 0 0018 6.007V5a2 2 0 00-2-2H4zm2 4a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      />
                     )}
                   </div>
                 </td>
@@ -395,6 +341,10 @@ const OrderTable = React.memo(
                       }
                       className="text-blue-600 hover:text-blue-900 font-medium"
                     >
+                      <FontAwesomeIcon
+                        icon={["fas", "eye"]}
+                        className="w-4 h-4 inline-block mr-1"
+                      />
                       Xem
                     </button>
                     <button
@@ -403,6 +353,10 @@ const OrderTable = React.memo(
                       }
                       className="text-green-600 hover:text-green-900 font-medium"
                     >
+                      <FontAwesomeIcon
+                        icon={["fas", "edit"]}
+                        className="w-4 h-4 inline-block mr-1"
+                      />
                       Sửa
                     </button>
                     <button
@@ -412,6 +366,10 @@ const OrderTable = React.memo(
                       }
                       className="text-red-600 hover:text-red-900 font-medium"
                     >
+                      <FontAwesomeIcon
+                        icon={["fas", "times-circle"]}
+                        className="w-4 h-4 inline-block mr-1"
+                      />
                       Hủy
                     </button>
                   </div>

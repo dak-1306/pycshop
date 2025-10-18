@@ -1,8 +1,19 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-const AdminUserTable = ({ users, onViewUser, onEditUser, onDeleteUser }) => {
+const AdminUserTable = ({
+  users = [],
+  onViewUser,
+  onEditUser,
+  onDeleteUser,
+}) => {
   const formatDate = (date) => {
-    return new Date(date).toLocaleDateString("vi-VN");
+    if (!date) return "N/A";
+    try {
+      return new Date(date).toLocaleDateString("vi-VN");
+    } catch {
+      return "Invalid Date";
+    }
   };
 
   const getRoleColor = (role) => {
@@ -62,15 +73,16 @@ const AdminUserTable = ({ users, onViewUser, onEditUser, onDeleteUser }) => {
   };
 
   const getUserInitials = (name) => {
+    if (!name || typeof name !== "string") return "?";
     return name
       .split(" ")
       .map((word) => word.charAt(0))
       .join("")
       .toUpperCase()
-      .slice(0, 2);
+      .slice(0, 2); // Limit to 2 characters
   };
 
-  if (!users || users.length === 0) {
+  if (!Array.isArray(users) || users.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow">
         <div className="p-8 text-center">
@@ -123,59 +135,65 @@ const AdminUserTable = ({ users, onViewUser, onEditUser, onDeleteUser }) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {users.map((user) => (
-              <tr key={user.id} className="hover:bg-gray-50 transition-colors">
+              <tr
+                key={user?.id || `user-${Math.random()}`}
+                className="hover:bg-gray-50 transition-colors"
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="w-10 h-10 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mr-4">
-                      {user.avatar ? (
+                      {user?.avatar ? (
                         <img
                           src={user.avatar}
-                          alt={user.name}
+                          alt={user?.name || "User"}
                           className="w-full h-full object-cover rounded-full"
                         />
                       ) : (
                         <span className="text-white font-medium text-sm">
-                          {getUserInitials(user.name)}
+                          {getUserInitials(user?.name)}
                         </span>
                       )}
                     </div>
                     <div>
                       <div className="text-sm font-medium text-gray-900">
-                        {user.name}
+                        {user?.name || "N/A"}
                       </div>
-                      <div className="text-sm text-gray-500">{user.email}</div>
+                      <div className="text-sm text-gray-500">
+                        {user?.email || "N/A"}
+                      </div>
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getRoleColor(
-                      user.role
+                      user?.role
                     )}`}
                   >
-                    {getRoleText(user.role)}
+                    {getRoleText(user?.role)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                      user.status
+                      user?.status
                     )}`}
                   >
-                    {getStatusText(user.status)}
+                    {getStatusText(user?.status)}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(user.joinDate)}
+                  {formatDate(user?.joinDate)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  {formatDate(user.lastLogin)}
+                  {formatDate(user?.lastLogin)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex justify-end space-x-2">
                     <button
-                      onClick={() => onViewUser && onViewUser(user)}
-                      className="text-blue-600 hover:text-blue-900 p-1 rounded"
+                      onClick={() => onViewUser?.(user)}
+                      disabled={!onViewUser}
+                      className="text-blue-600 hover:text-blue-900 p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Xem chi tiết"
                     >
                       <svg
@@ -199,8 +217,9 @@ const AdminUserTable = ({ users, onViewUser, onEditUser, onDeleteUser }) => {
                       </svg>
                     </button>
                     <button
-                      onClick={() => onEditUser && onEditUser(user)}
-                      className="text-green-600 hover:text-green-900 p-1 rounded"
+                      onClick={() => onEditUser?.(user)}
+                      disabled={!onEditUser}
+                      className="text-green-600 hover:text-green-900 p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Chỉnh sửa"
                     >
                       <svg
@@ -218,8 +237,9 @@ const AdminUserTable = ({ users, onViewUser, onEditUser, onDeleteUser }) => {
                       </svg>
                     </button>
                     <button
-                      onClick={() => onDeleteUser && onDeleteUser(user)}
-                      className="text-red-600 hover:text-red-900 p-1 rounded"
+                      onClick={() => onDeleteUser?.(user)}
+                      disabled={!onDeleteUser}
+                      className="text-red-600 hover:text-red-900 p-1 rounded disabled:opacity-50 disabled:cursor-not-allowed"
                       title="Xóa người dùng"
                     >
                       <svg
@@ -247,4 +267,28 @@ const AdminUserTable = ({ users, onViewUser, onEditUser, onDeleteUser }) => {
   );
 };
 
-export default AdminUserTable;
+AdminUserTable.propTypes = {
+  users: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+      name: PropTypes.string,
+      email: PropTypes.string,
+      role: PropTypes.string,
+      status: PropTypes.string,
+      joinDate: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.instanceOf(Date),
+      ]),
+      lastLogin: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.instanceOf(Date),
+      ]),
+      orderCount: PropTypes.number,
+    })
+  ),
+  onViewUser: PropTypes.func,
+  onEditUser: PropTypes.func,
+  onDeleteUser: PropTypes.func,
+};
+
+export default React.memo(AdminUserTable);

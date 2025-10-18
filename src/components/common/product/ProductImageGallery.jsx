@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 // Environment configuration - fallback for development
 const getApiBaseUrl = () => {
@@ -60,19 +61,12 @@ const ProductImageGallery = React.memo(({ product }) => {
     return (
       <div className="aspect-square bg-gray-50 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-200">
         <div className="text-center p-8">
-          <svg
-            className="w-20 h-20 text-gray-300 mx-auto mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-            />
-          </svg>
+          <FontAwesomeIcon
+            icon={["fas", "image"]}
+            className="text-6xl text-gray-300 mb-4"
+          />
+        </div>
+        <div>
           <p className="text-gray-400 font-medium text-lg">Chưa có hình ảnh</p>
           <p className="text-gray-300 text-sm mt-1">
             Hãy thêm hình ảnh cho sản phẩm
@@ -117,19 +111,10 @@ const ProductImageGallery = React.memo(({ product }) => {
               }
               className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white p-2.5 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100"
             >
-              <svg
+              <FontAwesomeIcon
+                icon={["fas", "chevron-left"]}
                 className="w-5 h-5 text-gray-700"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 19l-7-7 7-7"
-                />
-              </svg>
+              />
             </button>
             <button
               onClick={() =>
@@ -139,19 +124,10 @@ const ProductImageGallery = React.memo(({ product }) => {
               }
               className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/90 backdrop-blur-sm hover:bg-white p-2.5 rounded-full shadow-lg transition-all opacity-0 group-hover:opacity-100"
             >
-              <svg
+              <FontAwesomeIcon
+                icon={["fas", "chevron-right"]}
                 className="w-5 h-5 text-gray-700"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 5l7 7-7 7"
-                />
-              </svg>
+              />
             </button>
           </>
         )}

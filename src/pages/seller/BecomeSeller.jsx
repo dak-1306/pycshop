@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCategories } from "../../hooks/api/useCategories";
 import { useFormValidation } from "../../hooks/form/useFormValidation";
 import useBecomeSeller from "../../hooks/seller/useBecomeSeller";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const BecomeSeller = () => {
   const navigate = useNavigate();
@@ -61,16 +63,15 @@ const BecomeSeller = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-800">
-            Đăng ký trở thành Seller
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Điền thông tin shop của bạn để bắt đầu bán hàng
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br to-yellow-300 from-green-900 flex items-center pt-6 pb-6">
+      <div className="w-1/3 mx-auto bg-white rounded-lg shadow-md p-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 flex justify-between items-center gap-3">
+          <FontAwesomeIcon icon={["fas", "store"]} className="text-blue-600" />
+          <span>Đăng ký trở thành Seller</span>
+          <Link to="/">
+            <FontAwesomeIcon icon={["fas", "close"]} className="text-red-400" />
+          </Link>
+        </h1>
 
         {/* Loading state */}
         {loading && (
@@ -94,7 +95,7 @@ const BecomeSeller = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Shop Name */}
           <div>
             <label
@@ -128,7 +129,7 @@ const BecomeSeller = () => {
               name="shopDescription"
               value={formData.shopDescription}
               onChange={handleInputChange}
-              rows={4}
+              rows={3}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-vertical"
               placeholder="Mô tả về shop và sản phẩm của bạn"
               required
@@ -211,7 +212,7 @@ const BecomeSeller = () => {
           </div>
 
           {/* Submit Button */}
-          <div className="flex gap-4 pt-4">
+          <div className="flex gap-4 pt-3">
             <button
               type="button"
               onClick={() => navigate(-1)}
@@ -222,9 +223,9 @@ const BecomeSeller = () => {
             <button
               type="submit"
               disabled={becomeLoading}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 disabled:bg-blue-300 disabled:cursor-not-allow"
+              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 disabled:bg-blue-300 disabled:cursor-not-allow flex items-center justify-center gap-2"
             >
-              {becomeLoading ? "Đang xử lý..." : "Đăng ký Seller"}
+              <span>{becomeLoading ? "Đang xử lý..." : "Đăng ký Seller"}</span>
             </button>
           </div>
         </form>

@@ -1,11 +1,12 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 const AdminUserFilters = ({
-  searchValue,
+  searchValue = "",
   onSearchChange,
-  roleFilter,
+  roleFilter = "",
   onRoleChange,
-  statusFilter,
+  statusFilter = "",
   onStatusChange,
   onAddUser,
 }) => {
@@ -16,14 +17,14 @@ const AdminUserFilters = ({
           <input
             type="text"
             placeholder="Tìm kiếm người dùng..."
-            value={searchValue || ""}
-            onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
+            value={searchValue}
+            onChange={(e) => onSearchChange?.(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
 
           <select
-            value={roleFilter || ""}
-            onChange={(e) => onRoleChange && onRoleChange(e.target.value)}
+            value={roleFilter}
+            onChange={(e) => onRoleChange?.(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Tất cả vai trò</option>
@@ -33,8 +34,8 @@ const AdminUserFilters = ({
           </select>
 
           <select
-            value={statusFilter || ""}
-            onChange={(e) => onStatusChange && onStatusChange(e.target.value)}
+            value={statusFilter}
+            onChange={(e) => onStatusChange?.(e.target.value)}
             className="border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="">Tất cả trạng thái</option>
@@ -47,7 +48,8 @@ const AdminUserFilters = ({
 
         <button
           onClick={onAddUser}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+          disabled={!onAddUser}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Thêm người dùng
         </button>
@@ -56,4 +58,14 @@ const AdminUserFilters = ({
   );
 };
 
-export default AdminUserFilters;
+AdminUserFilters.propTypes = {
+  searchValue: PropTypes.string,
+  onSearchChange: PropTypes.func,
+  roleFilter: PropTypes.string,
+  onRoleChange: PropTypes.func,
+  statusFilter: PropTypes.string,
+  onStatusChange: PropTypes.func,
+  onAddUser: PropTypes.func,
+};
+
+export default React.memo(AdminUserFilters);

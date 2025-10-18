@@ -1,5 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { formatCurrency } from "../dashboard/charts/chartUtils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const OrderDetailModal = React.memo(
   ({ isOpen, onClose, order, onEdit, variant = "seller" }) => {
@@ -13,13 +15,6 @@ const OrderDetailModal = React.memo(
     const headerIcon = variant === "admin" ? "👑" : "�️";
     const headerTitle =
       variant === "admin" ? "Quản lý đơn hàng" : "Đơn hàng của bạn";
-
-    const formatCurrency = (amount) => {
-      return new Intl.NumberFormat("vi-VN", {
-        style: "currency",
-        currency: "VND",
-      }).format(amount);
-    };
 
     return (
       <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -47,19 +42,7 @@ const OrderDetailModal = React.memo(
                 onClick={onClose}
                 className="w-12 h-12 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-2xl flex items-center justify-center transition-all hover:scale-110 backdrop-blur-sm"
               >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
+                <FontAwesomeIcon icon={["fas", "times"]} className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -107,19 +90,10 @@ const OrderDetailModal = React.memo(
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                   <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
                     <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-blue-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
-                        />
-                      </svg>
+                      <FontAwesomeIcon
+                        icon={["fas", "info-circle"]}
+                        className="w-4 h-4 text-blue-600"
+                      />
                     </div>
                     Thông tin đơn hàng
                   </h3>
@@ -189,19 +163,10 @@ const OrderDetailModal = React.memo(
                 <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                   <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
                     <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                      <svg
-                        className="w-5 h-5 text-green-600"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
+                      <FontAwesomeIcon
+                        icon={["fas", "user"]}
+                        className="w-4 h-4 text-green-600"
+                      />
                     </div>
                     Thông tin khách hàng
                   </h3>
@@ -258,19 +223,10 @@ const OrderDetailModal = React.memo(
                   <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-6 py-4 border-b border-gray-200">
                     <h3 className="text-xl font-bold text-gray-800 flex items-center gap-3">
                       <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <svg
-                          className="w-5 h-5 text-purple-600"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
-                          />
-                        </svg>
+                        <FontAwesomeIcon
+                          icon={["fas", "store"]}
+                          className="w-4 h-4 text-purple-600"
+                        />
                       </div>
                       Thông tin người bán
                     </h3>
@@ -305,13 +261,18 @@ const OrderDetailModal = React.memo(
           {/* Footer */}
           <div className="bg-gradient-to-r from-gray-50 to-gray-100 px-8 py-6 border-t border-gray-200 flex justify-between items-center">
             <div className="text-sm text-gray-500">
-              🔒 Thông tin đơn hàng được bảo mật
+              <FontAwesomeIcon icon={["fas", "lock"]} className="mr-1" />
+              Thông tin đơn hàng được bảo mật
             </div>
             <div className="flex gap-4">
               <button
                 onClick={onClose}
                 className="px-6 py-3 text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all font-medium shadow-sm hover:shadow-md transform hover:scale-105"
               >
+                <FontAwesomeIcon
+                  icon={["fas", "times"]}
+                  className="w-4 h-4 mr-2"
+                />
                 Đóng
               </button>
               {onEdit && (
@@ -322,7 +283,11 @@ const OrderDetailModal = React.memo(
                   }}
                   className={`px-6 py-3 bg-gradient-to-r ${headerGradient} text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5`}
                 >
-                  Chỉnh sửa
+                  <FontAwesomeIcon
+                    icon={["fas", "edit"]}
+                    className="w-4 h-4 mr-2"
+                  />
+                  Chỉnh sửa đơn hàng
                 </button>
               )}
             </div>

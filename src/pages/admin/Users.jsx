@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import UserStats from "../../components/admin/user/UserStats";
 import AdminUserFilters from "../../components/admin/user/AdminUserFilters";
 import AdminUserTable from "../../components/admin/user/AdminUserTable";
-import AddUserModal from "../../components/admin/user/AddUserModal_v2";
+import AddUserModal from "../../components/admin/user/AddUserModal";
 import ViewUserModal from "../../components/admin/user/ViewUserModal";
 import EditUserModal from "../../components/admin/user/EditUserModal";
 import ConfirmDeleteModal from "../../components/admin/user/ConfirmDeleteModal";

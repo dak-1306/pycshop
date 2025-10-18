@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import ProductImageGallery from "./ProductImageGallery";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ProductDetailModal = React.memo(
   ({ isOpen, onClose, product, onEdit, onDelete }) => {
@@ -50,25 +51,10 @@ const ProductDetailModal = React.memo(
           <div className="flex items-center justify-between p-6 border-b border-gray-100">
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center text-white">
-                <svg
+                <FontAwesomeIcon
+                  icon={["fas", "box-open"]}
                   className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                  />
-                </svg>
+                />
               </div>
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">
@@ -84,19 +70,10 @@ const ProductDetailModal = React.memo(
               onClick={onClose}
               className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors group"
             >
-              <svg
-                className="w-5 h-5 text-gray-600 group-hover:text-gray-800"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <FontAwesomeIcon
+                icon={["fas", "times"]}
+                className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors"
+              />
             </button>
           </div>
 

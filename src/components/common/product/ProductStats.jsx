@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { useLanguage } from "../../../context/LanguageContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ProductStats = ({ stats = {} }) => {
   const { t } = useLanguage();
@@ -14,21 +15,7 @@ const ProductStats = ({ stats = {} }) => {
       iconColor: "text-blue-600",
       textColor: "text-gray-900",
       subTextColor: "text-gray-600",
-      icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-          />
-        </svg>
-      ),
+      icon: <FontAwesomeIcon icon={["fas", "boxes"]} className="w-6 h-6" />,
     },
     {
       key: "activeProducts",
@@ -40,19 +27,7 @@ const ProductStats = ({ stats = {} }) => {
       textColor: "text-gray-900",
       subTextColor: "text-gray-600",
       icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
+        <FontAwesomeIcon icon={["fas", "check-circle"]} className="w-6 h-6" />
       ),
     },
     {
@@ -65,19 +40,10 @@ const ProductStats = ({ stats = {} }) => {
       textColor: "text-gray-900",
       subTextColor: "text-gray-600",
       icon: (
-        <svg
+        <FontAwesomeIcon
+          icon={["fas", "exclamation-triangle"]}
           className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.865-.833-2.634 0L5.179 16.5c-.77.833.192 2.5 1.732 2.5z"
-          />
-        </svg>
+        />
       ),
     },
     {
@@ -90,19 +56,7 @@ const ProductStats = ({ stats = {} }) => {
       textColor: "text-gray-900",
       subTextColor: "text-gray-600",
       icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <FontAwesomeIcon icon={["fas", "hourglass-half"]} className="w-6 h-6" />
       ),
     },
   ];

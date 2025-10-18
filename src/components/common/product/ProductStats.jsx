@@ -9,7 +9,7 @@ const ProductStats = ({ stats = {} }) => {
     {
       key: "totalProducts",
       title: t("totalProducts"),
-      value: stats?.totalProducts || 342,
+      value: stats?.totalProducts?.value || stats?.totalProducts || 342,
       bgColor: "bg-white",
       iconBg: "bg-blue-100",
       iconColor: "text-blue-600",
@@ -20,7 +20,7 @@ const ProductStats = ({ stats = {} }) => {
     {
       key: "activeProducts",
       title: t("activeProducts"),
-      value: stats?.activeProducts || 298,
+      value: stats?.activeProducts?.value || stats?.activeProducts || 298,
       bgColor: "bg-white",
       iconBg: "bg-green-100",
       iconColor: "text-green-600",
@@ -33,7 +33,8 @@ const ProductStats = ({ stats = {} }) => {
     {
       key: "outOfStockProducts",
       title: t("outOfStock"),
-      value: stats?.outOfStockProducts || 23,
+      value:
+        stats?.outOfStockProducts?.value || stats?.outOfStockProducts || 23,
       bgColor: "bg-white",
       iconBg: "bg-red-100",
       iconColor: "text-red-600",
@@ -49,7 +50,7 @@ const ProductStats = ({ stats = {} }) => {
     {
       key: "pendingProducts",
       title: t("pending"),
-      value: stats?.pendingProducts || 21,
+      value: stats?.pendingProducts?.value || stats?.pendingProducts || 21,
       bgColor: "bg-white",
       iconBg: "bg-yellow-100",
       iconColor: "text-yellow-600",
@@ -89,10 +90,42 @@ const ProductStats = ({ stats = {} }) => {
 
 ProductStats.propTypes = {
   stats: PropTypes.shape({
-    totalProducts: PropTypes.number,
-    activeProducts: PropTypes.number,
-    outOfStockProducts: PropTypes.number,
-    pendingProducts: PropTypes.number,
+    totalProducts: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    activeProducts: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    outOfStockProducts: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    pendingProducts: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
   }),
 };
 

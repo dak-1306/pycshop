@@ -9,7 +9,7 @@ const OrderStats = React.memo(({ stats = {} }) => {
       {
         key: "totalOrders",
         title: "Tổng đơn hàng",
-        value: stats?.totalOrders || 856,
+        value: stats?.totalOrders?.value || stats?.totalOrders || 856,
         bgColor: "bg-white",
         iconBg: "bg-blue-100",
         iconColor: "text-blue-600",
@@ -20,7 +20,7 @@ const OrderStats = React.memo(({ stats = {} }) => {
       {
         key: "pendingOrders",
         title: "Chờ xử lý",
-        value: stats?.pendingOrders || 23,
+        value: stats?.pendingOrders?.value || stats?.pendingOrders || 23,
         bgColor: "bg-white",
         iconBg: "bg-yellow-100",
         iconColor: "text-yellow-600",
@@ -36,7 +36,7 @@ const OrderStats = React.memo(({ stats = {} }) => {
       {
         key: "completedOrders",
         title: "Hoàn thành",
-        value: stats?.completedOrders || 789,
+        value: stats?.completedOrders?.value || stats?.completedOrders || 789,
         bgColor: "bg-white",
         iconBg: "bg-green-100",
         iconColor: "text-green-600",
@@ -49,7 +49,7 @@ const OrderStats = React.memo(({ stats = {} }) => {
       {
         key: "totalRevenue",
         title: "Tổng doanh thu",
-        value: stats?.totalRevenue || 285460000,
+        value: stats?.totalRevenue?.value || stats?.totalRevenue || 285460000,
         isRevenue: true,
         bgColor: "bg-white",
         iconBg: "bg-orange-100",
@@ -99,10 +99,42 @@ OrderStats.displayName = "OrderStats";
 
 OrderStats.propTypes = {
   stats: PropTypes.shape({
-    totalOrders: PropTypes.number,
-    pendingOrders: PropTypes.number,
-    completedOrders: PropTypes.number,
-    totalRevenue: PropTypes.number,
+    totalOrders: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    pendingOrders: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    completedOrders: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    totalRevenue: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
   }),
 };
 

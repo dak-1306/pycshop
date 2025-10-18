@@ -60,29 +60,11 @@ const OrderFilters = React.memo(
                   }
                   className="relative bg-white border border-gray-300 rounded-lg px-3 py-2 pr-7 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-300 appearance-none cursor-pointer"
                 >
-                  <option value="">
-                    <FontAwesomeIcon icon={["fas", "box"]} className="mr-1" />
-                    Tất cả trạng thái
-                  </option>
-                  <option value="pending">
-                    <FontAwesomeIcon
-                      icon={["fas", "hourglass-half"]}
-                      className="mr-1"
-                    />
-                    Chờ xử lý
-                  </option>
-                  <option value="processing">
-                    <FontAwesomeIcon icon={["fas", "sync"]} className="mr-1" />
-                    Đang xử lý
-                  </option>
-                  <option value="completed">
-                    <FontAwesomeIcon icon={["fas", "check"]} className="mr-1" />
-                    Hoàn thành
-                  </option>
-                  <option value="cancelled">
-                    <FontAwesomeIcon icon={["fas", "times"]} className="mr-1" />
-                    Đã hủy
-                  </option>
+                  <option value="">📦 Tất cả trạng thái</option>
+                  <option value="pending">⏳ Chờ xử lý</option>
+                  <option value="processing">🔄 Đang xử lý</option>
+                  <option value="completed">✅ Hoàn thành</option>
+                  <option value="cancelled">❌ Đã hủy</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <FontAwesomeIcon
@@ -101,25 +83,10 @@ const OrderFilters = React.memo(
                   }
                   className="relative bg-white border border-gray-300 rounded-lg px-3 py-2 pr-7 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-300 appearance-none cursor-pointer"
                 >
-                  <option value="">
-                    <FontAwesomeIcon icon={["fas", "box"]} className="mr-1" />{" "}
-                    Tất cả thanh toán
-                  </option>
-                  <option value="paid">
-                    <FontAwesomeIcon icon={["fas", "check"]} className="mr-1" />{" "}
-                    Đã thanh toán
-                  </option>
-                  <option value="pending">
-                    <FontAwesomeIcon
-                      icon={["fas", "hourglass-half"]}
-                      className="mr-1"
-                    />{" "}
-                    Chờ thanh toán
-                  </option>
-                  <option value="failed">
-                    <FontAwesomeIcon icon={["fas", "times"]} className="mr-1" />{" "}
-                    Thất bại
-                  </option>
+                  <option value="">💳 Tất cả thanh toán</option>
+                  <option value="paid">💚 Đã thanh toán</option>
+                  <option value="pending">⏰ Chờ thanh toán</option>
+                  <option value="failed">💔 Thất bại</option>
                 </select>
                 <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
                   <FontAwesomeIcon

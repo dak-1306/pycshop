@@ -334,7 +334,7 @@ const OrderTable = React.memo(
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex space-x-2">
+                  <div className="flex space-x-4">
                     <button
                       onClick={() =>
                         onViewOrder && onViewOrder(order.id || order.ID_DonHang)

@@ -5,6 +5,7 @@ import { useNotifications } from "../../hooks/common/useNotifications";
 import { useShopInfo } from "../../hooks/seller/useShopInfo";
 import NotificationPanel from "../common/notifications/NotificationPanel";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import logoImage from "../../images/logo.svg";
 import "../../assets/css/logo.css";
 
 const SellerLayout = ({ children }) => {
@@ -75,25 +76,25 @@ const SellerLayout = ({ children }) => {
   const menuItems = [
     {
       id: "dashboard",
-      name: "Dashboard",
+      name: "Trang chủ",
       icon: "dashboard",
       href: "/seller/dashboard",
     },
     {
       id: "manageProduct",
-      name: "Manage Product",
+      name: "Quản lý sản phẩm",
       icon: "products",
       href: "/seller/products",
     },
     {
       id: "order",
-      name: "Order",
+      name: "Đơn hàng",
       icon: "orders",
       href: "/seller/orders",
     },
     {
       id: "shopPage",
-      name: "Shop Page",
+      name: "Trang cửa hàng",
       icon: "shop",
       href: "/seller/shop",
     },
@@ -116,16 +117,18 @@ const SellerLayout = ({ children }) => {
         <div className="max-w-full mx-auto px-4 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5" viewBox="0 0 640 640">
-                  <path
-                    fill="#ff6a00"
-                    d="M256 144C256 108.7 284.7 80 320 80C355.3 80 384 108.7 384 144L384 192L256 192L256 144zM208 192L144 192C117.5 192 96 213.5 96 240L96 448C96 501 139 544 192 544L448 544C501 544 544 501 544 448L544 240C544 213.5 522.5 192 496 192L432 192L432 144C432 82.1 381.9 32 320 32C258.1 32 208 82.1 208 144L208 192zM232 240C245.3 240 256 250.7 256 264C256 277.3 245.3 288 232 288C218.7 288 208 277.3 208 264C208 250.7 218.7 240 232 240zM384 264C384 250.7 394.7 240 408 240C421.3 240 432 250.7 432 264C432 277.3 421.3 288 408 288C394.7 288 384 277.3 384 264z"
-                  />
-                </svg>
-              </div>
-              <h1 className="text-xl font-bold pycshop-gradient">Pycshop</h1>
+            <div className="logo">
+              <Link
+                to="/seller/dashboard"
+                className="flex items-center space-x-3"
+              >
+                <img
+                  // src="/logo-shopee.svg"
+                  src={logoImage}
+                  alt="PycShop"
+                  className="logo-img"
+                />
+              </Link>
             </div>
 
             {/* Shop Name */}
@@ -144,25 +147,7 @@ const SellerLayout = ({ children }) => {
                   className="relative p-2 text-white hover:bg-green-600 rounded-lg transition-colors"
                   title="Thông báo"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M15 17h5l-5 5v-5zM10.07 2.82l-.9 1.46A9.949 9.949 0 0112 4a9.949 9.949 0 012.83.28l-.9-1.46A11.947 11.947 0 0010.07 2.82z"
-                    />
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9z"
-                    />
-                  </svg>
+                  <FontAwesomeIcon icon={["fas", "bell"]} />
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
                       {unreadCount > 99 ? "99+" : unreadCount}
@@ -192,32 +177,8 @@ const SellerLayout = ({ children }) => {
                 className="flex items-center space-x-2 px-3 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg transition-all text-sm font-medium shadow-md hover:shadow-lg transform hover:scale-105"
                 title="Thêm người cộng tác"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                  />
-                </svg>
+                <FontAwesomeIcon icon={["fas", "user-plus"]} />
+                <span>Thêm CTV</span>
               </button>
 
               {/* Return to Buyer Page Button */}
@@ -226,19 +187,7 @@ const SellerLayout = ({ children }) => {
                 className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
                 title="Trở về trang người mua"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                  />
-                </svg>
+                <FontAwesomeIcon icon={["fas", "home"]} />
                 <span>Trang người mua</span>
               </Link>
             </div>

@@ -4,11 +4,11 @@ import "./ProductGrid.css";
 import ProductCard from "./ProductCard";
 import { productService } from "../../lib/services/productService.js";
 
-const ProductGrid = ({ 
-  products: externalProducts, 
-  selectedCategory = null, 
-  onCategorySelect = () => {}, 
-  searchQuery = "" 
+const ProductGrid = ({
+  products: externalProducts,
+  selectedCategory = null,
+  onCategorySelect = () => {},
+  searchQuery = "",
 }) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
@@ -63,7 +63,7 @@ const ProductGrid = ({
       // Simple duplicate detection - only block if exact same params
       const paramsString = JSON.stringify(params);
       if (lastParams.current === paramsString && pageNum === 1) {
-        console.log("🚫 Skipping duplicate API call");
+        console.log("Skipping duplicate API call");
         setLoading(false);
         setIsLoadingMore(false);
         return;

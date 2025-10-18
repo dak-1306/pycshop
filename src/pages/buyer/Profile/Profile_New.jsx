@@ -364,8 +364,8 @@ const Profile = () => {
             
             {/* Sidebar */}
             <aside className="profile-sidebar">
-              <div className="profile-user-info">
-                <div className="profile-user-avatar">
+              <div className="user-info">
+                <div className="user-avatar">
                   <img
                     src={profileImage || formData.avatar || "/images/default-avatar.png"}
                     alt="User Avatar"
@@ -374,10 +374,10 @@ const Profile = () => {
                     }}
                   />
                 </div>
-                <div className="profile-user-details">
-                  <div className="profile-username">{formData.name}</div>
+                <div className="user-details">
+                  <div className="username">{formData.name}</div>
                   <div 
-                    className="profile-edit-link"
+                    className="edit-profile"
                     onClick={() => setActiveTab("profile")}
                   >
                     <span className="edit-icon">✏️</span>

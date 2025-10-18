@@ -1,4 +1,5 @@
 import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const DeleteModal = ({
   isOpen,
@@ -15,10 +16,12 @@ const DeleteModal = ({
   const getItemIcon = () => {
     switch (itemType) {
       case "đơn hàng":
-        return "📋";
+        return <FontAwesomeIcon icon={["fas", "boxes"]} className="w-5 h-5" />;
       case "sản phẩm":
       default:
-        return "📦";
+        return (
+          <FontAwesomeIcon icon={["fas", "box-open"]} className="w-5 h-5" />
+        );
     }
   };
 
@@ -63,19 +66,10 @@ const DeleteModal = ({
         <div className="p-6">
           <div className="text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
+              <FontAwesomeIcon
+                icon={["fas", "exclamation-triangle"]}
                 className="w-8 h-8 text-red-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth={2}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                />
-              </svg>
+              />
             </div>
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               Bạn có chắc chắn muốn xóa {itemType} này?
@@ -100,13 +94,15 @@ const DeleteModal = ({
             onClick={onClose}
             className="px-6 py-2.5 text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:border-gray-400 transition-all font-medium shadow-sm hover:shadow-md transform hover:scale-105 flex items-center gap-2"
           >
-            <span>↩️</span> Hủy bỏ
+            <FontAwesomeIcon icon={["fas", "arrow-left"]} className="w-4 h-4" />
+            <span>Hủy bỏ</span>
           </button>
           <button
             onClick={onConfirm}
             className="relative px-8 py-2.5 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5 flex items-center gap-2 overflow-hidden"
           >
-            <span>🗑️</span> Xóa {itemType}
+            <FontAwesomeIcon icon={["fas", "trash"]} className="w-4 h-4" />
+            <span>Xóa {itemType}</span>
             <div className="absolute inset-0 bg-white opacity-0 hover:opacity-20 transition-opacity"></div>
           </button>
         </div>

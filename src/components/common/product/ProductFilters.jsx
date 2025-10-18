@@ -7,6 +7,7 @@ import {
   PRICE_RANGES_ARRAY as PRICE_RANGES,
 } from "../../../lib/constants/product.js";
 import { useLanguage } from "../../../context/LanguageContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ProductFilters = React.memo(
   ({
@@ -100,19 +101,7 @@ const ProductFilters = React.memo(
                 normalizedCategory ||
                 normalizedStatus) && (
                 <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586l-4-4v-.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"
-                    />
-                  </svg>
+                  <FontAwesomeIcon icon={["fas", "filter"]} />
                   <span className="text-sm font-medium">
                     {t("activeFilters") || "Bộ lọc đang áp dụng"}
                   </span>
@@ -122,19 +111,10 @@ const ProductFilters = React.memo(
               {/* Search Input */}
               <div className="relative min-w-80">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg
-                    className="h-5 w-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                    />
-                  </svg>
+                  <FontAwesomeIcon
+                    icon={["fas", "search"]}
+                    className="w-4 h-4 text-gray-400"
+                  />
                 </div>
                 <input
                   type="text"
@@ -190,19 +170,7 @@ const ProductFilters = React.memo(
                   onClick={handleResetFilters}
                   className="flex items-center gap-2 px-4 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
+                  <FontAwesomeIcon icon={["fas", "redo"]} />
                   <span className="text-sm font-medium">
                     {t("resetFilters") || "Đặt lại"}
                   </span>
@@ -217,19 +185,7 @@ const ProductFilters = React.memo(
                   onClick={onExport}
                   className="flex items-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors font-medium"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                    />
-                  </svg>
+                  <FontAwesomeIcon icon={["fas", "file-export"]} />
                   {t("exportData") || "Xuất dữ liệu"}
                 </button>
               )}
@@ -239,19 +195,7 @@ const ProductFilters = React.memo(
                   onClick={onAddProduct}
                   className="flex items-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                    />
-                  </svg>
+                  <FontAwesomeIcon icon={["fas", "plus"]} />
                   {t("addProduct") || "Thêm sản phẩm"}
                 </button>
               )}
@@ -268,19 +212,10 @@ const ProductFilters = React.memo(
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <svg
-                className="w-5 h-5 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707v4.586l-4-4v-.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"
-                />
-              </svg>
+              <FontAwesomeIcon
+                icon={["fas", "filter"]}
+                className="text-white w-5 h-5"
+              />
             </div>
             <div>
               <h3 className="text-lg font-bold text-gray-900">
@@ -298,19 +233,7 @@ const ProductFilters = React.memo(
                 onClick={onAddProduct}
                 className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-all duration-200 transform hover:scale-105 font-medium shadow-sm hover:shadow-md"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg>
+                <FontAwesomeIcon icon={["fas", "plus"]} />
                 {t("addProduct") || "Thêm sản phẩm"}
               </button>
             )}
@@ -320,19 +243,7 @@ const ProductFilters = React.memo(
                 onClick={onExport}
                 className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-200 transform hover:scale-105 font-medium shadow-sm hover:shadow-md"
               >
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
+                <FontAwesomeIcon icon={["fas", "file-export"]} />
                 {t("exportData") || "Xuất dữ liệu"}
               </button>
             )}
@@ -344,19 +255,10 @@ const ProductFilters = React.memo(
           {/* Search Input */}
           <div className="relative lg:col-span-2">
             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <svg
-                className="h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+              <FontAwesomeIcon
+                icon={["fas", "search"]}
+                className="w-5 h-5 text-gray-400"
+              />
             </div>
             <input
               type="text"
@@ -443,19 +345,7 @@ const ProductFilters = React.memo(
               onClick={handleResetFilters}
               className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-all duration-200 border border-gray-300 hover:border-gray-400"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
+              <FontAwesomeIcon icon={["fas", "redo"]} />
               <span className="text-sm font-medium">
                 {t("resetFilters") || "Đặt lại bộ lọc"}
               </span>

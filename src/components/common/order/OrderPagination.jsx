@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const OrderPagination = React.memo(
   ({ currentPage = 1, setCurrentPage, totalItems = 0, itemsPerPage = 10 }) => {
@@ -22,19 +23,7 @@ const OrderPagination = React.memo(
             className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg disabled:text-gray-300 disabled:cursor-not-allowed transition-all"
             disabled={safeCurrentPage === 1}
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 19l-7-7 7-7"
-              />
-            </svg>
+            <FontAwesomeIcon icon={["fas", "arrow-left"]} className="w-5 h-5" />
           </button>
 
           <div className="flex space-x-2">
@@ -63,19 +52,10 @@ const OrderPagination = React.memo(
             className="p-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg disabled:text-gray-300 disabled:cursor-not-allowed transition-all"
             disabled={safeCurrentPage === totalPages}
           >
-            <svg
+            <FontAwesomeIcon
+              icon={["fas", "arrow-right"]}
               className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
+            />
           </button>
         </div>
 

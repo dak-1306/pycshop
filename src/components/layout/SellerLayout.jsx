@@ -4,6 +4,7 @@ import CollaboratorModal from "../seller/CollaboratorModal";
 import { useNotifications } from "../../hooks/common/useNotifications";
 import { useShopInfo } from "../../hooks/seller/useShopInfo";
 import NotificationPanel from "../common/notifications/NotificationPanel";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import "../../assets/css/logo.css";
 
 const SellerLayout = ({ children }) => {
@@ -100,38 +101,10 @@ const SellerLayout = ({ children }) => {
 
   const getIcon = (iconType) => {
     const icons = {
-      dashboard: (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-        </svg>
-      ),
-      products: (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fillRule="evenodd"
-            d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM6 12a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
-      orders: (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fillRule="evenodd"
-            d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2h4a1 1 0 110 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V6a1 1 0 110-2h4zm2-1v1h2V3H9zm5 5a1 1 0 10-2 0v2a1 1 0 102 0V8zm-4 0a1 1 0 10-2 0v2a1 1 0 102 0V8z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
-      shop: (
-        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-          <path
-            fillRule="evenodd"
-            d="M4 3a2 2 0 00-2 2v1.007a1 1 0 00.293.707L3 7.414V15a2 2 0 002 2h10a2 2 0 002-2V7.414l.707-.707A1 1 0 0018 6.007V5a2 2 0 00-2-2H4zm2 4a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm0 3a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1z"
-            clipRule="evenodd"
-          />
-        </svg>
-      ),
+      dashboard: <FontAwesomeIcon icon={["fas", "tachometer-alt"]} />,
+      products: <FontAwesomeIcon icon={["fas", "boxes"]} />,
+      orders: <FontAwesomeIcon icon={["fas", "shopping-bag"]} />,
+      shop: <FontAwesomeIcon icon={["fas", "store"]} />,
     };
     return icons[iconType] || icons.dashboard;
   };

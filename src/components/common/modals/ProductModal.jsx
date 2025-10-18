@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ProductModal = ({
   isOpen,
@@ -56,7 +57,11 @@ const ProductModal = ({
           buttonGradient:
             "from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600",
           headerIcon: "🔧",
-          buttonIcon: isEditMode ? "💾" : "➕",
+          buttonIcon: isEditMode ? (
+            <FontAwesomeIcon icon={["fas", "save"]} />
+          ) : (
+            <FontAwesomeIcon icon={["fas", "plus"]} />
+          ),
         }
       : {
           headerGradient: isEditMode
@@ -65,8 +70,16 @@ const ProductModal = ({
           buttonGradient: isEditMode
             ? "from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600"
             : "from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600",
-          headerIcon: isEditMode ? "✏️" : "📦",
-          buttonIcon: isEditMode ? "💾" : "🚀",
+          headerIcon: isEditMode ? (
+            <FontAwesomeIcon icon={["fas", "edit"]} />
+          ) : (
+            <FontAwesomeIcon icon={["fas", "plus-circle"]} />
+          ),
+          buttonIcon: isEditMode ? (
+            <FontAwesomeIcon icon={["fas", "save"]} />
+          ) : (
+            <FontAwesomeIcon icon={["fas", "rocket"]} />
+          ),
         };
 
   const buttonText = isEditMode
@@ -105,19 +118,7 @@ const ProductModal = ({
               onClick={onClose}
               className="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all transform hover:rotate-90"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <FontAwesomeIcon icon={["fas", "times"]} />
             </button>
           </div>
         </div>
@@ -129,18 +130,17 @@ const ProductModal = ({
             <div className="space-y-6">
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-blue-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-blue-500 text-white rounded-md flex items-center justify-center text-xs">
-                    ℹ️
-                  </span>
+                  <FontAwesomeIcon icon={["fas", "info-circle"]} />
                   Thông tin cơ bản
                 </h3>
 
                 <div className="space-y-4">
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                      <span className="w-5 h-5 bg-orange-500 text-white rounded text-xs flex items-center justify-center">
-                        🏷️
-                      </span>
+                      <FontAwesomeIcon
+                        icon={["fas", "tag"]}
+                        className="w-5 h-5 bg-blue-500 text-white rounded text-xs flex items-center justify-center"
+                      />
                       Tên sản phẩm *
                     </label>
                     <input
@@ -156,9 +156,10 @@ const ProductModal = ({
 
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                      <span className="w-5 h-5 bg-purple-500 text-white rounded text-xs flex items-center justify-center">
-                        📝
-                      </span>
+                      <FontAwesomeIcon
+                        icon={["fas", "file-alt"]}
+                        className="w-5 h-5 bg-purple-500 text-white rounded text-xs flex items-center justify-center"
+                      />
                       Mô tả sản phẩm
                     </label>
                     <textarea
@@ -177,10 +178,11 @@ const ProductModal = ({
 
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                      <span className="w-5 h-5 bg-indigo-500 text-white rounded text-xs flex items-center justify-center">
-                        📂
-                      </span>
-                      Danh mục *
+                      <FontAwesomeIcon
+                        icon={["fas", "folder"]}
+                        className="w-5 h-5 bg-indigo-500 text-white rounded text-xs flex items-center justify-center"
+                      />
+                      Danh mục
                     </label>
                     <select
                       value={product?.category || ""}
@@ -207,10 +209,11 @@ const ProductModal = ({
                   {variant === "admin" && (
                     <div>
                       <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                        <span className="w-5 h-5 bg-teal-500 text-white rounded text-xs flex items-center justify-center">
-                          👤
-                        </span>
-                        Người bán *
+                        <FontAwesomeIcon
+                          icon={["fas", "user"]}
+                          className="w-5 h-5 bg-teal-500 text-white rounded text-xs flex items-center justify-center"
+                        />
+                        Người bán
                       </label>
                       <input
                         type="text"
@@ -234,19 +237,15 @@ const ProductModal = ({
             <div className="space-y-6">
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-green-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-green-500 text-white rounded-md flex items-center justify-center text-xs">
-                    💰
-                  </span>
+                  <FontAwesomeIcon icon={["fas", "dollar-sign"]} />
                   Giá & Kho hàng
                 </h3>
 
                 <div className="space-y-4">
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                      <span className="w-5 h-5 bg-green-500 text-white rounded text-xs flex items-center justify-center">
-                        💰
-                      </span>
-                      Giá bán (₫) *
+                      <FontAwesomeIcon icon={["fas", "tag"]} />
+                      Giá bán
                     </label>
                     <input
                       type="number"
@@ -261,9 +260,7 @@ const ProductModal = ({
 
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                      <span className="w-5 h-5 bg-yellow-500 text-white rounded text-xs flex items-center justify-center">
-                        📦
-                      </span>
+                      <FontAwesomeIcon icon={["fas", "boxes"]} />
                       {isEditMode ? "Nhập hàng thêm" : "Số lượng tồn kho *"}
                     </label>
                     {isEditMode ? (
@@ -294,7 +291,8 @@ const ProductModal = ({
                         {additionalStock > 0 && (
                           <div className="bg-green-50 p-3 rounded-lg border border-green-200">
                             <div className="text-sm text-green-700">
-                              📈 Sau khi nhập thêm:{" "}
+                              <FontAwesomeIcon icon={["fas", "chart-line"]} />{" "}
+                              Sau khi nhập thêm:{" "}
                               <span className="font-semibold">
                                 {(product?.stock || product?.quantity || 0) +
                                   additionalStock}{" "}
@@ -304,7 +302,8 @@ const ProductModal = ({
                           </div>
                         )}
                         <div className="text-sm text-blue-600">
-                          💡 Chỉ có thể thêm hàng, không thể giảm số lượng
+                          <FontAwesomeIcon icon={["fas", "lightbulb"]} /> Chỉ có
+                          thể thêm hàng, không thể giảm số lượng tồn kho
                         </div>
                       </div>
                     ) : (
@@ -328,9 +327,7 @@ const ProductModal = ({
 
                   <div>
                     <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                      <span className="w-5 h-5 bg-pink-500 text-white rounded text-xs flex items-center justify-center">
-                        🏷️
-                      </span>
+                      <FontAwesomeIcon icon={["fas", "toggle-on"]} />
                       Trạng thái
                     </label>
                     <select
@@ -352,9 +349,7 @@ const ProductModal = ({
                   {variant === "admin" && (
                     <div>
                       <label className="flex items-center gap-2 text-sm font-semibold text-gray-800 mb-2">
-                        <span className="w-5 h-5 bg-blue-500 text-white rounded text-xs flex items-center justify-center">
-                          ✅
-                        </span>
+                        <FontAwesomeIcon icon={["fas", "check"]} />
                         Trạng thái duyệt
                       </label>
                       <select
@@ -379,7 +374,7 @@ const ProductModal = ({
               {/* Tips based on variant */}
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
                 <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                  <span className="text-blue-600">💡</span>
+                  <FontAwesomeIcon icon={["fas", "lightbulb"]} />
                   {variant === "admin" ? "Ghi chú Admin" : "Mẹo bán hàng"}
                 </h4>
                 <ul className="text-xs text-blue-700 space-y-1">
@@ -406,9 +401,7 @@ const ProductModal = ({
             <div className="space-y-6">
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-purple-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-purple-500 text-white rounded-md flex items-center justify-center text-xs">
-                    📷
-                  </span>
+                  <FontAwesomeIcon icon={["fas", "image"]} />
                   Hình ảnh sản phẩm
                 </h3>
 
@@ -427,19 +420,10 @@ const ProductModal = ({
                     />
                     <label htmlFor="image-upload" className="cursor-pointer">
                       <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-lg flex items-center justify-center">
-                        <svg
-                          className="w-8 h-8 text-purple-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                          />
-                        </svg>
+                        <FontAwesomeIcon
+                          icon={["fas", "cloud-upload-alt"]}
+                          className="text-purple-500 text-3xl"
+                        />
                       </div>
                       <p className="text-gray-600 text-sm">
                         <span className="font-semibold text-purple-600">
@@ -458,9 +442,7 @@ const ProductModal = ({
                   {product?.images && product.images.length > 0 && (
                     <div className="space-y-3">
                       <div className="text-sm text-gray-600 flex items-center gap-2">
-                        <span className="w-4 h-4 bg-yellow-500 text-white rounded text-xs flex items-center justify-center">
-                          ⭐
-                        </span>
+                        <FontAwesomeIcon icon={["fas", "info-circle"]} />
                         Ảnh đầu tiên sẽ là ảnh chính
                       </div>
                       <div className="grid grid-cols-2 gap-3">
@@ -469,9 +451,8 @@ const ProductModal = ({
                             {/* Main image indicator */}
                             {index === 0 && (
                               <div className="absolute -top-2 -left-2 z-10 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full shadow-md font-medium">
-                                <span className="flex items-center gap-1">
-                                  ⭐ Ảnh chính
-                                </span>
+                                <FontAwesomeIcon icon={["fas", "star"]} />
+                                Ảnh chính
                               </div>
                             )}
 
@@ -525,13 +506,7 @@ const ProductModal = ({
                                     className="p-2 bg-yellow-500 hover:bg-yellow-600 rounded-lg text-white shadow-md transform hover:scale-105 transition-all"
                                     title="Đặt làm ảnh chính"
                                   >
-                                    <svg
-                                      className="w-4 h-4"
-                                      fill="currentColor"
-                                      viewBox="0 0 20 20"
-                                    >
-                                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                                    </svg>
+                                    <FontAwesomeIcon icon={["fas", "star"]} />
                                   </button>
                                 )}
                                 <button
@@ -542,19 +517,7 @@ const ProductModal = ({
                                   className="p-2 bg-red-500 hover:bg-red-600 rounded-lg text-white shadow-md transform hover:scale-105 transition-all"
                                   title="Xóa ảnh"
                                 >
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                  </svg>
+                                  <FontAwesomeIcon icon={["fas", "trash"]} />
                                 </button>
                               </div>
                             </div>
@@ -570,11 +533,18 @@ const ProductModal = ({
                       {/* Instructions */}
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                         <div className="text-sm text-blue-800">
-                          <div className="font-medium mb-1">📋 Hướng dẫn:</div>
+                          <div className="font-medium mb-1">Hướng dẫn:</div>
                           <ul className="text-xs space-y-1 text-blue-700">
                             <li>• Ảnh đầu tiên sẽ hiển thị làm ảnh đại diện</li>
-                            <li>• Click ⭐ để đặt ảnh khác làm ảnh chính</li>
-                            <li>• Click 🗑️ để xóa ảnh không cần thiết</li>
+                            <li>
+                              • Click <FontAwesomeIcon icon={["fas", "star"]} />{" "}
+                              để đặt ảnh khác làm ảnh chính
+                            </li>
+                            <li>
+                              • Click{" "}
+                              <FontAwesomeIcon icon={["fas", "trash"]} /> để xóa
+                              ảnh không cần thiết
+                            </li>
                             <li>• Kéo thả để sắp xếp thứ tự ảnh</li>
                           </ul>
                         </div>
@@ -593,7 +563,7 @@ const ProductModal = ({
             onClick={onClose}
             className="px-8 py-3 text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all font-medium shadow-sm hover:shadow-md transform hover:scale-105 flex items-center gap-2"
           >
-            <span>❌</span> Hủy bỏ
+            <FontAwesomeIcon icon={["fas", "times"]} /> Đóng
           </button>
           <button
             onClick={handleSave}

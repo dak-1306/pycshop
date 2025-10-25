@@ -1,357 +1,166 @@
 import React from "react";
 import PropTypes from "prop-types";
-import {
-  PRODUCT_CATEGORIES_ARRAY as PRODUCT_CATEGORIES,
-  PRODUCT_STATUSES_ARRAY as PRODUCT_STATUSES,
-  PRODUCT_STATUS_LABELS,
-  PRICE_RANGES_ARRAY as PRICE_RANGES,
-} from "../../../lib/constants/product.js";
-import { useLanguage } from "../../../context/LanguageContext";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const ProductFilters = React.memo(
   ({
-    // Common props
-    searchTerm,
-    searchValue,
+    searchTerm = "",
     onSearchChange,
-
-    // Category props (normalized)
-    selectedCategory,
-    categoryFilter,
-    setSelectedCategory,
+    selectedCategory = "",
     onCategoryChange,
-
-    // Status props (normalized)
-    selectedStatus,
-    statusFilter,
-    setSelectedStatus,
+    selectedStatus = "",
     onStatusChange,
-
-    // Price props (seller specific)
-    selectedPrice,
-    setSelectedPrice,
-
-    // Actions
-    onResetFilters,
+    selectedPrice = "",
+    onPriceChange,
     onAddProduct,
-    onExport,
-
-    // Configuration
-    variant = "seller", // "admin" | "seller"
-    showResetButton = false,
-    categories = PRODUCT_CATEGORIES,
+    onExportProducts,
+    onClearFilters,
+    hasActiveFilters = false,
+    variant = "seller", // "admin" | "seller" - chỉ để phân quyền
+    // eslint-disable-next-line no-unused-vars
   }) => {
-    const { t } = useLanguage();
-
-    // Normalize props for different variants
-    const normalizedSearchValue = searchValue || searchTerm || "";
-    const normalizedCategory = categoryFilter || selectedCategory || "";
-    const normalizedStatus = statusFilter || selectedStatus || "";
-
-    const handleSearchChange = (e) => {
-      const value = e.target.value;
-      if (onSearchChange) {
-        onSearchChange(value);
-      }
-    };
-
-    const handleCategoryChange = (value) => {
-      if (onCategoryChange) {
-        onCategoryChange(value);
-      } else if (setSelectedCategory) {
-        setSelectedCategory(value);
-      }
-    };
-
-    const handleStatusChange = (value) => {
-      if (onStatusChange) {
-        onStatusChange(value);
-      } else if (setSelectedStatus) {
-        setSelectedStatus(value);
-      }
-    };
-
-    const handlePriceChange = (value) => {
-      if (setSelectedPrice) {
-        setSelectedPrice(value);
-      }
-    };
-
-    const handleResetFilters = () => {
-      if (onResetFilters) {
-        onResetFilters();
-      } else {
-        // Fallback reset
-        handleSearchChange({ target: { value: "" } });
-        handleCategoryChange("");
-        handleStatusChange("");
-        if (setSelectedPrice) handlePriceChange("");
-      }
-    };
-
-    // Render Admin variant
-    if (variant === "admin") {
-      return (
-        <div className="bg-white rounded-xl shadow-sm border p-6">
-          <div className="flex flex-wrap items-center justify-between gap-6">
-            <div className="flex flex-wrap items-center gap-4">
-              {/* Filter Results Count */}
-              {(normalizedSearchValue ||
-                normalizedCategory ||
-                normalizedStatus) && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 text-blue-700 rounded-lg border border-blue-200">
-                  <FontAwesomeIcon icon={["fas", "filter"]} />
-                  <span className="text-sm font-medium">
-                    {t("activeFilters") || "Bộ lọc đang áp dụng"}
-                  </span>
-                </div>
-              )}
-
-              {/* Search Input */}
-              <div className="relative min-w-80">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FontAwesomeIcon
-                    icon={["fas", "search"]}
-                    className="w-4 h-4 text-gray-400"
-                  />
-                </div>
-                <input
-                  type="text"
-                  placeholder={t("searchProducts") || "Tìm kiếm sản phẩm..."}
-                  value={normalizedSearchValue}
-                  onChange={handleSearchChange}
-                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+    return (
+      <div className="bg-white rounded-xl shadow-sm border p-4 mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Search Input */}
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <FontAwesomeIcon
+                  icon={["fas", "search"]}
+                  className="h-4 w-4 text-gray-400 group-focus-within:text-blue-500"
                 />
               </div>
-
-              {/* Category Filter */}
-              <select
-                value={normalizedCategory}
-                onChange={(e) => handleCategoryChange(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white min-w-48"
-              >
-                <option value="">
-                  {t("allCategories") || "Tất cả danh mục"}
-                </option>
-                {Array.isArray(categories) &&
-                  categories.map((category) => (
-                    <option
-                      key={category.value || category}
-                      value={category.value || category}
-                    >
-                      {category.label || category}
-                    </option>
-                  ))}
-              </select>
-
-              {/* Status Filter */}
-              <select
-                value={normalizedStatus}
-                onChange={(e) => handleStatusChange(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white min-w-48"
-              >
-                <option value="">
-                  {t("allStatuses") || "Tất cả trạng thái"}
-                </option>
-                {Array.isArray(PRODUCT_STATUSES) &&
-                  PRODUCT_STATUSES.map((status) => (
-                    <option key={status} value={status}>
-                      {PRODUCT_STATUS_LABELS?.[status] || status}
-                    </option>
-                  ))}
-              </select>
-
-              {/* Reset Filters Button */}
-              {(normalizedSearchValue ||
-                normalizedCategory ||
-                normalizedStatus) && (
-                <button
-                  onClick={handleResetFilters}
-                  className="flex items-center gap-2 px-4 py-3 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-colors"
-                >
-                  <FontAwesomeIcon icon={["fas", "redo"]} />
-                  <span className="text-sm font-medium">
-                    {t("resetFilters") || "Đặt lại"}
-                  </span>
-                </button>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center gap-3">
-              {onExport && (
-                <button
-                  onClick={onExport}
-                  className="flex items-center gap-2 px-4 py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-colors font-medium"
-                >
-                  <FontAwesomeIcon icon={["fas", "file-export"]} />
-                  {t("exportData") || "Xuất dữ liệu"}
-                </button>
-              )}
-
-              {onAddProduct && (
-                <button
-                  onClick={onAddProduct}
-                  className="flex items-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors font-medium"
-                >
-                  <FontAwesomeIcon icon={["fas", "plus"]} />
-                  {t("addProduct") || "Thêm sản phẩm"}
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    // Render Seller variant (default)
-    return (
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-100 mb-6">
-        {/* Header with Title and Add Product Button */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center">
-              <FontAwesomeIcon
-                icon={["fas", "filter"]}
-                className="text-white w-5 h-5"
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm..."
+                value={searchTerm}
+                onChange={(e) =>
+                  onSearchChange && onSearchChange(e.target.value)
+                }
+                className="pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-300 w-64"
               />
             </div>
-            <div>
-              <h3 className="text-lg font-bold text-gray-900">
-                {t("productFilters") || "Bộ lọc sản phẩm"}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {t("filterDescription") || "Tìm kiếm và lọc sản phẩm của bạn"}
-              </p>
+
+            {/* Category Filter */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+              <select
+                value={selectedCategory}
+                onChange={(e) =>
+                  onCategoryChange && onCategoryChange(e.target.value)
+                }
+                className="relative bg-white border border-gray-300 rounded-lg px-3 py-2 pr-7 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 hover:border-blue-300 appearance-none cursor-pointer"
+              >
+                <option value="">🏷️ Tất cả danh mục</option>
+                <option value="electronics">📱 Điện tử</option>
+                <option value="fashion">👕 Thời trang</option>
+                <option value="home">🏠 Gia dụng</option>
+                <option value="beauty">💄 Làm đẹp</option>
+                <option value="sports">⚽ Thể thao</option>
+                <option value="books">📚 Sách</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <FontAwesomeIcon
+                  icon={["fas", "chevron-down"]}
+                  className="w-3 h-3 text-gray-400"
+                />
+              </div>
             </div>
+
+            {/* Status Filter */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+              <select
+                value={selectedStatus}
+                onChange={(e) =>
+                  onStatusChange && onStatusChange(e.target.value)
+                }
+                className="relative bg-white border border-gray-300 rounded-lg px-3 py-2 pr-7 text-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 hover:border-green-300 appearance-none cursor-pointer"
+              >
+                <option value="">📊 Tất cả trạng thái</option>
+                <option value="active">✅ Hoạt động</option>
+                <option value="inactive">❌ Không hoạt động</option>
+                <option value="pending">⏳ Chờ duyệt</option>
+                <option value="draft">📝 Bản nháp</option>
+                <option value="out_of_stock">📦 Hết hàng</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <FontAwesomeIcon
+                  icon={["fas", "chevron-down"]}
+                  className="w-3 h-3 text-gray-400"
+                />
+              </div>
+            </div>
+
+            {/* Price Filter */}
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-lg opacity-0 group-hover:opacity-10 transition-opacity duration-200"></div>
+              <select
+                value={selectedPrice}
+                onChange={(e) => onPriceChange && onPriceChange(e.target.value)}
+                className="relative bg-white border border-gray-300 rounded-lg px-3 py-2 pr-7 text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 transition-all duration-200 hover:border-yellow-300 appearance-none cursor-pointer"
+              >
+                <option value="">💰 Tất cả giá</option>
+                <option value="0-100000">💵 Dưới 100K</option>
+                <option value="100000-500000">💶 100K - 500K</option>
+                <option value="500000-1000000">💷 500K - 1M</option>
+                <option value="1000000-">💸 Trên 1M</option>
+              </select>
+              <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                <FontAwesomeIcon
+                  icon={["fas", "chevron-down"]}
+                  className="w-3 h-3 text-gray-400"
+                />
+              </div>
+            </div>
+
+            {/* Reset Button */}
+            {hasActiveFilters && (
+              <button
+                onClick={onClearFilters}
+                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg transition-all duration-200"
+                title="Đặt lại bộ lọc"
+              >
+                <FontAwesomeIcon
+                  icon={["fas", "rotate-left"]}
+                  className="w-4 h-4"
+                />
+                <span className="text-sm">Đặt lại</span>
+              </button>
+            )}
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex space-x-2">
+            {/* Add Product Button */}
             {onAddProduct && (
               <button
                 onClick={onAddProduct}
-                className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl transition-all duration-200 transform hover:scale-105 font-medium shadow-sm hover:shadow-md"
+                className="group relative flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg font-medium text-sm transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 shadow-md hover:shadow-lg overflow-hidden"
+                title="Thêm sản phẩm mới"
               >
-                <FontAwesomeIcon icon={["fas", "plus"]} />
-                {t("addProduct") || "Thêm sản phẩm"}
+                <FontAwesomeIcon icon={["fas", "plus"]} className="w-4 h-4" />
+                <span>Thêm sản phẩm</span>
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
               </button>
             )}
 
-            {onExport && (
+            {/* Export Button */}
+            {onExportProducts && (
               <button
-                onClick={onExport}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all duration-200 transform hover:scale-105 font-medium shadow-sm hover:shadow-md"
+                onClick={onExportProducts}
+                className="group relative flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white rounded-lg font-medium text-sm transition-all duration-200 transform hover:scale-105 hover:-translate-y-0.5 shadow-md hover:shadow-lg overflow-hidden"
               >
-                <FontAwesomeIcon icon={["fas", "file-export"]} />
-                {t("exportData") || "Xuất dữ liệu"}
+                <FontAwesomeIcon
+                  icon={["fas", "file-export"]}
+                  className="w-4 h-4"
+                />
+                <span>Xuất Excel</span>
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-20 transition-opacity"></div>
               </button>
             )}
           </div>
         </div>
-
-        {/* Filter Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Search Input */}
-          <div className="relative lg:col-span-2">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-              <FontAwesomeIcon
-                icon={["fas", "search"]}
-                className="w-5 h-5 text-gray-400"
-              />
-            </div>
-            <input
-              type="text"
-              placeholder={t("searchProducts") || "Tìm kiếm sản phẩm..."}
-              value={normalizedSearchValue}
-              onChange={handleSearchChange}
-              className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 shadow-sm"
-            />
-          </div>
-
-          {/* Category Filter */}
-          <div>
-            <select
-              value={normalizedCategory}
-              onChange={(e) => handleCategoryChange(e.target.value)}
-              className="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
-            >
-              <option value="">
-                {t("allCategories") || "Tất cả danh mục"}
-              </option>
-              {Array.isArray(categories) &&
-                categories.map((category) => (
-                  <option
-                    key={category.value || category}
-                    value={category.value || category}
-                  >
-                    {category.label || category}
-                  </option>
-                ))}
-            </select>
-          </div>
-
-          {/* Status Filter */}
-          <div>
-            <select
-              value={normalizedStatus}
-              onChange={(e) => handleStatusChange(e.target.value)}
-              className="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
-            >
-              <option value="">
-                {t("allStatuses") || "Tất cả trạng thái"}
-              </option>
-              {Array.isArray(PRODUCT_STATUSES) &&
-                PRODUCT_STATUSES.map((status) => (
-                  <option key={status} value={status}>
-                    {PRODUCT_STATUS_LABELS?.[status] || status}
-                  </option>
-                ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Price Range Filter (Seller specific) */}
-        {setSelectedPrice && PRICE_RANGES && (
-          <div className="mt-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="md:col-span-1">
-                <select
-                  value={selectedPrice || ""}
-                  onChange={(e) => handlePriceChange(e.target.value)}
-                  className="block w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
-                >
-                  <option value="">{t("allPrices") || "Tất cả mức giá"}</option>
-                  {Array.isArray(PRICE_RANGES) &&
-                    PRICE_RANGES.map((range) => (
-                      <option key={range.value} value={range.value}>
-                        {range.label}
-                      </option>
-                    ))}
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Reset Button */}
-        {(showResetButton ||
-          normalizedSearchValue ||
-          normalizedCategory ||
-          normalizedStatus ||
-          selectedPrice) && (
-          <div className="mt-4 flex justify-end">
-            <button
-              onClick={handleResetFilters}
-              className="flex items-center gap-2 px-4 py-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-xl transition-all duration-200 border border-gray-300 hover:border-gray-400"
-            >
-              <FontAwesomeIcon icon={["fas", "redo"]} />
-              <span className="text-sm font-medium">
-                {t("resetFilters") || "Đặt lại bộ lọc"}
-              </span>
-            </button>
-          </div>
-        )}
       </div>
     );
   }
@@ -360,36 +169,19 @@ const ProductFilters = React.memo(
 ProductFilters.displayName = "ProductFilters";
 
 ProductFilters.propTypes = {
-  // Common props
   searchTerm: PropTypes.string,
-  searchValue: PropTypes.string,
   onSearchChange: PropTypes.func,
-
-  // Category props (normalized)
   selectedCategory: PropTypes.string,
-  categoryFilter: PropTypes.string,
-  setSelectedCategory: PropTypes.func,
   onCategoryChange: PropTypes.func,
-
-  // Status props (normalized)
   selectedStatus: PropTypes.string,
-  statusFilter: PropTypes.string,
-  setSelectedStatus: PropTypes.func,
   onStatusChange: PropTypes.func,
-
-  // Price props (seller specific)
   selectedPrice: PropTypes.string,
-  setSelectedPrice: PropTypes.func,
-
-  // Actions
-  onResetFilters: PropTypes.func,
+  onPriceChange: PropTypes.func,
   onAddProduct: PropTypes.func,
-  onExport: PropTypes.func,
-
-  // Configuration
+  onExportProducts: PropTypes.func,
+  onClearFilters: PropTypes.func,
+  hasActiveFilters: PropTypes.bool,
   variant: PropTypes.oneOf(["admin", "seller"]),
-  showResetButton: PropTypes.bool,
-  categories: PropTypes.array,
 };
 
 export default ProductFilters;

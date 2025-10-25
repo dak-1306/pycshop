@@ -120,16 +120,6 @@ export const useProducts = () => {
     }
   };
 
-  const confirmDeleteProduct = async () => {
-    try {
-      await commonHook.deleteProduct();
-      alert("🗑️ Đã xóa sản phẩm thành công!");
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      alert("❌ Lỗi khi xóa sản phẩm: " + (error.message || "Unknown error"));
-    }
-  };
-
   // Seller-specific image handling functions that extend the common hook
   const handleImageUpload = (files) => {
     const maxImages = 15;
@@ -213,19 +203,19 @@ export const useProducts = () => {
     error: commonHook.error,
 
     // Actions - use common hook functions with seller-specific wrappers where needed
-    handleViewProduct: commonHook.viewProduct,
-    handleAddProduct: commonHook.addProduct,
-    handleEditProduct: commonHook.editProduct,
+    handleViewProduct: commonHook.handleViewProduct,
+    handleAddProduct: commonHook.handleAddProduct,
+    handleEditProduct: commonHook.handleEditProduct,
     handleSaveProduct, // Custom seller implementation
-    handleDeleteProduct: commonHook.showDeleteConfirm,
-    confirmDeleteProduct, // Custom seller implementation
-    handleCloseProductModal: commonHook.closeModal,
-    handleCloseDetailModal: commonHook.closeDetailModal,
-    handleCloseDeleteModal: commonHook.closeModal,
-    handleResetFilters: commonHook.resetFilters,
-    handleExport: commonHook.exportToCSV,
+    handleDeleteProduct: commonHook.handleDeleteProduct,
+    confirmDeleteProduct: commonHook.confirmDeleteProduct,
+    handleCloseProductModal: commonHook.handleCloseProductModal,
+    handleCloseDetailModal: commonHook.handleCloseDetailModal,
+    handleCloseDeleteModal: commonHook.handleCloseDeleteModal,
+    handleResetFilters: commonHook.handleResetFilters,
+    handleExport: commonHook.handleExport,
     getStatusColor: commonHook.getStatusColor,
-    loadProducts: commonHook.loadData, // Renamed for consistency
+    loadProducts: commonHook.refresh, // Use refresh function
 
     // Image handling - seller-specific implementations
     handleImageUpload, // Custom seller implementation

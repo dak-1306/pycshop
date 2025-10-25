@@ -20,7 +20,7 @@ import Register from "./pages/auth/Register";
 import BecomeSeller from "./pages/seller/BecomeSeller";
 
 // Admin imports
-import AdminLayout from "./components/layout/AdminLayout";
+import AdminLayout from "./components/layout/admin/AdminLayout";
 import AdminRoute from "./components/admin/ProtectedRoute/AdminRoute";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUsers from "./pages/admin/Users";
@@ -54,7 +54,10 @@ function App() {
                   <Route path="/search" element={<SearchResults />} />
 
                   {/* Category Products */}
-                  <Route path="/category/:categoryId" element={<CategoryProducts />} />
+                  <Route
+                    path="/category/:categoryId"
+                    element={<CategoryProducts />}
+                  />
 
                   {/* Auth Routes */}
                   <Route path="/login" element={<Login />} />

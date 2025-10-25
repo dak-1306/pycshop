@@ -9,10 +9,9 @@ import StatsCards from "../../components/common/dashboard/StatsCards";
 import StatsOverview from "../../components/admin/reports/StatsOverview";
 import { useDashboard } from "../../hooks/common/useDashboard";
 import { useAdminReports } from "../../hooks/admin/useAdminReports";
-import { useLanguage } from "../../context/LanguageContext";
+import { ADMIN_CONSTANTS } from "../../lib/constants/adminConstants";
 
 const Dashboard = () => {
-  const { t } = useLanguage();
   const {
     recentOrders,
     recentUsers,
@@ -29,14 +28,7 @@ const Dashboard = () => {
   } = useAdminReports();
 
   // Fallback data when API fails
-  const fallbackStats = {
-    totalUsers: 0,
-    totalOrders: 0,
-    totalRevenue: 0,
-    totalProducts: 0,
-    activeUsers: 0,
-    pendingOrders: 0,
-  };
+  const fallbackStats = ADMIN_CONSTANTS.FALLBACK_STATS;
 
   const safeOverviewStats = overviewStats || fallbackStats;
   const isLoading =
@@ -50,7 +42,9 @@ const Dashboard = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải dashboard...</p>
+          <p className="mt-4 text-gray-600">
+            {ADMIN_CONSTANTS.PAGES.DASHBOARD.LOADING}
+          </p>
         </div>
       </div>
     );
@@ -69,11 +63,15 @@ const Dashboard = () => {
       {hasErrors && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="flex items-center gap-2">
-            <span className="text-red-600">⚠️</span>
-            <h3 className="text-red-800 font-semibold">Lỗi kết nối API</h3>
+            <span className="text-red-600">
+              {ADMIN_CONSTANTS.UI_TEXT.WARNING_ICON}
+            </span>
+            <h3 className="text-red-800 font-semibold">
+              {ADMIN_CONSTANTS.ERROR_MESSAGES.API_CONNECTION_ERROR}
+            </h3>
           </div>
           <p className="text-red-700 text-sm mt-1">
-            Không thể kết nối đến server. Hiển thị dữ liệu mặc định.
+            {ADMIN_CONSTANTS.ERROR_MESSAGES.API_CONNECTION_MESSAGE}
           </p>
         </div>
       )}
@@ -107,18 +105,10 @@ const Dashboard = () => {
         <RecentOrdersTable
           variant="admin"
           orderData={recentOrders || []}
-          getStatusColor={(status) => {
-            switch (status) {
-              case "completed":
-                return "bg-green-100 text-green-800";
-              case "pending":
-                return "bg-yellow-100 text-yellow-800";
-              case "cancelled":
-                return "bg-red-100 text-red-800";
-              default:
-                return "bg-gray-100 text-gray-800";
-            }
-          }}
+          getStatusColor={(status) =>
+            ADMIN_CONSTANTS.ORDER_STATUS_COLORS[status] ||
+            ADMIN_CONSTANTS.ORDER_STATUS_COLORS.default
+          }
         />
         <RecentUsersTable recentUsers={recentUsers || []} />
       </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { ORDER_STATUS_COLORS } from "../../lib/constants/order.js";
+import { ORDER_STATUS_COLORS } from "../../lib/constants/index.js";
 
 /**
  * Shared orders hook for both admin and seller

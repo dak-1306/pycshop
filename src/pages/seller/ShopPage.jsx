@@ -1,5 +1,5 @@
 import React from "react";
-import SellerLayout from "../../components/layout/SellerLayout";
+import SellerLayout from "../../components/layout/seller/SellerLayout";
 import ProductModal from "../../components/common/modals/ProductModal";
 import ProductDetailModal from "../../components/common/product/ProductDetailModal";
 import ShopEditModal from "../../components/seller/shop/ShopEditModal";

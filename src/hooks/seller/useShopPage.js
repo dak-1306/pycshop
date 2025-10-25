@@ -1,18 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-  DEFAULT_SHOP_INFO,
-  INITIAL_PRODUCT_STATE,
-  PAGINATION_CONFIG,
-  MODAL_MODES,
-  SHOP_STATUS_COLORS,
-  RECENT_ACTIVITIES,
-  MOCK_PRODUCTS,
-} from "../../lib/constants/shopPageConstants.js";
+  SELLER_CONSTANTS,
+  SELLER_MOCK_PRODUCTS,
+  SELLER_RECENT_ACTIVITIES,
+} from "../../lib/constants/sellerConstants.js";
 import ShopService from "../../lib/services/shopService.js";
 
 export const useShopPage = () => {
   // Shop Info State
-  const [shopInfo, setShopInfo] = useState(DEFAULT_SHOP_INFO);
+  const [shopInfo, setShopInfo] = useState(SELLER_CONSTANTS.DEFAULT_SHOP_INFO);
 
   // Product States
   const [products, setProducts] = useState([]);
@@ -36,8 +32,10 @@ export const useShopPage = () => {
   const [showProductModal, setShowProductModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showShopEditModal, setShowShopEditModal] = useState(false);
-  const [modalMode, setModalMode] = useState(MODAL_MODES.ADD);
-  const [currentProduct, setCurrentProduct] = useState(INITIAL_PRODUCT_STATE);
+  const [modalMode, setModalMode] = useState(SELLER_CONSTANTS.MODAL_MODES.ADD);
+  const [currentProduct, setCurrentProduct] = useState(
+    SELLER_CONSTANTS.INITIAL_PRODUCT_STATE
+  );
   const [productToDelete, setProductToDelete] = useState(null);
 
   // Load products from API
@@ -48,7 +46,7 @@ export const useShopPage = () => {
 
       console.log("Loading products with params:", {
         page: currentPage,
-        limit: PAGINATION_CONFIG.itemsPerPage,
+        limit: SELLER_CONSTANTS.PAGINATION_CONFIG.itemsPerPage,
         search: searchTerm || undefined,
         category: selectedCategory || undefined,
         status: selectedStatus || undefined,
@@ -59,7 +57,7 @@ export const useShopPage = () => {
       // Load products using ShopService
       const response = await ShopService.getSellerProducts({
         page: currentPage,
-        limit: PAGINATION_CONFIG.itemsPerPage,
+        limit: SELLER_CONSTANTS.PAGINATION_CONFIG.itemsPerPage,
         search: searchTerm || undefined,
         category: selectedCategory || undefined,
         status: selectedStatus || undefined,
@@ -131,7 +129,8 @@ export const useShopPage = () => {
         setProducts(productsWithImages);
         setTotalPages(
           Math.ceil(
-            (response.pagination?.total || 0) / PAGINATION_CONFIG.itemsPerPage
+            (response.pagination?.total || 0) /
+              SELLER_CONSTANTS.PAGINATION_CONFIG.itemsPerPage
           )
         );
         console.log(
@@ -149,7 +148,7 @@ export const useShopPage = () => {
       console.log("Using mock products as fallback");
 
       // Use mock products as fallback for testing UI
-      setProducts(MOCK_PRODUCTS);
+      setProducts(SELLER_CONSTANTS.MOCK_PRODUCTS);
       setTotalPages(1);
       setError(null);
     } finally {
@@ -208,7 +207,9 @@ export const useShopPage = () => {
 
   // Utility functions
   const getStatusColor = (status) => {
-    return SHOP_STATUS_COLORS[status] || "bg-gray-100 text-gray-800";
+    return (
+      SELLER_CONSTANTS.SHOP_STATUS_COLORS[status] || "bg-gray-100 text-gray-800"
+    );
   };
 
   const formatPrice = (price) => {
@@ -220,11 +221,14 @@ export const useShopPage = () => {
   // Product CRUD operations
   const handleAddProduct = () => {
     console.log("useShopPage - handleAddProduct called");
-    console.log("MODAL_MODES.ADD:", MODAL_MODES.ADD);
-    console.log("INITIAL_PRODUCT_STATE:", INITIAL_PRODUCT_STATE);
+    console.log("MODAL_MODES.ADD:", SELLER_CONSTANTS.MODAL_MODES.ADD);
+    console.log(
+      "INITIAL_PRODUCT_STATE:",
+      SELLER_CONSTANTS.INITIAL_PRODUCT_STATE
+    );
 
-    setCurrentProduct(INITIAL_PRODUCT_STATE);
-    setModalMode(MODAL_MODES.ADD);
+    setCurrentProduct(SELLER_CONSTANTS.INITIAL_PRODUCT_STATE);
+    setModalMode(SELLER_CONSTANTS.MODAL_MODES.ADD);
     setShowProductModal(true);
 
     console.log("Modal state should be set to true");
@@ -237,7 +241,7 @@ export const useShopPage = () => {
 
   const handleEditProduct = (product) => {
     setCurrentProduct({ ...product });
-    setModalMode(MODAL_MODES.EDIT);
+    setModalMode(SELLER_CONSTANTS.MODAL_MODES.EDIT);
     setShowProductModal(true);
   };
 
@@ -250,11 +254,11 @@ export const useShopPage = () => {
     try {
       setLoading(true);
 
-      if (modalMode === MODAL_MODES.ADD) {
+      if (modalMode === SELLER_CONSTANTS.MODAL_MODES.ADD) {
         const response = await ShopService.addProduct(currentProduct);
         if (response.success) {
           setShowProductModal(false);
-          setCurrentProduct(INITIAL_PRODUCT_STATE);
+          setCurrentProduct(SELLER_CONSTANTS.INITIAL_PRODUCT_STATE);
           alert("Thêm sản phẩm thành công!");
           // Force reload products to show new product
           await loadProducts();
@@ -268,7 +272,7 @@ export const useShopPage = () => {
         );
         if (response.success) {
           setShowProductModal(false);
-          setCurrentProduct(INITIAL_PRODUCT_STATE);
+          setCurrentProduct(SELLER_CONSTANTS.INITIAL_PRODUCT_STATE);
           alert("Cập nhật sản phẩm thành công!");
           // Force reload products to show updated product
           await loadProducts();

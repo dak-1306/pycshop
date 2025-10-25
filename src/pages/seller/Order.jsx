@@ -1,12 +1,9 @@
 import React from "react";
-import SellerLayout from "../../components/layout/SellerLayout";
+import SellerLayout from "../../components/layout/seller/SellerLayout";
+import { OrderManagement } from "../../components/common/order";
 import OrderModal from "../../components/common/modals/OrderModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
-import OrderSearchBar from "../../components/common/order/OrderSearchBar";
-import OrderFilters from "../../components/common/order/OrderFilters";
-import OrderTable from "../../components/common/order/OrderTable";
-import OrderPagination from "../../components/common/order/OrderPagination";
 import { useOrders } from "../../hooks/seller/useOrders";
 
 // CSS animations (giữ nguyên)
@@ -84,36 +81,27 @@ const Order = () => {
   return (
     <SellerLayout title="Order">
       <div className="p-6">
-        {/* Search Bar */}
-        <OrderSearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-
-        {/* Filters and Action Buttons */}
-        <OrderFilters
-          filters={orderStatuses}
-          selectedFilter={selectedFilter}
-          searchTerm={searchTerm}
-          onFilterChange={handleFilterChange}
-          onResetFilters={handleResetFilters}
-          onAddOrder={handleAddOrder}
-          onExport={handleExport}
-        />
-
-        {/* Orders Table */}
-        <OrderTable
-          variant="seller"
+        {/* Unified Order Management Component */}
+        <OrderManagement
+          // Data
           orders={orders}
+          // Actions
           onViewOrder={handleViewOrder}
           onEditOrder={handleEditOrder}
           onCancelOrder={handleCancelOrder}
-          getStatusColor={getStatusColor}
-        />
-
-        {/* Pagination */}
-        <OrderPagination
+          onExportOrders={handleExport}
+          // Filters
+          onSearchChange={setSearchTerm}
+          onStatusFilter={handleFilterChange}
+          // Pagination
           currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalItems={orders.length}
-          itemsPerPage={10}
+          totalPages={Math.ceil(orders.length / 10)}
+          onPageChange={setCurrentPage}
+          // Config
+          variant="seller"
+          isLoading={false}
+          // Styling
+          getStatusColor={getStatusColor}
         />
 
         {/* Modals */}

@@ -1,11 +1,7 @@
 import { useState, useCallback, useEffect } from "react";
 import { useUsers } from "../api/useUsers.js";
 import adminService from "../../lib/services/adminService.js";
-import {
-  DEFAULT_USER_STATS,
-  USER_STATUS_COLORS,
-  USER_ROLE_COLORS,
-} from "../../lib/constants/user.js";
+import { ADMIN_CONSTANTS } from "../../lib/constants/index.js";
 
 export const useAdminUsers = () => {
   // Use the existing useUsers hook as base
@@ -21,7 +17,7 @@ export const useAdminUsers = () => {
   } = useUsers();
 
   // Additional state for admin-specific features
-  const [stats, setStats] = useState(DEFAULT_USER_STATS);
+  const [stats, setStats] = useState(ADMIN_CONSTANTS.ADMIN_DEFAULT_USER_STATS);
   const [error, setError] = useState(null);
 
   // Extract filter values for compatibility with old interface
@@ -71,7 +67,7 @@ export const useAdminUsers = () => {
       setError(null);
     } catch (statsError) {
       console.warn("[useAdminUsers] Failed to fetch stats:", statsError);
-      setStats(DEFAULT_USER_STATS);
+      setStats(ADMIN_CONSTANTS.ADMIN_DEFAULT_USER_STATS);
       setError("Failed to load stats: " + statsError.message);
     }
   }, []);
@@ -90,11 +86,17 @@ export const useAdminUsers = () => {
   };
 
   const getStatusColor = (status) => {
-    return USER_STATUS_COLORS[status] || USER_STATUS_COLORS.default;
+    return (
+      ADMIN_CONSTANTS.ADMIN_USER_STATUS_COLORS[status] ||
+      ADMIN_CONSTANTS.ADMIN_USER_STATUS_COLORS.default
+    );
   };
 
   const getRoleColor = (role) => {
-    return USER_ROLE_COLORS[role] || USER_ROLE_COLORS.default;
+    return (
+      ADMIN_CONSTANTS.ADMIN_USER_ROLE_COLORS[role] ||
+      ADMIN_CONSTANTS.ADMIN_USER_ROLE_COLORS.default
+    );
   };
   // Event handlers
   const handleViewUser = useCallback((user) => {

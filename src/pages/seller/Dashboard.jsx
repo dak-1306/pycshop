@@ -1,5 +1,5 @@
 import React from "react";
-import SellerLayout from "../../components/layout/SellerLayout";
+import SellerLayout from "../../components/layout/seller/SellerLayout";
 import StatsCards from "../../components/common/dashboard/StatsCards";
 import SharedChartsSection from "../../components/common/dashboard/charts/SharedChartsSection";
 import RecentOrdersTable from "../../components/common/dashboard/RecentOrdersTable";

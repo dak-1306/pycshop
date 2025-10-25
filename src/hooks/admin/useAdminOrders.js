@@ -1,21 +1,25 @@
 import useOrdersCommon from "../common/useOrders.js";
-import { MOCK_ORDERS, DEFAULT_ORDER_STATS } from "../../lib/constants/order.js";
+import {
+  ADMIN_CONSTANTS,
+  ADMIN_MOCK_ORDERS,
+  ADMIN_DEFAULT_ORDER_STATS,
+} from "../../lib/constants/index.js";
 
 export const useAdminOrders = () => {
   // Use common hook with admin-specific configuration
   const commonHook = useOrdersCommon({
     role: "admin",
     service: null, // Using mock data for now
-    mockData: MOCK_ORDERS,
+    mockData: ADMIN_MOCK_ORDERS,
     canDelete: true, // Admins can delete orders
     pageSize: 10,
-    initialStats: DEFAULT_ORDER_STATS,
+    initialStats: ADMIN_DEFAULT_ORDER_STATS,
   });
 
   // Use common hook's functions and state
   const orders = commonHook.allOrders; // Get all filtered orders for admin
   const isLoading = commonHook.isLoading;
-  const stats = commonHook.stats || DEFAULT_ORDER_STATS;
+  const stats = commonHook.stats || ADMIN_DEFAULT_ORDER_STATS;
 
   // Filter states from common hook
   const searchValue = commonHook.searchValue;

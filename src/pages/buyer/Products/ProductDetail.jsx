@@ -182,15 +182,37 @@ const ProductDetail = () => {
     }).format(price);
   };
 
-  const renderStars = (rating) => {
+  const renderStars = (rating = 0) => {
+    const safeRating = rating || 0;
     const stars = [];
-    for (let i = 1; i <= 5; i++) {
+    const fullStars = Math.floor(safeRating);
+    const hasHalfStar = safeRating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <span key={i} className="pd-star">
-          {i <= rating ? "★" : "☆"}
+        <span key={i} className="star filled">
+          ★
         </span>
       );
     }
+
+    if (hasHalfStar) {
+      stars.push(
+        <span key="half" className="star half">
+          ★
+        </span>
+      );
+    }
+
+    const emptyStars = 5 - Math.ceil(safeRating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <span key={`empty-${i}`} className="star">
+          ★
+        </span>
+      );
+    }
+
     return stars;
   };
 
@@ -362,7 +384,7 @@ const ProductDetail = () => {
               {/* Rating and Stats */}
               <div className="pd-rating">
                 <div className="pd-rating-stars">
-                  {renderStars(Math.floor(product.rating))}
+                  {renderStars(product.rating)}
                   <span className="pd-rating-text">{product.rating}</span>
                 </div>
                 <span className="pd-rating-count">
@@ -574,7 +596,7 @@ const ProductDetail = () => {
                   {item.rating > 0 && (
                     <div className="pd-similar-rating">
                       <span className="pd-similar-rating-stars">
-                        {renderStars(Math.floor(item.rating))}
+                        {renderStars(item.rating)}
                       </span>
                       <span className="pd-similar-rating-text">
                         ({item.rating.toFixed(1)})

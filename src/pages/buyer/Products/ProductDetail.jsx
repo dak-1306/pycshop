@@ -188,26 +188,36 @@ const ProductDetail = () => {
     const fullStars = Math.floor(safeRating);
     const hasHalfStar = safeRating % 1 !== 0;
 
+    // Sao đầy
     for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <span key={i} className="star filled">
+        <span key={i} className="text-2xl text-yellow-400">
           ★
         </span>
       );
     }
 
+    // Sao nửa - sử dụng CSS để tạo hiệu ứng nửa sao
     if (hasHalfStar) {
       stars.push(
-        <span key="half" className="star half">
-          ★
+        <span key="half" className="text-2xl relative inline-block">
+          <span className="text-gray-300">★</span>
+          <span
+            className="absolute top-0 left-0 text-yellow-400 overflow-hidden"
+            style={{ width: "50%" }}
+          >
+            ★
+          </span>
         </span>
       );
     }
 
-    const emptyStars = 5 - Math.ceil(safeRating);
+    // Sao trống
+    const totalFilledStars = fullStars + (hasHalfStar ? 1 : 0);
+    const emptyStars = 5 - totalFilledStars;
     for (let i = 0; i < emptyStars; i++) {
       stars.push(
-        <span key={`empty-${i}`} className="star">
+        <span key={`empty-${i}`} className="text-2xl text-gray-300">
           ★
         </span>
       );

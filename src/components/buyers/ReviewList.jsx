@@ -57,18 +57,39 @@ const ReviewList = ({ productId, newReview }) => {
     });
   };
 
-  const renderStars = (rating) => {
+  const renderStars = (rating = 0) => {
+    const safeRating = rating || 0;
     const stars = [];
-    for (let i = 1; i <= 5; i++) {
+    const fullStars = Math.floor(safeRating);
+    const hasHalfStar = safeRating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <span key={i} className={`review-star ${i <= rating ? "active" : ""}`}>
+        <span key={i} className="text-2xl text-yellow-400">
           ★
         </span>
       );
     }
+
+    if (hasHalfStar) {
+      stars.push(
+        <span key="half" className="text-2xl text-yellow-400">
+          ★
+        </span>
+      );
+    }
+
+    const emptyStars = 5 - Math.ceil(safeRating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <span key={`empty-${i}`} className="text-2xl text-gray-300">
+          ★
+        </span>
+      );
+    }
+
     return stars;
   };
-
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);

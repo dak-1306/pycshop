@@ -32,22 +32,25 @@ class Shop {
   // Get shop information by shop ID
   static async getShopById(shopId) {
     try {
-      const query = `
+      //Lấy thông tin ảnh và danh mục
+      const shopQuery = `
         SELECT 
-          c.ID_CuaHang as id,
-          c.TenCuaHang as name,
-          c.ID_DanhMuc as category_id,
-          c.DiaChiCH as address,
-          c.SoDienThoaiCH as phone,
-          c.NgayCapNhat as updated_at,
-          d.TenDanhMuc as category_name
-        FROM CuaHang c
+          c.*, 
+          nd.ID_NguoiDung,
+          d.TenDanhMuc AS category_name,
+        (
+          SELECT COUNT(*)
+          FROM sanpham sp
+          WHERE sp.ID_NguoiBan = nd.ID_NguoiDung
+        ) AS product_count
+        FROM cuahang c
         LEFT JOIN DanhMuc d ON c.ID_DanhMuc = d.ID_DanhMuc
-        WHERE c.ID_CuaHang = ?
+        LEFT JOIN nguoidung nd ON nd.ID_CuaHang = c.ID_CuaHang
+        WHERE c.ID_CuaHang = ?;
       `;
 
-      const [rows] = await db.execute(query, [shopId]);
-      return rows[0] || null;
+      const [shopRows] = await db.execute(shopQuery, [shopId]);
+      return shopRows[0] || null;
     } catch (error) {
       console.error("[SHOP] Error in getShopById:", error);
       throw error;

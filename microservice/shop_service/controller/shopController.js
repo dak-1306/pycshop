@@ -307,12 +307,11 @@ export const searchShops = async (req, res) => {
   }
 };
 
-// Get shop by ID (public endpoint)
-export const getShopById = async (req, res) => {
+// Get information shop by ID (public endpoint) no get products
+export const getShopDetail = async (req, res) => {
   try {
     const { shopId } = req.params;
-
-    console.log(`[SHOP_CONTROLLER] Get shop by ID: ${shopId}`);
+    console.log(`[SHOP_CONTROLLER] Get shop detail for ID: ${shopId}`);
 
     if (!shopId || isNaN(shopId)) {
       return res.status(400).json({
@@ -320,7 +319,6 @@ export const getShopById = async (req, res) => {
         message: "ID cửa hàng không hợp lệ",
       });
     }
-
     const shop = await Shop.getShopById(parseInt(shopId));
 
     if (!shop) {
@@ -329,15 +327,13 @@ export const getShopById = async (req, res) => {
         message: "Không tìm thấy cửa hàng",
       });
     }
-
-    console.log(`[SHOP_CONTROLLER] Found shop: ${shop.name}`);
-
+    console.log(`[SHOP_CONTROLLER] Found shop: ${shop.TenCuaHang}`);
     res.json({
       success: true,
       shop: shop,
     });
   } catch (error) {
-    console.error("[SHOP_CONTROLLER] Error in getShopById:", error);
+    console.error("[SHOP_CONTROLLER] Error in getShopDetail:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi khi lấy thông tin cửa hàng",

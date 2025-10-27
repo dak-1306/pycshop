@@ -246,13 +246,77 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    // Add to cart logic
-    alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+    try {
+      // Get current cart items from localStorage
+      const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+
+      // Create cart item
+      const cartItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.images[0],
+        variant:
+          Object.keys(selectedVariants).length > 0
+            ? Object.entries(selectedVariants)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(", ")
+            : "Mặc định",
+      };
+
+      // Check if item already exists in cart
+      const existingItemIndex = cartItems.findIndex(
+        (item) => item.id === product.id && item.variant === cartItem.variant
+      );
+
+      if (existingItemIndex > -1) {
+        // Update quantity if item exists
+        cartItems[existingItemIndex].quantity += quantity;
+      } else {
+        // Add new item to cart
+        cartItems.push(cartItem);
+      }
+
+      // Save to localStorage
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
+      // Show success message
+      alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+    }
   };
 
   const handleBuyNow = () => {
-    // Buy now logic
-    alert("Chuyển đến trang thanh toán!");
+    try {
+      // Create cart item for immediate purchase
+      const cartItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.images[0],
+        variant:
+          Object.keys(selectedVariants).length > 0
+            ? Object.entries(selectedVariants)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(", ")
+            : "Mặc định",
+      };
+
+      // Navigate to checkout page with this item
+      navigate("/checkout", {
+        state: {
+          cartItems: [cartItem],
+          fromBuyNow: true,
+        },
+      });
+    } catch (error) {
+      console.error("Error buying now:", error);
+      alert("Có lỗi xảy ra! Vui lòng thử lại.");
+    }
   };
 
   const handleSimilarProductClick = (productId) => {

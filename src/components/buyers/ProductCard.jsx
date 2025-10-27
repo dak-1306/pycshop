@@ -123,6 +123,55 @@ const ProductCard = ({ product, onClick }) => {
           </div>
         </div>
         <div className="product-location">{safeProduct.location}</div>
+        
+        {/* Action Buttons */}
+        <div className="product-card-actions">
+          <button 
+            className="btn-add-cart"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Add to cart logic here
+              const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
+              const existingItem = cartItems.find(item => item.id === safeProduct.id);
+              
+              if (existingItem) {
+                existingItem.quantity += 1;
+              } else {
+                cartItems.push({
+                  id: safeProduct.id,
+                  name: safeProduct.name,
+                  price: safeProduct.price,
+                  quantity: 1,
+                  image: safeProduct.image,
+                  variant: 'Mặc định'
+                });
+              }
+              
+              localStorage.setItem('cartItems', JSON.stringify(cartItems));
+              alert('Đã thêm vào giỏ hàng!');
+            }}
+          >
+            Thêm vào giỏ
+          </button>
+          <button 
+            className="btn-buy-now"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Buy now logic - redirect to checkout with this product
+              const cartItem = {
+                id: safeProduct.id,
+                name: safeProduct.name,
+                price: safeProduct.price,
+                quantity: 1,
+                image: safeProduct.image,
+                variant: 'Mặc định'
+              };
+              navigate('/checkout', { state: { cartItems: [cartItem] } });
+            }}
+          >
+            Mua ngay
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -371,7 +371,8 @@ function setupRoutes(app) {
         req.path.includes("/categories") ||
         req.path.includes("/search") ||
         req.path.match(/^\/\d+$/) || // /:shopId pattern
-        req.path.match(/^\/id\/\d+$/)
+        req.path.match(/^\/id\/\d+$/) || // /id/:shopId pattern
+        req.path.match(/^\/shop\/\d+$/) // /shop/:shopId pattern
       ) {
         // /id/:shopId pattern
         console.log(

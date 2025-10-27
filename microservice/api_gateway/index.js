@@ -32,7 +32,7 @@ const corsOptions = {
     console.log(`[GATEWAY] Checking origin: ${origin}`);
 
     // Allow requests with no origin (mobile apps, Postman, etc.) or file:// protocol
-    if (!origin || origin === 'null') {
+    if (!origin || origin === "null") {
       console.log(`[GATEWAY] Allowing request with no origin or null origin`);
       return callback(null, true);
     }
@@ -236,6 +236,7 @@ app.use((req, res, next) => {
     "/shops/search",
     "/shops/category",
     "/shops/health",
+    "/shops/shop",
   ];
 
   // Combine all public routes
@@ -433,22 +434,24 @@ app.all(/^\/api\/reviews/, (req, res) => {
 });
 
 // Handle users route specifically (route to admin service) - BEFORE setupRoutes
-app.all('/users', authMiddleware, (req, res) => {
-  console.log(`[GATEWAY] 🎯 Users route matched: ${req.method} ${req.originalUrl}`);
+app.all("/users", authMiddleware, (req, res) => {
+  console.log(
+    `[GATEWAY] 🎯 Users route matched: ${req.method} ${req.originalUrl}`
+  );
   console.log(`[GATEWAY] User for users:`, req.user);
-  
+
   const targetUrl = `http://localhost:5006${req.originalUrl}`;
   console.log(`[GATEWAY] Proxying users to: ${targetUrl}`);
-  
+
   const requestOptions = {
     method: req.method,
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': req.headers.authorization,
-      'x-user-id': req.user.id.toString(),
-      'x-user-role': req.user.role,
-      'x-user-type': req.user.userType
-    }
+      "Content-Type": "application/json",
+      Authorization: req.headers.authorization,
+      "x-user-id": req.user.id.toString(),
+      "x-user-role": req.user.role,
+      "x-user-type": req.user.userType,
+    },
   };
 
   if (req.body && Object.keys(req.body).length > 0) {
@@ -468,24 +471,26 @@ app.all('/users', authMiddleware, (req, res) => {
 });
 
 // Handle notifications route specifically (route to admin service)
-app.get('/notifications', authMiddleware, (req, res) => {
-  console.log(`[GATEWAY] Notifications route: ${req.method} ${req.originalUrl}`);
+app.get("/notifications", authMiddleware, (req, res) => {
+  console.log(
+    `[GATEWAY] Notifications route: ${req.method} ${req.originalUrl}`
+  );
   console.log(`[GATEWAY] User for notifications:`, req.user);
-  
+
   const targetUrl = `http://localhost:5006${req.originalUrl}`;
   console.log(`[GATEWAY] Proxying notifications to: ${targetUrl}`);
-  
+
   const requestOptions = {
     method: req.method,
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': req.headers.authorization,
-      'x-user-id': req.user.id.toString(),
-      'x-user-role': req.user.role,
-      'x-user-type': req.user.userType
-    }
+      "Content-Type": "application/json",
+      Authorization: req.headers.authorization,
+      "x-user-id": req.user.id.toString(),
+      "x-user-role": req.user.role,
+      "x-user-type": req.user.userType,
+    },
   };
-  
+
   fetch(targetUrl, requestOptions)
     .then(async (response) => {
       const data = await response.json();
@@ -499,24 +504,26 @@ app.get('/notifications', authMiddleware, (req, res) => {
 });
 
 // Handle dashboard stats route specifically (route to admin service)
-app.get('/dashboard/stats', authMiddleware, (req, res) => {
-  console.log(`[GATEWAY] Dashboard stats route: ${req.method} ${req.originalUrl}`);
+app.get("/dashboard/stats", authMiddleware, (req, res) => {
+  console.log(
+    `[GATEWAY] Dashboard stats route: ${req.method} ${req.originalUrl}`
+  );
   console.log(`[GATEWAY] User for dashboard:`, req.user);
-  
+
   const targetUrl = `http://localhost:5006${req.originalUrl}`;
   console.log(`[GATEWAY] Proxying dashboard to: ${targetUrl}`);
-  
+
   const requestOptions = {
     method: req.method,
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': req.headers.authorization,
-      'x-user-id': req.user.id.toString(),
-      'x-user-role': req.user.role,
-      'x-user-type': req.user.userType
-    }
+      "Content-Type": "application/json",
+      Authorization: req.headers.authorization,
+      "x-user-id": req.user.id.toString(),
+      "x-user-role": req.user.role,
+      "x-user-type": req.user.userType,
+    },
   };
-  
+
   fetch(targetUrl, requestOptions)
     .then(async (response) => {
       const data = await response.json();

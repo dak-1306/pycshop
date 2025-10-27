@@ -7,7 +7,7 @@ import {
   getCategories,
   getShopsByCategory,
   searchShops,
-  getShopById,
+  getShopDetail,
   becomeSeller,
 } from "../controller/shopController.js";
 import {
@@ -56,6 +56,6 @@ router.delete("/delete", requireSeller, deleteShop);
 router.post("/become-seller", becomeSeller);
 
 // Dynamic routes (must come after specific routes)
-router.get("/id/:shopId", getShopById);
+router.get("/shop/:shopId", getShopDetail);
 
 export default router;

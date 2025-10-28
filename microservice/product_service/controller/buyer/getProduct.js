@@ -352,7 +352,7 @@ export const getProductsByShopId = async (req, res) => {
     const products = await Product.getProductsByShop(
       shopId,
       last_id || null,
-      parseInt(limit) || 10
+      parseInt(limit) || 8
     );
 
     console.log(

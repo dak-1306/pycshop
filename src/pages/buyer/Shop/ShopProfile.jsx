@@ -58,7 +58,7 @@ const ShopProfile = () => {
   };
 
   // Load products from product service using shop ID
-  const loadProductsByShopId = async (shopId, lastId = null, limit = 10) => {
+  const loadProductsByShopId = async (shopId, lastId = null, limit = 8) => {
     try {
       console.log(
         `Loading products for shop ${shopId}, lastId: ${lastId}, limit: ${limit}`
@@ -136,7 +136,7 @@ const ShopProfile = () => {
       };
 
       // Lấy sản phẩm từ product service
-      const productsResponse = await loadProductsByShopId(shopId, null, 10);
+      const productsResponse = await loadProductsByShopId(shopId, null, 8);
       console.log("Products response:", productsResponse);
       let transformedProducts = [];
       if (productsResponse.success && productsResponse.data) {
@@ -159,7 +159,7 @@ const ShopProfile = () => {
 
       setShop(transformedShop);
       setProducts(transformedProducts);
-      setHasMoreProducts(transformedProducts.length >= 10);
+      setHasMoreProducts(transformedProducts.length >= 8);
 
       console.log("Shop data loaded:", transformedShop);
       console.log("Products loaded:", transformedProducts.length);
@@ -183,7 +183,7 @@ const ShopProfile = () => {
       console.log(`Loading more products with lastId: ${lastProductId}`);
 
       // Sử dụng product service để load thêm sản phẩm
-      const response = await loadProductsByShopId(shopId, lastProductId, 10);
+      const response = await loadProductsByShopId(shopId, lastProductId, 8);
 
       if (response.success && response.data) {
         const newProducts = response.data.map((product) => ({
@@ -205,7 +205,7 @@ const ShopProfile = () => {
         }));
 
         setProducts((prev) => [...prev, ...newProducts]);
-        setHasMoreProducts(newProducts.length >= 10);
+        setHasMoreProducts(newProducts.length >= 8);
 
         console.log(`Loaded ${newProducts.length} more products`);
       } else {

@@ -429,7 +429,7 @@ class Product {
   }
 
   //lấy sản phẩm theo cửa hàng
-  static async getProductsByShop(shopId, lastId = null, limit = 10) {
+  static async getProductsByShop(shopId, lastId = null, limit = 8) {
     try {
       // Initialize connection settings
       await this.initializeConnection();

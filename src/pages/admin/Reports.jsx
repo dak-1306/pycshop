@@ -7,7 +7,7 @@ import ProductAnalytics from "../../components/admin/reports/ProductAnalytics";
 import FinancialReports from "../../components/admin/reports/FinancialReports";
 import ReportFilters from "../../components/admin/reports/ReportFilters";
 import ExportDropdown from "../../components/admin/reports/ExportDropdown";
-import StatsOverview from "../../components/admin/reports/StatsOverview";
+import StatsCards from "../../components/common/dashboard/StatsCards";
 
 const Reports = () => {
   const {
@@ -84,17 +84,15 @@ const Reports = () => {
       {/* Date Range Filters */}
       <ReportFilters dateRange={dateRange} onDateRangeChange={setDateRange} />
       {/* System Overview */}
-      <StatsOverview
+      <StatsCards
+        variant="admin"
         stats={{
           totalUsers: userAnalytics?.totalUsers || 0,
           totalOrders: orderAnalytics?.totalOrders || 0,
           totalProducts: productAnalytics?.totalProducts || 0,
           totalRevenue: financialData?.totalRevenue || 0,
-          activeUsers: userAnalytics?.activeUsers || 0,
-          pendingOrders: orderAnalytics?.pendingOrders || 0,
-          outOfStockProducts: productAnalytics?.outOfStockProducts || 0,
         }}
-      />{" "}
+      />
       {/* Advanced Filters */}
       {/* Detailed Analytics */}
       {/* Analytics Sections */}

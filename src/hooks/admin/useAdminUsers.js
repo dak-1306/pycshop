@@ -17,7 +17,14 @@ export const useAdminUsers = () => {
   } = useUsers();
 
   // Additional state for admin-specific features
-  const [stats, setStats] = useState(ADMIN_CONSTANTS.ADMIN_DEFAULT_USER_STATS);
+  const [stats, setStats] = useState(
+    ADMIN_CONSTANTS.ADMIN_DEFAULT_USER_STATS || {
+      totalUsers: 0,
+      activeUsers: 0,
+      customers: 0,
+      sellers: 0,
+    }
+  );
   const [error, setError] = useState(null);
 
   // Extract filter values for compatibility with old interface
@@ -67,7 +74,14 @@ export const useAdminUsers = () => {
       setError(null);
     } catch (statsError) {
       console.warn("[useAdminUsers] Failed to fetch stats:", statsError);
-      setStats(ADMIN_CONSTANTS.ADMIN_DEFAULT_USER_STATS);
+      setStats(
+        ADMIN_CONSTANTS.ADMIN_DEFAULT_USER_STATS || {
+          totalUsers: 0,
+          activeUsers: 0,
+          customers: 0,
+          sellers: 0,
+        }
+      );
       setError("Failed to load stats: " + statsError.message);
     }
   }, []);
@@ -164,10 +178,10 @@ export const useAdminUsers = () => {
 
   // Processed stats - UserStats component expects simple structure
   const processedStats = {
-    totalUsers: stats.totalUsers || 0,
-    activeUsers: stats.activeUsers || 0,
-    customers: stats.customers || 0,
-    sellers: stats.sellers || 0,
+    totalUsers: stats?.totalUsers || 0,
+    activeUsers: stats?.activeUsers || 0,
+    customers: stats?.customers || 0,
+    sellers: stats?.sellers || 0,
   };
 
   return {

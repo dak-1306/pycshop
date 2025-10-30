@@ -7,17 +7,22 @@ import {
   chartHeaderClass,
   chartTitleClass,
   chartFooterClass,
-} from "./chartUtils";
+} from "../../../../lib/utils";
+import { CHART_COLORS } from "../../../../lib/constants";
 
 const UserAnalyticsChart = React.memo(
   ({
     data = [],
     title = "Phân tích người dùng",
+    subtitle,
+    chartOptions = {},
+    variant = "admin", // UserAnalytics is mainly for admin
     isLoading = false,
     error = null,
     height = 320,
-    options = {},
+    options = {}, // Legacy support
     onDetailClick = null,
+    onChartClick,
   }) => {
     // Normalize and validate data
     const chartData = useMemo(
@@ -71,15 +76,22 @@ const UserAnalyticsChart = React.memo(
       []
     );
 
-    // Chart options
-    const chartOptions = useMemo(
+    // Merge chart options
+    const finalChartOptions = useMemo(
       () => ({
         customTooltip: CustomTooltip,
         customLabel: renderCustomizedLabel,
-        radius: 80,
-        ...options,
+        radius: chartOptions.radius || 80,
+        colors: chartOptions.colors || [
+          CHART_COLORS.users,
+          CHART_COLORS.secondary,
+          CHART_COLORS.accent,
+        ],
+        height: chartOptions.height || height,
+        ...options, // Legacy support
+        ...chartOptions, // New config system
       }),
-      [options, CustomTooltip, renderCustomizedLabel]
+      [options, chartOptions, CustomTooltip, renderCustomizedLabel, height]
     );
 
     // Error state
@@ -106,15 +118,20 @@ const UserAnalyticsChart = React.memo(
     return (
       <div className={chartContainerClass}>
         <div className={chartHeaderClass}>
-          <h3 className={chartTitleClass}>{title}</h3>
+          <div>
+            <h3 className={chartTitleClass}>{title}</h3>
+            {subtitle && (
+              <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+            )}
+          </div>
           <div className="flex items-center space-x-4">
             <div className="text-sm text-gray-600">Phân loại theo vai trò</div>
-            {onDetailClick && (
+            {(onDetailClick || onChartClick) && (
               <button
-                onClick={onDetailClick}
+                onClick={onDetailClick || onChartClick}
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
               >
-                Chi tiết
+                Chi tiết →
               </button>
             )}
           </div>
@@ -123,8 +140,8 @@ const UserAnalyticsChart = React.memo(
         <ChartWrapper
           type="pie"
           data={chartData}
-          options={chartOptions}
-          height={height}
+          options={finalChartOptions}
+          height={finalChartOptions.height}
           title={title}
           isLoading={isLoading}
         />
@@ -150,11 +167,15 @@ UserAnalyticsChart.propTypes = {
     })
   ),
   title: PropTypes.string,
+  subtitle: PropTypes.string,
+  chartOptions: PropTypes.object,
+  variant: PropTypes.oneOf(["admin", "seller"]),
   isLoading: PropTypes.bool,
   error: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  options: PropTypes.object,
+  options: PropTypes.object, // Legacy support
   onDetailClick: PropTypes.func,
+  onChartClick: PropTypes.func,
 };
 
 export default UserAnalyticsChart;

@@ -9,18 +9,22 @@ import {
   chartLegendClass,
   chartLegendItemClass,
   chartFooterClass,
-  defaultColors,
-} from "./chartUtils";
+} from "../../../../lib/utils";
+import { CHART_COLORS } from "../../../../lib/constants";
 
 const OrderTrendsChart = React.memo(
   ({
     data = [],
     title = "Xu hướng đơn hàng",
+    subtitle,
+    chartOptions = {},
+    variant = "seller",
     isLoading = false,
     error = null,
     height = 320,
-    options = {},
+    options = {}, // Legacy support
     onDetailClick = null,
+    onChartClick,
   }) => {
     // Normalize and validate data
     const chartData = useMemo(() => normalizeChartData(data, "orders"), [data]);
@@ -36,24 +40,30 @@ const OrderTrendsChart = React.memo(
                 <p className="text-green-600">
                   {`Đơn hàng: ${payload[0].value.toLocaleString("vi-VN")}`}
                 </p>
+                {variant === "admin" && (
+                  <p className="text-gray-500 text-sm">Tất cả cửa hàng</p>
+                )}
               </div>
             );
           }
           return null;
         },
-      []
+      [variant]
     );
 
-    // Chart options
-    const chartOptions = useMemo(
+    // Merge chart options
+    const finalChartOptions = useMemo(
       () => ({
         xKey: "month",
         yKey: "value",
-        color: defaultColors.orders,
+        color: chartOptions.color || CHART_COLORS.orders,
         customTooltip: CustomTooltip,
-        ...options,
+        height: chartOptions.height || height,
+        margin: { top: 20, right: 30, left: 20, bottom: 5 },
+        ...options, // Legacy support
+        ...chartOptions, // New config system
       }),
-      [options, CustomTooltip]
+      [options, chartOptions, CustomTooltip, height]
     );
 
     // Error state
@@ -80,7 +90,12 @@ const OrderTrendsChart = React.memo(
     return (
       <div className={chartContainerClass}>
         <div className={chartHeaderClass}>
-          <h3 className={chartTitleClass}>{title}</h3>
+          <div>
+            <h3 className={chartTitleClass}>{title}</h3>
+            {subtitle && (
+              <p className="text-sm text-gray-500 mt-1">{subtitle}</p>
+            )}
+          </div>
           <div className="flex items-center space-x-4">
             <div className={chartLegendClass}>
               <div className={chartLegendItemClass}>
@@ -88,12 +103,12 @@ const OrderTrendsChart = React.memo(
                 <span className="text-sm text-gray-600">Số đơn hàng</span>
               </div>
             </div>
-            {onDetailClick && (
+            {(onDetailClick || onChartClick) && (
               <button
-                onClick={onDetailClick}
+                onClick={onDetailClick || onChartClick}
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors"
               >
-                Chi tiết
+                Chi tiết →
               </button>
             )}
           </div>
@@ -102,8 +117,8 @@ const OrderTrendsChart = React.memo(
         <ChartWrapper
           type="line"
           data={chartData}
-          options={chartOptions}
-          height={height}
+          options={finalChartOptions}
+          height={finalChartOptions.height}
           title={title}
           isLoading={isLoading}
         />
@@ -129,11 +144,15 @@ OrderTrendsChart.propTypes = {
     })
   ),
   title: PropTypes.string,
+  subtitle: PropTypes.string,
+  chartOptions: PropTypes.object,
+  variant: PropTypes.oneOf(["admin", "seller"]),
   isLoading: PropTypes.bool,
   error: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
   height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
-  options: PropTypes.object,
+  options: PropTypes.object, // Legacy support
   onDetailClick: PropTypes.func,
+  onChartClick: PropTypes.func,
 };
 
 export default OrderTrendsChart;

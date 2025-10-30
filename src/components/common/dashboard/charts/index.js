@@ -8,5 +8,4 @@ export { default as RevenueChart } from "./RevenueChart";
 export { default as OrderTrendsChart } from "./OrderTrendsChart";
 export { default as UserAnalyticsChart } from "./UserAnalyticsChart";
 
-// Chart Utilities
-export * from "./chartUtils";
+// Note: Chart utilities have been moved to lib/utils and lib/constants

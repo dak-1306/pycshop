@@ -1,6 +1,7 @@
 import React, { Suspense, useMemo } from "react";
 import PropTypes from "prop-types";
 import ChartLoadingPlaceholder from "../ChartLoadingPlaceholder";
+import { CHART_COLORS } from "../../../../lib/constants";
 
 // Client-side check for SSR safety
 const isBrowser = typeof window !== "undefined";
@@ -109,7 +110,7 @@ const LazyPieChart = React.lazy(() =>
               labelLine={false}
               label={options.customLabel}
               outerRadius={options.radius || 80}
-              fill="#8884d8"
+              fill={CHART_COLORS.primary}
               dataKey="value"
             >
               {data.map((entry, index) => (

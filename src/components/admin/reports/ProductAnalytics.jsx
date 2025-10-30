@@ -1,6 +1,6 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { formatCurrency } from "../../common/dashboard/charts/chartUtils";
+import { formatCurrency } from "../../../lib/utils";
 
 const ProductAnalytics = ({ data = {} }) => {
   const formatNumber = (num) => {

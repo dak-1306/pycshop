@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import PropTypes from "prop-types";
-import { formatCurrency } from "../../common/dashboard/charts/chartUtils";
+import { formatCurrency } from "../../../lib/utils";
 
 const SystemPerformanceMetrics = ({ data = {} }) => {
   // Default metrics if no data provided

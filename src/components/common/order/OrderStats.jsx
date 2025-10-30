@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import PropTypes from "prop-types";
-import { formatCurrency } from "../dashboard/charts/chartUtils";
+import { formatCurrency } from "../../../lib/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const OrderStats = React.memo(({ stats = {} }) => {

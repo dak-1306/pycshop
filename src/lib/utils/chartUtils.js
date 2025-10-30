@@ -1,37 +1,9 @@
 // Chart utilities for shared configuration and helper functions
-export const defaultColors = {
-  primary: "#3b82f6", // blue-500
-  secondary: "#10b981", // emerald-500
-  accent: "#f59e0b", // amber-500
-  purple: "#8b5cf6", // violet-500
-  orange: "#f97316", // orange-500
-  red: "#ef4444", // red-500
-  indigo: "#6366f1", // indigo-500
-  pink: "#ec4899", // pink-500
-  teal: "#14b8a6", // teal-500
+import { CHART_COLORS } from "../constants/chartConstants";
+import { formatCurrency } from "./format";
 
-  // Semantic colors
-  revenue: "#2563eb", // blue-600
-  orders: "#10b981", // emerald-500
-  users: "#f59e0b", // amber-500
-  activity: "#7c3aed", // violet-600
-  category: "#ef4444", // red-500
-  products: "#06b6d4", // cyan-500
-};
-
-// Format currency for Vietnamese locale
-export const formatCurrency = (value) => {
-  if (typeof value !== "number") {
-    const numValue = Number(value);
-    if (isNaN(numValue)) return value;
-    value = numValue;
-  }
-
-  return new Intl.NumberFormat("vi-VN", {
-    style: "currency",
-    currency: "VND",
-  }).format(value);
-};
+// Re-export formatCurrency for convenience in chart contexts
+export { formatCurrency };
 
 // Format large numbers with K, M, B suffixes
 export const formatLargeNumber = (value) => {
@@ -86,7 +58,7 @@ export const buildPieData = (data = [], options = {}) => {
         : Number(item[valueKey] || 0),
     color:
       item[colorKey] ||
-      Object.values(defaultColors)[index % Object.values(defaultColors).length],
+      Object.values(CHART_COLORS)[index % Object.values(CHART_COLORS).length],
   }));
 };
 
@@ -156,9 +128,9 @@ export const generateDefaultData = (type, count = 12) => {
 
     case "userAnalytics":
       return [
-        { name: "Người mua", value: 65, color: defaultColors.primary },
-        { name: "Người bán", value: 25, color: defaultColors.secondary },
-        { name: "Admin", value: 10, color: defaultColors.accent },
+        { name: "Người mua", value: 65, color: CHART_COLORS.primary },
+        { name: "Người bán", value: 25, color: CHART_COLORS.secondary },
+        { name: "Admin", value: 10, color: CHART_COLORS.accent },
       ];
 
     case "category":

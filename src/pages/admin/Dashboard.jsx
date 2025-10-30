@@ -1,12 +1,11 @@
 import React from "react";
 import RecentOrdersTable from "../../components/common/dashboard/RecentOrdersTable";
 import RecentUsersTable from "../../components/admin/dashboard/RecentUsersTable";
-import AdminChartsSection from "../../components/admin/dashboard/charts/AdminChartsSection";
+import DashboardChartsBase from "../../components/common/dashboard/DashboardChartsBase";
 import ChartRefreshButton from "../../components/admin/dashboard/ChartRefreshButton";
 import SystemPerformanceMetrics from "../../components/admin/dashboard/SystemPerformanceMetrics";
 import DashboardInsights from "../../components/admin/dashboard/DashboardInsights";
 import StatsCards from "../../components/common/dashboard/StatsCards";
-import StatsOverview from "../../components/admin/reports/StatsOverview";
 import { useDashboard } from "../../hooks/common/useDashboard";
 import { useAdminReports } from "../../hooks/admin/useAdminReports";
 import { ADMIN_CONSTANTS } from "../../lib/constants/adminConstants";
@@ -36,6 +35,13 @@ const Dashboard = () => {
 
   // Show error notification if APIs fail
   const hasErrors = dashboardError || reportsError;
+
+  // Handle chart click for navigation
+  const handleChartClick = (chartId) => {
+    console.log(`[AdminDashboard] Chart clicked: ${chartId}`);
+    // TODO: Implement navigation to specific chart detail page
+    // For now, just log the chart ID
+  };
 
   if (isLoading) {
     return (
@@ -76,13 +82,7 @@ const Dashboard = () => {
         </div>
       )}
 
-      {/* System Overview */}
-      <StatsOverview stats={safeOverviewStats} />
-
-      {/* Performance Metrics */}
-      <SystemPerformanceMetrics data={safeOverviewStats} />
-
-      {/* Stats Cards */}
+      {/* Stats Overview Cards */}
       <StatsCards
         variant="admin"
         stats={{
@@ -92,12 +92,22 @@ const Dashboard = () => {
           totalProducts: safeOverviewStats.totalProducts,
         }}
       />
+
       {/* Charts Section */}
-      <AdminChartsSection
-        chartData={chartData || {}}
+      <DashboardChartsBase
+        variant="admin"
+        chartData={{
+          revenue: chartData?.revenue || [],
+          orders: chartData?.orders || [],
+          users: safeOverviewStats?.userAnalytics || [],
+        }}
+        onChartClick={handleChartClick}
         isLoading={isLoading}
-        error={dashboardError}
+        error={dashboardError?.message}
       />
+
+      {/* Performance Metrics */}
+      <SystemPerformanceMetrics data={safeOverviewStats} />
       {/* Dashboard Insights */}
       <DashboardInsights data={safeOverviewStats} />
       {/* Data Tables */}

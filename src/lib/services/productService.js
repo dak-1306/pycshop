@@ -29,10 +29,12 @@ export const productService = {
   // Get categories
   getCategories: async () => {
     try {
-      return await api.get("/products/categories");
+      // Temporary: call product service directly
+      const response = await fetch("http://localhost:5002/categories");
+      return await response.json();
     } catch (error) {
       console.error("Error fetching categories:", error);
-      throw error;
+      return { success: false, message: error.message };
     }
   },
 
@@ -46,10 +48,10 @@ export const productService = {
         ...(filters.priceRange?.min && { minPrice: filters.priceRange.min }),
         ...(filters.priceRange?.max && { maxPrice: filters.priceRange.max }),
       };
-      
+
       // Remove priceRange from params since we converted it to minPrice/maxPrice
       delete params.priceRange;
-      
+
       const queryParams = new URLSearchParams(params).toString();
       const url = `/products${queryParams ? `?${queryParams}` : ""}`;
       return await api.get(url);
@@ -72,12 +74,16 @@ export const productService = {
   // Search products
   searchProducts: async (params = {}) => {
     try {
+      // Temporary: call product service directly
       const queryParams = new URLSearchParams(params).toString();
-      const url = `/products/search${queryParams ? `?${queryParams}` : ""}`;
-      return await api.get(url);
+      const url = `http://localhost:5002/search${
+        queryParams ? `?${queryParams}` : ""
+      }`;
+      const response = await fetch(url);
+      return await response.json();
     } catch (error) {
       console.error("Error searching products:", error);
-      throw error;
+      return { success: false, message: error.message };
     }
   },
 

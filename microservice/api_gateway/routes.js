@@ -244,6 +244,53 @@ function setupRoutes(app) {
     })
   );
 
+  // API Product Service (for frontend calls to /api/products/*)
+  app.use(
+    "/api/products",
+    (req, res, next) => {
+      // Skip review routes as they're handled elsewhere
+      if (req.originalUrl.includes("/reviews")) {
+        return next(); // Pass to review service route
+      }
+      console.log(
+        `[ROUTES] Matched /api/products route for ${req.method} ${req.originalUrl}`
+      );
+      next();
+    },
+    createProxyMiddleware({
+      target: process.env.PRODUCT_SERVICE_URL || "http://localhost:5002",
+      changeOrigin: true,
+      // Filter to exclude review routes
+      filter: (pathname, req) => {
+        return !pathname.includes("/reviews");
+      },
+      pathRewrite: { "^/api/products": "" },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Product Service (/api/products)`
+        );
+      },
+      onError: (err, req, res) => {
+        console.error(
+          `[PROXY] Product Service (/api/products) Error:`,
+          err.message
+        );
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Product service error", details: err.message });
+        }
+      },
+    })
+  );
+
   // Seller Service (Product Management for Sellers)
   app.use(
     "/seller",
@@ -324,7 +371,8 @@ function setupRoutes(app) {
         req.path.includes("/categories") ||
         req.path.includes("/search") ||
         req.path.match(/^\/\d+$/) || // /:shopId pattern
-        req.path.match(/^\/id\/\d+$/)
+        req.path.match(/^\/id\/\d+$/) || // /id/:shopId pattern
+        req.path.match(/^\/shop\/\d+$/) // /shop/:shopId pattern
       ) {
         // /id/:shopId pattern
         console.log(

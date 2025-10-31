@@ -126,6 +126,7 @@ export const useAdminProducts = () => {
     showDeleteModal: commonHook.showDeleteModal,
     setShowDeleteModal: commonHook.setShowDeleteModal,
     selectedProduct: commonHook.selectedProduct,
+    setSelectedProduct: commonHook.setSelectedProduct,
     modalMode: commonHook.modalMode,
 
     // Event handlers - use common hook functions
@@ -137,6 +138,7 @@ export const useAdminProducts = () => {
     confirmDeleteProduct: commonHook.confirmDeleteProduct,
     handleResetFilters: commonHook.handleResetFilters,
     handleExport: commonHook.handleExport,
+    handleCloseProductModal: commonHook.handleCloseProductModal,
 
     // Utility functions
     formatCurrency,

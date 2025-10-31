@@ -5,8 +5,12 @@ import {
 } from "../../components/common/product";
 import ProductModal from "../../components/common/modals/ProductModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
+import { Button, ActionButton } from "../../components/common/ui";
 import { useAdminProducts } from "../../hooks/admin/useAdminProducts";
-import { ADMIN_CONSTANTS } from "../../lib/constants/adminConstants";
+import {
+  ADMIN_CONSTANTS,
+  ADMIN_PRODUCT_CATEGORIES,
+} from "../../lib/constants/adminConstants";
 
 const AdminProducts = () => {
   const {
@@ -30,6 +34,7 @@ const AdminProducts = () => {
     showDeleteModal,
     setShowDeleteModal,
     selectedProduct,
+    setSelectedProduct,
     modalMode,
     handleViewProduct,
     handleEditProduct,
@@ -39,6 +44,7 @@ const AdminProducts = () => {
     confirmDeleteProduct,
     handleResetFilters,
     handleExport,
+    handleCloseProductModal,
   } = useAdminProducts();
 
   if (isLoading) {
@@ -86,10 +92,12 @@ const AdminProducts = () => {
       {/* Product Modal */}
       <ProductModal
         isOpen={showProductModal}
-        onClose={() => setShowProductModal(false)}
+        onClose={handleCloseProductModal}
         mode={modalMode}
         product={selectedProduct}
+        onProductChange={setSelectedProduct}
         onSave={handleSaveProduct}
+        categories={ADMIN_PRODUCT_CATEGORIES.map((cat) => cat.name)}
         variant="admin"
       />
 
@@ -98,6 +106,7 @@ const AdminProducts = () => {
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         product={selectedProduct}
+        variant="admin"
         onEdit={() => {
           setShowDetailModal(false);
           handleEditProduct(selectedProduct?.id);

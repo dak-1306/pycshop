@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useCallback } from "react";
 import PropTypes from "prop-types";
 
 const ConfirmDeleteModal = ({
@@ -8,10 +8,39 @@ const ConfirmDeleteModal = ({
   userName = "",
   isDeleting = false,
 }) => {
+  // Handle ESC key
+  const handleClose = useCallback(() => {
+    if (!isDeleting) {
+      onClose();
+    }
+  }, [onClose, isDeleting]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const handleEsc = (e) => {
+        if (e.key === "Escape") {
+          handleClose();
+        }
+      };
+
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [isOpen, handleClose]);
+
   if (!isOpen) return null;
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget && !isDeleting) {
+      onClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="p-6">
           <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">

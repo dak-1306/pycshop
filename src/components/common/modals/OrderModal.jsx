@@ -360,40 +360,39 @@ const OrderModal = ({
   if (!order) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col transform transition-all animate-slideUp">
-        {/* Header */}
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[85vh] flex flex-col overflow-hidden">
+        {/* Compact Header */}
         <div
-          className={`relative bg-gradient-to-r ${colors.headerGradient} text-white px-8 py-6 rounded-t-2xl flex-shrink-0`}
+          className={`bg-gradient-to-r ${colors.headerGradient} text-white px-6 py-4 rounded-t-2xl flex-shrink-0`}
         >
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">{colors.headerIcon}</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                {colors.headerIcon}
               </div>
               <div>
-                <h2 className="text-2xl font-bold">
-                  Chi tiết đơn hàng #{order.id}
-                </h2>
-                <p className="text-white text-opacity-90 text-sm mt-1">
+                <h2 className="text-xl font-bold">Đơn hàng #{order.id}</h2>
+                <p className="text-white text-opacity-80 text-sm">
                   {variant === "admin"
-                    ? `Quản lý đơn hàng - ${formatDate(order.createdAt)}`
-                    : `Đơn hàng của bạn - ${formatDate(order.createdAt)}`}
+                    ? "Quản lý đơn hàng"
+                    : "Chi tiết đơn hàng"}{" "}
+                  • {formatDate(order.createdAt)}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all transform hover:rotate-90"
+              className="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all"
             >
-              <FontAwesomeIcon icon={["fas", "times"]} className="w-5 h-5" />
+              <FontAwesomeIcon icon={["fas", "times"]} />
             </button>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-8 bg-gradient-to-br from-gray-50 to-white">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Optimized Content Layout */}
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
             {/* Left Column - Order Info */}
             <div className="space-y-6">
               {/* Order Status */}
@@ -703,25 +702,28 @@ const OrderModal = ({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="bg-gradient-to-r from-gray-100 to-gray-50 px-8 py-6 rounded-b-2xl flex justify-between items-center border-t border-gray-200 flex-shrink-0">
-          <div className="flex items-center gap-4">
-            {variant === "admin" && (
-              <button
-                onClick={() => onViewDetails && onViewDetails(order)}
-                className="px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl transition-all font-medium shadow-sm hover:shadow-md transform hover:scale-105 flex items-center gap-2"
-              >
-                <FontAwesomeIcon icon={["fas", "search"]} />
-              </button>
-            )}
+        {/* Compact Footer */}
+        <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-between items-center border-t border-gray-200 flex-shrink-0">
+          <div className="text-sm text-gray-600 flex items-center gap-4">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                order.status
+              )}`}
+            >
+              {getStatusOptions().find((s) => s.value === order.status)?.icon}{" "}
+              {getStatusOptions().find((s) => s.value === order.status)?.label}
+            </span>
+            <span className="font-medium text-green-600">
+              {formatCurrency(order.total)}
+            </span>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-8 py-3 text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all font-medium shadow-sm hover:shadow-md transform hover:scale-105 flex items-center gap-2"
+              className="px-6 py-2.5 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all font-medium"
             >
-              <FontAwesomeIcon icon={["fas", "times"]} /> Đóng
+              Đóng
             </button>
 
             {variant === "seller" && (
@@ -729,9 +731,9 @@ const OrderModal = ({
                 onClick={() =>
                   onUpdateStatus && onUpdateStatus(order.id, "processing")
                 }
-                className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
               >
-                <FontAwesomeIcon icon={["fas", "box"]} /> Xác nhận đơn
+                <FontAwesomeIcon icon={["fas", "box"]} /> Xác nhận
               </button>
             )}
 
@@ -740,7 +742,7 @@ const OrderModal = ({
                 onClick={() =>
                   onUpdateStatus && onUpdateStatus(order.id, "approved")
                 }
-                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
               >
                 <FontAwesomeIcon icon={["fas", "check-circle"]} /> Duyệt đơn
               </button>

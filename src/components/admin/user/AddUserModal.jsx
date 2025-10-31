@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import PropTypes from "prop-types";
 
 const AddUserModal = ({ isOpen, onClose, onSubmit }) => {
@@ -114,7 +114,7 @@ const AddUserModal = ({ isOpen, onClose, onSubmit }) => {
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setFormData({
       name: "",
       email: "",
@@ -129,21 +129,43 @@ const AddUserModal = ({ isOpen, onClose, onSubmit }) => {
     setShowPassword(false);
     setShowConfirmPassword(false);
     onClose();
-  };
+  }, [onClose]);
 
-  // Focus on name input when modal opens
+  // Handle ESC key and focus management
   React.useEffect(() => {
-    if (isOpen && nameInputRef.current) {
-      setTimeout(() => {
-        nameInputRef.current.focus();
-      }, 100);
+    if (isOpen) {
+      // Focus on name input
+      if (nameInputRef.current) {
+        setTimeout(() => {
+          nameInputRef.current.focus();
+        }, 100);
+      }
+
+      // Handle ESC key
+      const handleEsc = (e) => {
+        if (e.key === "Escape" && !isSubmitting) {
+          handleClose();
+        }
+      };
+
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
     }
-  }, [isOpen]);
+  }, [isOpen, isSubmitting, handleClose]);
 
   if (!isOpen) return null;
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget && !isSubmitting) {
+      handleClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">

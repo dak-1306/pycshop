@@ -1,5 +1,6 @@
 import React, { useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 
 const NotificationPanel = ({
   isOpen,
@@ -35,8 +36,11 @@ const NotificationPanel = ({
 
   if (!isOpen) return null;
 
-  const unreadNotifications = notifications.filter((n) => !n.isRead);
-  const readNotifications = notifications.filter((n) => n.isRead);
+  // Ensure notifications is an array
+  const safeNotifications = Array.isArray(notifications) ? notifications : [];
+
+  const unreadNotifications = safeNotifications.filter((n) => !n.isRead);
+  const readNotifications = safeNotifications.filter((n) => n.isRead);
 
   return (
     <div
@@ -74,7 +78,7 @@ const NotificationPanel = ({
       </div>
 
       {/* Actions */}
-      {notifications.length > 0 && (
+      {safeNotifications.length > 0 && (
         <div className="flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200">
           <div className="flex space-x-2">
             {unreadCount > 0 && (
@@ -97,7 +101,7 @@ const NotificationPanel = ({
 
       {/* Notification List */}
       <div className="max-h-96 overflow-y-auto">
-        {notifications.length === 0 ? (
+        {safeNotifications.length === 0 ? (
           <div className="px-4 py-8 text-center">
             <svg
               className="w-12 h-12 mx-auto text-gray-400 mb-4"
@@ -355,6 +359,32 @@ const NotificationContent = ({
       </div>
     </div>
   );
+};
+
+NotificationPanel.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  notifications: PropTypes.array,
+  unreadCount: PropTypes.number,
+  onMarkAsRead: PropTypes.func,
+  onMarkAllAsRead: PropTypes.func,
+  onDeleteNotification: PropTypes.func,
+  onClearAll: PropTypes.func,
+  getRelativeTime: PropTypes.func,
+  getPriorityColor: PropTypes.func,
+  getNotificationIcon: PropTypes.func,
+};
+
+NotificationPanel.defaultProps = {
+  notifications: [],
+  unreadCount: 0,
+  onMarkAsRead: () => {},
+  onMarkAllAsRead: () => {},
+  onDeleteNotification: () => {},
+  onClearAll: () => {},
+  getRelativeTime: () => "Unknown time",
+  getPriorityColor: () => "bg-gray-100",
+  getNotificationIcon: () => "📄",
 };
 
 export default NotificationPanel;

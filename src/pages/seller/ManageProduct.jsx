@@ -189,6 +189,7 @@ const ManageProduct = () => {
           isOpen={showDetailModal}
           onClose={handleCloseDetailModal}
           product={currentProduct}
+          variant="seller"
           onEdit={handleEditProduct}
           onDelete={handleDeleteProduct}
         />

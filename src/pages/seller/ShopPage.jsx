@@ -138,6 +138,7 @@ const ShopPage = () => {
           isOpen={currentProduct && modalMode === "view"}
           onClose={() => setCurrentProduct(null)}
           product={currentProduct}
+          variant="seller"
           onEdit={handleEditProduct}
           onDelete={handleDeleteProduct}
         />

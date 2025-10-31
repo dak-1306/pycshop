@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from "prop-types";
 import { formatCurrency } from "../../../lib/utils";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ActionButton, IconButton } from "../ui";
 
 const ProductTable = React.memo(
   ({
@@ -206,51 +207,42 @@ const ProductTable = React.memo(
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center space-x-2">
-                      <button
+                      <ActionButton
+                        action="view"
                         onClick={() =>
                           onViewProduct &&
                           onViewProduct(product.id || product.ID_SanPham)
                         }
-                        className="group flex items-center gap-1.5 px-3 py-1.5 text-blue-600 hover:text-white hover:bg-blue-600 rounded-lg transition-all duration-200 border border-blue-200 hover:border-blue-600"
-                        title="Xem chi tiết sản phẩm"
+                        role={variant}
+                        size="sm"
                       >
-                        <FontAwesomeIcon
-                          icon={["fas", "eye"]}
-                          className="w-3.5 h-3.5"
-                        />
-                        <span className="text-xs">Xem</span>
-                      </button>
+                        Xem
+                      </ActionButton>
 
-                      <button
+                      <ActionButton
+                        action="edit"
                         onClick={() =>
                           onEditProduct &&
                           onEditProduct(product.id || product.ID_SanPham)
                         }
-                        className="group flex items-center gap-1.5 px-3 py-1.5 text-indigo-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-all duration-200 border border-indigo-200 hover:border-indigo-600"
-                        title="Chỉnh sửa sản phẩm"
+                        role={variant}
+                        size="sm"
                       >
-                        <FontAwesomeIcon
-                          icon={["fas", "edit"]}
-                          className="w-3.5 h-3.5"
-                        />
-                        <span className="text-xs">Sửa</span>
-                      </button>
+                        Sửa
+                      </ActionButton>
 
                       {variant === "admin" && (
-                        <button
+                        <ActionButton
+                          action="delete"
                           onClick={() =>
                             onDeleteProduct &&
                             onDeleteProduct(product.id || product.ID_SanPham)
                           }
-                          className="group flex items-center gap-1.5 px-3 py-1.5 text-red-600 hover:text-white hover:bg-red-600 rounded-lg transition-all duration-200 border border-red-200 hover:border-red-600"
-                          title="Xóa sản phẩm"
+                          role={variant}
+                          size="sm"
                         >
-                          <FontAwesomeIcon
-                            icon={["fas", "trash"]}
-                            className="w-3.5 h-3.5"
-                          />
-                          <span className="text-xs">Xóa</span>
-                        </button>
+                          Xóa
+                        </ActionButton>
                       )}
                     </div>
                   </td>

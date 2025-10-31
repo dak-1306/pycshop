@@ -330,7 +330,16 @@ export const useProductsCommon = (options = {}) => {
 
   const handleAddProduct = () => {
     setModalMode("add");
-    setSelectedProduct(null);
+    const initialProduct = {
+      name: "",
+      description: "",
+      price: "",
+      category: "",
+      status: "active",
+      stock: 0,
+      quantity: 0,
+    };
+    setSelectedProduct(initialProduct);
     setShowProductModal(true);
   };
 

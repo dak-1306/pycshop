@@ -35,16 +35,19 @@ src/
 ## ✅ Benefits of New Structure
 
 ### 🎯 **Better Organization**
+
 - All CSS files in one place
 - Clear separation by functionality
 - Easy to find and maintain
 
 ### 🔧 **Easier Maintenance**
+
 - No more CSS scattered across folders
 - Consistent import paths
 - Centralized styling
 
 ### 📦 **Modular Approach**
+
 - Component styles grouped together
 - Page styles separated
 - Global styles clearly defined
@@ -52,15 +55,17 @@ src/
 ## 🔄 Import Path Changes
 
 ### Before:
+
 ```jsx
 // Component CSS
 import "./Header.css";
 
-// Page CSS  
+// Page CSS
 import "./ProductDetail.css";
 ```
 
 ### After:
+
 ```jsx
 // Component CSS
 import "../../styles/components/buyer/Header.css";
@@ -75,9 +80,9 @@ You can use `src/styles/index.css` to import all styles at once:
 
 ```css
 /* Import all styles in one place */
-@import './App.css';
-@import './components/buyer/Header.css';
-@import './pages/buyer/ProductDetail.css';
+@import "./App.css";
+@import "./components/buyer/Header.css";
+@import "./pages/buyer/ProductDetail.css";
 /* ... etc */
 ```
 
@@ -90,12 +95,12 @@ You can use `src/styles/index.css` to import all styles at once:
 
 ## 📁 Old vs New Locations
 
-| Old Location | New Location |
-|-------------|-------------|
-| `src/components/buyers/Header.css` | `src/styles/components/buyer/Header.css` |
+| Old Location                                 | New Location                               |
+| -------------------------------------------- | ------------------------------------------ |
+| `src/components/buyers/Header.css`           | `src/styles/components/buyer/Header.css`   |
 | `src/pages/buyer/Products/ProductDetail.css` | `src/styles/pages/buyer/ProductDetail.css` |
-| `src/pages/auth/Login.css` | `src/styles/pages/auth/Login.css` |
-| `src/App.css` | `src/styles/App.css` |
+| `src/pages/auth/Login.css`                   | `src/styles/pages/auth/Login.css`          |
+| `src/App.css`                                | `src/styles/App.css`                       |
 
 ## 🎨 Styles Overview
 

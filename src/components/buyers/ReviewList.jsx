@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./ReviewList.css";
+import "../../styles/components/buyer/ReviewList.css";
 
 const ReviewList = ({ productId, newReview }) => {
   const [reviews, setReviews] = useState([]);

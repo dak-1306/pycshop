@@ -6,7 +6,7 @@ import ReviewForm from "../../../components/buyers/ReviewForm";
 import ReviewList from "../../../components/buyers/ReviewList";
 import { productService } from "../../../lib/services/productService.js";
 import { useAuth } from "../../../context/AuthContext";
-import "./ProductDetail.css";
+import "../../../styles/pages/buyer/ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();

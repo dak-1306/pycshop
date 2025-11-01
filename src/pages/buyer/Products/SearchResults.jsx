@@ -4,7 +4,7 @@ import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 import ProductCard from "../../../components/buyers/ProductCard";
 import { productService } from "../../../lib/services/productService.js";
-import "./SearchResults.css";
+import "../../../styles/pages/buyer/SearchResults.css";
 
 const SearchResults = () => {
   const location = useLocation();

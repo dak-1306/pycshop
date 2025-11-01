@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
-import "./Profile.css";
+import "../../../styles/pages/buyer/Profile.css";
 
 const Profile = () => {
   const { user } = useAuth();

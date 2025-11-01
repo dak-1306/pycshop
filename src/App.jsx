@@ -38,7 +38,7 @@ import CategoryProducts from "./pages/buyer/Products/CategoryProducts";
 import ShopProfile from "./pages/buyer/Shop/ShopProfile";
 import Checkout from "./pages/buyer/Cart/Checkout";
 import Cart from "./pages/buyer/Cart/Cart";
-import "./App.css";
+import "./styles/App.css";
 
 function App() {
   return (

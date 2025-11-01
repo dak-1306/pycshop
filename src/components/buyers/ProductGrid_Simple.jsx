@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import "./ProductGrid.css";
+import "../../styles/components/buyer/ProductGrid.css";
 import { productService } from "../../lib/services/productService.js";
 
 const ProductGrid = ({ products: externalProducts }) => {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../lib/services/authService.js";
-import "./Register.css";
+import "../../styles/pages/auth/Register.css";
 import signupGif from "../../images/signup.gif";
 
 const Register = () => {

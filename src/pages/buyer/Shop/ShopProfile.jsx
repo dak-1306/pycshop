@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import { useChat } from "../../../context/ChatContext";
 import { shopService } from "../../../lib/services/shopServiceBuyer";
-import "./ShopProfile.css";
+import "../../../styles/pages/buyer/ShopProfile.css";
 
 const ShopProfile = () => {
   const { shopId } = useParams();

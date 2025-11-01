@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import "./ChatDialog.css";
+import "../../styles/components/buyer/ChatDialog.css";
 
 const ChatDialog = ({ isOpen, onClose, shop }) => {
   const [messages, setMessages] = useState([

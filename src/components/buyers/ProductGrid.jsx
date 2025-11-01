@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import "./ProductGrid.css";
+import "../../styles/components/buyer/ProductGrid.css";
 import ProductCard from "./ProductCard";
 import { productService } from "../../lib/services/productService.js";
 

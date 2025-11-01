@@ -4,7 +4,7 @@ import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 import ProductCard from "../../../components/buyers/ProductCard";
 import { productService } from "../../../lib/services/productService";
-import "./CategoryProducts.css";
+import "../../../styles/pages/buyer/CategoryProducts.css";
 
 const CategoryProducts = () => {
   const { categoryId } = useParams();

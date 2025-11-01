@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import "./ProductCard.css";
+import "../../styles/components/buyer/ProductCard.css";
 
 const ProductCard = ({ product, onClick }) => {
   const navigate = useNavigate();

@@ -3,7 +3,7 @@ import { useAuth } from "../../../context/AuthContext";
 import { useProfile } from "../../../hooks/user/useProfile.js";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
-import "./Profile.css";
+import "../../../styles/pages/buyer/Profile.css";
 
 const Profile = () => {
   const { user, isAuthenticated, loading, login } = useAuth();

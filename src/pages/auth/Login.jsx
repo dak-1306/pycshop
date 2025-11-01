@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../lib/services/authService.js";
-import "./Login.css"; // Giữ một số custom styles
+import "../../styles/pages/auth/Login.css"; // Giữ một số custom styles
 
 const Login = () => {
   const [formData, setFormData] = useState({

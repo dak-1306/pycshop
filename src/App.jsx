@@ -15,6 +15,7 @@ import Dashboard from "./pages/seller/Dashboard";
 import ManageProduct from "./pages/seller/ManageProduct";
 import Order from "./pages/seller/Order";
 import ShopPage from "./pages/seller/ShopPage";
+import SellerMessages from "./pages/seller/SellerMessages";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import BecomeSeller from "./pages/seller/BecomeSeller";
@@ -79,6 +80,7 @@ function App() {
                   <Route path="/seller/products" element={<ManageProduct />} />
                   <Route path="/seller/orders" element={<Order />} />
                   <Route path="/seller/shop" element={<ShopPage />} />
+                  <Route path="/seller/messages" element={<SellerMessages />} />
 
                   {/* Admin Routes */}
                   <Route
@@ -152,6 +154,7 @@ const AppWithChat = () => {
         <Route path="/seller/manage-products" element={<ManageProduct />} />
         <Route path="/seller/manage-product" element={<ManageProduct />} />
         <Route path="/seller/orders" element={<Order />} />
+        <Route path="/seller/messages" element={<SellerMessages />} />
         <Route path="/seller/shop-page" element={<ShopPage />} />
 
         {/* Admin Routes */}

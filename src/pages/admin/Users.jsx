@@ -180,7 +180,7 @@ const AdminUsers = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>

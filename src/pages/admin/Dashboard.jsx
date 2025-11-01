@@ -57,7 +57,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       {/* Page Header */}
       <div className="mb-8 flex justify-between items-start">
         <ChartRefreshButton

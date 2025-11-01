@@ -284,10 +284,6 @@ const ProductModal = ({
                       </label>
                       {isEditMode ? (
                         <div className="space-y-2">
-                          <div className="text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded-lg">
-                            Hiện tại: {product?.stock || product?.quantity || 0}{" "}
-                            sản phẩm
-                          </div>
                           <input
                             type="number"
                             min="0"
@@ -300,6 +296,10 @@ const ProductModal = ({
                             className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-colors"
                             placeholder="Số lượng thêm"
                           />
+                          <div className="text-xs text-gray-500 bg-gray-50 px-3 py-1 rounded-lg">
+                            Hiện tại: {product?.stock || product?.quantity || 0}{" "}
+                            sản phẩm
+                          </div>
                         </div>
                       ) : (
                         <input

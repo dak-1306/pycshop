@@ -55,7 +55,7 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       {/* Unified Order Management Component */}
       <OrderManagement
         // Data

@@ -24,6 +24,12 @@ const SellerSidebar = ({ activeMenu }) => {
       href: "/seller/orders",
     },
     {
+      id: "messages",
+      name: "Tin nhắn khách hàng",
+      icon: "messages",
+      href: "/seller/messages",
+    },
+    {
       id: "shopPage",
       name: "Trang cửa hàng",
       icon: "shop",
@@ -36,15 +42,16 @@ const SellerSidebar = ({ activeMenu }) => {
       dashboard: <FontAwesomeIcon icon={["fas", "tachometer-alt"]} />,
       products: <FontAwesomeIcon icon={["fas", "boxes"]} />,
       orders: <FontAwesomeIcon icon={["fas", "shopping-bag"]} />,
+      messages: <FontAwesomeIcon icon={["fas", "comments"]} />,
       shop: <FontAwesomeIcon icon={["fas", "store"]} />,
     };
     return icons[iconType] || icons.dashboard;
   };
 
   return (
-    <aside className="w-64 bg-white shadow-lg min-h-screen">
-      <nav className="mt-8">
-        <div className="px-4 space-y-2">
+    <aside className="w-64 bg-white shadow-lg flex-shrink-0 overflow-y-auto">
+      <nav className="p-4">
+        <div className="space-y-2">
           {menuItems.map((item) => (
             <Link
               key={item.id}

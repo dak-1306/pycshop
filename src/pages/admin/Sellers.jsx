@@ -61,7 +61,7 @@ const Sellers = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">

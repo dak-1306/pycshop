@@ -4,7 +4,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PropTypes from "prop-types";
 import NotificationPanel from "../../common/notifications/NotificationPanel";
 import logoImage from "../../../images/logo.svg";
-import "../../../assets/css/logo.css";
 
 const SellerHeader = ({
   shopInfo,
@@ -26,7 +25,7 @@ const SellerHeader = ({
   onAddCollaborator,
 }) => {
   return (
-    <header className="bg-green-700 text-white shadow-lg">
+    <header className="bg-green-700 text-white shadow-lg z-50 flex-shrink-0">
       <div className="max-w-full mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
+import CartService from "../../../services/cartService";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -9,11 +10,34 @@ const Cart = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load cart items from localStorage
-    const items = JSON.parse(localStorage.getItem("cartItems") || "[]");
-    setCartItems(items);
-    setLoading(false);
+    // Load cart items from cart service
+    loadCartData();
   }, []);
+
+  const loadCartData = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const cartData = await CartService.getCart();
+      const transformedCart = CartService.transformCartForDisplay(
+        cartData.data
+      );
+      setCartItems(transformedCart.items);
+    } catch (error) {
+      console.error("Error loading cart:", error);
+      // Fallback to localStorage for now
+      const items = JSON.parse(localStorage.getItem("cartItems") || "[]");
+      setCartItems(items);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -22,22 +46,48 @@ const Cart = () => {
     }).format(price);
   };
 
-  const updateQuantity = (index, newQuantity) => {
+  const updateQuantity = async (index, newQuantity) => {
     if (newQuantity <= 0) {
       removeItem(index);
       return;
     }
 
-    const updatedItems = [...cartItems];
-    updatedItems[index].quantity = newQuantity;
-    setCartItems(updatedItems);
-    localStorage.setItem("cartItems", JSON.stringify(updatedItems));
+    try {
+      const item = cartItems[index];
+      await CartService.updateCartItem(item.id, newQuantity);
+
+      const updatedItems = [...cartItems];
+      updatedItems[index].quantity = newQuantity;
+      setCartItems(updatedItems);
+
+      // Update localStorage as backup
+      localStorage.setItem("cartItems", JSON.stringify(updatedItems));
+
+      // Dispatch cart update event
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
+    } catch (error) {
+      console.error("Error updating cart item:", error);
+      alert("Có lỗi xảy ra khi cập nhật số lượng!");
+    }
   };
 
-  const removeItem = (index) => {
-    const updatedItems = cartItems.filter((_, i) => i !== index);
-    setCartItems(updatedItems);
-    localStorage.setItem("cartItems", JSON.stringify(updatedItems));
+  const removeItem = async (index) => {
+    try {
+      const item = cartItems[index];
+      await CartService.removeFromCart(item.id);
+
+      const updatedItems = cartItems.filter((_, i) => i !== index);
+      setCartItems(updatedItems);
+
+      // Update localStorage as backup
+      localStorage.setItem("cartItems", JSON.stringify(updatedItems));
+
+      // Dispatch cart update event
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
+    } catch (error) {
+      console.error("Error removing cart item:", error);
+      alert("Có lỗi xảy ra khi xóa sản phẩm!");
+    }
   };
 
   const getTotalPrice = () => {
@@ -47,13 +97,44 @@ const Cart = () => {
     );
   };
 
-  const handleCheckout = () => {
+  const handleCheckout = async () => {
     if (cartItems.length === 0) {
       alert("Giỏ hàng trống!");
       return;
     }
 
-    navigate("/checkout", { state: { cartItems } });
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        alert("Vui lòng đăng nhập để thanh toán!");
+        navigate("/login");
+        return;
+      }
+
+      // Use cart service for checkout
+      const orderData = {
+        totalAmount: getTotalPrice() + 30000, // Including shipping
+        shippingFee: 30000,
+        items: cartItems,
+      };
+
+      await CartService.checkout(orderData);
+
+      // Clear local cart
+      setCartItems([]);
+      localStorage.removeItem("cartItems");
+
+      // Dispatch cart update event
+      window.dispatchEvent(new CustomEvent("cartUpdated"));
+
+      alert("Đặt hàng thành công!");
+      navigate("/orders"); // Redirect to orders page if available
+    } catch (error) {
+      console.error("Error during checkout:", error);
+      // Fallback to normal checkout
+      navigate("/checkout", { state: { cartItems } });
+    }
   };
 
   if (loading) {

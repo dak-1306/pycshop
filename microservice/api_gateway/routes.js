@@ -348,10 +348,85 @@ function setupRoutes(app) {
   // Cart Service
   app.use(
     "/cart",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /cart route for ${req.method} ${req.originalUrl}`
+      );
+      console.log(`[ROUTES] req.user:`, req.user);
+      next();
+    },
+    // apply auth middle manual
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Applying auth middleware for cart route: ${req.path}`
+      );
+      authMiddleware(req, res, next);
+    },
+    //apply header manual
+    (req, res, next) => {
+      console.log(`[ROUTES] Setting headers for cart route: ${req.path}`);
+      // Manually set headers for proxy
+      if (req.user) {
+        req.headers["x-user-id"] = req.user.id;
+        req.headers["x-user-role"] = req.user.role;
+        req.headers["x-user-type"] = req.user.userType;
+        console.log(
+          `[ROUTES] Set headers manually: x-user-id=${req.user.id}, x-user-role=${req.user.role}, x-user-type=${req.user.userType}`
+        );
+      }
+      next();
+    },
     createProxyMiddleware({
-      target: process.env.CART_SERVICE_URL,
+      target: process.env.CART_SERVICE_URL || "http://localhost:5004",
       changeOrigin: true,
-      pathRewrite: { "^/cart": "" },
+      pathRewrite: (path, req) => {
+        const newPath = `/api/cart${path}`;
+        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
+        return newPath;
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`[PROXY] onProxyReq callback triggered for cart service`);
+
+        // Truyền thông tin user từ API Gateway xuống cart service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id.toString());
+          proxyReq.setHeader("x-user-role", req.user.role);
+          proxyReq.setHeader("x-user-type", req.user.userType);
+          console.log("[PROXY] Set user headers:", {
+            id: req.user.id,
+            role: req.user.role,
+            userType: req.user.userType,
+          });
+        } else {
+          console.log(`[PROXY] No req.user found for this cart request`);
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.CART_SERVICE_URL || "http://localhost:5004"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Cart Service`
+        );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Cart Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Cart service error", details: err.message });
+        }
+      },
     })
   );
 

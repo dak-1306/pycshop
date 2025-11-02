@@ -63,7 +63,7 @@ const ProductCard = ({ product, onClick }) => {
     discount: product?.discount || 0,
     originalPrice: product?.originalPrice || null,
     stock: product?.stock || 0,
-    ...product // Override with actual product data if available
+    ...product, // Override with actual product data if available
   };
 
   const handleClick = () => {
@@ -123,50 +123,77 @@ const ProductCard = ({ product, onClick }) => {
           </div>
         </div>
         <div className="product-location">{safeProduct.location}</div>
-        
+
         {/* Action Buttons */}
         <div className="product-card-actions">
-          <button 
+          <button
             className="btn-add-cart"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation();
-              // Add to cart logic here
-              const cartItems = JSON.parse(localStorage.getItem('cartItems') || '[]');
-              const existingItem = cartItems.find(item => item.id === safeProduct.id);
-              
-              if (existingItem) {
-                existingItem.quantity += 1;
-              } else {
-                cartItems.push({
+
+              try {
+                // Get auth token from localStorage or context
+                const token = localStorage.getItem("token");
+                if (!token) {
+                  alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+                  navigate("/login");
+                  return;
+                }
+
+                // Prepare product data for cart service
+                const productData = {
                   id: safeProduct.id,
                   name: safeProduct.name,
                   price: safeProduct.price,
-                  quantity: 1,
                   image: safeProduct.image,
-                  variant: 'Mặc định'
+                  variant: "Mặc định",
+                };
+
+                // Call cart service API
+                const response = await fetch("http://localhost:5000/cart/add", {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    productId: safeProduct.id,
+                    quantity: 1,
+                    productData: productData,
+                  }),
                 });
+
+                const result = await response.json();
+
+                if (result.success) {
+                  alert("Đã thêm vào giỏ hàng!");
+                  // Optionally update cart count in header
+                  window.dispatchEvent(
+                    new CustomEvent("cartUpdated", {
+                      detail: { totalItems: result.data.totalItems },
+                    })
+                  );
+                } else {
+                  alert(
+                    result.message || "Có lỗi xảy ra khi thêm vào giỏ hàng!"
+                  );
+                }
+              } catch (error) {
+                console.error("Error adding to cart:", error);
+                alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
               }
-              
-              localStorage.setItem('cartItems', JSON.stringify(cartItems));
-              alert('Đã thêm vào giỏ hàng!');
             }}
           >
             Thêm vào giỏ
           </button>
-          <button 
+          <button
             className="btn-buy-now"
             onClick={(e) => {
               e.stopPropagation();
-              // Buy now logic - redirect to checkout with this product
-              const cartItem = {
-                id: safeProduct.id,
-                name: safeProduct.name,
-                price: safeProduct.price,
-                quantity: 1,
-                image: safeProduct.image,
-                variant: 'Mặc định'
-              };
-              navigate('/checkout', { state: { cartItems: [cartItem] } });
+              // Buy now logic - redirect to product detail for more options
+              navigate(`/product/${safeProduct.id}`, {
+                state: { buyNow: true },
+              });
             }}
           >
             Mua ngay

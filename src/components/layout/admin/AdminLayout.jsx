@@ -138,8 +138,16 @@ const AdminLayout = () => {
     return location.pathname.startsWith(path);
   };
 
+  // Prevent body scroll when admin layout is active
+  React.useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="h-screen bg-gray-50 flex overflow-hidden">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 lg:hidden">
@@ -150,7 +158,7 @@ const AdminLayout = () => {
         </div>
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Fixed on left */}
       <AdminSidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -160,9 +168,9 @@ const AdminLayout = () => {
         t={t}
       />
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col lg:ml-0">
-        {/* Top bar */}
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Header - Fixed at top */}
         <AdminHeader
           setSidebarOpen={setSidebarOpen}
           showProfileDropdown={showProfileDropdown}
@@ -185,9 +193,12 @@ const AdminLayout = () => {
           getPriorityColor={getPriorityColor}
           getNotificationIcon={getNotificationIcon}
         />
-        {/* Page content */}
-        <main className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50 dark:bg-gray-900">
-          <Outlet />
+
+        {/* Page content - Scrollable area */}
+        <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-gray-900">
+          <div className="p-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

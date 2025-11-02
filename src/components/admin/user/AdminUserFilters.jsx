@@ -49,7 +49,7 @@ const AdminUserFilters = ({
         <button
           onClick={onAddUser}
           disabled={!onAddUser}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-admin-500 hover:bg-admin-600 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Thêm người dùng
         </button>

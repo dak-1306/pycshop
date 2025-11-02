@@ -29,50 +29,50 @@ const Button = ({
     xl: "px-8 py-4 text-lg gap-3",
   };
 
-  // Color variants based on role and variant
+  // Color variants based on role and variant using new design system
   const getVariantStyles = () => {
     const variants = {
       admin: {
         primary:
-          "bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl focus:ring-blue-500",
+          "bg-gradient-to-r from-admin-500 to-admin-600 hover:from-admin-600 hover:to-admin-700 text-white shadow-lg hover:shadow-xl focus:ring-admin-500",
         secondary:
-          "bg-white border-2 border-blue-500 text-blue-600 hover:bg-blue-50 focus:ring-blue-500",
+          "bg-white border-2 border-admin-500 text-admin-600 hover:bg-admin-50 focus:ring-admin-500",
         danger:
           "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl focus:ring-red-500",
         success:
-          "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500",
+          "bg-gradient-to-r from-status-success to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500",
         warning:
-          "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl focus:ring-yellow-500",
+          "bg-gradient-to-r from-status-warning to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl focus:ring-yellow-500",
         ghost:
-          "bg-transparent text-blue-600 hover:bg-blue-50 focus:ring-blue-500",
+          "bg-transparent text-admin-600 hover:bg-admin-50 focus:ring-admin-500",
       },
       seller: {
         primary:
-          "bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-lg hover:shadow-xl focus:ring-orange-500",
+          "bg-gradient-to-r from-seller-500 to-seller-600 hover:from-seller-600 hover:to-seller-700 text-white shadow-lg hover:shadow-xl focus:ring-seller-500",
         secondary:
-          "bg-white border-2 border-orange-500 text-orange-600 hover:bg-orange-50 focus:ring-orange-500",
+          "bg-white border-2 border-seller-500 text-seller-600 hover:bg-seller-50 focus:ring-seller-500",
         danger:
           "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl focus:ring-red-500",
         success:
-          "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500",
+          "bg-gradient-to-r from-status-success to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500",
         warning:
-          "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl focus:ring-yellow-500",
+          "bg-gradient-to-r from-status-warning to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl focus:ring-yellow-500",
         ghost:
-          "bg-transparent text-orange-600 hover:bg-orange-50 focus:ring-orange-500",
+          "bg-transparent text-seller-600 hover:bg-seller-50 focus:ring-seller-500",
       },
       common: {
         primary:
-          "bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-800 hover:to-gray-900 text-white shadow-lg hover:shadow-xl focus:ring-gray-500",
+          "bg-gradient-to-r from-buyer-500 to-buyer-600 hover:from-buyer-600 hover:to-buyer-700 text-white shadow-lg hover:shadow-xl focus:ring-buyer-500",
         secondary:
-          "bg-white border-2 border-gray-300 text-gray-700 hover:bg-gray-50 focus:ring-gray-500",
+          "bg-white border-2 border-buyer-500 text-buyer-600 hover:bg-buyer-50 focus:ring-buyer-500",
         danger:
           "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg hover:shadow-xl focus:ring-red-500",
         success:
-          "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500",
+          "bg-gradient-to-r from-status-success to-green-600 hover:from-green-600 hover:to-green-700 text-white shadow-lg hover:shadow-xl focus:ring-green-500",
         warning:
-          "bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl focus:ring-yellow-500",
+          "bg-gradient-to-r from-status-warning to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-lg hover:shadow-xl focus:ring-yellow-500",
         ghost:
-          "bg-transparent text-gray-600 hover:bg-gray-50 focus:ring-gray-500",
+          "bg-transparent text-buyer-600 hover:bg-buyer-50 focus:ring-buyer-500",
       },
     };
     return variants[role]?.[variant] || variants.common[variant];

@@ -216,12 +216,12 @@ const ShopEditModal = ({ isOpen, onClose, shopInfo, onSave }) => {
             </div>
 
             {/* Tips Section */}
-            <div className="mt-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-              <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                <span className="text-blue-600">💡</span>
+            <div className="mt-6 bg-gradient-to-r from-seller-50 to-seller-100 border border-seller-200 rounded-xl p-4">
+              <h4 className="text-sm font-semibold text-seller-800 mb-2 flex items-center gap-2">
+                <span className="text-seller-600">💡</span>
                 Mẹo tối ưu hóa thông tin shop
               </h4>
-              <ul className="text-xs text-blue-700 space-y-1">
+              <ul className="text-xs text-seller-700 space-y-1">
                 <li>
                   • Tên shop nên ngắn gọn, dễ nhớ và thể hiện được lĩnh vực kinh
                   doanh

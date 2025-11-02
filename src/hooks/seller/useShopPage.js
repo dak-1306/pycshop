@@ -85,6 +85,13 @@ export const useShopPage = () => {
             images: product.images || product.HinhAnh || [],
             created_at: product.NgayTao,
             updated_at: product.NgayCapNhat,
+            // Rating fields from backend
+            average_rating: parseFloat(
+              product.average_rating || product.DiemTrungBinh || 0
+            ),
+            review_count: parseInt(
+              product.review_count || product.SoLuongDanhGia || 0
+            ),
             // Add any other fields that might be needed
           };
         });
@@ -148,7 +155,7 @@ export const useShopPage = () => {
       console.log("Using mock products as fallback");
 
       // Use mock products as fallback for testing UI
-      setProducts(SELLER_CONSTANTS.MOCK_PRODUCTS);
+      setProducts(SELLER_MOCK_PRODUCTS);
       setTotalPages(1);
       setError(null);
     } finally {

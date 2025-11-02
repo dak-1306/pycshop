@@ -123,6 +123,13 @@ export const useProductsCommon = (options = {}) => {
               imageFiles: [],
               shopName: product.TenCuaHang || "",
               created_date: product.created_date,
+              // Rating fields from backend
+              average_rating: parseFloat(
+                product.average_rating || product.DiemTrungBinh || 0
+              ),
+              review_count: parseInt(
+                product.review_count || product.SoLuongDanhGia || 0
+              ),
               actions: ["view", "edit", "delete"],
             };
           });

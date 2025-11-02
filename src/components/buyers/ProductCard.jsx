@@ -1,5 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { ProductRating } from "../common/ui/StarRating";
 import "../../styles/components/buyer/ProductCard.css";
 
 const ProductCard = ({ product, onClick }) => {
@@ -17,48 +18,16 @@ const ProductCard = ({ product, onClick }) => {
       .replace("₫", "đ");
   };
 
-  const renderStars = (rating = 0) => {
-    const safeRating = rating || 0;
-    const stars = [];
-    const fullStars = Math.floor(safeRating);
-    const hasHalfStar = safeRating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <span key={i} className="star filled">
-          ★
-        </span>
-      );
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <span key="half" className="star half">
-          ★
-        </span>
-      );
-    }
-
-    const emptyStars = 5 - Math.ceil(safeRating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <span key={`empty-${i}`} className="star">
-          ★
-        </span>
-      );
-    }
-
-    return stars;
-  };
-
   // Ensure product has default values to prevent undefined errors
   const safeProduct = {
     id: product?.id || 0,
     name: product?.name || "Sản phẩm",
     price: product?.price || 0,
     image: product?.image || "",
-    rating: product?.rating || 0,
-    sold: product?.sold || 0,
+    rating: product?.rating || product?.average_rating || 0,
+    average_rating: product?.average_rating || product?.rating || 0,
+    review_count: product?.review_count || product?.sold || 0,
+    sold: product?.sold || product?.review_count || 0,
     location: product?.location || "Việt Nam",
     discount: product?.discount || 0,
     originalPrice: product?.originalPrice || null,
@@ -110,17 +79,12 @@ const ProductCard = ({ product, onClick }) => {
           )}
         </div>
         <div className="product-meta">
-          <div className="rating">
-            <div className="stars">{renderStars(safeProduct.rating)}</div>
-            <span className="rating-text">
-              ({safeProduct.rating.toFixed(1)})
-            </span>
-          </div>
-          <div className="sold">
-            {safeProduct.sold > 0
-              ? `${safeProduct.sold} đánh giá`
-              : "Chưa có đánh giá"}
-          </div>
+          <ProductRating
+            rating={safeProduct.average_rating}
+            reviewCount={safeProduct.review_count}
+            size="sm"
+            className="mb-2"
+          />
         </div>
         <div className="product-location">{safeProduct.location}</div>
 
@@ -130,58 +94,28 @@ const ProductCard = ({ product, onClick }) => {
             className="btn-add-cart"
             onClick={async (e) => {
               e.stopPropagation();
+              // Add to cart logic here
+              const cartItems = JSON.parse(
+                localStorage.getItem("cartItems") || "[]"
+              );
+              const existingItem = cartItems.find(
+                (item) => item.id === safeProduct.id
+              );
 
-              try {
-                // Get auth token from localStorage or context
-                const token = localStorage.getItem("token");
-                if (!token) {
-                  alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
-                  navigate("/login");
-                  return;
-                }
-
-                // Prepare product data for cart service
-                const productData = {
+              if (existingItem) {
+                existingItem.quantity += 1;
+              } else {
+                cartItems.push({
                   id: safeProduct.id,
                   name: safeProduct.name,
                   price: safeProduct.price,
                   image: safeProduct.image,
                   variant: "Mặc định",
-                };
-
-                // Call cart service API
-                const response = await fetch("http://localhost:5000/cart/add", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    productId: safeProduct.id,
-                    quantity: 1,
-                    productData: productData,
-                  }),
                 });
-
-                const result = await response.json();
-
-                if (result.success) {
-                  alert("Đã thêm vào giỏ hàng!");
-                  // Optionally update cart count in header
-                  window.dispatchEvent(
-                    new CustomEvent("cartUpdated", {
-                      detail: { totalItems: result.data.totalItems },
-                    })
-                  );
-                } else {
-                  alert(
-                    result.message || "Có lỗi xảy ra khi thêm vào giỏ hàng!"
-                  );
-                }
-              } catch (error) {
-                console.error("Error adding to cart:", error);
-                alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
               }
+
+              localStorage.setItem("cartItems", JSON.stringify(cartItems));
+              alert("Đã thêm vào giỏ hàng!");
             }}
           >
             Thêm vào giỏ
@@ -190,10 +124,16 @@ const ProductCard = ({ product, onClick }) => {
             className="btn-buy-now"
             onClick={(e) => {
               e.stopPropagation();
-              // Buy now logic - redirect to product detail for more options
-              navigate(`/product/${safeProduct.id}`, {
-                state: { buyNow: true },
-              });
+              // Buy now logic - redirect to checkout with this product
+              const cartItem = {
+                id: safeProduct.id,
+                name: safeProduct.name,
+                price: safeProduct.price,
+                quantity: 1,
+                image: safeProduct.image,
+                variant: "Mặc định",
+              };
+              navigate("/checkout", { state: { cartItems: [cartItem] } });
             }}
           >
             Mua ngay

@@ -38,7 +38,7 @@ const ProductTable = React.memo(
       switch (status) {
         case "active":
         case "hoạt động":
-          return "bg-green-100 text-green-800";
+          return "bg-success text-white";
         case "inactive":
         case "không hoạt động":
           return "bg-red-100 text-red-800";

@@ -29,7 +29,7 @@ const AdminHeader = ({
   getNotificationIcon,
 }) => {
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
       <div className="flex items-center justify-between px-6 py-4">
         <div className="flex items-center space-x-4">
           <button
@@ -91,7 +91,7 @@ const AdminHeader = ({
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-admin-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-medium text-sm">A</span>
               </div>
               <div className="hidden md:block text-left">

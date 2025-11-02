@@ -24,6 +24,12 @@ const SellerSidebar = ({ activeMenu }) => {
       href: "/seller/orders",
     },
     {
+      id: "messages",
+      name: "Tin nhắn khách hàng",
+      icon: "messages",
+      href: "/seller/messages",
+    },
+    {
       id: "shopPage",
       name: "Trang cửa hàng",
       icon: "shop",
@@ -36,29 +42,30 @@ const SellerSidebar = ({ activeMenu }) => {
       dashboard: <FontAwesomeIcon icon={["fas", "tachometer-alt"]} />,
       products: <FontAwesomeIcon icon={["fas", "boxes"]} />,
       orders: <FontAwesomeIcon icon={["fas", "shopping-bag"]} />,
+      messages: <FontAwesomeIcon icon={["fas", "comments"]} />,
       shop: <FontAwesomeIcon icon={["fas", "store"]} />,
     };
     return icons[iconType] || icons.dashboard;
   };
 
   return (
-    <aside className="w-64 bg-white shadow-lg min-h-screen">
-      <nav className="mt-8">
-        <div className="px-4 space-y-2">
+    <aside className="w-64 bg-white shadow-lg flex-shrink-0 overflow-y-auto">
+      <nav className="p-4">
+        <div className="space-y-2">
           {menuItems.map((item) => (
             <Link
               key={item.id}
               to={item.href}
               className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
                 activeMenu === item.id
-                  ? "bg-green-50 text-green-800 border-r-4 border-green-600 shadow-sm"
+                  ? "bg-seller-50 text-seller-800 border-r-4 border-seller-600 shadow-sm"
                   : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm"
               }`}
             >
               <span
                 className={`mr-3 transition-colors duration-200 ${
                   activeMenu === item.id
-                    ? "text-green-600"
+                    ? "text-seller-600"
                     : "text-gray-400 group-hover:text-gray-600"
                 }`}
               >

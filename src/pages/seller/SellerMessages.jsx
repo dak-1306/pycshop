@@ -199,7 +199,7 @@ const SellerMessages = () => {
                         }}
                       />
                       {activeConversation.isOnline && (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-seller-500 border-2 border-white rounded-full"></div>
                       )}
                     </div>
                     <div>
@@ -209,8 +209,8 @@ const SellerMessages = () => {
                       <div className="flex items-center text-sm text-gray-500">
                         {activeConversation.isOnline ? (
                           <>
-                            <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                            <span className="text-green-600 font-medium">
+                            <div className="w-2 h-2 bg-seller-500 rounded-full mr-2 animate-pulse"></div>
+                            <span className="text-seller-600 font-medium">
                               Đang hoạt động
                             </span>
                           </>

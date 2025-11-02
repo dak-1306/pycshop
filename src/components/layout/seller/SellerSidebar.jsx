@@ -58,14 +58,14 @@ const SellerSidebar = ({ activeMenu }) => {
               to={item.href}
               className={`group flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-all duration-200 ${
                 activeMenu === item.id
-                  ? "bg-green-50 text-green-800 border-r-4 border-green-600 shadow-sm"
+                  ? "bg-seller-50 text-seller-800 border-r-4 border-seller-600 shadow-sm"
                   : "text-gray-700 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm"
               }`}
             >
               <span
                 className={`mr-3 transition-colors duration-200 ${
                   activeMenu === item.id
-                    ? "text-green-600"
+                    ? "text-seller-600"
                     : "text-gray-400 group-hover:text-gray-600"
                 }`}
               >

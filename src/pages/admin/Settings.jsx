@@ -43,7 +43,7 @@ const AdminSettings = () => {
 
       {/* Success Message */}
       {showSuccess && (
-        <div className="mb-6 p-4 bg-green-100 dark:bg-green-900 border border-green-400 dark:border-green-600 text-green-700 dark:text-green-300 rounded-lg flex items-center">
+        <div className="mb-6 p-4 bg-status-success bg-opacity-10 dark:bg-status-success dark:bg-opacity-20 border border-status-success text-status-success rounded-lg flex items-center">
           <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
             <path
               fillRule="evenodd"
@@ -61,7 +61,7 @@ const AdminSettings = () => {
           <div className="mb-6">
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center">
               <svg
-                className="w-6 h-6 mr-3 text-blue-500"
+                className="w-6 h-6 mr-3 text-admin-500"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -85,7 +85,7 @@ const AdminSettings = () => {
             <div
               className={`cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-md ${
                 isLight
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                  ? "border-admin-500 bg-admin-50 dark:bg-admin-900/20"
                   : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
               }`}
               onClick={() => handleThemeChange("light")}
@@ -111,7 +111,7 @@ const AdminSettings = () => {
                 </div>
                 {isLight && (
                   <svg
-                    className="w-5 h-5 text-blue-500"
+                    className="w-5 h-5 text-admin-500"
                     fill="currentColor"
                     viewBox="0 0 20 20"
                   >
@@ -129,7 +129,7 @@ const AdminSettings = () => {
               <div className="mt-3 flex space-x-1">
                 <div className="w-3 h-3 bg-white border border-gray-200 rounded"></div>
                 <div className="w-3 h-3 bg-gray-100 rounded"></div>
-                <div className="w-3 h-3 bg-blue-500 rounded"></div>
+                <div className="w-3 h-3 bg-admin-500 rounded"></div>
               </div>
             </div>
 
@@ -137,7 +137,7 @@ const AdminSettings = () => {
             <div
               className={`cursor-pointer rounded-lg border-2 p-4 transition-all duration-200 hover:shadow-md ${
                 isDark
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                  ? "border-admin-500 bg-admin-50 dark:bg-admin-900/20"
                   : "border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500"
               }`}
               onClick={() => handleThemeChange("dark")}

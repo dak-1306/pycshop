@@ -25,7 +25,7 @@ const SellerHeader = ({
   onAddCollaborator,
 }) => {
   return (
-    <header className="bg-green-700 text-white shadow-lg z-50 flex-shrink-0">
+    <header className="bg-seller-600 text-white shadow-lg z-50 flex-shrink-0">
       <div className="max-w-full mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -51,7 +51,7 @@ const SellerHeader = ({
             <div className="relative">
               <button
                 onClick={toggleNotifications}
-                className="relative p-2 text-white hover:bg-green-600 rounded-lg transition-colors"
+                className="relative p-2 text-white hover:bg-seller-500 rounded-lg transition-colors"
                 title="Thông báo"
               >
                 <FontAwesomeIcon icon={["fas", "bell"]} />
@@ -91,7 +91,7 @@ const SellerHeader = ({
             {/* Return to Buyer Page Button */}
             <Link
               to="/"
-              className="flex items-center space-x-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium"
+              className="flex items-center space-x-2 px-3 py-2 bg-seller-500 hover:bg-seller-600 text-white rounded-lg transition-colors text-sm font-medium"
               title="Trở về trang người mua"
             >
               <FontAwesomeIcon icon={["fas", "home"]} />

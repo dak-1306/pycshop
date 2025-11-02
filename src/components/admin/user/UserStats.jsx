@@ -9,8 +9,8 @@ const UserStats = ({ stats = {} }) => {
         title: "Tổng người dùng",
         value: stats?.totalUsers || 1248,
         bgColor: "bg-white",
-        iconBg: "bg-blue-100",
-        iconColor: "text-blue-600",
+        iconBg: "bg-admin-100",
+        iconColor: "text-admin-600",
         textColor: "text-gray-900",
         subTextColor: "text-gray-600",
         icon: (
@@ -34,8 +34,8 @@ const UserStats = ({ stats = {} }) => {
         title: "Đang hoạt động",
         value: stats?.activeUsers || 1156,
         bgColor: "bg-white",
-        iconBg: "bg-green-100",
-        iconColor: "text-green-600",
+        iconBg: "bg-status-success bg-opacity-10",
+        iconColor: "text-success",
         textColor: "text-gray-900",
         subTextColor: "text-gray-600",
         icon: (

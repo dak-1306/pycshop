@@ -66,7 +66,7 @@ const ConversationList = ({
                 }}
               />
               {conversation.isOnline && (
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-seller-500 border-2 border-white rounded-full"></div>
               )}
             </div>
 
@@ -96,8 +96,10 @@ const ConversationList = ({
               {/* Online status */}
               {conversation.isOnline && (
                 <div className="flex items-center mt-1">
-                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                  <span className="text-xs text-green-600">Đang hoạt động</span>
+                  <div className="w-2 h-2 bg-seller-500 rounded-full mr-2"></div>
+                  <span className="text-xs text-seller-600">
+                    Đang hoạt động
+                  </span>
                 </div>
               )}
             </div>

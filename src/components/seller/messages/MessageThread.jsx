@@ -217,7 +217,7 @@ const MessageThread = ({
                               {message.status === "read" && (
                                 <FontAwesomeIcon
                                   icon={["fas", "check-double"]}
-                                  className="text-blue-500 text-xs"
+                                  className="text-seller-500 text-xs"
                                 />
                               )}
                             </div>

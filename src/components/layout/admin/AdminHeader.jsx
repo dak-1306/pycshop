@@ -91,7 +91,7 @@ const AdminHeader = ({
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
               className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             >
-              <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
+              <div className="w-8 h-8 bg-admin-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-medium text-sm">A</span>
               </div>
               <div className="hidden md:block text-left">

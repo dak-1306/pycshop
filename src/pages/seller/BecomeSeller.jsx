@@ -63,10 +63,13 @@ const BecomeSeller = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br to-yellow-300 from-green-900 flex items-center pt-6 pb-6">
+    <div className="min-h-screen bg-gradient-to-br from-seller-500 to-seller-600 flex items-center pt-6 pb-6">
       <div className="w-1/3 mx-auto bg-white rounded-lg shadow-md p-8">
         <h1 className="text-3xl font-bold text-gray-800 mb-4 flex justify-between items-center gap-3">
-          <FontAwesomeIcon icon={["fas", "store"]} className="text-blue-600" />
+          <FontAwesomeIcon
+            icon={["fas", "store"]}
+            className="text-seller-600"
+          />
           <span>Đăng ký trở thành Seller</span>
           <Link to="/">
             <FontAwesomeIcon icon={["fas", "close"]} className="text-red-400" />
@@ -76,7 +79,7 @@ const BecomeSeller = () => {
         {/* Loading state */}
         {loading && (
           <div className="text-center py-4">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-seller-600"></div>
             <p className="mt-2 text-gray-600">Đang kiểm tra thông tin...</p>
           </div>
         )}
@@ -223,7 +226,7 @@ const BecomeSeller = () => {
             <button
               type="submit"
               disabled={becomeLoading}
-              className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 disabled:bg-blue-300 disabled:cursor-not-allow flex items-center justify-center gap-2"
+              className="flex-1 px-6 py-3 bg-seller-500 text-white rounded-md hover:bg-seller-600 focus:outline-none focus:ring-2 focus:ring-seller-400 focus:border-transparent transition duration-200 disabled:bg-seller-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               <span>{becomeLoading ? "Đang xử lý..." : "Đăng ký Seller"}</span>
             </button>

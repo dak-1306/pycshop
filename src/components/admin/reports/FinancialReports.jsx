@@ -21,19 +21,21 @@ const FinancialReports = ({ data = {} }) => {
 
       {/* Revenue Overview */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-green-50 rounded-lg p-4">
-          <p className="text-sm font-medium text-green-600 mb-1">
+        <div className="bg-status-success bg-opacity-10 rounded-lg p-4">
+          <p className="text-sm font-medium text-status-success mb-1">
             Doanh thu tháng này
           </p>
-          <p className="text-2xl font-bold text-green-900">
+          <p className="text-2xl font-bold text-status-success">
             {formatCurrency(data.revenueThisMonth || 0)}
           </p>
         </div>
-        <div className="bg-blue-50 rounded-lg p-4">
-          <p className="text-sm font-medium text-blue-600 mb-1">Tăng trưởng</p>
+        <div className="bg-admin-50 rounded-lg p-4">
+          <p className="text-sm font-medium text-admin-600 mb-1">Tăng trưởng</p>
           <p
             className={`text-2xl font-bold ${
-              (data.revenueGrowth || 0) > 0 ? "text-green-900" : "text-red-900"
+              (data.revenueGrowth || 0) > 0
+                ? "text-status-success"
+                : "text-red-900"
             }`}
           >
             {formatPercentage(data.revenueGrowth || 0)}
@@ -106,7 +108,7 @@ const FinancialReports = ({ data = {} }) => {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-green-600">
+                  <p className="font-bold text-status-success">
                     {formatCurrency(category?.revenue || 0)}
                   </p>
                 </div>
@@ -116,21 +118,23 @@ const FinancialReports = ({ data = {} }) => {
       </div>
 
       {/* Financial Summary */}
-      <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200">
+      <div className="p-4 bg-gradient-to-r from-status-success from-opacity-10 to-green-100 rounded-lg border border-status-success border-opacity-30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-              <span className="text-green-600">💎</span>
+            <div className="w-10 h-10 bg-status-success bg-opacity-10 rounded-full flex items-center justify-center">
+              <span className="text-status-success">💎</span>
             </div>
             <div>
-              <p className="font-semibold text-green-900">
+              <p className="font-semibold text-status-success">
                 Tổng doanh thu tích lũy
               </p>
-              <p className="text-sm text-green-700">Từ khi ra mắt hệ thống</p>
+              <p className="text-sm text-status-success text-opacity-80">
+                Từ khi ra mắt hệ thống
+              </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-2xl font-bold text-green-900">
+            <p className="text-2xl font-bold text-status-success">
               {formatCurrency(data.totalRevenue || 0)}
             </p>
           </div>

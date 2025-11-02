@@ -558,7 +558,7 @@ const ProductModal = ({
             {/* Left side - Stock info for edit mode */}
             <div className="text-sm text-gray-600">
               {isEditMode && additionalStock > 0 && (
-                <div className="flex items-center space-x-2 text-green-600 font-medium">
+                <div className="flex items-center space-x-2 text-success font-medium">
                   <FontAwesomeIcon icon={["fas", "plus-circle"]} />
                   <span>Sẽ thêm {additionalStock} sản phẩm vào kho</span>
                 </div>

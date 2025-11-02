@@ -48,14 +48,16 @@ const AdminSidebar = ({
                   flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200
                   ${
                     isCurrentPath(item.href)
-                      ? "bg-blue-50 text-blue-700 border-r-4 border-blue-700"
+                      ? "bg-admin-50 text-admin-700 border-r-4 border-admin-700"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }
                 `}
               >
                 <span
                   className={
-                    isCurrentPath(item.href) ? "text-blue-700" : "text-gray-400"
+                    isCurrentPath(item.href)
+                      ? "text-admin-700"
+                      : "text-gray-400"
                   }
                 >
                   {item.icon}

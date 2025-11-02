@@ -170,7 +170,7 @@ const ProductManagement = React.memo(
                       onClick={() => onPageChange && onPageChange(pageNum)}
                       className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
                         pageNum === currentPage
-                          ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                          ? "z-10 bg-info bg-opacity-10 border-info text-info"
                           : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
                       }`}
                     >

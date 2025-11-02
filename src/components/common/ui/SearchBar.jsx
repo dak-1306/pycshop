@@ -17,14 +17,14 @@ const SearchBar = ({
   const colors =
     variant === "admin"
       ? {
-          gradient: "from-blue-400 to-blue-600",
-          focus: "focus:ring-blue-500",
-          button: "text-blue-600 hover:text-blue-700 hover:bg-blue-50",
+          gradient: "from-admin-400 to-admin-600",
+          focus: "focus:ring-admin-500",
+          button: "text-admin-600 hover:text-admin-700 hover:bg-admin-50",
         }
       : {
-          gradient: "from-orange-400 to-orange-600",
-          focus: "focus:ring-orange-500",
-          button: "text-green-600 hover:text-green-700 hover:bg-green-50",
+          gradient: "from-seller-400 to-seller-600",
+          focus: "focus:ring-seller-500",
+          button: "text-seller-600 hover:text-seller-700 hover:bg-seller-50",
         };
 
   return (

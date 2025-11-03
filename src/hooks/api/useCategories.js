@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { productService } from "../../lib/services/productService.js";
-import sellerProductService from "../../lib/services/sellerProductService.js";
+import productService from "../../lib/services/productService.js";
 
 // Fallback categories khi API lỗi
 const FALLBACK_CATEGORIES = [
@@ -30,10 +29,8 @@ export const useCategories = (usePublicAPI = false) => {
         } API...`
       );
 
-      // Chọn service dựa trên tham số
-      const response = usePublicAPI
-        ? await productService.getCategories()
-        : await sellerProductService.getCategories();
+      // Chọn service dựa trên tham số (cả 2 đều từ productService)
+      const response = await productService.getCategories();
 
       if (response.success && response.data) {
         // Map backend data to frontend format

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/components/buyer/Categories.css";
-import { productService } from "../../lib/services/productService.js";
+import productService from "../../lib/services/productService.js";
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);

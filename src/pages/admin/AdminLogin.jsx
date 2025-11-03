@@ -14,7 +14,6 @@ const AdminLogin = () => {
     showPassword,
     handleInputChange,
     handleSubmit,
-    handleDemoLogin,
     togglePasswordVisibility,
   } = useAdminLogin();
 

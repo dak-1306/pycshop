@@ -2,7 +2,7 @@
 // High-performance caching to reduce database load by 80-90%
 
 import Redis from "ioredis";
-import { productService } from "../productService.js";
+import productService from "./productService.js";
 
 // Redis configuration for high availability
 const redisConfig = {

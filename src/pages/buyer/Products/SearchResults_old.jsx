@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
-import { productService } from "../../../lib/services/productService.js";
+import productService from "../../../lib/services/productService.js";
 import "../../../styles/pages/buyer/SearchResults.css";
 
 const SearchResults = () => {
@@ -24,7 +24,7 @@ const SearchResults = () => {
     sortBy: "newest",
     rating: "",
     location: "",
-    selectedCategory: "all"
+    selectedCategory: "all",
   });
   const [sidebarVisible, setSidebarVisible] = useState(true);
 
@@ -175,13 +175,13 @@ const SearchResults = () => {
     if (categories.length > 0 && products.length > 0) {
       const newCategoryCounts = {};
       newCategoryCounts["all"] = products.length;
-      
+
       // Đếm sản phẩm cho mỗi category
-      products.forEach(product => {
+      products.forEach((product) => {
         const catId = String(product.category);
         newCategoryCounts[catId] = (newCategoryCounts[catId] || 0) + 1;
       });
-      
+
       // Chỉ update nếu có thay đổi
       let hasChanges = false;
       const updatedCategories = categories.map((cat) => {
@@ -191,7 +191,7 @@ const SearchResults = () => {
         }
         return { ...cat, count: newCount };
       });
-      
+
       if (hasChanges) {
         setCategories(updatedCategories);
       }
@@ -259,19 +259,22 @@ const SearchResults = () => {
   const validatePriceRange = (min, max) => {
     const minVal = parseFloat(min);
     const maxVal = parseFloat(max);
-    
+
     if (min !== "" && max !== "" && !isNaN(minVal) && !isNaN(maxVal)) {
       if (minVal > maxVal) {
         setPriceError("Giá tối thiểu không thể lớn hơn giá tối đa");
         return false;
       }
     }
-    
-    if ((min !== "" && isNaN(parseFloat(min))) || (max !== "" && isNaN(parseFloat(max)))) {
+
+    if (
+      (min !== "" && isNaN(parseFloat(min))) ||
+      (max !== "" && isNaN(parseFloat(max)))
+    ) {
       setPriceError("Vui lòng nhập số hợp lệ");
       return false;
     }
-    
+
     setPriceError("");
     return true;
   };
@@ -426,7 +429,7 @@ const SearchResults = () => {
                   >
                     1tr - 10tr
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setPriceRange({ min: "10000000", max: "" });
                       setPriceError("");
@@ -434,7 +437,7 @@ const SearchResults = () => {
                   >
                     Trên 10tr
                   </button>
-                  <button 
+                  <button
                     onClick={() => {
                       setPriceRange({ min: "", max: "" });
                       setPriceError("");

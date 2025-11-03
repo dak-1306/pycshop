@@ -5,4 +5,3 @@ export { default as ProductFilters } from "./ProductFilters";
 export { default as ProductStats } from "./ProductStats";
 export { default as ProductDetailModal } from "./ProductDetailModal";
 export { default as ProductImageGallery } from "./ProductImageGallery";
-export { default as Pagination } from "./Pagination";

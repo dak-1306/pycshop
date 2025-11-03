@@ -376,6 +376,7 @@ function setupRoutes(app) {
       }
       next();
     },
+
     createProxyMiddleware({
       target: process.env.CART_SERVICE_URL || "http://localhost:5004",
       changeOrigin: true,

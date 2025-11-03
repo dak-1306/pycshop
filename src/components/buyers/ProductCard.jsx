@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { ProductRating } from "../common/ui/StarRating";
 import "../../styles/components/buyer/ProductCard.css";
+import CartService from "../../lib/services/cartService";
 
 const ProductCard = ({ product, onClick }) => {
   const navigate = useNavigate();
@@ -18,16 +19,48 @@ const ProductCard = ({ product, onClick }) => {
       .replace("₫", "đ");
   };
 
+  const renderStars = (rating = 0) => {
+    const safeRating = rating || 0;
+    const stars = [];
+    const fullStars = Math.floor(safeRating);
+    const hasHalfStar = safeRating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <span key={i} className="star filled">
+          ★
+        </span>
+      );
+    }
+
+    if (hasHalfStar) {
+      stars.push(
+        <span key="half" className="star half">
+          ★
+        </span>
+      );
+    }
+
+    const emptyStars = 5 - Math.ceil(safeRating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <span key={`empty-${i}`} className="star">
+          ★
+        </span>
+      );
+    }
+
+    return stars;
+  };
+
   // Ensure product has default values to prevent undefined errors
   const safeProduct = {
     id: product?.id || 0,
     name: product?.name || "Sản phẩm",
     price: product?.price || 0,
     image: product?.image || "",
-    rating: product?.rating || product?.average_rating || 0,
-    average_rating: product?.average_rating || product?.rating || 0,
-    review_count: product?.review_count || product?.sold || 0,
-    sold: product?.sold || product?.review_count || 0,
+    rating: product?.rating || 0,
+    sold: product?.sold || 0,
     location: product?.location || "Việt Nam",
     discount: product?.discount || 0,
     originalPrice: product?.originalPrice || null,
@@ -79,12 +112,17 @@ const ProductCard = ({ product, onClick }) => {
           )}
         </div>
         <div className="product-meta">
-          <ProductRating
-            rating={safeProduct.average_rating}
-            reviewCount={safeProduct.review_count}
-            size="sm"
-            className="mb-2"
-          />
+          <div className="rating">
+            <div className="stars">{renderStars(safeProduct.rating)}</div>
+            <span className="rating-text">
+              ({safeProduct.rating.toFixed(1)})
+            </span>
+          </div>
+          <div className="sold">
+            {safeProduct.sold > 0
+              ? `${safeProduct.sold} đánh giá`
+              : "Chưa có đánh giá"}
+          </div>
         </div>
         <div className="product-location">{safeProduct.location}</div>
 
@@ -94,28 +132,49 @@ const ProductCard = ({ product, onClick }) => {
             className="btn-add-cart"
             onClick={async (e) => {
               e.stopPropagation();
-              // Add to cart logic here
-              const cartItems = JSON.parse(
-                localStorage.getItem("cartItems") || "[]"
-              );
-              const existingItem = cartItems.find(
-                (item) => item.id === safeProduct.id
-              );
 
-              if (existingItem) {
-                existingItem.quantity += 1;
-              } else {
-                cartItems.push({
+              try {
+                // Check if user is logged in
+                const token = localStorage.getItem("token");
+                if (!token) {
+                  alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+                  navigate("/login");
+                  return;
+                }
+
+                // Prepare product data for cart service
+                const productData = {
                   id: safeProduct.id,
                   name: safeProduct.name,
                   price: safeProduct.price,
                   image: safeProduct.image,
                   variant: "Mặc định",
-                });
-              }
+                };
 
-              localStorage.setItem("cartItems", JSON.stringify(cartItems));
-              alert("Đã thêm vào giỏ hàng!");
+                // Use CartService.addToCart method
+                const result = await CartService.addToCart(
+                  safeProduct.id,
+                  1,
+                  productData
+                );
+
+                if (result.success) {
+                  alert("Đã thêm vào giỏ hàng!");
+                  // Dispatch cart updated event
+                  window.dispatchEvent(
+                    new CustomEvent("cartUpdated", {
+                      detail: { totalItems: result.data.totalItems },
+                    })
+                  );
+                } else {
+                  alert(
+                    result.message || "Có lỗi xảy ra khi thêm vào giỏ hàng!"
+                  );
+                }
+              } catch (error) {
+                console.error("Error adding to cart:", error);
+                alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+              }
             }}
           >
             Thêm vào giỏ
@@ -124,16 +183,10 @@ const ProductCard = ({ product, onClick }) => {
             className="btn-buy-now"
             onClick={(e) => {
               e.stopPropagation();
-              // Buy now logic - redirect to checkout with this product
-              const cartItem = {
-                id: safeProduct.id,
-                name: safeProduct.name,
-                price: safeProduct.price,
-                quantity: 1,
-                image: safeProduct.image,
-                variant: "Mặc định",
-              };
-              navigate("/checkout", { state: { cartItems: [cartItem] } });
+              // Buy now logic - redirect to product detail for more options
+              navigate(`/product/${safeProduct.id}`, {
+                state: { buyNow: true },
+              });
             }}
           >
             Mua ngay

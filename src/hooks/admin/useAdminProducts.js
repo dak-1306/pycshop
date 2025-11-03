@@ -28,12 +28,11 @@ export const useAdminProducts = () => {
   const commonHook = useProductsCommon({
     role: "admin",
     service: adminProductService,
+    mockData: ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS, // Use mock data for admin
     canDelete: true, // Admins can delete products
     pageSize: 10,
     hasImageManagement: false, // Simpler admin interface
     hasStockManagement: false, // Admin doesn't manage stock directly
-    useMockData: true, // Use mock data for admin
-    initialData: ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS, // Provide initial mock data
   });
 
   // Admin-specific stats calculation from filtered products

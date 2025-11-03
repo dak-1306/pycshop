@@ -116,10 +116,18 @@ export const useOrdersCommon = (options = {}) => {
     // Search matching
     const matchesSearch =
       !searchValue ||
-      customerName.toLowerCase().includes(searchValue.toLowerCase()) ||
-      orderId.toLowerCase().includes(searchValue.toLowerCase()) ||
-      email.toLowerCase().includes(searchValue.toLowerCase()) ||
-      productName.toLowerCase().includes(searchValue.toLowerCase());
+      String(customerName || "")
+        .toLowerCase()
+        .includes(searchValue.toLowerCase()) ||
+      String(orderId || "")
+        .toLowerCase()
+        .includes(searchValue.toLowerCase()) ||
+      String(email || "")
+        .toLowerCase()
+        .includes(searchValue.toLowerCase()) ||
+      String(productName || "")
+        .toLowerCase()
+        .includes(searchValue.toLowerCase());
 
     // Status filtering
     const matchesStatus =

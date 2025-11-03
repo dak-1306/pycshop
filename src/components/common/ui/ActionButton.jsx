@@ -97,9 +97,12 @@ const ActionButton = ({ action, role = "common", children, ...props }) => {
 
   const config = actionConfigs[action] || actionConfigs.save;
 
+  // Filter out defaultText from config to prevent it from being passed to DOM
+  const { defaultText, ...buttonProps } = config;
+
   return (
-    <Button {...config} role={role} {...props}>
-      {children || config.defaultText}
+    <Button {...buttonProps} role={role} {...props}>
+      {children || defaultText}
     </Button>
   );
 };

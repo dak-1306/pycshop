@@ -1,4 +1,4 @@
-import sellerProductService from "../../lib/services/sellerProductService.js";
+import { sellerProductService } from "../../lib/services/productService.js";
 import useProductsCommon from "../common/useProducts.js";
 import { useCategories } from "../api/useCategories.js";
 
@@ -21,6 +21,12 @@ const INITIAL_FORM_STATE = {
 export const useProducts = () => {
   // Get categories helper
   const { categories } = useCategories(false);
+
+  console.log("[useProducts] Seller service:", sellerProductService);
+  console.log(
+    "[useProducts] getSellerProducts method:",
+    sellerProductService.getSellerProducts
+  );
 
   // Use common hook with seller-specific configuration
   const commonHook = useProductsCommon({

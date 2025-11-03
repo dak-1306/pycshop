@@ -10,6 +10,7 @@ import ErrorDisplay from "../../components/common/feedback/ErrorDisplay";
 import EmptyState from "../../components/common/feedback/EmptyState";
 import { useProducts } from "../../hooks/seller/useProducts";
 import { useCategories } from "../../hooks/api/useCategories";
+import { useAuth } from "../../context/AuthContext";
 
 // CSS animations
 const styles = `
@@ -46,6 +47,14 @@ if (typeof document !== "undefined") {
 }
 
 const ManageProduct = () => {
+  // Check auth status
+  const { user, isAuthenticated } = useAuth();
+  console.log("[ManageProduct] Auth status:", { user, isAuthenticated });
+  console.log(
+    "[ManageProduct] Token in localStorage:",
+    localStorage.getItem("token")?.substring(0, 20)
+  );
+
   // Get categories from API
   const {
     categories,
@@ -98,6 +107,27 @@ const ManageProduct = () => {
     handleRemoveImage,
     handleSetFeaturedImage,
   } = useProducts();
+
+  // Debug logging - Add useEffect to track products changes
+  React.useEffect(() => {
+    console.log("[ManageProduct] Products state changed:", {
+      productsLength: products?.length || 0,
+      isLoading,
+      error,
+      products: products?.slice(0, 3), // Log first 3 products as sample
+    });
+  }, [products, isLoading, error]);
+
+  console.log(
+    "[ManageProduct] Current render - Products loaded:",
+    products?.length || 0,
+    "isLoading:",
+    isLoading,
+    "error:",
+    error
+  );
+  console.log("[ManageProduct] Is loading:", isLoading);
+  console.log("[ManageProduct] Error:", error);
 
   // Prepare categories for ProductModal (expects string array format)
   const categoryNames = categories.map((cat) => cat.name);

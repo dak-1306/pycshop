@@ -5,13 +5,15 @@ function setupRoutes(app) {
   console.log("[ROUTES] Setting up proxy routes...");
   // Auth Service - Manual Proxy Approach
   app.use("/auth", (req, res, next) => {
-    console.log(`[ROUTES] Manual auth proxy for ${req.method} ${req.originalUrl}`);
+    console.log(
+      `[ROUTES] Manual auth proxy for ${req.method} ${req.originalUrl}`
+    );
     console.log(`[ROUTES] req.user:`, req.user);
-    
+
     // Skip auth middleware for login/register routes
     const publicRoutes = [
       "/auth/login",
-      "/auth/register", 
+      "/auth/register",
       "/auth/logout",
       "/auth/admin/login",
       "/auth/register-admin",
@@ -31,23 +33,23 @@ function setupRoutes(app) {
         success: false,
         message: "Vui lòng đăng nhập để tiếp tục",
         code: "NO_TOKEN",
-        requireLogin: true
+        requireLogin: true,
       });
     }
-    
+
     // For GET requests, handle immediately
-    if (req.method === 'GET' || req.method === 'HEAD') {
+    if (req.method === "GET" || req.method === "HEAD") {
       handleAuthProxy(req, res);
       return;
     }
-    
+
     // For POST/PUT requests, collect body first
-    let body = '';
-    req.on('data', (chunk) => {
+    let body = "";
+    req.on("data", (chunk) => {
       body += chunk.toString();
     });
-    
-    req.on('end', () => {
+
+    req.on("end", () => {
       req.bodyString = body;
       handleAuthProxy(req, res);
     });
@@ -55,56 +57,57 @@ function setupRoutes(app) {
 
   async function handleAuthProxy(req, res) {
     try {
-      // Build target URL  
-      const targetPath = req.url.replace(/^\//, ''); // Remove leading slash
+      // Build target URL
+      const targetPath = req.url.replace(/^\//, ""); // Remove leading slash
       const targetUrl = `http://localhost:5001/${targetPath}`;
-      
+
       console.log(`🔥 [MANUAL_AUTH_PROXY] Forwarding to: ${targetUrl}`);
-      
+
       // Prepare headers - copy from original request
       const headers = {
         ...req.headers,
-        'x-user-id': req.user?.id?.toString() || '',
-        'x-user-role': req.user?.role || '',
-        'x-user-type': req.user?.userType || '',
+        "x-user-id": req.user?.id?.toString() || "",
+        "x-user-role": req.user?.role || "",
+        "x-user-type": req.user?.userType || "",
       };
-      
+
       delete headers.host; // Remove host header to avoid conflicts
-      
+
       // Prepare request options
       const requestOptions = {
         method: req.method,
         headers,
       };
-      
+
       // Add body for POST/PUT requests
       if (req.bodyString) {
         requestOptions.body = req.bodyString;
         console.log(`🔥 [MANUAL_AUTH_PROXY] Body: ${req.bodyString}`);
       }
-      
+
       // Make request to auth service
       const response = await fetch(targetUrl, requestOptions);
       const data = await response.json();
-      
-      console.log(`🔥 [MANUAL_AUTH_PROXY] Response ${response.status} from auth service`);
-      
+
+      console.log(
+        `🔥 [MANUAL_AUTH_PROXY] Response ${response.status} from auth service`
+      );
+
       // Set CORS headers
       const origin = req.headers.origin;
       if (origin) {
-        res.setHeader('Access-Control-Allow-Origin', origin);
-        res.setHeader('Access-Control-Allow-Credentials', 'true');
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Access-Control-Allow-Credentials", "true");
       }
-      
+
       // Return response
       res.status(response.status).json(data);
-      
     } catch (error) {
       console.error(`🔥 [MANUAL_AUTH_PROXY] Error:`, error.message);
-      res.status(500).json({ 
-        success: false, 
-        message: 'Auth service error', 
-        error: error.message 
+      res.status(500).json({
+        success: false,
+        message: "Auth service error",
+        error: error.message,
       });
     }
   }

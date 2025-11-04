@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import cartRoutes from "./routes/cartRoutes.js";
 import { startKafkaConsumer } from "./services/kafkaConsumer.js";
+import { scheduleRedisToKafkaSync } from "./services/scheduler.js";
 
 dotenv.config();
 
@@ -75,5 +76,6 @@ const startServer = async () => {
 };
 
 startServer();
+scheduleRedisToKafkaSync();
 
 export default app;

@@ -40,8 +40,8 @@ export const addToCart = async (req, res) => {
     // Add item to Redis
     await addItemToRedis(userId, productId, quantity, productData);
 
-    // Send Kafka event for sync
-    await sendCartUpdate(userId, "add", { productId, quantity, productData });
+    // // Send Kafka event for sync
+    // await sendCartUpdate(userId, "add", { productId, quantity, productData });
 
     // Get updated cart count
     const itemCount = await getCartItemCount(userId);
@@ -101,7 +101,7 @@ export const updateCartItem = async (req, res) => {
 
     // Send Kafka event for sync
     const action = quantity === 0 ? "remove" : "update";
-    await sendCartUpdate(userId, action, { productId, quantity });
+    // await sendCartUpdate(userId, action, { productId, quantity });
 
     // Get updated cart count
     const itemCount = await getCartItemCount(userId);
@@ -155,8 +155,8 @@ export const removeFromCart = async (req, res) => {
     // Remove item from Redis
     await removeItemFromRedis(userId, productId);
 
-    // Send Kafka event for sync
-    await sendCartUpdate(userId, "remove", { productId });
+    // // Send Kafka event for sync
+    // await sendCartUpdate(userId, "remove", { productId });
 
     // Get updated cart count
     const itemCount = await getCartItemCount(userId);

@@ -42,8 +42,25 @@ export const addItemToRedis = async (
       );
     }
 
-    // Increment quantity for the product
-    await redis.hincrby(key, productId, quantity);
+    // Kiểm tra sản phẩm đã tồn tại trong giỏ chưa
+    const currentQty = await redis.hget(key, productId);
+    let newQty;
+
+    if (currentQty) {
+      // Nếu đã có thì cộng thêm
+      newQty = parseInt(currentQty) + parseInt(quantity);
+      await redis.hset(key, productId, newQty);
+      console.log(
+        `[REDIS] Updated product ${productId} quantity from ${currentQty} -> ${newQty} for user ${userId}`
+      );
+    } else {
+      // Nếu chưa có thì thêm mới
+      newQty = parseInt(quantity);
+      await redis.hset(key, productId, newQty);
+      console.log(
+        `[REDIS] Added new product ${productId} (quantity=${newQty}) for user ${userId}`
+      );
+    }
 
     // Set TTL = 7 days
     await redis.expire(key, 7 * 24 * 60 * 60);

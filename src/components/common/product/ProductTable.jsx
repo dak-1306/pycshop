@@ -1,8 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { formatCurrency } from "../../../lib/utils";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { ActionButton, IconButton } from "../ui";
+import { DataTable } from "../ui";
 
 const ProductTable = React.memo(
   ({
@@ -13,49 +12,7 @@ const ProductTable = React.memo(
     getStatusColor,
     variant = "seller", // "admin" | "seller"
   }) => {
-    // Defensive check for products array
-    const safeProducts = Array.isArray(products) ? products : [];
-
-    // Show empty state if no products
-    if (safeProducts.length === 0) {
-      return (
-        <div className="bg-white rounded-xl shadow-sm border p-8 text-center">
-          <FontAwesomeIcon
-            icon={["fas", "box-open"]}
-            className="w-16 h-16 mx-auto text-gray-300 mb-4"
-          />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Chưa có sản phẩm
-          </h3>
-          <p className="text-gray-500">Danh sách sản phẩm sẽ hiển thị ở đây</p>
-        </div>
-      );
-    }
-
-    const getStatusColorInternal = (status) => {
-      if (getStatusColor) return getStatusColor(status);
-
-      switch (status) {
-        case "active":
-        case "hoạt động":
-          return "bg-success text-white";
-        case "inactive":
-        case "không hoạt động":
-          return "bg-red-100 text-red-800";
-        case "pending":
-        case "chờ duyệt":
-          return "bg-yellow-100 text-yellow-800";
-        case "draft":
-        case "bản nháp":
-          return "bg-gray-100 text-gray-800";
-        case "out_of_stock":
-        case "hết hàng":
-          return "bg-orange-100 text-orange-800";
-        default:
-          return "bg-gray-100 text-gray-800";
-      }
-    };
-
+    // Helper functions
     const getStatusText = (status) => {
       switch (status) {
         case "active":
@@ -86,7 +43,6 @@ const ProductTable = React.memo(
     };
 
     const getProductImage = (product) => {
-      // Handle different image property formats
       if (product.image) return product.image;
       if (
         product.images &&
@@ -99,159 +55,151 @@ const ProductTable = React.memo(
       return "/images/placeholder-product.png";
     };
 
-    // Unified admin-style table with conditional column display
+    // Row action handler
+    const handleRowAction = (actionType, product) => {
+      const productId = product.id || product.ID_SanPham;
+
+      switch (actionType) {
+        case "view":
+          onViewProduct && onViewProduct(productId);
+          break;
+        case "edit":
+          onEditProduct && onEditProduct(productId);
+          break;
+        case "delete":
+          onDeleteProduct && onDeleteProduct(productId);
+          break;
+      }
+    };
+
+    // Status color with product-specific mapping
+    const getStatusColorInternal = (status, type) => {
+      if (getStatusColor) return getStatusColor(status, type);
+
+      const productStatusColors = {
+        active: "bg-green-100 text-green-800",
+        "hoạt động": "bg-green-100 text-green-800",
+        inactive: "bg-red-100 text-red-800",
+        "không hoạt động": "bg-red-100 text-red-800",
+        pending: "bg-yellow-100 text-yellow-800",
+        "chờ duyệt": "bg-yellow-100 text-yellow-800",
+        draft: "bg-gray-100 text-gray-800",
+        "bản nháp": "bg-gray-100 text-gray-800",
+        out_of_stock: "bg-orange-100 text-orange-800",
+        "hết hàng": "bg-orange-100 text-orange-800",
+      };
+
+      return productStatusColors[status] || "bg-gray-100 text-gray-800";
+    };
+
+    // Table columns configuration
+    const columns = [
+      {
+        header: "Sản phẩm",
+        type: "image",
+        showDetails: true,
+        nowrap: true,
+        getImageUrl: getProductImage,
+        getTitle: (product) =>
+          product ? product.name || product.TenSanPham : "Sản phẩm",
+        getSubtitle: (product) =>
+          product ? `#${product.id || product.ID_SanPham}` : "#0",
+      },
+      {
+        header: "Danh mục",
+        type: "text",
+        nowrap: true,
+        format: (_, product) =>
+          product
+            ? getCategoryText(product.category || product.DanhMuc)
+            : "Chưa phân loại",
+      },
+      {
+        header: "Người bán",
+        type: "text",
+        nowrap: true,
+        adminOnly: true,
+        format: (_, product) =>
+          product
+            ? product.sellerName ||
+              product.seller ||
+              product.TenCuaHang ||
+              "Shop"
+            : "Shop",
+      },
+      {
+        header: "Giá",
+        type: "currency",
+        nowrap: true,
+        format: (_, product) =>
+          product ? formatCurrency(product.price || product.Gia) : "0",
+      },
+      {
+        header: "Tồn kho",
+        type: "text",
+        nowrap: true,
+        format: (_, product) =>
+          product
+            ? (product.stock !== undefined
+                ? product.stock
+                : product.SoLuongTon) || 0
+            : 0,
+      },
+      {
+        header: "Trạng thái",
+        type: "status",
+        nowrap: true,
+        accessor: "status",
+        statusType: "product",
+        getStatusText,
+        format: (_, product) =>
+          product ? product.status || product.TrangThai : "active",
+      },
+      {
+        header: "Ngày tạo",
+        type: "date",
+        nowrap: true,
+        format: (_, product) =>
+          product ? product.createdAt || product.NgayTao : null,
+      },
+      {
+        header: "Hành động",
+        type: "actions",
+        nowrap: true,
+        actions: [
+          {
+            type: "view",
+            label: "Xem",
+            title: "Xem chi tiết sản phẩm",
+          },
+          {
+            type: "edit",
+            label: "Sửa",
+            title: "Chỉnh sửa sản phẩm",
+          },
+          {
+            type: "delete",
+            label: "Xóa",
+            title: "Xóa sản phẩm",
+            shouldShow: () => variant === "admin",
+          },
+        ],
+      },
+    ];
+
     return (
-      <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Sản phẩm
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Danh mục
-                </th>
-                {variant === "admin" && (
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Người bán
-                  </th>
-                )}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Giá
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Tồn kho
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Trạng thái
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Ngày tạo
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Hành động
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {safeProducts.map((product, index) => (
-                <tr
-                  key={product.id || product.ID_SanPham || `product-${index}`}
-                  className="hover:bg-gray-50 transition-colors duration-150"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-12 w-12">
-                        <img
-                          className="h-12 w-12 rounded-lg object-cover border"
-                          src={getProductImage(product)}
-                          alt={product.name || product.TenSanPham || "Product"}
-                          onError={(e) => {
-                            e.target.src = "/images/placeholder-product.png";
-                          }}
-                        />
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
-                          {product.name || product.TenSanPham}
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          #{product.id || product.ID_SanPham}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {getCategoryText(product.category || product.DanhMuc)}
-                    </div>
-                  </td>
-                  {variant === "admin" && (
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {product.sellerName ||
-                          product.seller ||
-                          product.TenCuaHang ||
-                          "Shop"}
-                      </div>
-                    </td>
-                  )}
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-semibold text-gray-900">
-                      {formatCurrency(product.price || product.Gia)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
-                      {(product.stock !== undefined
-                        ? product.stock
-                        : product.SoLuongTon) || 0}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorInternal(
-                        product.status || product.TrangThai
-                      )}`}
-                    >
-                      {getStatusText(product.status || product.TrangThai)}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {product.createdAt || product.NgayTao
-                      ? new Date(
-                          product.createdAt || product.NgayTao
-                        ).toLocaleDateString("vi-VN")
-                      : "-"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center space-x-2">
-                      <ActionButton
-                        action="view"
-                        onClick={() =>
-                          onViewProduct &&
-                          onViewProduct(product.id || product.ID_SanPham)
-                        }
-                        role={variant}
-                        size="sm"
-                      >
-                        Xem
-                      </ActionButton>
-
-                      <ActionButton
-                        action="edit"
-                        onClick={() =>
-                          onEditProduct &&
-                          onEditProduct(product.id || product.ID_SanPham)
-                        }
-                        role={variant}
-                        size="sm"
-                      >
-                        Sửa
-                      </ActionButton>
-
-                      {variant === "admin" && (
-                        <ActionButton
-                          action="delete"
-                          onClick={() =>
-                            onDeleteProduct &&
-                            onDeleteProduct(product.id || product.ID_SanPham)
-                          }
-                          role={variant}
-                          size="sm"
-                        >
-                          Xóa
-                        </ActionButton>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <DataTable
+        data={products}
+        columns={columns}
+        variant={variant}
+        onRowAction={handleRowAction}
+        getStatusColor={getStatusColorInternal}
+        emptyState={{
+          icon: ["fas", "box-open"],
+          title: "Chưa có sản phẩm",
+          description: "Danh sách sản phẩm sẽ hiển thị ở đây",
+        }}
+      />
     );
   }
 );

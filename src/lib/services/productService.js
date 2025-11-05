@@ -413,9 +413,41 @@ export const getStockHistory = async (productId, params = {}) => {
  */
 export const getAdminProducts = async (params = {}) => {
   try {
-    const queryParams = new URLSearchParams(params).toString();
-    const url = `/admin/products${queryParams ? `?${queryParams}` : ""}`;
-    return await api.get(url);
+    // Filter out undefined, null, and empty string values
+    const cleanParams = Object.entries(params).reduce((acc, [key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
+    const queryParams = new URLSearchParams(cleanParams).toString();
+    const url = `/products${queryParams ? `?${queryParams}` : ""}`;
+
+    console.log("[getAdminProducts] Clean params:", cleanParams);
+    console.log("[getAdminProducts] Final URL:", url);
+
+    // Call admin service directly on port 5006
+    const ADMIN_API_URL = "http://localhost:5006";
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    const response = await fetch(`${ADMIN_API_URL}${url}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({
+        message: "Network error",
+      }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
     console.error("Error fetching admin products:", error);
     throw error;
@@ -430,7 +462,27 @@ export const getAdminProducts = async (params = {}) => {
  */
 export const updateProductStatus = async (id, status) => {
   try {
-    return await api.patch(`/admin/products/${id}/status`, { status });
+    const ADMIN_API_URL = "http://localhost:5006";
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    const response = await fetch(`${ADMIN_API_URL}/products/${id}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+      body: JSON.stringify({ status }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({
+        message: "Network error",
+      }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
     console.error("Error updating product status:", error);
     throw error;
@@ -457,7 +509,26 @@ export const getProductStats = async () => {
  */
 export const adminDeleteProduct = async (id) => {
   try {
-    return await api.delete(`/admin/products/${id}`);
+    const ADMIN_API_URL = "http://localhost:5006";
+    const token =
+      localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    const response = await fetch(`${ADMIN_API_URL}/products/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({
+        message: "Network error",
+      }));
+      throw new Error(error.message || `HTTP ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
     console.error("Error deleting product (admin):", error);
     throw error;

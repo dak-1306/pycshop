@@ -1,12 +1,16 @@
 import React from "react";
-import ProductStats from "../../components/common/product/ProductStats";
-import ProductFilters from "../../components/common/product/ProductFilters";
-import ProductTable from "../../components/common/product/ProductTable";
-import Pagination from "../../components/common/product/Pagination";
+import {
+  ProductManagement,
+  ProductDetailModal,
+} from "../../components/common/product";
 import ProductModal from "../../components/common/modals/ProductModal";
-import ProductDetailModal from "../../components/common/product/ProductDetailModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
+import { Button, ActionButton } from "../../components/common/ui";
 import { useAdminProducts } from "../../hooks/admin/useAdminProducts";
+import {
+  ADMIN_CONSTANTS,
+  ADMIN_PRODUCT_CATEGORIES,
+} from "../../lib/constants/adminConstants";
 
 const AdminProducts = () => {
   const {
@@ -30,6 +34,7 @@ const AdminProducts = () => {
     showDeleteModal,
     setShowDeleteModal,
     selectedProduct,
+    setSelectedProduct,
     modalMode,
     handleViewProduct,
     handleEditProduct,
@@ -38,14 +43,18 @@ const AdminProducts = () => {
     handleSaveProduct,
     confirmDeleteProduct,
     handleResetFilters,
+    handleExport,
+    handleCloseProductModal,
   } = useAdminProducts();
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải dữ liệu sản phẩm...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-admin-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {ADMIN_CONSTANTS.PAGES.PRODUCTS.LOADING}
+          </p>
         </div>
       </div>
     );
@@ -53,66 +62,42 @@ const AdminProducts = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">
-              📦 Quản lý sản phẩm
-            </h1>
-            <p className="text-gray-600">
-              Quản lý tất cả sản phẩm trong hệ thống
-              {(searchValue || categoryFilter || statusFilter) && (
-                <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded text-sm">
-                  Hiển thị {totalItems} sản phẩm
-                </span>
-              )}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Stats Cards */}
-      <ProductStats stats={stats} />
-
-      {/* Products Table with Filters */}
-      <div className="bg-white rounded-lg shadow">
-        <ProductFilters
-          searchTerm={searchValue}
-          selectedCategory={categoryFilter}
-          selectedStatus={statusFilter}
-          onSearchChange={setSearchValue}
-          onCategoryChange={setCategoryFilter}
-          onStatusChange={setStatusFilter}
-          onResetFilters={handleResetFilters}
-          showResetButton={searchValue || categoryFilter || statusFilter}
-        />
-        <ProductTable
-          variant="admin"
-          products={products}
-          onViewProduct={handleViewProduct}
-          onEditProduct={handleEditProduct}
-          onDeleteProduct={handleDeleteProduct}
-        />
-      </div>
-
-      {/* Pagination */}
-      {totalItems > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalItems={totalItems}
-          itemsPerPage={10}
-          variant="admin"
-        />
-      )}
+      {/* Unified Product Management */}
+      <ProductManagement
+        // Data
+        products={products}
+        stats={stats}
+        // Actions
+        onAddProduct={handleAddProduct}
+        onViewProduct={handleViewProduct}
+        onEditProduct={handleEditProduct}
+        onDeleteProduct={handleDeleteProduct}
+        onExportProducts={handleExport}
+        // Filters
+        onSearchChange={setSearchValue}
+        onCategoryFilter={setCategoryFilter}
+        onStatusFilter={setStatusFilter}
+        onPriceFilter={() => {}} // Add price filter if needed
+        // Pagination
+        currentPage={currentPage}
+        totalPages={totalPages || Math.ceil(totalItems / 10)}
+        onPageChange={setCurrentPage}
+        // Config
+        variant="admin"
+        isLoading={isLoading}
+        // Styling
+        getStatusColor={() => "bg-gray-100 text-gray-800"} // Add status color function
+      />
 
       {/* Product Modal */}
       <ProductModal
         isOpen={showProductModal}
-        onClose={() => setShowProductModal(false)}
+        onClose={handleCloseProductModal}
         mode={modalMode}
         product={selectedProduct}
+        onProductChange={setSelectedProduct}
         onSave={handleSaveProduct}
+        categories={ADMIN_PRODUCT_CATEGORIES.map((cat) => cat.name)}
         variant="admin"
       />
 
@@ -121,6 +106,7 @@ const AdminProducts = () => {
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         product={selectedProduct}
+        variant="admin"
         onEdit={() => {
           setShowDetailModal(false);
           handleEditProduct(selectedProduct?.id);
@@ -133,9 +119,9 @@ const AdminProducts = () => {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDeleteProduct}
         item={selectedProduct}
-        itemType="sản phẩm"
-        title="Xác nhận xóa sản phẩm"
-        subtitle="Hành động này không thể hoàn tác"
+        itemType={ADMIN_CONSTANTS.ITEM_TYPES.PRODUCT}
+        title={ADMIN_CONSTANTS.MODAL_TITLES.DELETE_PRODUCT}
+        subtitle={ADMIN_CONSTANTS.MODAL_TITLES.DELETE_SUBTITLE}
       />
     </div>
   );

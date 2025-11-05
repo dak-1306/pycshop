@@ -1,15 +1,15 @@
 import React from "react";
+import PropTypes from "prop-types";
+import { formatCurrency } from "../../../lib/utils";
 
-const UserAnalytics = ({ data }) => {
+const UserAnalytics = ({ data = {} }) => {
   const formatNumber = (num) => {
+    if (typeof num !== "number") {
+      const numValue = Number(num);
+      if (isNaN(numValue)) return "0";
+      num = numValue;
+    }
     return new Intl.NumberFormat("vi-VN").format(num);
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
   };
 
   return (
@@ -26,7 +26,7 @@ const UserAnalytics = ({ data }) => {
       {/* Key Metrics */}
       <div className="grid grid-cols-2 gap-4 mb-6">
         <div className="bg-blue-50 rounded-lg p-4">
-          <p className="text-sm font-medium text-blue-600 mb-1">
+          <p className="text-sm font-medium text-admin-600 mb-1">
             Tổng người dùng
           </p>
           <p className="text-2xl font-bold text-blue-900">
@@ -34,7 +34,7 @@ const UserAnalytics = ({ data }) => {
           </p>
         </div>
         <div className="bg-green-50 rounded-lg p-4">
-          <p className="text-sm font-medium text-green-600 mb-1">
+          <p className="text-sm font-medium text-success mb-1">
             Người dùng mới tháng này
           </p>
           <p className="text-2xl font-bold text-green-900">
@@ -109,8 +109,8 @@ const UserAnalytics = ({ data }) => {
               className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
             >
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-bold text-blue-600">
+                <div className="w-8 h-8 bg-admin-100 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-bold text-admin-600">
                     #{index + 1}
                   </span>
                 </div>
@@ -122,7 +122,7 @@ const UserAnalytics = ({ data }) => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-bold text-green-600">
+                <p className="font-bold text-success">
                   {formatCurrency(seller.totalRevenue)}
                 </p>
               </div>
@@ -151,4 +151,13 @@ const UserAnalytics = ({ data }) => {
   );
 };
 
-export default UserAnalytics;
+UserAnalytics.propTypes = {
+  data: PropTypes.shape({
+    userGrowth: PropTypes.array,
+    userEngagement: PropTypes.object,
+    topUsers: PropTypes.array,
+    userSegmentation: PropTypes.array,
+  }),
+};
+
+export default React.memo(UserAnalytics);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const OrderModal = ({
   isOpen,
@@ -57,13 +58,17 @@ const OrderModal = ({
       ? {
           headerGradient: "from-blue-600 via-blue-700 to-indigo-600",
           accentColor: "blue",
-          headerIcon: "👑",
+          headerIcon: (
+            <FontAwesomeIcon icon={["fas", "crown"]} className="w-6 h-6" />
+          ),
           statusColor: "blue",
         }
       : {
           headerGradient: "from-orange-500 via-orange-600 to-red-500",
           accentColor: "orange",
-          headerIcon: "🛍️",
+          headerIcon: (
+            <FontAwesomeIcon icon={["fas", "store"]} className="w-6 h-6" />
+          ),
           statusColor: "orange",
         };
 
@@ -71,9 +76,9 @@ const OrderModal = ({
   const getStatusColor = (status) => {
     const statusColors = {
       pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      processing: "bg-blue-100 text-blue-800 border-blue-200",
+      processing: "bg-info bg-opacity-10 text-info border-info",
       shipping: "bg-purple-100 text-purple-800 border-purple-200",
-      delivered: "bg-green-100 text-green-800 border-green-200",
+      delivered: "bg-success text-white border-success",
       cancelled: "bg-red-100 text-red-800 border-red-200",
       returned: "bg-gray-100 text-gray-800 border-gray-200",
     };
@@ -84,21 +89,65 @@ const OrderModal = ({
   const getStatusOptions = () => {
     if (variant === "admin") {
       return [
-        { value: "pending", label: "Chờ xử lý", icon: "⏳" },
-        { value: "processing", label: "Đang xử lý", icon: "🔄" },
-        { value: "shipping", label: "Đang giao", icon: "🚛" },
-        { value: "delivered", label: "Đã giao", icon: "✅" },
-        { value: "cancelled", label: "Đã hủy", icon: "❌" },
-        { value: "returned", label: "Trả hàng", icon: "↩️" },
+        {
+          value: "pending",
+          label: "Chờ xử lý",
+          icon: <FontAwesomeIcon icon={["fas", "hourglass"]} />,
+        },
+        {
+          value: "processing",
+          label: "Đang xử lý",
+          icon: <FontAwesomeIcon icon={["fas", "sync"]} />,
+        },
+        {
+          value: "shipping",
+          label: "Đang giao",
+          icon: <FontAwesomeIcon icon={["fas", "truck"]} />,
+        },
+        {
+          value: "delivered",
+          label: "Đã giao",
+          icon: <FontAwesomeIcon icon={["fas", "check"]} />,
+        },
+        {
+          value: "cancelled",
+          label: "Đã hủy",
+          icon: <FontAwesomeIcon icon={["fas", "times"]} />,
+        },
+        {
+          value: "returned",
+          label: "Trả hàng",
+          icon: <FontAwesomeIcon icon={["fas", "undo"]} />,
+        },
       ];
     } else {
       // Seller has limited status options
       return [
-        { value: "pending", label: "Chờ xử lý", icon: "⏳" },
-        { value: "processing", label: "Đang chuẩn bị", icon: "📦" },
-        { value: "shipping", label: "Đã giao shipper", icon: "🚛" },
-        { value: "delivered", label: "Hoàn thành", icon: "✅" },
-        { value: "cancelled", label: "Hủy đơn", icon: "❌" },
+        {
+          value: "pending",
+          label: "Chờ xử lý",
+          icon: <FontAwesomeIcon icon={["fas", "hourglass"]} />,
+        },
+        {
+          value: "processing",
+          label: "Đang chuẩn bị",
+          icon: <FontAwesomeIcon icon={["fas", "box-open"]} />,
+        },
+        {
+          value: "shipping",
+          label: "Đã giao shipper",
+          icon: <FontAwesomeIcon icon={["fas", "truck"]} />,
+        },
+        {
+          value: "delivered",
+          label: "Hoàn thành",
+          icon: <FontAwesomeIcon icon={["fas", "check"]} />,
+        },
+        {
+          value: "cancelled",
+          label: "Hủy đơn",
+          icon: <FontAwesomeIcon icon={["fas", "times"]} />,
+        },
       ];
     }
   };
@@ -130,7 +179,11 @@ const OrderModal = ({
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                   <span className="text-2xl">
-                    {modalMode === "edit" ? "✏️" : "➕"}
+                    {modalMode === "edit" ? (
+                      <FontAwesomeIcon icon={["fas", "pencil-alt"]} />
+                    ) : (
+                      <FontAwesomeIcon icon={["fas", "plus"]} />
+                    )}
                   </span>
                 </div>
                 <div>
@@ -265,9 +318,17 @@ const OrderModal = ({
                   onChange={handleInputChange}
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 >
-                  <option value="pending">⏳ Chờ thanh toán</option>
-                  <option value="paid">💰 Đã thanh toán</option>
-                  <option value="failed">❌ Thất bại</option>
+                  <option value="pending">
+                    <FontAwesomeIcon icon={["fas", "hourglass"]} /> Chờ thanh
+                    toán
+                  </option>
+                  <option value="paid">
+                    <FontAwesomeIcon icon={["fas", "money-bill-wave"]} /> Đã
+                    thanh toán
+                  </option>
+                  <option value="failed">
+                    <FontAwesomeIcon icon={["fas", "times-circle"]} /> Thất bại
+                  </option>
                 </select>
               </div>
             </div>
@@ -285,7 +346,8 @@ const OrderModal = ({
                 type="submit"
                 className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
               >
-                💾 {modalMode === "edit" ? "Lưu thay đổi" : "Tạo đơn hàng"}
+                <FontAwesomeIcon icon={["fas", "save"]} />{" "}
+                {modalMode === "edit" ? "Lưu thay đổi" : "Tạo đơn hàng"}
               </button>
             </div>
           </form>
@@ -298,60 +360,48 @@ const OrderModal = ({
   if (!order) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[90vh] flex flex-col transform transition-all animate-slideUp">
-        {/* Header */}
+    <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl shadow-2xl max-w-5xl w-full h-[85vh] flex flex-col overflow-hidden">
+        {/* Compact Header */}
         <div
-          className={`relative bg-gradient-to-r ${colors.headerGradient} text-white px-8 py-6 rounded-t-2xl flex-shrink-0`}
+          className={`bg-gradient-to-r ${colors.headerGradient} text-white px-6 py-4 rounded-t-2xl flex-shrink-0`}
         >
-          <div className="relative flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                <span className="text-2xl">{colors.headerIcon}</span>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                {colors.headerIcon}
               </div>
               <div>
-                <h2 className="text-2xl font-bold">
-                  Chi tiết đơn hàng #{order.id}
-                </h2>
-                <p className="text-white text-opacity-90 text-sm mt-1">
+                <h2 className="text-xl font-bold">Đơn hàng #{order.id}</h2>
+                <p className="text-white text-opacity-80 text-sm">
                   {variant === "admin"
-                    ? `Quản lý đơn hàng - ${formatDate(order.createdAt)}`
-                    : `Đơn hàng của bạn - ${formatDate(order.createdAt)}`}
+                    ? "Quản lý đơn hàng"
+                    : "Chi tiết đơn hàng"}{" "}
+                  • {formatDate(order.createdAt)}
                 </p>
               </div>
             </div>
             <button
               onClick={onClose}
-              className="w-10 h-10 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all transform hover:rotate-90"
+              className="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-lg flex items-center justify-center transition-all"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                strokeWidth={2.5}
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <FontAwesomeIcon icon={["fas", "times"]} />
             </button>
           </div>
         </div>
 
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto p-8 bg-gradient-to-br from-gray-50 to-white">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Optimized Content Layout */}
+        <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
             {/* Left Column - Order Info */}
             <div className="space-y-6">
               {/* Order Status */}
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-blue-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-blue-500 text-white rounded-md flex items-center justify-center text-xs">
-                    📊
-                  </span>
+                  <FontAwesomeIcon
+                    icon={["fas", "info-circle"]}
+                    className="w-6 h-6 text-blue-500"
+                  />
                   Trạng thái đơn hàng
                 </h3>
 
@@ -372,7 +422,7 @@ const OrderModal = ({
                   </span>
                   <div className="text-right">
                     <div className="text-sm text-gray-600">Tổng tiền</div>
-                    <div className="text-xl font-bold text-green-600">
+                    <div className="text-xl font-bold text-success">
                       {formatCurrency(order.total)}
                     </div>
                   </div>
@@ -402,9 +452,10 @@ const OrderModal = ({
               {/* Customer/Seller Info */}
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-green-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-green-500 text-white rounded-md flex items-center justify-center text-xs">
-                    👤
-                  </span>
+                  <FontAwesomeIcon
+                    icon={["fas", "users"]}
+                    className="w-6 h-6 text-green-500"
+                  />
                   {variant === "admin"
                     ? "Thông tin khách hàng & Shop"
                     : "Thông tin khách hàng"}
@@ -414,7 +465,11 @@ const OrderModal = ({
                   {/* Customer Info */}
                   <div className="bg-gray-50 rounded-lg p-4">
                     <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                      <span className="text-blue-600">👤</span> Khách hàng
+                      <FontAwesomeIcon
+                        icon={["fas", "user"]}
+                        className="w-6 h-6 text-info"
+                      />
+                      Khách hàng
                     </h4>
                     <div className="space-y-2 text-sm">
                       <div>
@@ -436,8 +491,11 @@ const OrderModal = ({
                   {variant === "admin" && (
                     <div className="bg-gray-50 rounded-lg p-4">
                       <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
-                        <span className="text-orange-600">🏪</span> Shop bán
-                        hàng
+                        <FontAwesomeIcon
+                          icon={["fas", "store"]}
+                          className="w-6 h-6 text-orange-600"
+                        />
+                        Shop bán hàng
                       </h4>
                       <div className="space-y-2 text-sm">
                         <div>
@@ -461,9 +519,10 @@ const OrderModal = ({
               {/* Shipping Address */}
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-purple-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-purple-500 text-white rounded-md flex items-center justify-center text-xs">
-                    📍
-                  </span>
+                  <FontAwesomeIcon
+                    icon={["fas", "map-marker-alt"]}
+                    className="w-6 h-6 text-purple-500"
+                  />
                   Địa chỉ giao hàng
                 </h3>
                 <div className="bg-gray-50 rounded-lg p-4">
@@ -487,9 +546,10 @@ const OrderModal = ({
               {/* Order Items */}
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-orange-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-orange-500 text-white rounded-md flex items-center justify-center text-xs">
-                    📦
-                  </span>
+                  <FontAwesomeIcon
+                    icon={["fas", "box"]}
+                    className="w-6 h-6 bg-orange-500 text-white rounded-md flex items-center justify-center text-xs"
+                  />
                   Sản phẩm ({order.items?.length || 0} mặt hàng)
                 </h3>
 
@@ -517,7 +577,7 @@ const OrderModal = ({
                             <div className="text-sm text-gray-500 line-through">
                               {formatCurrency(item.originalPrice)}
                             </div>
-                            <div className="font-bold text-green-600">
+                            <div className="font-bold text-success">
                               {formatCurrency(item.price)}
                             </div>
                           </div>
@@ -531,9 +591,10 @@ const OrderModal = ({
               {/* Order Summary */}
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-indigo-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-indigo-500 text-white rounded-md flex items-center justify-center text-xs">
-                    💰
-                  </span>
+                  <FontAwesomeIcon
+                    icon={["fas", "money-bill-wave"]}
+                    className="w-6 h-6 bg-indigo-500 text-white rounded-md flex items-center justify-center text-xs"
+                  />
                   Tổng kết đơn hàng
                 </h3>
 
@@ -555,7 +616,7 @@ const OrderModal = ({
                   <hr className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Tổng cộng:</span>
-                    <span className="text-green-600">
+                    <span className="text-success">
                       {formatCurrency(order.total)}
                     </span>
                   </div>
@@ -571,12 +632,14 @@ const OrderModal = ({
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         order.paymentMethod === "cash"
                           ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
+                          : "bg-info bg-opacity-10 text-info"
                       }`}
                     >
-                      {order.paymentMethod === "cash"
-                        ? "💵 Tiền mặt"
-                        : "💳 Chuyển khoản"}
+                      {order.paymentMethod === "cash" ? (
+                        <FontAwesomeIcon icon={["fas", "money-bill-wave"]} />
+                      ) : (
+                        <FontAwesomeIcon icon={["fas", "credit-card"]} />
+                      )}
                     </span>
                   </div>
                   <div className="flex justify-between items-center mt-2">
@@ -590,9 +653,11 @@ const OrderModal = ({
                           : "bg-red-100 text-red-800"
                       }`}
                     >
-                      {order.paymentStatus === "paid"
-                        ? "✅ Đã thanh toán"
-                        : "❌ Chưa thanh toán"}
+                      {order.paymentStatus === "paid" ? (
+                        <FontAwesomeIcon icon={["fas", "check-circle"]} />
+                      ) : (
+                        <FontAwesomeIcon icon={["fas", "times-circle"]} />
+                      )}
                     </span>
                   </div>
                 </div>
@@ -601,9 +666,10 @@ const OrderModal = ({
               {/* Order Timeline */}
               <div className="bg-white rounded-xl p-6 shadow-sm border-l-4 border-teal-500">
                 <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="w-6 h-6 bg-teal-500 text-white rounded-md flex items-center justify-center text-xs">
-                    ⏰
-                  </span>
+                  <FontAwesomeIcon
+                    icon={["fas", "stream"]}
+                    className="w-6 h-6 bg-teal-500 text-white rounded-md flex items-center justify-center text-xs"
+                  />
                   Lịch sử đơn hàng
                 </h3>
 
@@ -636,25 +702,28 @@ const OrderModal = ({
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="bg-gradient-to-r from-gray-100 to-gray-50 px-8 py-6 rounded-b-2xl flex justify-between items-center border-t border-gray-200 flex-shrink-0">
-          <div className="flex items-center gap-4">
-            {variant === "admin" && (
-              <button
-                onClick={() => onViewDetails && onViewDetails(order)}
-                className="px-6 py-3 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-xl transition-all font-medium shadow-sm hover:shadow-md transform hover:scale-105 flex items-center gap-2"
-              >
-                <span>🔍</span> Xem chi tiết
-              </button>
-            )}
+        {/* Compact Footer */}
+        <div className="bg-gray-50 px-6 py-4 rounded-b-2xl flex justify-between items-center border-t border-gray-200 flex-shrink-0">
+          <div className="text-sm text-gray-600 flex items-center gap-4">
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                order.status
+              )}`}
+            >
+              {getStatusOptions().find((s) => s.value === order.status)?.icon}{" "}
+              {getStatusOptions().find((s) => s.value === order.status)?.label}
+            </span>
+            <span className="font-medium text-green-600">
+              {formatCurrency(order.total)}
+            </span>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-8 py-3 text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-all font-medium shadow-sm hover:shadow-md transform hover:scale-105 flex items-center gap-2"
+              className="px-6 py-2.5 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all font-medium"
             >
-              <span>❌</span> Đóng
+              Đóng
             </button>
 
             {variant === "seller" && (
@@ -662,9 +731,9 @@ const OrderModal = ({
                 onClick={() =>
                   onUpdateStatus && onUpdateStatus(order.id, "processing")
                 }
-                className="px-8 py-3 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
               >
-                <span>📦</span> Xác nhận đơn
+                <FontAwesomeIcon icon={["fas", "box"]} /> Xác nhận
               </button>
             )}
 
@@ -673,9 +742,9 @@ const OrderModal = ({
                 onClick={() =>
                   onUpdateStatus && onUpdateStatus(order.id, "approved")
                 }
-                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-0.5 flex items-center gap-2"
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-lg transition-all font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center gap-2"
               >
-                <span>✅</span> Duyệt đơn
+                <FontAwesomeIcon icon={["fas", "check-circle"]} /> Duyệt đơn
               </button>
             )}
           </div>

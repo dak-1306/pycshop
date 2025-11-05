@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import UserStats from "../../components/admin/user/UserStats";
 import AdminUserFilters from "../../components/admin/user/AdminUserFilters";
 import AdminUserTable from "../../components/admin/user/AdminUserTable";
-import AddUserModal from "../../components/admin/user/AddUserModal_v2";
+import AddUserModal from "../../components/admin/user/AddUserModal";
 import ViewUserModal from "../../components/admin/user/ViewUserModal";
 import EditUserModal from "../../components/admin/user/EditUserModal";
 import ConfirmDeleteModal from "../../components/admin/user/ConfirmDeleteModal";
 import SuccessNotification from "../../components/common/notifications/SuccessNotification";
 import ErrorNotification from "../../components/common/notifications/ErrorNotification";
 import { useAdminUsers } from "../../hooks/admin/useAdminUsers";
-import { useLanguage } from "../../context/LanguageContext";
+import { ADMIN_CONSTANTS } from "../../lib/constants/adminConstants";
 
 const AdminUsers = () => {
-  const { t } = useLanguage();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -56,16 +55,18 @@ const AdminUsers = () => {
       await handleAddUser(userData);
       setIsAddModalOpen(false);
       setSuccessMessage(
-        `Người dùng "${userData.name}" đã được tạo thành công!`
+        `${ADMIN_CONSTANTS.PAGES.USERS.TITLE.replace("👥 ", "")} "${
+          userData.name
+        }" ${ADMIN_CONSTANTS.USER_MESSAGES.CREATE_SUCCESS}`
       );
       setShowSuccessNotification(true);
     } catch (error) {
-      let errorMsg = "Có lỗi xảy ra khi tạo người dùng";
+      let errorMsg = ADMIN_CONSTANTS.USER_MESSAGES.CREATE_ERROR;
 
       if (error.message.includes("Email already exists")) {
-        errorMsg = "Email này đã được sử dụng bởi người dùng khác";
+        errorMsg = ADMIN_CONSTANTS.USER_MESSAGES.CREATE_ERROR_EMAIL_EXISTS;
       } else if (error.message.includes("Failed to create user")) {
-        errorMsg = "Không thể tạo người dùng. Vui lòng thử lại";
+        errorMsg = ADMIN_CONSTANTS.USER_MESSAGES.CREATE_ERROR_GENERIC;
       }
 
       setErrorMessage(errorMsg);
@@ -95,14 +96,16 @@ const AdminUsers = () => {
       setIsDeleteModalOpen(false);
       setUserToDelete(null);
       setSuccessMessage(
-        `Người dùng "${userToDelete.name}" đã được xóa thành công!`
+        `${ADMIN_CONSTANTS.PAGES.USERS.TITLE.replace("👥 ", "")} "${
+          userToDelete.name
+        }" ${ADMIN_CONSTANTS.USER_MESSAGES.DELETE_SUCCESS}`
       );
       setShowSuccessNotification(true);
     } catch (error) {
-      let errorMsg = "Có lỗi xảy ra khi xóa người dùng";
+      let errorMsg = ADMIN_CONSTANTS.USER_MESSAGES.DELETE_ERROR;
 
       if (error.message.includes("constraint")) {
-        errorMsg = "Không thể xóa người dùng này vì có dữ liệu liên quan";
+        errorMsg = ADMIN_CONSTANTS.USER_MESSAGES.DELETE_ERROR_CONSTRAINT;
       }
 
       setErrorMessage(errorMsg);
@@ -144,16 +147,18 @@ const AdminUsers = () => {
       setIsEditModalOpen(false);
       setSelectedUser(null);
       setSuccessMessage(
-        `Người dùng "${userData.name}" đã được cập nhật thành công!`
+        `${ADMIN_CONSTANTS.PAGES.USERS.TITLE.replace("👥 ", "")} "${
+          userData.name
+        }" ${ADMIN_CONSTANTS.USER_MESSAGES.UPDATE_SUCCESS}`
       );
       setShowSuccessNotification(true);
     } catch (error) {
-      let errorMsg = "Có lỗi xảy ra khi cập nhật người dùng";
+      let errorMsg = ADMIN_CONSTANTS.USER_MESSAGES.UPDATE_ERROR;
 
       if (error.message.includes("Email already exists")) {
-        errorMsg = "Email này đã được sử dụng bởi người dùng khác";
+        errorMsg = ADMIN_CONSTANTS.USER_MESSAGES.CREATE_ERROR_EMAIL_EXISTS;
       } else if (error.message.includes("Failed to update user")) {
-        errorMsg = "Không thể cập nhật người dùng. Vui lòng thử lại";
+        errorMsg = ADMIN_CONSTANTS.USER_MESSAGES.UPDATE_ERROR_GENERIC;
       }
 
       setErrorMessage(errorMsg);
@@ -166,22 +171,24 @@ const AdminUsers = () => {
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải dữ liệu người dùng...</p>
+          <p className="mt-4 text-gray-600">
+            {ADMIN_CONSTANTS.PAGES.USERS.LOADING}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
+    <div>
       <div className="mb-6">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">
-              👥 Quản lý người dùng
+              {ADMIN_CONSTANTS.PAGES.USERS.TITLE}
             </h1>
             <p className="text-gray-600">
-              Quản lý tất cả người dùng trong hệ thống
+              {ADMIN_CONSTANTS.PAGES.USERS.SUBTITLE}
             </p>
           </div>
 
@@ -191,7 +198,7 @@ const AdminUsers = () => {
               onClick={refetch}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              Thử lại
+              {ADMIN_CONSTANTS.ERROR_MESSAGES.RETRY_ACTION}
             </button>
           )}
         </div>
@@ -215,12 +222,12 @@ const AdminUsers = () => {
               </div>
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">
-                  Lỗi khi tải dữ liệu người dùng
+                  {ADMIN_CONSTANTS.PAGES.USERS.ERROR_TITLE}
                 </h3>
                 <div className="mt-2 text-sm text-red-700">
                   <p>{error}</p>
                   <p className="mt-1 text-xs">
-                    Hệ thống đang sử dụng dữ liệu mẫu để hiển thị.
+                    {ADMIN_CONSTANTS.ERROR_MESSAGES.SYSTEM_USING_SAMPLE_DATA}
                   </p>
                 </div>
               </div>

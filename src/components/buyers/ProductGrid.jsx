@@ -1,9 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import "./ProductGrid.css";
-import { productService } from "../../lib/services/productService.js";
+import "../../styles/components/buyer/ProductGrid.css";
+import ProductCard from "./ProductCard";
+import productService from "../../lib/services/productService.js";
 
-const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
+const ProductGrid = ({
+  products: externalProducts,
+  selectedCategory = null,
+  onCategorySelect = () => {},
+  searchQuery = "",
+}) => {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +21,17 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
   // Ref to track the last API call to prevent duplicates
   const lastApiCall = useRef(null);
   const lastParams = useRef(null);
+
+  // Use external products if provided, otherwise load all products
+  useEffect(() => {
+    if (externalProducts) {
+      setProducts(externalProducts);
+      setLoading(false);
+      setHasMore(false); // External products are usually complete
+    } else {
+      loadProducts(1, true);
+    }
+  }, [externalProducts]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load products function
   const loadProducts = async (pageNum = 1, reset = false) => {
@@ -46,7 +63,7 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
       // Simple duplicate detection - only block if exact same params
       const paramsString = JSON.stringify(params);
       if (lastParams.current === paramsString && pageNum === 1) {
-        console.log("🚫 Skipping duplicate API call");
+        console.log("Skipping duplicate API call");
         setLoading(false);
         setIsLoadingMore(false);
         return;
@@ -125,55 +142,13 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery, selectedCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Load more products
   const handleLoadMore = () => {
     if (!isLoadingMore && hasMore) {
       loadProducts(page + 1, false);
     }
-  };
-
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    })
-      .format(price)
-      .replace("₫", "đ");
-  };
-
-  const renderStars = (rating) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 !== 0;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(
-        <span key={i} className="star filled">
-          ★
-        </span>
-      );
-    }
-
-    if (hasHalfStar) {
-      stars.push(
-        <span key="half" className="star half">
-          ★
-        </span>
-      );
-    }
-
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(
-        <span key={`empty-${i}`} className="star">
-          ★
-        </span>
-      );
-    }
-
-    return stars;
   };
 
   const handleProductClick = (productId) => {
@@ -266,60 +241,11 @@ const ProductGrid = ({ searchQuery, selectedCategory, onCategorySelect }) => {
         </div>
         <div className="products-grid">
           {products.map((product) => (
-            <div
+            <ProductCard
               key={product.id}
-              className="product-card"
-              onClick={() => handleProductClick(product.id)}
-            >
-              <div className="product-image">
-                <img
-                  src={product.image}
-                  alt={product.name}
-                  onError={(e) => {
-                    // Prevent infinite loop by checking if already using fallback
-                    if (!e.target.src.includes("data:image")) {
-                      e.target.src =
-                        "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300' viewBox='0 0 300 300'%3E%3Crect width='300' height='300' fill='%23ff6b35'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='20' fill='white'%3EPycShop%3C/text%3E%3C/svg%3E";
-                    }
-                  }}
-                />
-                {product.discount > 0 && (
-                  <div className="discount-badge">-{product.discount}%</div>
-                )}
-                {product.stock === 0 && (
-                  <div className="out-of-stock-badge">Hết hàng</div>
-                )}
-              </div>
-              <div className="product-info">
-                <h3 className="product-name" title={product.name}>
-                  {product.name}
-                </h3>
-                <div className="product-price">
-                  <span className="current-price">
-                    {formatPrice(product.price)}
-                  </span>
-                  {product.originalPrice && (
-                    <span className="original-price">
-                      {formatPrice(product.originalPrice)}
-                    </span>
-                  )}
-                </div>
-                <div className="product-meta">
-                  <div className="rating">
-                    <div className="stars">{renderStars(product.rating)}</div>
-                    <span className="rating-text">
-                      ({product.rating.toFixed(1)})
-                    </span>
-                  </div>
-                  <div className="sold">
-                    {product.sold > 0
-                      ? `${product.sold} đánh giá`
-                      : "Chưa có đánh giá"}
-                  </div>
-                </div>
-                <div className="product-location">{product.location}</div>
-              </div>
-            </div>
+              product={product}
+              onClick={handleProductClick}
+            />
           ))}
         </div>
 

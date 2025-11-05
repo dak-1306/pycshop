@@ -15,12 +15,13 @@ import Dashboard from "./pages/seller/Dashboard";
 import ManageProduct from "./pages/seller/ManageProduct";
 import Order from "./pages/seller/Order";
 import ShopPage from "./pages/seller/ShopPage";
+import SellerMessages from "./pages/seller/SellerMessages";
 import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import BecomeSeller from "./pages/seller/BecomeSeller";
 
 // Admin imports
-import AdminLayout from "./components/layout/AdminLayout";
+import AdminLayout from "./components/layout/admin/AdminLayout";
 import AdminRoute from "./components/admin/ProtectedRoute/AdminRoute";
 import AdminDashboard from "./pages/admin/Dashboard";
 import AdminUsers from "./pages/admin/Users";
@@ -34,8 +35,11 @@ import AdminSettings from "./pages/admin/Settings";
 import Profile from "./pages/buyer/Profile/Profile";
 import ProductDetail from "./pages/buyer/Products/ProductDetail";
 import SearchResults from "./pages/buyer/Products/SearchResults";
+import CategoryProducts from "./pages/buyer/Products/CategoryProducts";
 import ShopProfile from "./pages/buyer/Shop/ShopProfile";
-import "./App.css";
+import Checkout from "./pages/buyer/Cart/Checkout";
+import Cart from "./pages/buyer/Cart/Cart";
+import "./styles/App.css";
 
 function App() {
   return (
@@ -52,6 +56,12 @@ function App() {
                   {/* Search Results */}
                   <Route path="/search" element={<SearchResults />} />
 
+                  {/* Category Products */}
+                  <Route
+                    path="/category/:categoryId"
+                    element={<CategoryProducts />}
+                  />
+
                   {/* Auth Routes */}
                   <Route path="/login" element={<Login />} />
                   <Route path="/register" element={<Register />} />
@@ -62,12 +72,15 @@ function App() {
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/product/:id" element={<ProductDetail />} />
                   <Route path="/shop/:shopId" element={<ShopProfile />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
 
                   {/* Seller Routes */}
                   <Route path="/seller/dashboard" element={<Dashboard />} />
                   <Route path="/seller/products" element={<ManageProduct />} />
                   <Route path="/seller/orders" element={<Order />} />
                   <Route path="/seller/shop" element={<ShopPage />} />
+                  <Route path="/seller/messages" element={<SellerMessages />} />
 
                   {/* Admin Routes */}
                   <Route
@@ -117,6 +130,9 @@ const AppWithChat = () => {
         {/* Search Results */}
         <Route path="/search" element={<SearchResults />} />
 
+        {/* Category Products */}
+        <Route path="/category/:categoryId" element={<CategoryProducts />} />
+
         {/* Auth Routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -138,6 +154,7 @@ const AppWithChat = () => {
         <Route path="/seller/manage-products" element={<ManageProduct />} />
         <Route path="/seller/manage-product" element={<ManageProduct />} />
         <Route path="/seller/orders" element={<Order />} />
+        <Route path="/seller/messages" element={<SellerMessages />} />
         <Route path="/seller/shop-page" element={<ShopPage />} />
 
         {/* Admin Routes */}

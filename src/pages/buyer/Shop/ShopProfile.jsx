@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import { useChat } from "../../../context/ChatContext";
-import { PLACEHOLDER_IMAGES } from "../../../lib/utils/placeholderImages";
-import "./ShopProfile.css";
+import { shopService } from "../../../lib/services/shopServiceBuyer";
+import "../../../styles/pages/buyer/ShopProfile.css";
 
 const ShopProfile = () => {
   const { shopId } = useParams();
@@ -12,105 +12,212 @@ const ShopProfile = () => {
   const [shop, setShop] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreProducts, setHasMoreProducts] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
+  const [error, setError] = useState(null);
 
+  // Load shop data and products
   useEffect(() => {
-    // Mock data cho shop
-    const mockShop = {
-      id: shopId,
-      name: "PycShop Electronics",
-      avatar: PLACEHOLDER_IMAGES.avatar100,
-      description: "Chuyên cung cấp các sản phẩm điện tử chất lượng cao",
-      rating: 4.8,
-      totalReviews: 1250,
-      followers: 15430,
-      products: 324,
-      responseRate: 98,
-      responseTime: "trong vài phút",
-      joinDate: "2021-03-15",
-      location: "TP. Hồ Chí Minh",
-      isFollowing: false,
-      badges: ["Mall", "Preferred Seller", "Fast Shipping"],
-    };
-
-    // Mock data cho sản phẩm
-    const mockProducts = [
-      {
-        id: 1,
-        name: "iPhone 15 Pro Max 256GB",
-        image: PLACEHOLDER_IMAGES.product200,
-        price: 29990000,
-        originalPrice: 32990000,
-        discount: 9,
-        sold: 150,
-        rating: 4.9,
-        location: "TP. Hồ Chí Minh",
-      },
-      {
-        id: 2,
-        name: "Samsung Galaxy S24 Ultra",
-        image: PLACEHOLDER_IMAGES.product200,
-        price: 27990000,
-        originalPrice: 30990000,
-        discount: 10,
-        sold: 89,
-        rating: 4.8,
-        location: "TP. Hồ Chí Minh",
-      },
-      {
-        id: 3,
-        name: "MacBook Air M3 13 inch",
-        image: PLACEHOLDER_IMAGES.product200,
-        price: 28990000,
-        originalPrice: 31990000,
-        discount: 9,
-        sold: 45,
-        rating: 4.9,
-        location: "TP. Hồ Chí Minh",
-      },
-      {
-        id: 4,
-        name: "iPad Pro 11 inch M4",
-        image: PLACEHOLDER_IMAGES.product200,
-        price: 21990000,
-        originalPrice: 24990000,
-        discount: 12,
-        sold: 67,
-        rating: 4.7,
-        location: "TP. Hồ Chí Minh",
-      },
-      {
-        id: 5,
-        name: "AirPods Pro 3rd Gen",
-        image: PLACEHOLDER_IMAGES.product200,
-        price: 5990000,
-        originalPrice: 6990000,
-        discount: 14,
-        sold: 234,
-        rating: 4.8,
-        location: "TP. Hồ Chí Minh",
-      },
-      {
-        id: 6,
-        name: "Apple Watch Series 9",
-        image: PLACEHOLDER_IMAGES.product200,
-        price: 8990000,
-        originalPrice: 9990000,
-        discount: 10,
-        sold: 123,
-        rating: 4.6,
-        location: "TP. Hồ Chí Minh",
-      },
-    ];
-
-    // Giả lập API call
-    setTimeout(() => {
-      setShop(mockShop);
-      setProducts(mockProducts);
-      setLoading(false);
-    }, 1000);
+    loadShopData();
   }, [shopId]);
+
+  const renderStars = (rating = 0) => {
+    const safeRating = rating || 0;
+    const stars = [];
+    const fullStars = Math.floor(safeRating);
+    const hasHalfStar = safeRating % 1 !== 0;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(
+        <span key={i} className="star filled">
+          ★
+        </span>
+      );
+    }
+
+    if (hasHalfStar) {
+      stars.push(
+        <span key="half" className="star half">
+          ★
+        </span>
+      );
+    }
+
+    const emptyStars = 5 - Math.ceil(safeRating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <span key={`empty-${i}`} className="star">
+          ★
+        </span>
+      );
+    }
+
+    return stars;
+  };
+
+  // Load products from product service using shop ID
+  const loadProductsByShopId = async (shopId, lastId = null, limit = 8) => {
+    try {
+      console.log(
+        `Loading products for shop ${shopId}, lastId: ${lastId}, limit: ${limit}`
+      );
+
+      // Sử dụng direct fetch đến product service endpoint
+      const params = new URLSearchParams();
+      params.append("limit", limit.toString());
+      if (lastId) {
+        params.append("last_id", lastId.toString());
+      }
+
+      const response = await fetch(
+        `http://localhost:5000/products/shop/${shopId}?${params}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Lỗi khi tải sản phẩm");
+      }
+
+      return {
+        success: true,
+        data: data.data || [],
+      };
+    } catch (error) {
+      console.error("Error loading products by shop ID:", error);
+      return {
+        success: false,
+        message: error.message,
+        data: [],
+      };
+    }
+  };
+
+  const loadShopData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      console.log(`Loading shop data for shopId: ${shopId}`);
+
+      // Lấy thông tin shop từ shop service
+      const shopResponse = await shopService.getShopDetail(shopId);
+
+      if (!shopResponse.success || !shopResponse.data) {
+        throw new Error(shopResponse.message || "Không thể tải thông tin shop");
+      }
+
+      const shopData = shopResponse.data.shop; // Transform shop data
+      const transformedShop = {
+        id: shopData.ID_CuaHang,
+        name: shopData.TenCuaHang,
+        avatar: "🏪", // Default avatar since no avatar in DB
+        rating: parseFloat(shopData.DanhGiaTB),
+        followers: "12.3k",
+        phone: shopData.SoDienThoaiCH || "Chưa cập nhật",
+        products: shopData.product_count,
+        responseRate: 98,
+        responseTime: "trong vài phút",
+        joinDate: shopData.NgayCapNhat,
+        location: shopData.DiaChiCH,
+        isFollowing: false, // Mock data - cần API để check
+        badges: shopData.badges
+          ? shopData.badges.split(",")
+          : ["Trusted Seller"],
+        categoryName: shopData.category_name,
+      };
+
+      // Lấy sản phẩm từ product service
+      const productsResponse = await loadProductsByShopId(shopId, null, 8);
+      console.log("Products response:", productsResponse);
+      let transformedProducts = [];
+      if (productsResponse.success && productsResponse.data) {
+        transformedProducts = productsResponse.data.map((product) => ({
+          id: product.ID_SanPham,
+          name: product.TenSanPham,
+          image: product.image_urls
+            ? `../../../microservice/product_service${product.image_urls
+                .split(",")[0]
+                .trim()}`
+            : "https://via.placeholder.com/200x200/ff6b35/ffffff?text=PycShop",
+          price: parseFloat(product.Gia),
+          originalPrice: product.Gia * 1.2, // Giả sử giá gốc cao hơn 20%
+          discount: 20,
+          sold: product.review_count || 0, // Số đánh giá thực từ DB
+          rating: parseFloat(product.average_rating) || 0, // Đánh giá thực từ DB
+          location: product.shop_location,
+        }));
+      }
+
+      setShop(transformedShop);
+      setProducts(transformedProducts);
+      setHasMoreProducts(transformedProducts.length >= 8);
+
+      console.log("Shop data loaded:", transformedShop);
+      console.log("Products loaded:", transformedProducts.length);
+    } catch (error) {
+      console.error("Error loading shop data:", error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadMoreProducts = async () => {
+    if (!shop || loadingMore || !hasMoreProducts) return;
+
+    try {
+      setLoadingMore(true);
+
+      const lastProductId =
+        products.length > 0 ? products[products.length - 1].id : null;
+
+      console.log(`Loading more products with lastId: ${lastProductId}`);
+
+      // Sử dụng product service để load thêm sản phẩm
+      const response = await loadProductsByShopId(shopId, lastProductId, 8);
+
+      if (response.success && response.data) {
+        const newProducts = response.data.map((product) => ({
+          id: product.ID_SanPham,
+          name: product.TenSanPham,
+          image: product.image_urls
+            ? `../../../microservice/product_service${product.image_urls
+                .split(",")[0]
+                .trim()}`
+            : "https://via.placeholder.com/200x200/ff6b35/ffffff?text=PycShop",
+          price: parseFloat(product.Gia),
+          originalPrice: product.original_price
+            ? parseFloat(product.original_price)
+            : null,
+          discount: product.discount_percent || 0,
+          sold: product.review_count || 0, // Số đánh giá thực từ DB
+          rating: parseFloat(product.average_rating), // Đánh giá thực từ DB
+          location: product.shop_location,
+        }));
+
+        setProducts((prev) => [...prev, ...newProducts]);
+        setHasMoreProducts(newProducts.length >= 8);
+
+        console.log(`Loaded ${newProducts.length} more products`);
+      } else {
+        setHasMoreProducts(false);
+      }
+    } catch (error) {
+      console.error("Error loading more products:", error);
+      setHasMoreProducts(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
 
   const handleFollowShop = () => {
     setShop((prev) => ({
@@ -146,12 +253,15 @@ const ShopProfile = () => {
   };
 
   const formatNumber = (num) => {
-    if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + "M";
-    } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + "k";
+    if (!num && num !== 0) return "0";
+    const number = Number(num);
+
+    if (number >= 1000000) {
+      return (number / 1000000).toFixed(1).replace(".", ",") + " triệu";
+    } else if (number >= 1000) {
+      return (number / 1000).toFixed(1).replace(".", ",") + " nghìn";
     }
-    return num.toString();
+    return new Intl.NumberFormat("vi-VN").format(number);
   };
 
   if (loading) {
@@ -202,7 +312,7 @@ const ShopProfile = () => {
                     <div className="stat-value">
                       <span className="rating">{shop.rating}</span>
                       <div className="stars">
-                        {[...Array(1)].map((_, i) => (
+                        {[...Array(5)].map((_, i) => (
                           <i
                             key={i}
                             className={`fas fa-star ${
@@ -211,20 +321,17 @@ const ShopProfile = () => {
                           ></i>
                         ))}
                       </div>
-                      <span className="review-count">
-                        ({formatNumber(shop.totalReviews)} đánh giá)
-                      </span>
                     </div>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Sản phẩm</span>
-                    <span className="stat-value">{shop.products}</span>
+                    <span className="stat-value">
+                      {formatNumber(shop.products)}
+                    </span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Người theo dõi</span>
-                    <span className="stat-value">
-                      {formatNumber(shop.followers)}
-                    </span>
+                    <span className="stat-value">{shop.followers}</span>
                   </div>
                   <div className="stat-item">
                     <span className="stat-label">Tỷ lệ phản hồi</span>
@@ -345,7 +452,7 @@ const ShopProfile = () => {
                           <span className="shop-current-price">
                             {formatPrice(product.price)}
                           </span>
-                          {product.originalPrice && (
+                          {product.originalPrice && product.discount > 0 && (
                             <span className="shop-original-price">
                               {formatPrice(product.originalPrice)}
                             </span>
@@ -354,23 +461,16 @@ const ShopProfile = () => {
                         <div className="shop-product-meta">
                           <div className="shop-product-rating">
                             <div className="shop-stars">
-                              {[...Array(5)].map((_, i) => (
-                                <i
-                                  key={i}
-                                  className={`fas fa-star ${
-                                    i < Math.floor(product.rating)
-                                      ? "filled"
-                                      : ""
-                                  }`}
-                                ></i>
-                              ))}
+                              {renderStars(product.rating)}
                             </div>
                             <span className="shop-rating-text">
-                              ({product.rating})
+                              ({product.rating.toFixed(1)})
                             </span>
                           </div>
                           <span className="shop-product-sold">
-                            Đã bán {product.sold}
+                            {product.sold > 0
+                              ? `${formatNumber(product.sold)} đánh giá`
+                              : "Chưa có đánh giá"}
                           </span>
                         </div>
                         <div className="shop-product-location">
@@ -381,6 +481,29 @@ const ShopProfile = () => {
                     </div>
                   ))}
                 </div>
+
+                {/* Nút xem thêm */}
+                {hasMoreProducts && (
+                  <div className="shop-load-more">
+                    <button
+                      className="load-more-btn"
+                      onClick={loadMoreProducts}
+                      disabled={loadingMore}
+                    >
+                      {loadingMore ? (
+                        <>
+                          <i className="fas fa-spinner fa-spin"></i>
+                          Đang tải...
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-plus"></i>
+                          Xem thêm sản phẩm
+                        </>
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
@@ -404,8 +527,8 @@ const ShopProfile = () => {
                       </span>
                     </div>
                     <div className="info-item">
-                      <span className="info-label">Mô tả:</span>
-                      <span className="info-value">{shop.description}</span>
+                      <span className="info-label">Số điện thoại:</span>
+                      <span className="info-value">{shop.phone}</span>
                     </div>
                   </div>
                 </div>

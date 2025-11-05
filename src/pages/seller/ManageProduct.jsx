@@ -1,15 +1,16 @@
 import React from "react";
-import SellerLayout from "../../components/layout/SellerLayout";
+import SellerLayout from "../../components/layout/seller/SellerLayout";
 import ProductModal from "../../components/common/modals/ProductModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
-import ProductDetailModal from "../../components/common/product/ProductDetailModal";
-import ProductFilters from "../../components/common/product/ProductFilters";
-import ProductTable from "../../components/common/product/ProductTable";
-import Pagination from "../../components/common/product/Pagination";
+import {
+  ProductManagement,
+  ProductDetailModal,
+} from "../../components/common/product";
 import ErrorDisplay from "../../components/common/feedback/ErrorDisplay";
 import EmptyState from "../../components/common/feedback/EmptyState";
 import { useProducts } from "../../hooks/seller/useProducts";
 import { useCategories } from "../../hooks/api/useCategories";
+import { useAuth } from "../../context/AuthContext";
 
 // CSS animations
 const styles = `
@@ -46,6 +47,14 @@ if (typeof document !== "undefined") {
 }
 
 const ManageProduct = () => {
+  // Check auth status
+  const { user, isAuthenticated } = useAuth();
+  console.log("[ManageProduct] Auth status:", { user, isAuthenticated });
+  console.log(
+    "[ManageProduct] Token in localStorage:",
+    localStorage.getItem("token")?.substring(0, 20)
+  );
+
   // Get categories from API
   const {
     categories,
@@ -99,34 +108,38 @@ const ManageProduct = () => {
     handleSetFeaturedImage,
   } = useProducts();
 
+  // Debug logging - Add useEffect to track products changes
+  React.useEffect(() => {
+    console.log("[ManageProduct] Products state changed:", {
+      productsLength: products?.length || 0,
+      isLoading,
+      error,
+      products: products?.slice(0, 3), // Log first 3 products as sample
+    });
+  }, [products, isLoading, error]);
+
+  console.log(
+    "[ManageProduct] Current render - Products loaded:",
+    products?.length || 0,
+    "isLoading:",
+    isLoading,
+    "error:",
+    error
+  );
+  console.log("[ManageProduct] Is loading:", isLoading);
+  console.log("[ManageProduct] Error:", error);
+
   // Prepare categories for ProductModal (expects string array format)
   const categoryNames = categories.map((cat) => cat.name);
 
   // Add "Tất cả" option for filters
   const filterCategories = ["Tất cả", ...categoryNames];
 
-  return (
-    <SellerLayout title="Manage Product">
-      <div className="p-6">
-        {/* Filters and Action Buttons */}
-        <ProductFilters
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          selectedStatus={selectedStatus}
-          onStatusChange={setSelectedStatus}
-          selectedPrice={selectedPrice}
-          setSelectedPrice={setSelectedPrice}
-          onResetFilters={handleResetFilters}
-          onAddProduct={handleAddProduct}
-          onExport={handleExport}
-          categories={filterCategories} // Use categories from API with "Tất cả" option
-          showResetButton={searchTerm || selectedCategory || selectedStatus}
-        />
-
-        {/* Products Table */}
-        {error ? (
+  // Handle errors with fallback UI
+  if (error) {
+    return (
+      <SellerLayout title="Manage Product">
+        <div className="p-6">
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <ErrorDisplay
               error={error}
@@ -134,7 +147,16 @@ const ManageProduct = () => {
               title="Không thể tải danh sách sản phẩm"
             />
           </div>
-        ) : products.length === 0 && !isLoading ? (
+        </div>
+      </SellerLayout>
+    );
+  }
+
+  // Empty state when no products
+  if (products.length === 0 && !isLoading) {
+    return (
+      <SellerLayout title="Manage Product">
+        <div className="p-6">
           <div className="bg-white rounded-xl shadow-sm border p-6">
             <EmptyState
               title="Chưa có sản phẩm"
@@ -143,27 +165,40 @@ const ManageProduct = () => {
               onAction={handleAddProduct}
             />
           </div>
-        ) : (
-          <ProductTable
-            variant="seller"
-            products={products}
-            onViewProduct={handleViewProduct}
-            onEditProduct={handleEditProduct}
-            onDeleteProduct={handleDeleteProduct}
-            getStatusColor={getStatusColor}
-            isLoading={isLoading}
-          />
-        )}
+        </div>
+      </SellerLayout>
+    );
+  }
 
-        {/* Pagination - only show if there are products and no error */}
-        {!error && totalItems > 0 && (
-          <Pagination
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            totalItems={totalItems}
-            itemsPerPage={10}
-          />
-        )}
+  return (
+    <SellerLayout title="Manage Product">
+      <div className="p-6">
+        {/* Unified Product Management */}
+        <ProductManagement
+          // Data
+          products={products}
+          stats={null} // Can add product stats later
+          // Actions
+          onAddProduct={handleAddProduct}
+          onViewProduct={handleViewProduct}
+          onEditProduct={handleEditProduct}
+          onDeleteProduct={handleDeleteProduct}
+          onExportProducts={handleExport}
+          // Filters
+          onSearchChange={setSearchTerm}
+          onCategoryFilter={setSelectedCategory}
+          onStatusFilter={setSelectedStatus}
+          onPriceFilter={setSelectedPrice}
+          // Pagination
+          currentPage={currentPage}
+          totalPages={totalPages || Math.ceil(totalItems / 10)}
+          onPageChange={setCurrentPage}
+          // Config
+          variant="seller"
+          isLoading={isLoading}
+          // Styling
+          getStatusColor={getStatusColor}
+        />
 
         {/* Modals */}
         <ProductModal
@@ -184,6 +219,7 @@ const ManageProduct = () => {
           isOpen={showDetailModal}
           onClose={handleCloseDetailModal}
           product={currentProduct}
+          variant="seller"
           onEdit={handleEditProduct}
           onDelete={handleDeleteProduct}
         />

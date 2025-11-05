@@ -1,172 +1,147 @@
 import React from "react";
-import {
-  PRODUCT_CATEGORIES_ARRAY as PRODUCT_CATEGORIES,
-  PRODUCT_STATUSES_ARRAY as PRODUCT_STATUSES,
-  PRODUCT_STATUS_LABELS,
-} from "../../../lib/constants/product.js";
-import { useLanguage } from "../../../context/LanguageContext";
+import PropTypes from "prop-types";
+import SearchBar from "../ui/SearchBar";
+import FilterSelect from "../ui/FilterSelect";
+import FilterContainer from "../ui/FilterContainer";
 
-const ProductFilters = ({
-  searchTerm,
-  selectedCategory,
-  selectedStatus,
-  onSearchChange,
-  onCategoryChange,
-  onStatusChange,
-  onResetFilters,
-  onAddProduct,
-  onExport,
-  showResetButton = false,
-  categories = PRODUCT_CATEGORIES,
-}) => {
-  const { t } = useLanguage();
+const ProductFilters = React.memo(
+  ({
+    searchTerm = "",
+    onSearchChange,
+    selectedCategory = "",
+    onCategoryChange,
+    selectedStatus = "",
+    onStatusChange,
+    selectedPrice = "",
+    onPriceChange,
+    onAddProduct,
+    onExportProducts,
+    onClearFilters,
+    hasActiveFilters = false,
+    variant = "seller", // "admin" | "seller" - chỉ để phân quyền
+  }) => {
+    // Filter options
+    const categoryOptions = [
+      { value: "electronics", label: "📱 Điện tử" },
+      { value: "fashion", label: "👕 Thời trang" },
+      { value: "home", label: "🏠 Gia dụng" },
+      { value: "beauty", label: "💄 Làm đẹp" },
+      { value: "sports", label: "⚽ Thể thao" },
+      { value: "books", label: "📚 Sách" },
+    ];
 
-  return (
-    <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 mb-6">
-      {/* Header with Title and Add Product Button */}
-      <div className="items-center mb-4">
-        <div className="flex gap-2">
-          {onAddProduct && (
-            <button
-              onClick={onAddProduct}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors font-medium"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                />
-              </svg>
-              {t("addProduct") || "Thêm sản phẩm"}
-            </button>
-          )}
-          {onExport && (
-            <button
-              onClick={onExport}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors font-medium"
-            >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              {t("export") || "Xuất dữ liệu"}
-            </button>
-          )}
-        </div>
-      </div>
+    const statusOptions = [
+      { value: "active", label: "✅ Hoạt động" },
+      { value: "inactive", label: "❌ Không hoạt động" },
+      { value: "pending", label: "⏳ Chờ duyệt" },
+      { value: "draft", label: "� Bản nháp" },
+      { value: "out_of_stock", label: "� Hết hàng" },
+    ];
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
+    const priceOptions = [
+      { value: "0-100000", label: "� Dưới 100K" },
+      { value: "100000-500000", label: "💶 100K - 500K" },
+      { value: "500000-1000000", label: "💷 500K - 1M" },
+      { value: "1000000-", label: "💸 Trên 1M" },
+    ];
+
+    // Action buttons
+    const actionButtons = [];
+
+    // Add Product Button
+    if (onAddProduct) {
+      actionButtons.push({
+        label: "Thêm sản phẩm",
+        onClick: onAddProduct,
+        icon: ["fas", "plus"],
+        className:
+          "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white",
+        title: "Thêm sản phẩm mới",
+      });
+    }
+
+    // Export Button
+    if (onExportProducts) {
+      actionButtons.push({
+        label: "Xuất Excel",
+        onClick: onExportProducts,
+        icon: ["fas", "file-export"],
+        className:
+          "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white",
+        title: "Xuất dữ liệu Excel",
+      });
+    }
+
+    return (
+      <FilterContainer
+        hasActiveFilters={hasActiveFilters}
+        onResetFilters={onClearFilters}
+        actionButtons={actionButtons}
+      >
         {/* Search Input */}
-        <div className="lg:col-span-2">
-          {" "}
-          <label
-            htmlFor="search"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            {t("searchProduct")}
-          </label>
-          <div className="relative">
-            <input
-              id="search"
-              type="text"
-              placeholder={t("searchPlaceholder")}
-              value={searchTerm}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <svg
-              className="absolute right-3 top-2.5 h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-        </div>{" "}
-        {/* Category Filter */}
-        <div>
-          <label
-            htmlFor="category"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            {t("category")}
-          </label>
-          <select
-            id="category"
-            value={selectedCategory}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {" "}
-            <option value="">{t("allCategories")}</option>
-            {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
-        </div>
-        {/* Status Filter */}
-        <div>
-          {" "}
-          <label
-            htmlFor="status"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            {t("status")}
-          </label>
-          <select
-            id="status"
-            value={selectedStatus}
-            onChange={(e) => onStatusChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            {" "}
-            <option value="">{t("allStatuses")}</option>
-            {PRODUCT_STATUSES.map((status) => (
-              <option key={status} value={status}>
-                {PRODUCT_STATUS_LABELS[status]}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+        <SearchBar
+          searchTerm={searchTerm}
+          setSearchTerm={onSearchChange}
+          variant={variant}
+          placeholder="Tìm kiếm sản phẩm..."
+          size="compact"
+          icon="fontawesome"
+          debounceMs={0}
+        />
 
-      {/* Reset Filters Button */}
-      {showResetButton && (
-        <div className="mt-4 flex justify-end">
-          <button
-            onClick={onResetFilters}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
-          >
-            {t("clearFilters")}
-          </button>
-        </div>
-      )}
-    </div>
-  );
+        {/* Category Filter */}
+        <FilterSelect
+          value={selectedCategory}
+          onChange={onCategoryChange}
+          options={categoryOptions}
+          placeholder="🏷️ Tất cả danh mục"
+          gradientFrom="blue-400"
+          gradientTo="blue-600"
+          focusColor="blue-500"
+        />
+
+        {/* Status Filter */}
+        <FilterSelect
+          value={selectedStatus}
+          onChange={onStatusChange}
+          options={statusOptions}
+          placeholder="📊 Tất cả trạng thái"
+          gradientFrom="green-400"
+          gradientTo="green-600"
+          focusColor="green-500"
+        />
+
+        {/* Price Filter */}
+        <FilterSelect
+          value={selectedPrice}
+          onChange={onPriceChange}
+          options={priceOptions}
+          placeholder="💰 Tất cả giá"
+          gradientFrom="yellow-400"
+          gradientTo="yellow-600"
+          focusColor="yellow-500"
+        />
+      </FilterContainer>
+    );
+  }
+);
+
+ProductFilters.displayName = "ProductFilters";
+
+ProductFilters.propTypes = {
+  searchTerm: PropTypes.string,
+  onSearchChange: PropTypes.func,
+  selectedCategory: PropTypes.string,
+  onCategoryChange: PropTypes.func,
+  selectedStatus: PropTypes.string,
+  onStatusChange: PropTypes.func,
+  selectedPrice: PropTypes.string,
+  onPriceChange: PropTypes.func,
+  onAddProduct: PropTypes.func,
+  onExportProducts: PropTypes.func,
+  onClearFilters: PropTypes.func,
+  hasActiveFilters: PropTypes.bool,
+  variant: PropTypes.oneOf(["admin", "seller"]),
 };
 
 export default ProductFilters;

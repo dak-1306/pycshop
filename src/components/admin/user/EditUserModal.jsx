@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
+import PropTypes from "prop-types";
 
 const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
   const [formData, setFormData] = useState({
@@ -31,16 +32,16 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
 
     // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
+      setErrors((prev) => ({
         ...prev,
-        [name]: ""
+        [name]: "",
       }));
     }
   };
@@ -63,7 +64,10 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
     }
 
     // Phone validation (optional but if provided, must be valid)
-    if (formData.phone && !/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))) {
+    if (
+      formData.phone &&
+      !/^[0-9]{10,11}$/.test(formData.phone.replace(/\s/g, ""))
+    ) {
       newErrors.phone = "Số điện thoại không hợp lệ (10-11 số)";
     }
 
@@ -73,7 +77,7 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -84,16 +88,18 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
       onClose();
     } catch (error) {
       console.error("Error updating user:", error);
-      setErrors({ submit: error.message || "Có lỗi xảy ra khi cập nhật người dùng" });
+      setErrors({
+        submit: error.message || "Có lỗi xảy ra khi cập nhật người dùng",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setErrors({});
     onClose();
-  };
+  }, [onClose]);
 
   // Focus on name input when modal opens
   useEffect(() => {
@@ -104,10 +110,33 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
     }
   }, [isOpen]);
 
+  // Handle ESC key
+  useEffect(() => {
+    if (isOpen) {
+      const handleEsc = (e) => {
+        if (e.key === "Escape" && !isSubmitting) {
+          handleClose();
+        }
+      };
+
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [isOpen, isSubmitting, handleClose]);
+
   if (!isOpen || !user) return null;
 
+  const handleBackdropClick = (e) => {
+    if (e.target === e.currentTarget && !isSubmitting) {
+      handleClose();
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={handleBackdropClick}
+    >
       <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
@@ -116,7 +145,8 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
                 Chỉnh sửa người dùng
               </h2>
               <p className="text-sm text-gray-600 mt-1">
-                Cập nhật thông tin cho: <span className="font-medium">{user.name}</span>
+                Cập nhật thông tin cho:{" "}
+                <span className="font-medium">{user.name}</span>
               </p>
             </div>
             <button
@@ -124,8 +154,18 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
               disabled={isSubmitting}
               className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
@@ -220,9 +260,7 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
                 <option value="customer">Khách hàng</option>
                 <option value="seller">Người bán</option>
                 {/* Admin role can be edited if current user is admin */}
-                {user.role === "admin" && (
-                  <option value="admin">Admin</option>
-                )}
+                {user.role === "admin" && <option value="admin">Admin</option>}
               </select>
             </div>
 
@@ -268,7 +306,9 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
 
           {/* User Info Display */}
           <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">Thông tin bổ sung</h4>
+            <h4 className="text-sm font-medium text-gray-700 mb-2">
+              Thông tin bổ sung
+            </h4>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
                 <span className="text-gray-600">ID:</span>
@@ -276,7 +316,9 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
               </div>
               <div>
                 <span className="text-gray-600">Ngày tạo:</span>
-                <span className="ml-2">{new Date(user.joinDate).toLocaleDateString("vi-VN")}</span>
+                <span className="ml-2">
+                  {new Date(user.joinDate).toLocaleDateString("vi-VN")}
+                </span>
               </div>
             </div>
           </div>
@@ -297,9 +339,24 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
             >
               {isSubmitting ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Đang cập nhật...
                 </span>
@@ -314,4 +371,19 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
   );
 };
 
-export default EditUserModal;
+EditUserModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  user: PropTypes.shape({
+    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    name: PropTypes.string,
+    email: PropTypes.string,
+    phone: PropTypes.string,
+    address: PropTypes.string,
+    role: PropTypes.string,
+    status: PropTypes.string,
+  }),
+};
+
+export default React.memo(EditUserModal);

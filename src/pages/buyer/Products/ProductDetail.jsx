@@ -4,9 +4,9 @@ import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 import ReviewForm from "../../../components/buyers/ReviewForm";
 import ReviewList from "../../../components/buyers/ReviewList";
-import { productService } from "../../../lib/services/productService.js";
+import productService from "../../../lib/services/productService.js";
 import { useAuth } from "../../../context/AuthContext";
-import "./ProductDetail.css";
+import "../../../styles/pages/buyer/ProductDetail.css";
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -182,15 +182,47 @@ const ProductDetail = () => {
     }).format(price);
   };
 
-  const renderStars = (rating) => {
+  const renderStars = (rating = 0) => {
+    const safeRating = rating || 0;
     const stars = [];
-    for (let i = 1; i <= 5; i++) {
+    const fullStars = Math.floor(safeRating);
+    const hasHalfStar = safeRating % 1 !== 0;
+
+    // Sao đầy
+    for (let i = 0; i < fullStars; i++) {
       stars.push(
-        <span key={i} className="pd-star">
-          {i <= rating ? "★" : "☆"}
+        <span key={i} className="text-2xl text-yellow-400">
+          ★
         </span>
       );
     }
+
+    // Sao nửa - sử dụng CSS để tạo hiệu ứng nửa sao
+    if (hasHalfStar) {
+      stars.push(
+        <span key="half" className="text-2xl relative inline-block">
+          <span className="text-gray-300">★</span>
+          <span
+            className="absolute top-0 left-0 text-yellow-400 overflow-hidden"
+            style={{ width: "50%" }}
+          >
+            ★
+          </span>
+        </span>
+      );
+    }
+
+    // Sao trống
+    const totalFilledStars = fullStars + (hasHalfStar ? 1 : 0);
+    const emptyStars = 5 - totalFilledStars;
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(
+        <span key={`empty-${i}`} className="text-2xl text-gray-300">
+          ★
+        </span>
+      );
+    }
+
     return stars;
   };
 
@@ -214,13 +246,77 @@ const ProductDetail = () => {
   };
 
   const handleAddToCart = () => {
-    // Add to cart logic
-    alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+    try {
+      // Get current cart items from localStorage
+      const cartItems = JSON.parse(localStorage.getItem("cartItems") || "[]");
+
+      // Create cart item
+      const cartItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.images[0],
+        variant:
+          Object.keys(selectedVariants).length > 0
+            ? Object.entries(selectedVariants)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(", ")
+            : "Mặc định",
+      };
+
+      // Check if item already exists in cart
+      const existingItemIndex = cartItems.findIndex(
+        (item) => item.id === product.id && item.variant === cartItem.variant
+      );
+
+      if (existingItemIndex > -1) {
+        // Update quantity if item exists
+        cartItems[existingItemIndex].quantity += quantity;
+      } else {
+        // Add new item to cart
+        cartItems.push(cartItem);
+      }
+
+      // Save to localStorage
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+
+      // Show success message
+      alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+    }
   };
 
   const handleBuyNow = () => {
-    // Buy now logic
-    alert("Chuyển đến trang thanh toán!");
+    try {
+      // Create cart item for immediate purchase
+      const cartItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: quantity,
+        image: product.images[0],
+        variant:
+          Object.keys(selectedVariants).length > 0
+            ? Object.entries(selectedVariants)
+                .map(([key, value]) => `${key}: ${value}`)
+                .join(", ")
+            : "Mặc định",
+      };
+
+      // Navigate to checkout page with this item
+      navigate("/checkout", {
+        state: {
+          cartItems: [cartItem],
+          fromBuyNow: true,
+        },
+      });
+    } catch (error) {
+      console.error("Error buying now:", error);
+      alert("Có lỗi xảy ra! Vui lòng thử lại.");
+    }
   };
 
   const handleSimilarProductClick = (productId) => {
@@ -362,7 +458,7 @@ const ProductDetail = () => {
               {/* Rating and Stats */}
               <div className="pd-rating">
                 <div className="pd-rating-stars">
-                  {renderStars(Math.floor(product.rating))}
+                  {renderStars(product.rating)}
                   <span className="pd-rating-text">{product.rating}</span>
                 </div>
                 <span className="pd-rating-count">
@@ -574,7 +670,7 @@ const ProductDetail = () => {
                   {item.rating > 0 && (
                     <div className="pd-similar-rating">
                       <span className="pd-similar-rating-stars">
-                        {renderStars(Math.floor(item.rating))}
+                        {renderStars(item.rating)}
                       </span>
                       <span className="pd-similar-rating-text">
                         ({item.rating.toFixed(1)})

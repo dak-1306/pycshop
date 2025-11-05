@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 const SellerDetailModal = ({
   isOpen,
@@ -7,6 +7,20 @@ const SellerDetailModal = ({
   formatCurrency,
   formatDate,
 }) => {
+  // Handle ESC key
+  useEffect(() => {
+    if (isOpen) {
+      const handleEsc = (e) => {
+        if (e.key === "Escape") {
+          onClose();
+        }
+      };
+
+      document.addEventListener("keydown", handleEsc);
+      return () => document.removeEventListener("keydown", handleEsc);
+    }
+  }, [isOpen, onClose]);
+
   if (!isOpen || !seller) return null;
 
   return (

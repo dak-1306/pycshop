@@ -43,9 +43,9 @@ const QuickStatsCard = ({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-seller-100 rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-4 h-4 text-green-600"
+                  className="w-4 h-4 text-seller-600"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -60,7 +60,7 @@ const QuickStatsCard = ({
                 Còn hàng
               </span>
             </div>
-            <span className="text-lg font-bold text-green-600">
+            <span className="text-lg font-bold text-seller-600">
               {shopStats.inStockProducts}
             </span>
           </div>
@@ -91,9 +91,9 @@ const QuickStatsCard = ({
 
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-seller-100 rounded-lg flex items-center justify-center">
                 <svg
-                  className="w-4 h-4 text-blue-600"
+                  className="w-4 h-4 text-seller-600"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                 >
@@ -104,7 +104,7 @@ const QuickStatsCard = ({
                 Đánh giá TB
               </span>
             </div>
-            <span className="text-lg font-bold text-blue-600">
+            <span className="text-lg font-bold text-seller-600">
               {shopStats.averageRating}/5
             </span>
           </div>

@@ -1,11 +1,6 @@
-import sellerOrderService from "../../lib/services/sellerOrderService.js";
+import { sellerOrderService } from "../../lib/services/order.js";
 import useOrdersCommon from "../common/useOrders.js";
-import {
-  ORDER_STATUSES,
-  ORDER_STATUSES_ARRAY,
-  ORDER_CATEGORIES,
-  DEFAULT_ORDER,
-} from "../../lib/constants/order.js";
+import { SELLER_CONSTANTS } from "../../lib/constants/index.js";
 
 export const useOrders = () => {
   // Use common hook with seller-specific configuration
@@ -17,7 +12,8 @@ export const useOrders = () => {
   });
 
   // Seller-specific state for backward compatibility
-  const currentOrder = commonHook.selectedOrder || DEFAULT_ORDER;
+  const currentOrder =
+    commonHook.selectedOrder || SELLER_CONSTANTS.DEFAULT_ORDER;
   const orderToDelete = commonHook.selectedOrder;
 
   // Map common hook's search to seller's searchTerm for backward compatibility
@@ -118,8 +114,10 @@ export const useOrders = () => {
 
     // Constants
     // Return array form for UI filters (backwards-compatible mapping)
-    orderStatuses: ORDER_STATUSES_ARRAY || Object.values(ORDER_STATUSES),
-    orderCategories: ORDER_CATEGORIES,
+    orderStatuses:
+      SELLER_CONSTANTS.ORDER_STATUSES_ARRAY ||
+      Object.values(SELLER_CONSTANTS.ORDER_STATUSES),
+    orderCategories: SELLER_CONSTANTS.ORDER_CATEGORIES,
 
     // Additional common hook features
     refresh: commonHook.refresh,

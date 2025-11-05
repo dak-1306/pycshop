@@ -1,103 +1,63 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { useLanguage } from "../../../context/LanguageContext";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
-const ProductStats = ({ stats }) => {
-  const { t } = useLanguage();  const statsConfig = [
+const ProductStats = ({ stats = {} }) => {
+  const { t } = useLanguage();
+  const statsConfig = [
     {
       key: "totalProducts",
       title: t("totalProducts"),
-      value: stats?.totalProducts || 342,
+      value: stats?.totalProducts?.value || stats?.totalProducts || 342,
       bgColor: "bg-white",
-      iconBg: "bg-blue-100",
-      iconColor: "text-blue-600",
+      iconBg: "bg-info bg-opacity-10",
+      iconColor: "text-info",
       textColor: "text-gray-900",
       subTextColor: "text-gray-600",
-      icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
-          />
-        </svg>
-      ),    },
+      icon: <FontAwesomeIcon icon={["fas", "boxes"]} className="w-6 h-6" />,
+    },
     {
       key: "activeProducts",
       title: t("activeProducts"),
-      value: stats?.activeProducts || 298,
+      value: stats?.activeProducts?.value || stats?.activeProducts || 298,
       bgColor: "bg-white",
-      iconBg: "bg-green-100",
-      iconColor: "text-green-600",
+      iconBg: "bg-success bg-opacity-10",
+      iconColor: "text-success",
       textColor: "text-gray-900",
       subTextColor: "text-gray-600",
       icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M5 13l4 4L19 7"
-          />
-        </svg>
-      ),    },
+        <FontAwesomeIcon icon={["fas", "check-circle"]} className="w-6 h-6" />
+      ),
+    },
     {
       key: "outOfStockProducts",
       title: t("outOfStock"),
-      value: stats?.outOfStockProducts || 23,
+      value:
+        stats?.outOfStockProducts?.value || stats?.outOfStockProducts || 23,
       bgColor: "bg-white",
       iconBg: "bg-red-100",
       iconColor: "text-red-600",
       textColor: "text-gray-900",
       subTextColor: "text-gray-600",
       icon: (
-        <svg
+        <FontAwesomeIcon
+          icon={["fas", "exclamation-triangle"]}
           className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.865-.833-2.634 0L5.179 16.5c-.77.833.192 2.5 1.732 2.5z"
-          />
-        </svg>
-      ),    },
+        />
+      ),
+    },
     {
       key: "pendingProducts",
       title: t("pending"),
-      value: stats?.pendingProducts || 21,
+      value: stats?.pendingProducts?.value || stats?.pendingProducts || 21,
       bgColor: "bg-white",
       iconBg: "bg-yellow-100",
       iconColor: "text-yellow-600",
       textColor: "text-gray-900",
       subTextColor: "text-gray-600",
       icon: (
-        <svg
-          className="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-          />
-        </svg>
+        <FontAwesomeIcon icon={["fas", "hourglass-half"]} className="w-6 h-6" />
       ),
     },
   ];
@@ -117,7 +77,7 @@ const ProductStats = ({ stats }) => {
             </div>
             <div>
               <p className={`text-2xl font-bold ${config.textColor}`}>
-                {config.value.toLocaleString()}
+                {(Number(config.value) || 0).toLocaleString()}
               </p>
               <p className={`text-sm ${config.subTextColor}`}>{config.title}</p>
             </div>
@@ -126,6 +86,47 @@ const ProductStats = ({ stats }) => {
       ))}
     </div>
   );
+};
+
+ProductStats.propTypes = {
+  stats: PropTypes.shape({
+    totalProducts: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    activeProducts: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    outOfStockProducts: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+    pendingProducts: PropTypes.oneOfType([
+      PropTypes.number,
+      PropTypes.shape({
+        value: PropTypes.number,
+        formattedValue: PropTypes.string,
+        label: PropTypes.string,
+        icon: PropTypes.string,
+      }),
+    ]),
+  }),
 };
 
 export default ProductStats;

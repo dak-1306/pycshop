@@ -1,15 +1,15 @@
 import React from "react";
+import PropTypes from "prop-types";
+import { formatCurrency } from "../../../lib/utils";
 
-const OrderAnalytics = ({ data }) => {
+const OrderAnalytics = ({ data = {} }) => {
   const formatNumber = (num) => {
+    if (typeof num !== "number") {
+      const numValue = Number(num);
+      if (isNaN(numValue)) return "0";
+      num = numValue;
+    }
     return new Intl.NumberFormat("vi-VN").format(num);
-  };
-
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
   };
 
   const getStatusColor = (status) => {
@@ -42,10 +42,12 @@ const OrderAnalytics = ({ data }) => {
     }
   };
 
-  const totalOrders = Object.values(data.ordersByStatus).reduce(
-    (sum, count) => sum + count,
-    0
-  );
+  const totalOrders = data.ordersByStatus
+    ? Object.values(data.ordersByStatus).reduce(
+        (sum, count) => sum + (count || 0),
+        0
+      )
+    : 0;
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
@@ -178,4 +180,13 @@ const OrderAnalytics = ({ data }) => {
   );
 };
 
-export default OrderAnalytics;
+OrderAnalytics.propTypes = {
+  data: PropTypes.shape({
+    ordersByStatus: PropTypes.object,
+    avgOrderValue: PropTypes.number,
+    topCustomers: PropTypes.array,
+    recentOrders: PropTypes.array,
+  }),
+};
+
+export default React.memo(OrderAnalytics);

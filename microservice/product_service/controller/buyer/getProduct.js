@@ -336,3 +336,38 @@ export const getSimilarProducts = async (req, res) => {
     });
   }
 };
+//lấy sản phẩm theo id shop
+export const getProductsByShopId = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const { last_id, limit } = req.query;
+    console.log(`[PRODUCT_CONTROLLER] Get products for shop ID: ${shopId}`);
+
+    if (!shopId || isNaN(shopId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid shop ID",
+      });
+    }
+    const products = await Product.getProductsByShop(
+      shopId,
+      last_id || null,
+      parseInt(limit) || 8
+    );
+
+    console.log(
+      `[PRODUCT_CONTROLLER] Found ${products.length} products for shop ID: ${shopId}`
+    );
+    res.json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    console.error("[PRODUCT_CONTROLLER] Error in getProductsByShopId:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch products by shop ID",
+      error: error.message,
+    });
+  }
+};

@@ -39,15 +39,15 @@ const AdminManagement = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleCreateAdmin = async (e) => {
     e.preventDefault();
-    
+
     // Validate form
     if (!formData.name || !formData.email || !formData.password) {
       setError("Vui lòng điền đầy đủ thông tin");
@@ -67,11 +67,11 @@ const AdminManagement = () => {
     try {
       setCreateLoading(true);
       setError("");
-      
+
       await adminService.createAdmin({
         name: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
       });
 
       // Reset form
@@ -82,12 +82,11 @@ const AdminManagement = () => {
         confirmPassword: "",
       });
       setShowCreateForm(false);
-      
+
       // Reload admins list
       await loadAdmins();
-      
+
       alert("Tạo tài khoản admin mới thành công!");
-      
     } catch (error) {
       console.error("Error creating admin:", error);
       setError(error.message || "Không thể tạo tài khoản admin");
@@ -102,8 +101,16 @@ const AdminManagement = () => {
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <svg className="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              <svg
+                className="h-5 w-5 text-yellow-400"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                  clipRule="evenodd"
+                />
               </svg>
             </div>
             <div className="ml-3">
@@ -126,14 +133,26 @@ const AdminManagement = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Quản lý Admin</h1>
-            <p className="text-gray-600 mt-1">Quản lý tài khoản quản trị viên hệ thống</p>
+            <p className="text-gray-600 mt-1">
+              Quản lý tài khoản quản trị viên hệ thống
+            </p>
           </div>
           <button
             onClick={() => setShowCreateForm(true)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+            className="bg-admin-500 hover:bg-admin-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+              />
             </svg>
             <span>Tạo Admin Mới</span>
           </button>
@@ -156,12 +175,27 @@ const AdminManagement = () => {
                 onClick={() => {
                   setShowCreateForm(false);
                   setError("");
-                  setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+                  setFormData({
+                    name: "",
+                    email: "",
+                    password: "",
+                    confirmPassword: "",
+                  });
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -176,7 +210,7 @@ const AdminManagement = () => {
                   name="name"
                   value={formData.name}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-500 focus:border-admin-500"
                   placeholder="Nhập họ tên admin"
                   required
                 />
@@ -191,7 +225,7 @@ const AdminManagement = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-500 focus:border-admin-500"
                   placeholder="admin@pycshop.com"
                   required
                 />
@@ -206,7 +240,7 @@ const AdminManagement = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-500 focus:border-admin-500"
                   placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
                   required
                   minLength={6}
@@ -222,7 +256,7 @@ const AdminManagement = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-admin-500 focus:border-admin-500"
                   placeholder="Nhập lại mật khẩu"
                   required
                 />
@@ -234,7 +268,12 @@ const AdminManagement = () => {
                   onClick={() => {
                     setShowCreateForm(false);
                     setError("");
-                    setFormData({ name: "", email: "", password: "", confirmPassword: "" });
+                    setFormData({
+                      name: "",
+                      email: "",
+                      password: "",
+                      confirmPassword: "",
+                    });
                   }}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
                 >
@@ -243,7 +282,7 @@ const AdminManagement = () => {
                 <button
                   type="submit"
                   disabled={createLoading}
-                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 bg-admin-500 text-white rounded-lg hover:bg-admin-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {createLoading ? "Đang tạo..." : "Tạo Admin"}
                 </button>
@@ -261,7 +300,7 @@ const AdminManagement = () => {
 
         {loading ? (
           <div className="p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-admin-600"></div>
             <p className="mt-2 text-gray-600">Đang tải...</p>
           </div>
         ) : (
@@ -299,7 +338,9 @@ const AdminManagement = () => {
                               </span>
                             )}
                           </div>
-                          <div className="text-sm text-gray-500">{admin.email}</div>
+                          <div className="text-sm text-gray-500">
+                            {admin.email}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -309,7 +350,7 @@ const AdminManagement = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                      <span className="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-status-success bg-opacity-10 text-status-success">
                         Hoạt động
                       </span>
                     </td>
@@ -320,8 +361,18 @@ const AdminManagement = () => {
 
             {admins.length === 0 && !loading && (
               <div className="p-8 text-center text-gray-500">
-                <svg className="mx-auto h-12 w-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                <svg
+                  className="mx-auto h-12 w-12 text-gray-300"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"
+                  />
                 </svg>
                 <p className="mt-2">Chưa có admin nào</p>
               </div>

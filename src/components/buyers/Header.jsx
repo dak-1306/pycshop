@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import "./Header.css";
+import "../../styles/components/buyer/Header.css";
 import logoImage from "../../images/logo.svg";
 
 const Header = ({ onSearch }) => {
@@ -165,7 +165,11 @@ const Header = ({ onSearch }) => {
 
             {/* Cart */}
             <div className="cart">
-              <div className="cart-icon">
+              <div
+                className="cart-icon"
+                onClick={() => navigate("/cart")}
+                style={{ cursor: "pointer" }}
+              >
                 <i
                   className="fas fa-shopping-cart"
                   style={{ color: "white" }}

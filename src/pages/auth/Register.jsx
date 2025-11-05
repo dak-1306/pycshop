@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { authService } from "../../lib/services/authService.js";
-import "./Register.css";
+import "../../styles/pages/auth/Register.css";
 import signupGif from "../../images/signup.gif";
 
 const Register = () => {
@@ -38,56 +38,56 @@ const Register = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    
+
     // Validation
     if (!formData.fullName.trim()) {
       setError("Vui lòng nhập họ tên");
       setLoading(false);
       return;
     }
-    
+
     if (!formData.email.trim()) {
       setError("Vui lòng nhập email");
       setLoading(false);
       return;
     }
-    
+
     if (!formData.phone.trim()) {
       setError("Vui lòng nhập số điện thoại");
       setLoading(false);
       return;
     }
-    
+
     if (!formData.address.trim()) {
       setError("Vui lòng nhập địa chỉ");
       setLoading(false);
       return;
     }
-    
+
     if (!formData.password) {
       setError("Vui lòng nhập mật khẩu");
       setLoading(false);
       return;
     }
-    
+
     if (formData.password.length < 6) {
       setError("Mật khẩu phải có ít nhất 6 ký tự");
       setLoading(false);
       return;
     }
-    
+
     if (formData.password !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không khớp");
       setLoading(false);
       return;
     }
-    
+
     if (!formData.agreeTerms) {
       setError("Vui lòng đồng ý với điều khoản sử dụng");
       setLoading(false);
       return;
     }
-    
+
     try {
       // Gọi API đăng ký với vai trò buyer
       const response = await authService.register({
@@ -96,15 +96,18 @@ const Register = () => {
         password: formData.password,
         phone: formData.phone,
         address: formData.address,
-        role: "buyer" // Mặc định là buyer
+        role: "buyer", // Mặc định là buyer
       });
-      
+
       console.log("Register successful:", response);
-      
+
       // Đăng ký thành công, tự động đăng nhập luôn
-      const loginResponse = await authService.login(formData.email, formData.password);
+      const loginResponse = await authService.login(
+        formData.email,
+        formData.password
+      );
       login(loginResponse.user, loginResponse.token);
-      
+
       // Chuyển hướng về trang chủ sau khi đăng ký thành công
       navigate("/");
     } catch (err) {
@@ -305,8 +308,8 @@ const Register = () => {
             </div>
 
             {/* Register Button */}
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="register-button"
               disabled={loading}
             >

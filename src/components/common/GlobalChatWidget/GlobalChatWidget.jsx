@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useChat } from "../../../context/ChatContext";
 import { PLACEHOLDER_IMAGES } from "../../../lib/utils/placeholderImages";
-import "./GlobalChatWidget.css";
+import "../../../styles/components/GlobalChatWidget.css";
 
 const GlobalChatWidget = () => {
   const { isChatOpen, currentShop, closeChat } = useChat();

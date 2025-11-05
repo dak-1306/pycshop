@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./Banner.css";
+import "../../styles/components/buyer/Banner.css";
 import newAccountSaleIMG from "../../images/banners/new_account_sale.png";
 import superSale1010 from "../../images/banners/sale_10_10.png";
 import sundaySale from "../../images/banners/sunday_sale.png";

@@ -1,18 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import adminService from "../../lib/services/adminService.js";
-import {
-  MOCK_RECENT_ORDERS,
-  MOCK_RECENT_USERS,
-  MOCK_CHART_DATA,
-  DASHBOARD_ORDER_STATUS_COLORS,
-  DEFAULT_STATS,
-} from "../../lib/constants/dashboard.js";
+import { ADMIN_CONSTANTS } from "../../lib/constants/index.js";
 
 export const useDashboard = (variant = "admin") => {
   // State management
   const [recentOrders, setRecentOrders] = useState([]);
   const [recentUsers, setRecentUsers] = useState([]);
-  const [chartData, setChartData] = useState(MOCK_CHART_DATA);
+  const [chartData, setChartData] = useState(
+    ADMIN_CONSTANTS.DASHBOARD.MOCK_CHART_DATA
+  );
   const [stats, setStats] = useState({
     orders: 0,
     revenue: 0,
@@ -36,9 +32,11 @@ export const useDashboard = (variant = "admin") => {
           products: 42,
           newCustomers: 8,
         });
-        setRecentOrders(MOCK_RECENT_ORDERS.slice(0, 5));
-        setRecentUsers(MOCK_RECENT_USERS.slice(0, 5));
-        setChartData(MOCK_CHART_DATA);
+        setRecentOrders(
+          ADMIN_CONSTANTS.DASHBOARD.MOCK_RECENT_ORDERS.slice(0, 5)
+        );
+        setRecentUsers(ADMIN_CONSTANTS.DASHBOARD.MOCK_RECENT_USERS.slice(0, 5));
+        setChartData(ADMIN_CONSTANTS.DASHBOARD.MOCK_CHART_DATA);
         return;
       }
 
@@ -57,20 +55,20 @@ export const useDashboard = (variant = "admin") => {
 
       setRecentOrders(dashboardData.recentOrders || []);
       setRecentUsers(dashboardData.recentUsers || []);
-      setChartData(chartsData || MOCK_CHART_DATA);
+      setChartData(chartsData || ADMIN_CONSTANTS.DASHBOARD.MOCK_CHART_DATA);
     } catch (error) {
       console.error("Error loading dashboard data:", error);
       setError(error.message || "Failed to load dashboard data");
 
       // Fallback to mock data on error
-      setRecentOrders(MOCK_RECENT_ORDERS);
-      setRecentUsers(MOCK_RECENT_USERS);
-      setChartData(MOCK_CHART_DATA);
+      setRecentOrders(ADMIN_CONSTANTS.DASHBOARD.MOCK_RECENT_ORDERS);
+      setRecentUsers(ADMIN_CONSTANTS.DASHBOARD.MOCK_RECENT_USERS);
+      setChartData(ADMIN_CONSTANTS.DASHBOARD.MOCK_CHART_DATA);
       setStats({
-        orders: DEFAULT_STATS.todayOrders,
-        revenue: DEFAULT_STATS.totalRevenue,
-        products: DEFAULT_STATS.totalProducts,
-        newCustomers: DEFAULT_STATS.todayUsers,
+        orders: ADMIN_CONSTANTS.DASHBOARD.DEFAULT_STATS.todayOrders,
+        revenue: ADMIN_CONSTANTS.DASHBOARD.DEFAULT_STATS.totalRevenue,
+        products: ADMIN_CONSTANTS.DASHBOARD.DEFAULT_STATS.totalProducts,
+        newCustomers: ADMIN_CONSTANTS.DASHBOARD.DEFAULT_STATS.todayUsers,
       });
     } finally {
       setIsLoading(false);
@@ -92,8 +90,8 @@ export const useDashboard = (variant = "admin") => {
 
   const getStatusColor = (status) => {
     return (
-      DASHBOARD_ORDER_STATUS_COLORS[status] ||
-      DASHBOARD_ORDER_STATUS_COLORS.default
+      ADMIN_CONSTANTS.DASHBOARD.ORDER_STATUS_COLORS[status] ||
+      ADMIN_CONSTANTS.DASHBOARD.ORDER_STATUS_COLORS.default
     );
   };
 

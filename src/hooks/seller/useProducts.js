@@ -1,4 +1,4 @@
-import sellerProductService from "../../lib/services/sellerProductService.js";
+import { sellerProductService } from "../../lib/services/productService.js";
 import useProductsCommon from "../common/useProducts.js";
 import { useCategories } from "../api/useCategories.js";
 
@@ -21,6 +21,12 @@ const INITIAL_FORM_STATE = {
 export const useProducts = () => {
   // Get categories helper
   const { categories } = useCategories(false);
+
+  console.log("[useProducts] Seller service:", sellerProductService);
+  console.log(
+    "[useProducts] getSellerProducts method:",
+    sellerProductService.getSellerProducts
+  );
 
   // Use common hook with seller-specific configuration
   const commonHook = useProductsCommon({
@@ -120,16 +126,6 @@ export const useProducts = () => {
     }
   };
 
-  const confirmDeleteProduct = async () => {
-    try {
-      await commonHook.deleteProduct();
-      alert("🗑️ Đã xóa sản phẩm thành công!");
-    } catch (error) {
-      console.error("Error deleting product:", error);
-      alert("❌ Lỗi khi xóa sản phẩm: " + (error.message || "Unknown error"));
-    }
-  };
-
   // Seller-specific image handling functions that extend the common hook
   const handleImageUpload = (files) => {
     const maxImages = 15;
@@ -213,19 +209,19 @@ export const useProducts = () => {
     error: commonHook.error,
 
     // Actions - use common hook functions with seller-specific wrappers where needed
-    handleViewProduct: commonHook.viewProduct,
-    handleAddProduct: commonHook.addProduct,
-    handleEditProduct: commonHook.editProduct,
+    handleViewProduct: commonHook.handleViewProduct,
+    handleAddProduct: commonHook.handleAddProduct,
+    handleEditProduct: commonHook.handleEditProduct,
     handleSaveProduct, // Custom seller implementation
-    handleDeleteProduct: commonHook.showDeleteConfirm,
-    confirmDeleteProduct, // Custom seller implementation
-    handleCloseProductModal: commonHook.closeModal,
-    handleCloseDetailModal: commonHook.closeDetailModal,
-    handleCloseDeleteModal: commonHook.closeModal,
-    handleResetFilters: commonHook.resetFilters,
-    handleExport: commonHook.exportToCSV,
+    handleDeleteProduct: commonHook.handleDeleteProduct,
+    confirmDeleteProduct: commonHook.confirmDeleteProduct,
+    handleCloseProductModal: commonHook.handleCloseProductModal,
+    handleCloseDetailModal: commonHook.handleCloseDetailModal,
+    handleCloseDeleteModal: commonHook.handleCloseDeleteModal,
+    handleResetFilters: commonHook.handleResetFilters,
+    handleExport: commonHook.handleExport,
     getStatusColor: commonHook.getStatusColor,
-    loadProducts: commonHook.loadData, // Renamed for consistency
+    loadProducts: commonHook.refresh, // Use refresh function
 
     // Image handling - seller-specific implementations
     handleImageUpload, // Custom seller implementation

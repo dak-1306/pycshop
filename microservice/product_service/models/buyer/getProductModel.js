@@ -427,6 +427,85 @@ class Product {
       throw error;
     }
   }
+
+  //lấy sản phẩm theo cửa hàng
+  static async getProductsByShop(shopId, lastId = null, limit = 8) {
+    try {
+      // Initialize connection settings
+      await this.initializeConnection();
+      let query = `
+        SELECT 
+    p.ID_SanPham,
+    p.TenSanPham,
+    p.MoTa,
+    p.Gia,
+    p.TonKho,
+    p.TrangThai,
+    (SELECT GROUP_CONCAT(Url ORDER BY Upload_at ASC SEPARATOR ',')
+     FROM AnhSanPham a 
+     WHERE a.ID_SanPham = p.ID_SanPham) AS image_urls,
+    p.CapNhat AS created_date,
+
+    -- Product review info
+    (SELECT COUNT(*) 
+     FROM DanhGiaSanPham dg 
+     WHERE dg.ID_SanPham = p.ID_SanPham) AS review_count,
+    (SELECT COALESCE(ROUND(AVG(dg.TyLe), 1), 0)
+     FROM DanhGiaSanPham dg 
+     WHERE dg.ID_SanPham = p.ID_SanPham) AS average_rating,
+
+    -- Category info
+    c.TenDanhMuc,
+    c.ID_DanhMuc,
+
+    -- Shop info
+    ch.TenCuaHang,
+    ch.ID_CuaHang,
+    ch.DiaChiCH,
+    SUBSTRING_INDEX(ch.DiaChiCH, ',', -1) AS shop_location,
+
+    -- Shop statistics
+    (SELECT COUNT(*) 
+     FROM SanPham sp 
+     WHERE sp.ID_NguoiBan = p.ID_NguoiBan AND sp.TrangThai != 'inactive') AS shop_product_count,
+    (SELECT COALESCE(ROUND(AVG(dg2.TyLe), 1), 0)
+     FROM SanPham sp2 
+     JOIN DanhGiaSanPham dg2 ON sp2.ID_SanPham = dg2.ID_SanPham
+     WHERE sp2.ID_NguoiBan = p.ID_NguoiBan) AS shop_average_rating
+
+FROM SanPham p
+LEFT JOIN DanhMuc c ON p.ID_DanhMuc = c.ID_DanhMuc
+LEFT JOIN NguoiDung nb ON p.ID_NguoiBan = nb.ID_NguoiDung
+LEFT JOIN CuaHang ch ON nb.ID_CuaHang = ch.ID_CuaHang
+
+WHERE 
+    ch.ID_CuaHang = ? 
+    AND p.TrangThai = 'active'   
+
+
+      `;
+      const params = [shopId];
+      if (lastId) {
+        query += ` AND p.ID_SanPham < ?  `;
+        params.push(lastId);
+      }
+      query += `
+        GROUP BY 
+    p.ID_SanPham, p.TenSanPham, p.MoTa, p.Gia, p.TonKho, p.TrangThai, 
+    p.CapNhat, c.TenDanhMuc, c.ID_DanhMuc, ch.TenCuaHang, ch.ID_CuaHang, ch.DiaChiCH
+ORDER BY 
+    p.ID_SanPham DESC
+LIMIT ?;
+      `;
+      params.push(limit);
+
+      const [rows] = await db.execute(query, params);
+      return rows;
+    } catch (error) {
+      console.error("[PRODUCT] Error in getProductsByShop:", error);
+      throw error;
+    }
+  }
 }
 
 export default Product;

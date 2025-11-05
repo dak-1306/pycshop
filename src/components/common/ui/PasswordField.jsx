@@ -1,9 +1,10 @@
 import React from "react";
-import FormField from "./FormField";
+import PropTypes from "prop-types";
 
 /**
  * PasswordField Component
  * Specialized password input with show/hide toggle
+ * Supports both light and dark theme variants
  */
 const PasswordField = ({
   id,
@@ -17,11 +18,40 @@ const PasswordField = ({
   onTogglePassword,
   className = "",
   error,
+  variant = "dark", // "light" | "dark"
   ...props
 }) => {
+  // Theme configurations
+  const themes = {
+    light: {
+      label: "block text-sm font-medium text-gray-700 mb-2",
+      input:
+        "w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all bg-white",
+      icon: "w-5 h-5 text-gray-400",
+      toggleButton:
+        "absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors",
+      error: "mt-1 text-sm text-red-600",
+      errorBorder: "border-red-300 focus:ring-red-500",
+      requiredStar: "text-red-500",
+    },
+    dark: {
+      label: "block text-sm font-medium text-slate-200 mb-2",
+      input:
+        "w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all",
+      icon: "w-5 h-5 text-slate-400",
+      toggleButton:
+        "absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors",
+      error: "mt-1 text-sm text-red-400",
+      errorBorder: "border-red-500/50 focus:ring-red-500",
+      requiredStar: "text-red-400",
+    },
+  };
+
+  const theme = themes[variant] || themes.dark;
+
   const LockIcon = () => (
     <svg
-      className="w-5 h-5 text-slate-400"
+      className={theme.icon}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -38,12 +68,9 @@ const PasswordField = ({
   return (
     <div className={className}>
       {label && (
-        <label
-          htmlFor={id}
-          className="block text-sm font-medium text-slate-200 mb-2"
-        >
+        <label htmlFor={id} className={theme.label}>
           {label}
-          {required && <span className="text-red-400 ml-1">*</span>}
+          {required && <span className={`${theme.requiredStar} ml-1`}>*</span>}
         </label>
       )}
       <div className="relative">
@@ -58,15 +85,13 @@ const PasswordField = ({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={`w-full pl-10 pr-12 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all ${
-            error ? "border-red-500/50 focus:ring-red-500" : ""
-          }`}
+          className={`${theme.input} ${error ? theme.errorBorder : ""}`}
           {...props}
         />
         <button
           type="button"
           onClick={onTogglePassword}
-          className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-white transition-colors"
+          className={theme.toggleButton}
         >
           {showPassword ? (
             <svg
@@ -105,9 +130,24 @@ const PasswordField = ({
           )}
         </button>
       </div>
-      {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+      {error && <p className={theme.error}>{error}</p>}
     </div>
   );
+};
+
+PasswordField.propTypes = {
+  id: PropTypes.string,
+  name: PropTypes.string,
+  label: PropTypes.string,
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  required: PropTypes.bool,
+  showPassword: PropTypes.bool,
+  onTogglePassword: PropTypes.func,
+  className: PropTypes.string,
+  error: PropTypes.string,
+  variant: PropTypes.oneOf(["light", "dark"]),
 };
 
 export default PasswordField;

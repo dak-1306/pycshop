@@ -1,16 +1,12 @@
 import React from "react";
-import OrderStats from "../../components/common/order/OrderStats";
-import OrderFilters from "../../components/common/order/OrderFilters";
-import OrderTable from "../../components/common/order/OrderTable";
+import { OrderManagement } from "../../components/common/order";
 import OrderModal from "../../components/common/modals/OrderModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
-import Pagination from "../../components/common/product/Pagination";
 import { useAdminOrders } from "../../hooks/admin/useAdminOrders";
-import { useLanguage } from "../../context/LanguageContext";
+import { ADMIN_CONSTANTS } from "../../lib/constants/adminConstants";
 
 const AdminOrders = () => {
-  const { t } = useLanguage();
   const {
     orders,
     stats,
@@ -49,60 +45,40 @@ const AdminOrders = () => {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải dữ liệu đơn hàng...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-admin-500 mx-auto"></div>
+          <p className="mt-4 text-gray-600">
+            {ADMIN_CONSTANTS.PAGES.ORDERS.LOADING}
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">
-          📋 {t("orderManagement")}
-        </h1>
-        <p className="text-gray-600">{t("manageAllOrders")}</p>
-      </div>
-
-      {/* Stats Cards */}
-      <OrderStats stats={stats} />
-
-      {/* Orders Table with Filters */}
-      <div className="bg-white rounded-lg shadow">
-        <OrderFilters
-          variant="admin"
-          searchTerm={searchValue}
-          onSearchChange={setSearchValue}
-          statusFilter={statusFilter}
-          onStatusChange={setStatusFilter}
-          paymentFilter={paymentFilter}
-          onPaymentChange={setPaymentFilter}
-          onUpdateStatus={() => {
-            handleAddOrder();
-          }}
-          onExport={handleExport}
-        />
-        <OrderTable
-          variant="admin"
-          orders={orders}
-          onViewOrder={handleViewOrder}
-          onEditOrder={handleEditOrder}
-          onDeleteOrder={handleDeleteOrder}
-          onUpdateStatus={handleUpdateOrderStatus}
-        />
-      </div>
-
-      {/* Pagination */}
-      {totalItems > 0 && (
-        <Pagination
-          currentPage={currentPage}
-          setCurrentPage={setCurrentPage}
-          totalItems={totalItems}
-          itemsPerPage={10}
-          variant="admin"
-        />
-      )}
+    <div>
+      {/* Unified Order Management Component */}
+      <OrderManagement
+        // Data
+        orders={orders}
+        stats={stats}
+        // Actions
+        onCreateOrder={handleAddOrder}
+        onViewOrder={handleViewOrder}
+        onEditOrder={handleEditOrder}
+        onDeleteOrder={handleDeleteOrder}
+        onExportOrders={handleExport}
+        // Filters
+        onSearchChange={setSearchValue}
+        onStatusFilter={setStatusFilter}
+        onPaymentFilter={setPaymentFilter}
+        // Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        // Config
+        variant="admin"
+        isLoading={isLoading}
+      />
 
       {/* Order Modal */}
       <OrderModal
@@ -134,9 +110,9 @@ const AdminOrders = () => {
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDeleteOrder}
         item={selectedOrder}
-        itemType="đơn hàng"
-        title="Xác nhận xóa đơn hàng"
-        subtitle="Hành động này không thể hoàn tác"
+        itemType={ADMIN_CONSTANTS.ITEM_TYPES.ORDER}
+        title={ADMIN_CONSTANTS.MODAL_TITLES.DELETE_ORDER}
+        subtitle={ADMIN_CONSTANTS.MODAL_TITLES.DELETE_SUBTITLE}
       />
     </div>
   );

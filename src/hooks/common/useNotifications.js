@@ -20,12 +20,23 @@ export const useNotifications = (userType = "admin") => {
       });
 
       if (response.success) {
-        setNotifications(response.data || []);
+        // Ensure notifications is always an array
+        const notificationData = Array.isArray(response.data)
+          ? response.data
+          : [];
+        setNotifications(notificationData);
         setUnreadCount(response.unreadCount || 0);
+      } else {
+        // If response is not successful, set empty array
+        setNotifications([]);
+        setUnreadCount(0);
       }
     } catch (err) {
       console.error("Error fetching notifications:", err);
       setError(err.message || "Failed to fetch notifications");
+      // Ensure notifications is empty array on error
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setIsLoading(false);
     }

@@ -1,17 +1,14 @@
 import useProductsCommon from "../common/useProducts.js";
-import {
-  MOCK_PRODUCTS,
-  DEFAULT_PRODUCT_STATS,
-} from "../../lib/constants/product.js";
+import { ADMIN_CONSTANTS } from "../../lib/constants/index.js";
 
 // Mock service for admin products
 const adminProductService = {
   getProducts: async () => ({
     success: true,
-    data: MOCK_PRODUCTS,
+    data: ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS,
     pagination: {
-      total: MOCK_PRODUCTS.length,
-      totalPages: Math.ceil(MOCK_PRODUCTS.length / 10),
+      total: ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS.length,
+      totalPages: Math.ceil(ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS.length / 10),
     },
   }),
   // Add other mock methods as needed for admin
@@ -31,12 +28,11 @@ export const useAdminProducts = () => {
   const commonHook = useProductsCommon({
     role: "admin",
     service: adminProductService,
+    mockData: ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS, // Use mock data for admin
     canDelete: true, // Admins can delete products
     pageSize: 10,
     hasImageManagement: false, // Simpler admin interface
     hasStockManagement: false, // Admin doesn't manage stock directly
-    useMockData: true, // Use mock data for admin
-    initialData: MOCK_PRODUCTS, // Provide initial mock data
   });
 
   // Admin-specific stats calculation from filtered products
@@ -129,16 +125,19 @@ export const useAdminProducts = () => {
     showDeleteModal: commonHook.showDeleteModal,
     setShowDeleteModal: commonHook.setShowDeleteModal,
     selectedProduct: commonHook.selectedProduct,
+    setSelectedProduct: commonHook.setSelectedProduct,
     modalMode: commonHook.modalMode,
 
     // Event handlers - use common hook functions
-    handleViewProduct: commonHook.viewProduct,
-    handleEditProduct: commonHook.editProduct,
-    handleDeleteProduct: commonHook.showDeleteConfirm,
-    handleAddProduct: commonHook.addProduct,
-    handleSaveProduct: commonHook.saveProduct,
-    confirmDeleteProduct: commonHook.deleteProduct,
-    handleResetFilters: commonHook.resetFilters,
+    handleViewProduct: commonHook.handleViewProduct,
+    handleEditProduct: commonHook.handleEditProduct,
+    handleDeleteProduct: commonHook.handleDeleteProduct,
+    handleAddProduct: commonHook.handleAddProduct,
+    handleSaveProduct: commonHook.handleSaveProduct,
+    confirmDeleteProduct: commonHook.confirmDeleteProduct,
+    handleResetFilters: commonHook.handleResetFilters,
+    handleExport: commonHook.handleExport,
+    handleCloseProductModal: commonHook.handleCloseProductModal,
 
     // Utility functions
     formatCurrency,

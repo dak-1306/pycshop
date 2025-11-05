@@ -14,13 +14,13 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       "http://localhost:3000",
-      "http://localhost:5000", 
+      "http://localhost:5000",
       "http://localhost:5173",
       "http://localhost:5174",
       "http://localhost:5175",
-      "http://127.0.0.1:5500"
+      "http://127.0.0.1:5500",
     ];
-    
+
     if (!origin || allowedOrigins.includes(origin)) {
       return callback(null, true);
     } else {
@@ -31,10 +31,10 @@ const corsOptions = {
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
   allowedHeaders: [
     "Content-Type",
-    "Authorization", 
+    "Authorization",
     "x-user-id",
     "x-user-role",
-    "x-user-type"
+    "x-user-type",
   ],
 };
 
@@ -44,30 +44,33 @@ app.use(express.urlencoded({ extended: true }));
 
 // Middleware to extract user info from headers (set by API Gateway) with JWT fallback
 const extractUserFromHeaders = (req, res, next) => {
-  const userId = req.headers['x-user-id'];
-  const userRole = req.headers['x-user-role'];
-  const userType = req.headers['x-user-type'];
-  
+  const userId = req.headers["x-user-id"];
+  const userRole = req.headers["x-user-role"];
+  const userType = req.headers["x-user-type"];
+
   if (userId && userRole) {
     req.user = {
       id: userId,
       role: userRole,
-      userType: userType
+      userType: userType,
     };
     console.log(`[ADMIN SERVICE] User extracted from headers:`, req.user);
     return next();
   }
-  
+
   // Fallback: Try to extract from JWT token if headers are missing
   const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith('Bearer ')) {
+  if (authHeader && authHeader.startsWith("Bearer ")) {
     try {
       const token = authHeader.substring(7);
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      const decoded = jwt.verify(
+        token,
+        process.env.JWT_SECRET || "your-secret-key"
+      );
       req.user = {
         id: decoded.id || decoded.userId,
-        role: decoded.role || 'admin',
-        userType: decoded.userType || 'admin'
+        role: decoded.role || "admin",
+        userType: decoded.userType || "admin",
       };
       console.log(`[ADMIN SERVICE] User extracted from JWT:`, req.user);
       return next();
@@ -75,7 +78,7 @@ const extractUserFromHeaders = (req, res, next) => {
       console.log(`[ADMIN SERVICE] JWT verification failed:`, jwtError.message);
     }
   }
-  
+
   console.log(`[ADMIN SERVICE] No user headers or valid JWT found`);
   next();
 };
@@ -83,7 +86,7 @@ const extractUserFromHeaders = (req, res, next) => {
 // Middleware to check admin role
 const requireAdmin = (req, res, next) => {
   console.log(`[ADMIN SERVICE] Checking admin role for user:`, req.user);
-  
+
   if (!req.user || req.user.role !== "admin") {
     console.log(`[ADMIN SERVICE] Access denied - not admin role`);
     return res.status(403).json({
@@ -91,7 +94,7 @@ const requireAdmin = (req, res, next) => {
       message: "Access denied. Admin role required.",
     });
   }
-  
+
   console.log(`[ADMIN SERVICE] Admin access granted`);
   next();
 };
@@ -105,7 +108,7 @@ app.get("/health", (req, res) => {
   res.json({
     success: true,
     message: "Admin Service is running",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -135,14 +138,16 @@ app.get("/dashboard/stats", async (req, res) => {
     `);
 
     // Get order stats (handle case where donhang table might not exist or be empty)
-    let orderStats = [{
-      total_orders: 0,
-      total_revenue: 0,
-      pending_orders: 0,
-      confirmed_orders: 0,
-      shipped_orders: 0,
-      cancelled_orders: 0
-    }];
+    let orderStats = [
+      {
+        total_orders: 0,
+        total_revenue: 0,
+        pending_orders: 0,
+        confirmed_orders: 0,
+        shipped_orders: 0,
+        cancelled_orders: 0,
+      },
+    ];
 
     try {
       const [orders] = await db.execute(`
@@ -177,7 +182,10 @@ app.get("/dashboard/stats", async (req, res) => {
       `);
       newOrders7d = newOrdersResult[0]?.new_orders_7d || 0;
     } catch (orderError) {
-      console.warn("[ADMIN] Could not fetch recent orders:", orderError.message);
+      console.warn(
+        "[ADMIN] Could not fetch recent orders:",
+        orderError.message
+      );
     }
 
     const stats = {
@@ -189,7 +197,7 @@ app.get("/dashboard/stats", async (req, res) => {
 
     const recentOrders = [];
     const recentUsers = [];
-    
+
     // Try to get recent orders
     try {
       const [orders] = await db.execute(`
@@ -206,7 +214,10 @@ app.get("/dashboard/stats", async (req, res) => {
       `);
       recentOrders.push(...orders);
     } catch (orderError) {
-      console.warn("[ADMIN] Could not fetch recent orders list:", orderError.message);
+      console.warn(
+        "[ADMIN] Could not fetch recent orders list:",
+        orderError.message
+      );
     }
 
     // Get recent users
@@ -422,10 +433,10 @@ app.post("/users", async (req, res) => {
         name,
         email,
         hashedPassword,
-        role || 'customer',
-        status || 'active',
+        role || "customer",
+        status || "active",
         phone || null,
-        address || null
+        address || null,
       ]
     );
 
@@ -440,9 +451,8 @@ app.post("/users", async (req, res) => {
     res.status(201).json({
       success: true,
       message: "User created successfully",
-      data: newUser[0]
+      data: newUser[0],
     });
-
   } catch (error) {
     console.error("[ADMIN] Error creating user:", error);
     res.status(500).json({
@@ -475,9 +485,8 @@ app.get("/users/:id", async (req, res) => {
 
     res.json({
       success: true,
-      data: user[0]
+      data: user[0],
     });
-
   } catch (error) {
     console.error("[ADMIN] Error getting user by ID:", error);
     res.status(500).json({
@@ -520,7 +529,15 @@ app.put("/users/:id", async (req, res) => {
       `UPDATE nguoidung 
        SET HoTen = ?, Email = ?, SoDienThoai = ?, DiaChi = ?, VaiTro = ?, TrangThai = ?
        WHERE ID_NguoiDung = ?`,
-      [name, email, phone || null, address || null, role || 'customer', status || 'active', id]
+      [
+        name,
+        email,
+        phone || null,
+        address || null,
+        role || "customer",
+        status || "active",
+        id,
+      ]
     );
 
     // Get updated user
@@ -534,9 +551,8 @@ app.put("/users/:id", async (req, res) => {
     res.json({
       success: true,
       message: "User updated successfully",
-      data: updatedUser[0]
+      data: updatedUser[0],
     });
-
   } catch (error) {
     console.error("[ADMIN] Error updating user:", error);
     res.status(500).json({
@@ -547,9 +563,25 @@ app.put("/users/:id", async (req, res) => {
   }
 });
 
+// Initialize connection settings for GROUP_CONCAT
+const initializeConnection = async () => {
+  try {
+    await db.execute("SET SESSION group_concat_max_len = 10000");
+    console.log("[ADMIN] GROUP_CONCAT max length set successfully");
+  } catch (error) {
+    console.warn(
+      "[ADMIN] Warning: Could not set group_concat_max_len:",
+      error.message
+    );
+  }
+};
+
 // Product management
 app.get("/products", async (req, res) => {
   try {
+    // Initialize connection settings
+    await initializeConnection();
+
     const { page = 1, limit = 10, search = "", status = "" } = req.query;
     const offset = (page - 1) * limit;
 
@@ -566,25 +598,50 @@ app.get("/products", async (req, res) => {
       params.push(status);
     }
 
+    // Debug: Test simple query first
+    console.log("[ADMIN] Debug - Testing simple query first");
+    const [testProducts] = await db.execute(
+      "SELECT COUNT(*) as total FROM sanpham"
+    );
+    console.log("[ADMIN] Total products in DB:", testProducts[0].total);
+
+    // Test image query for specific product
+    const [testImages] = await db.execute(
+      "SELECT sp.ID_SanPham, sp.TenSanPham, GROUP_CONCAT(a.Url) as image_urls FROM sanpham sp LEFT JOIN anhsanpham a ON sp.ID_SanPham = a.ID_SanPham WHERE sp.ID_SanPham IN (1,2,3,4) GROUP BY sp.ID_SanPham LIMIT 4"
+    );
+    console.log("[ADMIN] Test images for first 4 products:", testImages);
+
     const [products] = await db.execute(
       `
       SELECT
         sp.ID_SanPham as id,
         sp.TenSanPham as name,
+        sp.MoTa as description,
         sp.Gia as price,
         sp.TonKho as stock,
         sp.TrangThai as status,
         sp.CapNhat as updated_at,
         u.HoTen as seller_name,
-        dm.TenDanhMuc as category
+        dm.TenDanhMuc as category,
+        dm.ID_DanhMuc as category_id,
+        COALESCE(GROUP_CONCAT(DISTINCT a.Url ORDER BY a.Upload_at ASC SEPARATOR ','), '') as image_urls
       FROM sanpham sp
       JOIN nguoidung u ON sp.ID_NguoiBan = u.ID_NguoiDung
       JOIN danhmuc dm ON sp.ID_DanhMuc = dm.ID_DanhMuc
+      LEFT JOIN anhsanpham a ON sp.ID_SanPham = a.ID_SanPham
       WHERE ${whereClause}
+      GROUP BY sp.ID_SanPham, sp.TenSanPham, sp.MoTa, sp.Gia, sp.TonKho, sp.TrangThai, sp.CapNhat, u.HoTen, dm.TenDanhMuc, dm.ID_DanhMuc
       ORDER BY sp.CapNhat DESC
       LIMIT ? OFFSET ?
     `,
       [...params, parseInt(limit), offset]
+    );
+
+    console.log("[ADMIN] Raw products from DB:", products);
+    console.log("[ADMIN] Sample product image_urls:", products[0]?.image_urls);
+    console.log(
+      "[ADMIN] Sample product seller_name:",
+      products[0]?.seller_name
     );
 
     const [countResult] = await db.execute(
@@ -715,7 +772,10 @@ app.get("/orders", async (req, res) => {
       orders = orderResults;
       total = countResult[0].total;
     } catch (error) {
-      console.warn("[ADMIN] Orders table may not exist or be empty:", error.message);
+      console.warn(
+        "[ADMIN] Orders table may not exist or be empty:",
+        error.message
+      );
     }
 
     const totalPages = Math.ceil(total / limit);
@@ -774,16 +834,28 @@ app.put("/orders/:id/status", async (req, res) => {
 // Seller management
 app.get("/sellers", async (req, res) => {
   try {
+    console.log("[ADMIN] /sellers endpoint called");
+    console.log("[ADMIN] Query params:", req.query);
+
     const { page = 1, limit = 10, status = "" } = req.query;
     const offset = (page - 1) * limit;
 
     let whereClause = "u.VaiTro = 'seller'";
     const params = [];
 
-    if (status) {
+    if (status && status !== "all") {
       whereClause += " AND u.TrangThai = ?";
       params.push(status);
     }
+
+    console.log("[ADMIN] Where clause:", whereClause);
+    console.log("[ADMIN] Params:", params);
+
+    // Debug: Check if we have any sellers
+    const [allSellers] = await db.execute(
+      "SELECT COUNT(*) as total, VaiTro FROM nguoidung GROUP BY VaiTro"
+    );
+    console.log("[ADMIN] All user roles in DB:", allSellers);
 
     const [sellers] = await db.execute(
       `
@@ -818,6 +890,10 @@ app.get("/sellers", async (req, res) => {
 
     const total = countResult[0].total;
     const totalPages = Math.ceil(total / limit);
+
+    console.log("[ADMIN] Sellers found:", sellers.length);
+    console.log("[ADMIN] Total sellers in DB:", total);
+    console.log("[ADMIN] Sample seller:", sellers[0]);
 
     res.json({
       success: true,
@@ -944,9 +1020,9 @@ app.put("/reports/:id/resolve", async (req, res) => {
 app.post("/create-admin", async (req, res) => {
   try {
     console.log(`[ADMIN SERVICE] Create admin request from user:`, req.user);
-      // Only allow super admin (testadmin@pycshop.com) to create new admins
-    const currentUserEmail = req.headers['x-user-email'] || req.user?.email;
-    if (currentUserEmail !== 'testadmin@pycshop.com') {
+    // Only allow super admin (testadmin@pycshop.com) to create new admins
+    const currentUserEmail = req.headers["x-user-email"] || req.user?.email;
+    if (currentUserEmail !== "testadmin@pycshop.com") {
       return res.status(403).json({
         success: false,
         message: "Chỉ Super Admin mới có thể tạo tài khoản admin mới",
@@ -999,7 +1075,7 @@ app.post("/create-admin", async (req, res) => {
     }
 
     // Hash password
-    const bcrypt = await import('bcryptjs');
+    const bcrypt = await import("bcryptjs");
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create new admin
@@ -1011,7 +1087,7 @@ app.post("/create-admin", async (req, res) => {
     console.log(`[ADMIN SERVICE] New admin created successfully:`, {
       id: result.insertId,
       name,
-      email
+      email,
     });
 
     res.json({
@@ -1020,10 +1096,9 @@ app.post("/create-admin", async (req, res) => {
       data: {
         id: result.insertId,
         name,
-        email
-      }
+        email,
+      },
     });
-
   } catch (error) {
     console.error("[ADMIN SERVICE] Error creating admin:", error);
     res.status(500).json({
@@ -1038,8 +1113,8 @@ app.post("/create-admin", async (req, res) => {
 app.get("/admins", async (req, res) => {
   try {
     // Only allow super admin to view admin list
-    const currentUserEmail = req.headers['x-user-email'] || req.user?.email;
-    if (currentUserEmail !== 'dat@gmail.com') {
+    const currentUserEmail = req.headers["x-user-email"] || req.user?.email;
+    if (currentUserEmail !== "dat@gmail.com") {
       return res.status(403).json({
         success: false,
         message: "Chỉ Super Admin mới có thể xem danh sách admin",
@@ -1060,9 +1135,8 @@ app.get("/admins", async (req, res) => {
 
     res.json({
       success: true,
-      data: admins
+      data: admins,
     });
-
   } catch (error) {
     console.error("[ADMIN SERVICE] Error getting admins:", error);
     res.status(500).json({
@@ -1075,10 +1149,10 @@ app.get("/admins", async (req, res) => {
 
 // Health check endpoint
 app.get("/health", (req, res) => {
-  res.json({ 
-    status: "OK", 
+  res.json({
+    status: "OK",
     service: "Admin Service",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -1086,10 +1160,10 @@ app.get("/health", (req, res) => {
 app.get("/charts/revenue", async (req, res) => {
   try {
     const { period = "monthly" } = req.query;
-    
+
     // Get revenue data based on period
     let dateFormat, groupBy;
-    switch(period) {
+    switch (period) {
       case "yearly":
         dateFormat = "%Y";
         groupBy = "YEAR(created_at)";
@@ -1117,11 +1191,11 @@ app.get("/charts/revenue", async (req, res) => {
     `;
 
     const results = await db.execute(query);
-    
+
     // Format data for chart
     const chartData = results.map((row, index) => ({
       month: `T${index + 1}`,
-      value: parseInt(row.value) || 0
+      value: parseInt(row.value) || 0,
     }));
 
     res.json(chartData);
@@ -1134,9 +1208,9 @@ app.get("/charts/revenue", async (req, res) => {
 app.get("/charts/orders", async (req, res) => {
   try {
     const { period = "monthly" } = req.query;
-    
+
     let dateFormat, groupBy;
-    switch(period) {
+    switch (period) {
       case "yearly":
         dateFormat = "%Y";
         groupBy = "YEAR(created_at)";
@@ -1162,10 +1236,10 @@ app.get("/charts/orders", async (req, res) => {
     `;
 
     const results = await db.execute(query);
-    
+
     const chartData = results.map((row, index) => ({
       month: `T${index + 1}`,
-      value: parseInt(row.value) || 0
+      value: parseInt(row.value) || 0,
     }));
 
     res.json(chartData);
@@ -1179,32 +1253,35 @@ app.get("/charts/user-analytics", async (req, res) => {
   try {
     const queries = [
       "SELECT COUNT(*) as count FROM NguoiDung WHERE VaiTro = 'buyer'",
-      "SELECT COUNT(*) as count FROM NguoiDung WHERE VaiTro = 'seller'", 
-      "SELECT COUNT(*) as count FROM NguoiDung WHERE VaiTro = 'admin'"
+      "SELECT COUNT(*) as count FROM NguoiDung WHERE VaiTro = 'seller'",
+      "SELECT COUNT(*) as count FROM NguoiDung WHERE VaiTro = 'admin'",
     ];
 
     const results = await Promise.all(
-      queries.map(query => db.execute(query))
+      queries.map((query) => db.execute(query))
     );
 
-    const totalUsers = results.reduce((sum, result) => sum + result[0].count, 0);
-    
+    const totalUsers = results.reduce(
+      (sum, result) => sum + result[0].count,
+      0
+    );
+
     const chartData = [
-      { 
-        name: "Người mua", 
+      {
+        name: "Người mua",
         value: Math.round((results[0][0].count / totalUsers) * 100),
-        color: "#3b82f6" 
+        color: "#3b82f6",
       },
-      { 
-        name: "Người bán", 
+      {
+        name: "Người bán",
         value: Math.round((results[1][0].count / totalUsers) * 100),
-        color: "#10b981" 
+        color: "#10b981",
       },
-      { 
-        name: "Admin", 
+      {
+        name: "Admin",
         value: Math.round((results[2][0].count / totalUsers) * 100),
-        color: "#f59e0b" 
-      }
+        color: "#f59e0b",
+      },
     ];
 
     res.json(chartData);
@@ -1231,35 +1308,49 @@ app.get("/charts/category-performance", async (req, res) => {
     `;
 
     const results = await db.execute(query);
-    
-    const chartData = results.map(row => ({
+
+    const chartData = results.map((row) => ({
       category: row.category,
       sales: parseInt(row.sales) || 0,
-      revenue: parseInt(row.revenue) || 0
+      revenue: parseInt(row.revenue) || 0,
     }));
 
     res.json(chartData);
   } catch (error) {
-    console.error("[ADMIN SERVICE] Error fetching category performance data:", error);
-    res.status(500).json({ error: "Failed to fetch category performance data" });
+    console.error(
+      "[ADMIN SERVICE] Error fetching category performance data:",
+      error
+    );
+    res
+      .status(500)
+      .json({ error: "Failed to fetch category performance data" });
   }
 });
 
 app.get("/charts/all", async (req, res) => {
   try {
     // Fetch all chart data in parallel
-    const [revenueResponse, ordersResponse, userAnalyticsResponse, categoryResponse] = await Promise.all([
-      fetch(`http://localhost:${PORT}/charts/revenue`).then(r => r.json()),
-      fetch(`http://localhost:${PORT}/charts/orders`).then(r => r.json()),
-      fetch(`http://localhost:${PORT}/charts/user-analytics`).then(r => r.json()),
-      fetch(`http://localhost:${PORT}/charts/category-performance`).then(r => r.json())
+    const [
+      revenueResponse,
+      ordersResponse,
+      userAnalyticsResponse,
+      categoryResponse,
+    ] = await Promise.all([
+      fetch(`http://localhost:${PORT}/charts/revenue`).then((r) => r.json()),
+      fetch(`http://localhost:${PORT}/charts/orders`).then((r) => r.json()),
+      fetch(`http://localhost:${PORT}/charts/user-analytics`).then((r) =>
+        r.json()
+      ),
+      fetch(`http://localhost:${PORT}/charts/category-performance`).then((r) =>
+        r.json()
+      ),
     ]);
 
     const allChartsData = {
       revenue: revenueResponse,
       orders: ordersResponse,
       userAnalytics: userAnalyticsResponse,
-      categoryPerformance: categoryResponse
+      categoryPerformance: categoryResponse,
     };
 
     res.json(allChartsData);
@@ -1273,7 +1364,7 @@ app.get("/charts/all", async (req, res) => {
 app.get("/charts/revenue", async (req, res) => {
   try {
     const { period = "monthly" } = req.query;
-    
+
     // Mock data for now since DonHang table structure may vary
     const mockData = [
       { month: "T1", value: 2100000000 },
@@ -1321,16 +1412,19 @@ app.get("/charts/user-analytics", async (req, res) => {
   try {
     const queries = [
       "SELECT COUNT(*) as count FROM nguoidung WHERE VaiTro = 'buyer'",
-      "SELECT COUNT(*) as count FROM nguoidung WHERE VaiTro = 'seller'", 
-      "SELECT COUNT(*) as count FROM nguoidung WHERE VaiTro = 'admin'"
+      "SELECT COUNT(*) as count FROM nguoidung WHERE VaiTro = 'seller'",
+      "SELECT COUNT(*) as count FROM nguoidung WHERE VaiTro = 'admin'",
     ];
 
     const results = await Promise.all(
-      queries.map(query => db.execute(query))
+      queries.map((query) => db.execute(query))
     );
 
-    const totalUsers = results.reduce((sum, result) => sum + (result[0]?.count || 0), 0);
-    
+    const totalUsers = results.reduce(
+      (sum, result) => sum + (result[0]?.count || 0),
+      0
+    );
+
     if (totalUsers === 0) {
       // Return default data if no users found
       const defaultData = [
@@ -1340,23 +1434,23 @@ app.get("/charts/user-analytics", async (req, res) => {
       ];
       return res.json(defaultData);
     }
-    
+
     const chartData = [
-      { 
-        name: "Người mua", 
+      {
+        name: "Người mua",
         value: Math.round(((results[0][0]?.count || 0) / totalUsers) * 100),
-        color: "#3b82f6" 
+        color: "#3b82f6",
       },
-      { 
-        name: "Người bán", 
+      {
+        name: "Người bán",
         value: Math.round(((results[1][0]?.count || 0) / totalUsers) * 100),
-        color: "#10b981" 
+        color: "#10b981",
       },
-      { 
-        name: "Admin", 
+      {
+        name: "Admin",
         value: Math.round(((results[2][0]?.count || 0) / totalUsers) * 100),
-        color: "#f59e0b" 
-      }
+        color: "#f59e0b",
+      },
     ];
 
     res.json(chartData);
@@ -1386,8 +1480,13 @@ app.get("/charts/category-performance", async (req, res) => {
 
     res.json(mockData);
   } catch (error) {
-    console.error("[ADMIN SERVICE] Error fetching category performance data:", error);
-    res.status(500).json({ error: "Failed to fetch category performance data" });
+    console.error(
+      "[ADMIN SERVICE] Error fetching category performance data:",
+      error
+    );
+    res
+      .status(500)
+      .json({ error: "Failed to fetch category performance data" });
   }
 });
 
@@ -1416,29 +1515,36 @@ app.get("/charts/all", async (req, res) => {
   try {
     // Get all chart data from individual endpoints
     const baseUrl = `http://localhost:${PORT}`;
-    
-    const [revenueRes, ordersRes, userAnalyticsRes, userActivityRes, categoryRes] = await Promise.all([
+
+    const [
+      revenueRes,
+      ordersRes,
+      userAnalyticsRes,
+      userActivityRes,
+      categoryRes,
+    ] = await Promise.all([
       fetch(`${baseUrl}/charts/revenue`),
       fetch(`${baseUrl}/charts/orders`),
       fetch(`${baseUrl}/charts/user-analytics`),
       fetch(`${baseUrl}/charts/user-activity`),
-      fetch(`${baseUrl}/charts/category-performance`)
+      fetch(`${baseUrl}/charts/category-performance`),
     ]);
 
-    const [revenue, orders, userAnalytics, userActivity, categoryPerformance] = await Promise.all([
-      revenueRes.json(),
-      ordersRes.json(),
-      userAnalyticsRes.json(),
-      userActivityRes.json(),
-      categoryRes.json()
-    ]);
+    const [revenue, orders, userAnalytics, userActivity, categoryPerformance] =
+      await Promise.all([
+        revenueRes.json(),
+        ordersRes.json(),
+        userAnalyticsRes.json(),
+        userActivityRes.json(),
+        categoryRes.json(),
+      ]);
 
     const allChartsData = {
       revenue,
       orders,
       userAnalytics,
       userActivity,
-      categoryPerformance
+      categoryPerformance,
     };
 
     res.json(allChartsData);
@@ -1469,7 +1575,8 @@ app.get("/charts/all", async (req, res) => {
         { month: "T8", value: 940 },
         { month: "T9", value: 820 },
         { month: "T10", value: 856 },
-      ],      userAnalytics: [
+      ],
+      userAnalytics: [
         { name: "Người mua", value: 68, color: "#3b82f6" },
         { name: "Người bán", value: 22, color: "#10b981" },
         { name: "Admin", value: 10, color: "#f59e0b" },
@@ -1498,53 +1605,61 @@ app.get("/charts/all", async (req, res) => {
 });
 
 // Enhanced users management endpoint with better error handling
-app.get('/users', async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     console.log(`[ADMIN SERVICE] Getting users with params:`, req.query);
-    
+
     const {
       page = 1,
       limit = 10,
-      search = '',
-      role = '',
-      status = '',
-      sortBy = 'created_at',
-      sortOrder = 'desc'
+      search = "",
+      role = "",
+      status = "",
+      sortBy = "created_at",
+      sortOrder = "desc",
     } = req.query;
 
     // Validate sortBy to prevent SQL injection
-    const allowedSortFields = ['id', 'email', 'name', 'created_at', 'updated_at'];
-    const safeSortBy = allowedSortFields.includes(sortBy) ? sortBy : 'created_at';
-    const safeSortOrder = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+    const allowedSortFields = [
+      "id",
+      "email",
+      "name",
+      "created_at",
+      "updated_at",
+    ];
+    const safeSortBy = allowedSortFields.includes(sortBy)
+      ? sortBy
+      : "created_at";
+    const safeSortOrder = sortOrder.toLowerCase() === "asc" ? "ASC" : "DESC";
 
     // Calculate offset
     const offset = (page - 1) * limit;
-    
+
     // Try to get data from nguoidung table first, fallback to mock data
     let total = 0;
     let userData = [];
-    
+
     try {
       // Build WHERE conditions for nguoidung table
-      let whereConditions = ['1=1'];
+      let whereConditions = ["1=1"];
       let queryParams = [];
-      
+
       if (search) {
-        whereConditions.push('(HoTen LIKE ? OR Email LIKE ?)');
+        whereConditions.push("(HoTen LIKE ? OR Email LIKE ?)");
         queryParams.push(`%${search}%`, `%${search}%`);
       }
-      
+
       if (role) {
-        whereConditions.push('VaiTro = ?');
+        whereConditions.push("VaiTro = ?");
         queryParams.push(role);
       }
-      
+
       if (status) {
-        whereConditions.push('TrangThai = ?');
+        whereConditions.push("TrangThai = ?");
         queryParams.push(status);
       }
 
-      const whereClause = whereConditions.join(' AND ');
+      const whereClause = whereConditions.join(" AND ");
 
       // Get count
       const countQuery = `SELECT COUNT(*) as total FROM nguoidung WHERE ${whereClause}`;
@@ -1571,39 +1686,46 @@ app.get('/users', async (req, res) => {
       const finalParams = [...queryParams, parseInt(limit), parseInt(offset)];
       const [result] = await db.execute(usersQuery, finalParams);
       userData = result;
-      
     } catch (dbError) {
-      console.log(`[ADMIN SERVICE] Database error, using mock data:`, dbError.message);
-      
+      console.log(
+        `[ADMIN SERVICE] Database error, using mock data:`,
+        dbError.message
+      );
+
       // Fallback to mock data if database query fails
       const mockUsers = [
         {
           id: 1,
-          email: 'admin@admin.com',
-          name: 'System Admin',
-          role: 'admin',
-          status: 'active',
+          email: "admin@admin.com",
+          name: "System Admin",
+          role: "admin",
+          status: "active",
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          last_login: new Date().toISOString()
+          last_login: new Date().toISOString(),
         },
         {
           id: 2,
-          email: 'user@example.com', 
-          name: 'Test User',
-          role: 'customer',
-          status: 'active',
+          email: "user@example.com",
+          name: "Test User",
+          role: "customer",
+          status: "active",
           created_at: new Date(Date.now() - 86400000).toISOString(),
           updated_at: new Date(Date.now() - 86400000).toISOString(),
-          last_login: new Date(Date.now() - 3600000).toISOString()
-        }
+          last_login: new Date(Date.now() - 3600000).toISOString(),
+        },
       ];
-      
-      userData = mockUsers.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+
+      userData = mockUsers.slice(
+        parseInt(offset),
+        parseInt(offset) + parseInt(limit)
+      );
       total = mockUsers.length;
     }
-    
-    console.log(`[ADMIN SERVICE] Found ${userData.length} users, total: ${total}`);
+
+    console.log(
+      `[ADMIN SERVICE] Found ${userData.length} users, total: ${total}`
+    );
 
     // Calculate pagination info
     const totalPages = Math.ceil(total / limit);
@@ -1618,71 +1740,74 @@ app.get('/users', async (req, res) => {
           totalItems: total,
           itemsPerPage: parseInt(limit),
           hasNextPage: page < totalPages,
-          hasPreviousPage: page > 1
-        }
-      }
+          hasPreviousPage: page > 1,
+        },
+      },
     });
-
   } catch (error) {
-    console.error('[ADMIN SERVICE] Error fetching users:', error);
+    console.error("[ADMIN SERVICE] Error fetching users:", error);
     res.status(500).json({
       success: false,
-      message: 'Lỗi khi lấy danh sách người dùng',
-      error: error.message
+      message: "Lỗi khi lấy danh sách người dùng",
+      error: error.message,
     });
   }
 });
 
-// Mock notifications endpoint  
-app.get('/notifications', extractUserFromHeaders, requireAdmin, async (req, res) => {
-  try {
-    console.log(`[ADMIN SERVICE] Getting notifications for user:`, req.user);
-    
-    // Mock notifications data since we don't have a notifications table
-    const mockNotifications = [
-      {
-        id: 1,
-        title: 'Đơn hàng mới',
-        message: 'Có 5 đơn hàng mới cần xử lý',
-        type: 'order',
-        read: false,
-        created_at: new Date().toISOString()
-      },
-      {
-        id: 2,  
-        title: 'Người dùng mới',
-        message: 'Có 3 người dùng mới đăng ký',
-        type: 'user',
-        read: false,
-        created_at: new Date(Date.now() - 3600000).toISOString()
-      },
-      {
-        id: 3,
-        title: 'Báo cáo doanh thu',
-        message: 'Báo cáo doanh thu tháng đã sẵn sàng',
-        type: 'report', 
-        read: true,
-        created_at: new Date(Date.now() - 7200000).toISOString()
-      }
-    ];
+// Mock notifications endpoint
+app.get(
+  "/notifications",
+  extractUserFromHeaders,
+  requireAdmin,
+  async (req, res) => {
+    try {
+      console.log(`[ADMIN SERVICE] Getting notifications for user:`, req.user);
 
-    res.json({
-      success: true,
-      data: {
-        notifications: mockNotifications,
-        unreadCount: mockNotifications.filter(n => !n.read).length
-      }
-    });
+      // Mock notifications data since we don't have a notifications table
+      const mockNotifications = [
+        {
+          id: 1,
+          title: "Đơn hàng mới",
+          message: "Có 5 đơn hàng mới cần xử lý",
+          type: "order",
+          read: false,
+          created_at: new Date().toISOString(),
+        },
+        {
+          id: 2,
+          title: "Người dùng mới",
+          message: "Có 3 người dùng mới đăng ký",
+          type: "user",
+          read: false,
+          created_at: new Date(Date.now() - 3600000).toISOString(),
+        },
+        {
+          id: 3,
+          title: "Báo cáo doanh thu",
+          message: "Báo cáo doanh thu tháng đã sẵn sàng",
+          type: "report",
+          read: true,
+          created_at: new Date(Date.now() - 7200000).toISOString(),
+        },
+      ];
 
-  } catch (error) {
-    console.error('[ADMIN SERVICE] Error fetching notifications:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Lỗi khi lấy thông báo',
-      error: error.message
-    });
+      res.json({
+        success: true,
+        data: {
+          notifications: mockNotifications,
+          unreadCount: mockNotifications.filter((n) => !n.read).length,
+        },
+      });
+    } catch (error) {
+      console.error("[ADMIN SERVICE] Error fetching notifications:", error);
+      res.status(500).json({
+        success: false,
+        message: "Lỗi khi lấy thông báo",
+        error: error.message,
+      });
+    }
   }
-});
+);
 
 // Start server
 app.listen(PORT, () => {

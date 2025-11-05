@@ -181,7 +181,44 @@ export const useAdminSellers = () => {
           status: statusFilter,
           verification: verificationFilter,
         });
-        setSellers(response.data || []);
+        
+        console.log("[useAdminSellers] API response:", response);
+        console.log("[useAdminSellers] Raw sellers data:", response.data);
+        
+        // Map API data to expected frontend structure
+        const mappedSellers = (response.data || []).map((seller) => {
+          console.log("[useAdminSellers] Mapping seller:", seller);
+          return {
+            id: seller.id,
+            name: seller.name || "Không có tên",
+            email: seller.email || "Không có email",
+            phone: seller.phone || "Không có SĐT",
+            address: seller.address || seller.shopAddress || "Không có địa chỉ",
+            status: seller.status || "active",
+            isVerified: seller.isVerified || false,
+            joinDate: seller.joinDate,
+            lastActive: seller.lastActive || seller.joinDate,
+            shop: {
+              id: seller.shopId || seller.id,
+              name: seller.shopName || "Chưa có shop",
+              category: seller.shopCategory || "Chưa phân loại",
+              totalProducts: parseInt(seller.totalProducts) || 0,
+              totalOrders: parseInt(seller.totalOrders) || 0,
+              rating: parseFloat(seller.shopRating) || 0,
+              revenue: parseFloat(seller.shopRevenue) || 0,
+            },
+            avatar: seller.avatar || null,
+            performance: {
+              orderCompletionRate: parseFloat(seller.orderCompletionRate) || 0,
+              responseTime: seller.responseTime || "Chưa có dữ liệu",
+              customerRating: parseFloat(seller.customerRating) || 0,
+              refundRate: parseFloat(seller.refundRate) || 0,
+            },
+          };
+        });
+        
+        console.log("[useAdminSellers] Mapped sellers:", mappedSellers);
+        setSellers(mappedSellers);
 
         // Get seller stats from dashboard API
         const dashboardData = await adminService.getDashboardStats();

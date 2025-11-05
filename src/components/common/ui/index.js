@@ -3,6 +3,9 @@ export { default as Button } from "./Button";
 export { default as IconButton } from "./IconButton";
 export { default as ActionButton } from "./ActionButton";
 
+// Table Components
+export { default as DataTable } from "./DataTable";
+
 // Demo/Development components
 export { default as ButtonShowcase } from "./ButtonShowcase";
 

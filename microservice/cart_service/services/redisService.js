@@ -49,6 +49,9 @@ export const addItemToRedis = async (
     await redis.expire(key, 7 * 24 * 60 * 60);
     await redis.expire(`cart_products:${userId}`, 7 * 24 * 60 * 60);
 
+    //Đánh dấu user này cần đồng bộ cart
+    await redis.sadd("cart:pending_sync_users", userId);
+
     console.log(
       `[REDIS] Added ${quantity} of product ${productId} to cart for user ${userId}`
     );
@@ -114,6 +117,9 @@ export const updateItemInRedis = async (userId, productId, quantity) => {
     await redis.expire(key, 7 * 24 * 60 * 60);
     await redis.expire(`cart_products:${userId}`, 7 * 24 * 60 * 60);
 
+    //Đánh dấu user này cần đồng bộ cart
+    await redis.sadd("cart:pending_sync_users", userId);
+
     return true;
   } catch (error) {
     console.error("[REDIS] Error updating item in cart:", error);
@@ -127,6 +133,9 @@ export const removeItemFromRedis = async (userId, productId) => {
     const key = `cart:${userId}`;
     await redis.hdel(key, productId);
     await redis.hdel(`cart_products:${userId}`, `product:${productId}`);
+
+    //Đánh dấu user cần sync
+    await redis.sadd("cart:pending_sync_users", userId);
 
     console.log(
       `[REDIS] Removed product ${productId} from cart for user ${userId}`
@@ -143,6 +152,9 @@ export const clearCart = async (userId) => {
   try {
     await redis.del(`cart:${userId}`);
     await redis.del(`cart_products:${userId}`);
+
+    //Đánh dấu user cần sync
+    await redis.sadd("cart:pending_sync_users", userId);
 
     console.log(`[REDIS] Cleared cart for user ${userId}`);
     return true;

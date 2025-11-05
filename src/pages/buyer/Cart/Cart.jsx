@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
-import CartService from "../../../services/cartService";
+import CartService from "../../../lib/services/cartService";
 
 const Cart = () => {
   const navigate = useNavigate();

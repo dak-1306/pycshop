@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ===== COMPONENT IMPORTS ===== */
+/* All @import statements must come first before any CSS rules */
+
+/* Buyer Component Styles */
+@import "./components/buyer/Banner.css";
+@import "./components/buyer/Categories.css";
+@import "./components/buyer/ChatDialog.css";
+@import "./components/buyer/Footer.css";
+@import "./components/buyer/Header.css";
+@import "./components/buyer/ProductCard.css";
+@import "./components/buyer/ProductGrid.css";
+@import "./components/buyer/ReviewForm.css";
+@import "./components/buyer/ReviewList.css";
+@import "./components/GlobalChatWidget.css";
+
+/* Page Styles */
+@import "./pages/auth/Login.css";
+@import "./pages/auth/Register.css";
+@import "./pages/buyer/CategoryProducts.css";
+@import "./pages/buyer/ProductDetail.css";
+@import "./pages/buyer/Profile.css";
+@import "./pages/buyer/Profile_New.css";
+@import "./pages/buyer/SearchResults.css";
+@import "./pages/buyer/ShopProfile.css";
+
+/* App-specific styles */
+@import "./App.css";
+
 /* Global CSS Variables for Design System */
 :root {
   /* Buyer Theme - Forest Green (Natural, trustworthy) */
@@ -175,30 +203,3 @@ select {
   box-shadow: 0 0 0 2px var(--admin-primary);
   border-color: var(--admin-primary);
 }
-
-/* ===== COMPONENT IMPORTS ===== */
-
-/* Buyer Component Styles */
-@import "./components/buyer/Banner.css";
-@import "./components/buyer/Categories.css";
-@import "./components/buyer/ChatDialog.css";
-@import "./components/buyer/Footer.css";
-@import "./components/buyer/Header.css";
-@import "./components/buyer/ProductCard.css";
-@import "./components/buyer/ProductGrid.css";
-@import "./components/buyer/ReviewForm.css";
-@import "./components/buyer/ReviewList.css";
-@import "./components/GlobalChatWidget.css";
-
-/* Page Styles */
-@import "./pages/auth/Login.css";
-@import "./pages/auth/Register.css";
-@import "./pages/buyer/CategoryProducts.css";
-@import "./pages/buyer/ProductDetail.css";
-@import "./pages/buyer/Profile.css";
-@import "./pages/buyer/Profile_New.css";
-@import "./pages/buyer/SearchResults.css";
-@import "./pages/buyer/ShopProfile.css";
-
-/* App-specific styles */
-@import "./App.css";

@@ -6,6 +6,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { CartProvider } from "./context/CartContext";
 import { ChatProvider } from "./context/ChatContext";
 import { ThemeProvider } from "./context/ThemeContext";
 import { LanguageProvider } from "./context/LanguageContext";
@@ -46,74 +47,82 @@ function App() {
     <ThemeProvider>
       <LanguageProvider>
         <AuthProvider>
-          <ChatProvider>
-            <Router>
-              <div className="app">
-                <Routes>
-                  {/* Main Homepage */}
-                  <Route path="/" element={<HomePage />} />
+          <CartProvider>
+            <ChatProvider>
+              <Router>
+                <div className="app">
+                  <Routes>
+                    {/* Main Homepage */}
+                    <Route path="/" element={<HomePage />} />
 
-                  {/* Search Results */}
-                  <Route path="/search" element={<SearchResults />} />
+                    {/* Search Results */}
+                    <Route path="/search" element={<SearchResults />} />
 
-                  {/* Category Products */}
-                  <Route
-                    path="/category/:categoryId"
-                    element={<CategoryProducts />}
-                  />
-
-                  {/* Auth Routes */}
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                  <Route path="/admin/login" element={<AdminLogin />} />
-                  <Route path="/become-seller" element={<BecomeSeller />} />
-
-                  {/* Buyer Routes */}
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/product/:id" element={<ProductDetail />} />
-                  <Route path="/shop/:shopId" element={<ShopProfile />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-
-                  {/* Seller Routes */}
-                  <Route path="/seller/dashboard" element={<Dashboard />} />
-                  <Route path="/seller/products" element={<ManageProduct />} />
-                  <Route path="/seller/orders" element={<Order />} />
-                  <Route path="/seller/shop" element={<ShopPage />} />
-                  <Route path="/seller/messages" element={<SellerMessages />} />
-
-                  {/* Admin Routes */}
-                  <Route
-                    path="/admin/*"
-                    element={
-                      <AdminRoute>
-                        <AdminLayout />
-                      </AdminRoute>
-                    }
-                  >
+                    {/* Category Products */}
                     <Route
-                      index
-                      element={<Navigate to="/admin/dashboard" replace />}
+                      path="/category/:categoryId"
+                      element={<CategoryProducts />}
                     />
-                    <Route path="dashboard" element={<AdminDashboard />} />
-                    <Route path="users" element={<AdminUsers />} />
-                    <Route path="products" element={<AdminProducts />} />
-                    <Route path="orders" element={<AdminOrders />} />
-                    <Route path="sellers" element={<AdminSellers />} />
-                    <Route path="reports" element={<AdminReports />} />
-                    <Route
-                      path="admin-management"
-                      element={<AdminManagement />}
-                    />
-                    <Route path="settings" element={<AdminSettings />} />
-                  </Route>
-                </Routes>
 
-                {/* Global Chat Widget */}
-                <GlobalChatWidget />
-              </div>{" "}
-            </Router>
-          </ChatProvider>
+                    {/* Auth Routes */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/admin/login" element={<AdminLogin />} />
+                    <Route path="/become-seller" element={<BecomeSeller />} />
+
+                    {/* Buyer Routes */}
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/product/:id" element={<ProductDetail />} />
+                    <Route path="/shop/:shopId" element={<ShopProfile />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+
+                    {/* Seller Routes */}
+                    <Route path="/seller/dashboard" element={<Dashboard />} />
+                    <Route
+                      path="/seller/products"
+                      element={<ManageProduct />}
+                    />
+                    <Route path="/seller/orders" element={<Order />} />
+                    <Route path="/seller/shop" element={<ShopPage />} />
+                    <Route
+                      path="/seller/messages"
+                      element={<SellerMessages />}
+                    />
+
+                    {/* Admin Routes */}
+                    <Route
+                      path="/admin/*"
+                      element={
+                        <AdminRoute>
+                          <AdminLayout />
+                        </AdminRoute>
+                      }
+                    >
+                      <Route
+                        index
+                        element={<Navigate to="/admin/dashboard" replace />}
+                      />
+                      <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="users" element={<AdminUsers />} />
+                      <Route path="products" element={<AdminProducts />} />
+                      <Route path="orders" element={<AdminOrders />} />
+                      <Route path="sellers" element={<AdminSellers />} />
+                      <Route path="reports" element={<AdminReports />} />
+                      <Route
+                        path="admin-management"
+                        element={<AdminManagement />}
+                      />
+                      <Route path="settings" element={<AdminSettings />} />
+                    </Route>
+                  </Routes>
+
+                  {/* Global Chat Widget */}
+                  <GlobalChatWidget />
+                </div>{" "}
+              </Router>
+            </ChatProvider>
+          </CartProvider>
         </AuthProvider>
       </LanguageProvider>
     </ThemeProvider>

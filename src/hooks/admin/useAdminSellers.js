@@ -181,10 +181,10 @@ export const useAdminSellers = () => {
           status: statusFilter,
           verification: verificationFilter,
         });
-        
+
         console.log("[useAdminSellers] API response:", response);
         console.log("[useAdminSellers] Raw sellers data:", response.data);
-        
+
         // Map API data to expected frontend structure
         const mappedSellers = (response.data || []).map((seller) => {
           console.log("[useAdminSellers] Mapping seller:", seller);
@@ -216,7 +216,7 @@ export const useAdminSellers = () => {
             },
           };
         });
-        
+
         console.log("[useAdminSellers] Mapped sellers:", mappedSellers);
         setSellers(mappedSellers);
 

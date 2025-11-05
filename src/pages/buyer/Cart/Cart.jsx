@@ -184,6 +184,11 @@ const Cart = () => {
                     <img
                       src={item.image}
                       alt={item.name}
+                      onError={(e) =>
+                        (e.target.src =
+                          "../../../../microservice/product_service" +
+                          item.image)
+                      }
                       className="w-20 h-20 rounded object-cover border border-gray-200"
                     />
                     <div className="flex-1">
@@ -191,7 +196,7 @@ const Cart = () => {
                         {item.name}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">
-                        Phân loại: {item.variant}
+                        Phân loại: {"Mặc định"}
                       </p>
                       <p className="text-red-500 font-semibold">
                         {formatPrice(item.price)}

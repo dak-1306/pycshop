@@ -25,7 +25,7 @@ export class CartModel {
             SELECT 
                 ID_SanPham,
                 Url,
-                ROW_NUMBER() OVER (PARTITION BY ID_SanPham ORDER BY Upload_at DESC) AS rn
+                ROW_NUMBER() OVER (PARTITION BY ID_SanPham ORDER BY Upload_at ASC) AS rn
             FROM AnhSanPham
         )
             SELECT 

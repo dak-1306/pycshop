@@ -102,13 +102,14 @@ export const sendCartCheckout = async (userId, cartItems, orderData = {}) => {
 };
 
 // Send cart sync event (for periodic sync)
-export const sendCartSync = async (userId) => {
+export const sendCartSync = async (userId, cartData = null) => {
   try {
     await connectProducer();
 
     const message = {
       userId,
       action: "sync",
+      cartData, // Truyền cart data trực tiếp thay vì để consumer đọc từ Redis
       timestamp: new Date().toISOString(),
     };
 
@@ -123,7 +124,11 @@ export const sendCartSync = async (userId) => {
       ],
     });
 
-    console.log(`[KAFKA_PRODUCER] Sent cart sync for user ${userId}`);
+    console.log(
+      `[KAFKA_PRODUCER] Sent cart sync for user ${userId} with ${
+        cartData ? Object.keys(cartData).length : "unknown"
+      } items`
+    );
     return true;
   } catch (error) {
     console.error("[KAFKA_PRODUCER] Error sending cart sync:", error);

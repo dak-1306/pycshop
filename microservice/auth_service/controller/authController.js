@@ -233,11 +233,12 @@ export const logout = async (req, res) => {
 
     // 1. Lấy cart từ Redis
     const cart = await getCartFromRedis(userId);
+    console.log(`[LOGOUT] Cart retrieved: ${Object.keys(cart).length} items`);
 
-    // 2. Gửi sang Kafka để sync về DB
+    // 2. Gửi cart data trực tiếp sang Kafka (không để consumer đọc lại từ Redis)
     await sendCartSync(userId, cart);
 
-    // 3. Xóa cache Redis
+    // 3. Xóa cache Redis SAU KHI đã gửi data vào Kafka
     await redis.del(`cart:${userId}`);
     await redis.del(`cart_products:${userId}`);
 

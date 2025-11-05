@@ -7,6 +7,33 @@ import {
   getCartItemCount,
 } from "../services/redisService.js";
 import { sendCartUpdate, sendCartCheckout } from "../services/kafkaProducer.js";
+import { CartModel } from "../models/cartModel.js";
+
+// Load cart from MySQL when Redis is empty
+const loadCartFromMySQL = async (userId) => {
+  return await CartModel.loadFromDatabase(userId);
+};
+
+// Restore cart from MySQL to Redis
+const restoreCartToRedis = async (userId, cart) => {
+  try {
+    for (const [productId, itemData] of Object.entries(cart)) {
+      await addItemToRedis(
+        userId,
+        productId,
+        itemData.quantity,
+        itemData.product || {}
+      );
+    }
+    console.log(
+      `[CART_CONTROLLER] Restored ${
+        Object.keys(cart).length
+      } items to Redis for user ${userId}`
+    );
+  } catch (error) {
+    console.error("[CART_CONTROLLER] Error restoring cart to Redis:", error);
+  }
+};
 
 // Add item to cart
 export const addToCart = async (req, res) => {
@@ -195,9 +222,31 @@ export const viewCart = async (req, res) => {
       });
     }
 
-    // Get cart from Redis
-    const cart = await getCartFromRedis(userId);
-    const itemCount = await getCartItemCount(userId);
+    // Get cart from Redis first
+    let cart = await getCartFromRedis(userId);
+    let itemCount = await getCartItemCount(userId);
+
+    // If Redis cart is empty, try to load from MySQL
+    if (!cart || Object.keys(cart).length === 0) {
+      console.log(
+        `[CART_CONTROLLER] Redis cart empty for user ${userId}, loading from MySQL...`
+      );
+      cart = await loadCartFromMySQL(userId);
+      itemCount = Object.values(cart).reduce(
+        (total, item) => total + (item.quantity || 0),
+        0
+      );
+
+      // If we found cart in MySQL, restore it to Redis
+      if (cart && Object.keys(cart).length > 0) {
+        console.log(
+          `[CART_CONTROLLER] Restoring ${
+            Object.keys(cart).length
+          } items to Redis for user ${userId}`
+        );
+        await restoreCartToRedis(userId, cart);
+      }
+    }
 
     console.log(
       `[CART_CONTROLLER] Retrieved cart for user ${userId} with ${itemCount} items`
@@ -233,7 +282,27 @@ export const getCartCount = async (req, res) => {
       });
     }
 
-    const itemCount = await getCartItemCount(userId);
+    let itemCount = await getCartItemCount(userId);
+
+    // If Redis count is 0, check MySQL
+    if (itemCount === 0) {
+      console.log(
+        `[CART_CONTROLLER] Redis count is 0 for user ${userId}, checking MySQL...`
+      );
+      const cart = await loadCartFromMySQL(userId);
+      itemCount = Object.values(cart).reduce(
+        (total, item) => total + (item.quantity || 0),
+        0
+      );
+
+      // If we found cart in MySQL, restore it to Redis
+      if (cart && Object.keys(cart).length > 0) {
+        console.log(
+          `[CART_CONTROLLER] Restoring cart to Redis for count check, user ${userId}`
+        );
+        await restoreCartToRedis(userId, cart);
+      }
+    }
 
     res.json({
       success: true,

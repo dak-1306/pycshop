@@ -1,5 +1,5 @@
 import { Kafka } from "kafkajs";
-import { pool } from "../db/mysql.js";
+import { CartModel } from "../models/cartModel.js";
 import { getCartFromRedis } from "./redisService.js";
 import redis from "./redisService.js";
 
@@ -35,7 +35,7 @@ export const startKafkaConsumer = async () => {
       eachMessage: async ({ topic, partition, message }) => {
         try {
           const messageValue = JSON.parse(message.value.toString());
-          const { userId, action, productData } = messageValue;
+          const { userId, action, productData, cartData } = messageValue;
 
           console.log(
             `[KAFKA_CONSUMER] Processing message: topic=${topic}, action=${action}, userId=${userId}`
@@ -46,7 +46,7 @@ export const startKafkaConsumer = async () => {
               await handleCartUpdate(userId, action, productData);
               break;
             case "cart_sync":
-              await handleCartSync(userId);
+              await handleCartSync(userId, cartData);
               break;
             case "cart_checkout":
               await handleCartCheckout(messageValue);
@@ -86,9 +86,28 @@ const handleCartUpdate = async (userId, action, productData) => {
 };
 
 // Handle cart sync events
-const handleCartSync = async (userId) => {
+const handleCartSync = async (userId, cartData = null) => {
   try {
-    const cart = await getCartFromRedis(userId);
+    let cart;
+
+    if (cartData) {
+      // Sử dụng cart data từ message (ưu tiên cho logout)
+      cart = cartData;
+      console.log(
+        `[KAFKA_CONSUMER] Using cart data from message: ${
+          Object.keys(cart).length
+        } items`
+      );
+    } else {
+      // Fallback: đọc từ Redis (cho auto-sync)
+      cart = await getCartFromRedis(userId);
+      console.log(
+        `[KAFKA_CONSUMER] Fallback: reading cart from Redis: ${
+          Object.keys(cart).length
+        } items`
+      );
+    }
+
     await syncCartToMySQL(userId, cart);
 
     console.log(`[KAFKA_CONSUMER] Cart synced for user ${userId}`);
@@ -119,67 +138,11 @@ const handleCartCheckout = async (messageData) => {
 
 // Sync cart from Redis to MySQL
 const syncCartToMySQL = async (userId, cart) => {
-  const connection = await pool.getConnection();
-
   try {
-    await connection.beginTransaction();
-
-    // Check if cart exists in MySQL
-    const [cartRows] = await connection.query(
-      "SELECT ID_GioHang FROM giohang WHERE ID_NguoiMua = ?",
-      [userId]
-    );
-
-    let cartId = cartRows.length ? cartRows[0].ID_GioHang : null;
-
-    // Create cart if doesn't exist
-    if (!cartId) {
-      const [result] = await connection.query(
-        "INSERT INTO giohang (ID_NguoiMua) VALUES (?)",
-        [userId]
-      );
-      cartId = result.insertId;
-      console.log(
-        `[KAFKA_CONSUMER] Created new cart ${cartId} for user ${userId}`
-      );
-    }
-
-    // Clear existing cart items
-    await connection.query("DELETE FROM sanphamtronggio WHERE ID_GioHang = ?", [
-      cartId,
-    ]);
-
-    // Insert current cart items
-    let totalQuantity = 0;
-    for (const [productId, itemData] of Object.entries(cart)) {
-      const quantity = itemData.quantity || 0;
-      if (quantity > 0) {
-        await connection.query(
-          "INSERT INTO sanphamtronggio (ID_GioHang, ID_SanPham, SoLuong) VALUES (?, ?, ?)",
-          [cartId, productId, quantity]
-        );
-        totalQuantity += quantity;
-      }
-    }
-
-    // Update cart timestamp to indicate last sync
-    await connection.query(
-      "UPDATE giohang SET ThoiGianTao = CURRENT_TIMESTAMP WHERE ID_GioHang = ?",
-      [cartId]
-    );
-
-    await connection.commit();
-    console.log(
-      `[KAFKA_CONSUMER] Synced ${
-        Object.keys(cart).length
-      } items to MySQL for user ${userId}`
-    );
+    await CartModel.syncToDatabase(userId, cart);
   } catch (error) {
-    await connection.rollback();
     console.error("[KAFKA_CONSUMER] Error syncing cart to MySQL:", error);
     throw error;
-  } finally {
-    connection.release();
   }
 };
 
@@ -223,7 +186,7 @@ const syncAllActiveCarts = async () => {
 
           // Only sync if cart has items
           if (Object.keys(cart).length > 0) {
-            await syncCartToMySQL(userId, cart);
+            await CartModel.syncToDatabase(userId, cart);
             syncedCount++;
           }
         }

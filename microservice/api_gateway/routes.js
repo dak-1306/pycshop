@@ -3,105 +3,114 @@ import authMiddleware from "./middleware/authMiddleware.js";
 
 function setupRoutes(app) {
   console.log("[ROUTES] Setting up proxy routes...");
-  // Auth Service
-  app.use(
-    "/auth",
-    (req, res, next) => {
-      console.log(
-        `[ROUTES] Matched /auth route for ${req.method} ${req.originalUrl}`
-      );
-      console.log(`[ROUTES] req.user:`, req.user);
-      // Skip auth middleware for login/register routes
-      const publicRoutes = [
-        "/auth/login",
-        "/auth/register",
-        "/auth/admin/login",
-        "/auth/register-admin",
-      ];
-      const isPublicRoute = publicRoutes.some(
-        (route) =>
-          req.originalUrl === route || req.originalUrl.startsWith(route + "?")
-      );
+  // Auth Service - Manual Proxy Approach
+  app.use("/auth", (req, res, next) => {
+    console.log(
+      `[ROUTES] Manual auth proxy for ${req.method} ${req.originalUrl}`
+    );
+    console.log(`[ROUTES] req.user:`, req.user);
 
-      console.log(
-        `[ROUTES] Checking if ${req.originalUrl} is public route:`,
-        isPublicRoute
-      );
+    // Skip auth middleware for login/register routes
+    const publicRoutes = [
+      "/auth/login",
+      "/auth/register",
+      "/auth/logout",
+      "/auth/admin/login",
+      "/auth/register-admin",
+    ];
+    const isPublicRoute = publicRoutes.some(
+      (route) =>
+        req.originalUrl === route || req.originalUrl.startsWith(route + "?")
+    );
 
-      if (isPublicRoute) {
-        console.log(
-          `[ROUTES] Skipping auth for public auth route: ${req.originalUrl}`
-        );
-        return next();
+    console.log(
+      `[ROUTES] Checking if ${req.originalUrl} is public route:`,
+      isPublicRoute
+    );
+
+    if (!isPublicRoute && !req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Vui lòng đăng nhập để tiếp tục",
+        code: "NO_TOKEN",
+        requireLogin: true,
+      });
+    }
+
+    // For GET requests, handle immediately
+    if (req.method === "GET" || req.method === "HEAD") {
+      handleAuthProxy(req, res);
+      return;
+    }
+
+    // For POST/PUT requests, collect body first
+    let body = "";
+    req.on("data", (chunk) => {
+      body += chunk.toString();
+    });
+
+    req.on("end", () => {
+      req.bodyString = body;
+      handleAuthProxy(req, res);
+    });
+  });
+
+  async function handleAuthProxy(req, res) {
+    try {
+      // Build target URL
+      const targetPath = req.url.replace(/^\//, ""); // Remove leading slash
+      const targetUrl = `http://localhost:5001/${targetPath}`;
+
+      console.log(`🔥 [MANUAL_AUTH_PROXY] Forwarding to: ${targetUrl}`);
+
+      // Prepare headers - copy from original request
+      const headers = {
+        ...req.headers,
+        "x-user-id": req.user?.id?.toString() || "",
+        "x-user-role": req.user?.role || "",
+        "x-user-type": req.user?.userType || "",
+      };
+
+      delete headers.host; // Remove host header to avoid conflicts
+
+      // Prepare request options
+      const requestOptions = {
+        method: req.method,
+        headers,
+      };
+
+      // Add body for POST/PUT requests
+      if (req.bodyString) {
+        requestOptions.body = req.bodyString;
+        console.log(`🔥 [MANUAL_AUTH_PROXY] Body: ${req.bodyString}`);
       }
-      // Apply auth middleware for protected auth routes (like logout)
-      authMiddleware(req, res, next);
-    },
-    (req, res, next) => {
+
+      // Make request to auth service
+      const response = await fetch(targetUrl, requestOptions);
+      const data = await response.json();
+
       console.log(
-        `[ROUTES] About to call createProxyMiddleware for ${req.method} ${req.url}`
+        `🔥 [MANUAL_AUTH_PROXY] Response ${response.status} from auth service`
       );
-      next();
-    },
-    createProxyMiddleware({
-      target: process.env.AUTH_SERVICE_URL || "http://localhost:5001",
-      changeOrigin: true,
-      pathRewrite: { "^/auth": "" },
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(
-          `🔥 [PROXY] Auth onProxyReq callback CALLED! - ${req.method} ${req.url}`
-        );
-        console.log(
-          `🔥 [PROXY] Target: ${
-            process.env.AUTH_SERVICE_URL || "http://localhost:5001"
-          }${proxyReq.path}`
-        );
 
-        // Truyền thông tin user từ API Gateway xuống auth service
-        if (req.user) {
-          proxyReq.setHeader("x-user-id", req.user.id);
-          proxyReq.setHeader("x-user-role", req.user.role);
+      // Set CORS headers
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+      }
 
-          // Only set x-user-type if it exists to avoid undefined header
-          if (req.user.userType) {
-            proxyReq.setHeader("x-user-type", req.user.userType);
-          }
-
-          console.log(
-            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${
-              req.user.role
-            }, userType: ${req.user.userType || "undefined"}`
-          );
-        } else {
-          console.log(`[PROXY] No req.user found for this request`);
-        }
-
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.AUTH_SERVICE_URL || "http://localhost:5001"
-          }${proxyReq.path}`
-        );
-      },
-      onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Auth Service`
-        );
-
-        // Ensure CORS headers are set
-        const origin = req.headers.origin;
-        if (origin) {
-          res.setHeader("Access-Control-Allow-Origin", origin);
-          res.setHeader("Access-Control-Allow-Credentials", "true");
-        }
-      },
-      onError: (err, req, res) => {
-        console.error(`[PROXY] Error:`, err.message);
-        if (!res.headersSent) {
-          res.status(500).json({ error: "Proxy error", details: err.message });
-        }
-      },
-    })
-  );
+      // Return response
+      res.status(response.status).json(data);
+    } catch (error) {
+      console.error(`🔥 [MANUAL_AUTH_PROXY] Error:`, error.message);
+      res.status(500).json({
+        success: false,
+        message: "Auth service error",
+        error: error.message,
+      });
+    }
+  }
 
   // Admin Service
   app.use(
@@ -348,10 +357,86 @@ function setupRoutes(app) {
   // Cart Service
   app.use(
     "/cart",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /cart route for ${req.method} ${req.originalUrl}`
+      );
+      console.log(`[ROUTES] req.user:`, req.user);
+      next();
+    },
+    // apply auth middle manual
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Applying auth middleware for cart route: ${req.path}`
+      );
+      authMiddleware(req, res, next);
+    },
+    //apply header manual
+    (req, res, next) => {
+      console.log(`[ROUTES] Setting headers for cart route: ${req.path}`);
+      // Manually set headers for proxy
+      if (req.user) {
+        req.headers["x-user-id"] = req.user.id;
+        req.headers["x-user-role"] = req.user.role;
+        req.headers["x-user-type"] = req.user.userType;
+        console.log(
+          `[ROUTES] Set headers manually: x-user-id=${req.user.id}, x-user-role=${req.user.role}, x-user-type=${req.user.userType}`
+        );
+      }
+      next();
+    },
+
     createProxyMiddleware({
-      target: process.env.CART_SERVICE_URL,
+      target: process.env.CART_SERVICE_URL || "http://localhost:5004",
       changeOrigin: true,
-      pathRewrite: { "^/cart": "" },
+      pathRewrite: (path, req) => {
+        const newPath = `/api/cart${path}`;
+        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
+        return newPath;
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`[PROXY] onProxyReq callback triggered for cart service`);
+
+        // Truyền thông tin user từ API Gateway xuống cart service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id.toString());
+          proxyReq.setHeader("x-user-role", req.user.role);
+          proxyReq.setHeader("x-user-type", req.user.userType);
+          console.log("[PROXY] Set user headers:", {
+            id: req.user.id,
+            role: req.user.role,
+            userType: req.user.userType,
+          });
+        } else {
+          console.log(`[PROXY] No req.user found for this cart request`);
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.CART_SERVICE_URL || "http://localhost:5004"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Cart Service`
+        );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Cart Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Cart service error", details: err.message });
+        }
+      },
     })
   );
 

@@ -15,7 +15,9 @@ const adminService = {
   // Chart data methods
   getRevenueChartData: async (period = "monthly") => {
     try {
-      const response = await apiService.get(`/admin/charts/revenue?period=${period}`);
+      const response = await apiService.get(
+        `/admin/charts/revenue?period=${period}`
+      );
       return response;
     } catch (error) {
       console.error("Error fetching revenue chart data:", error);
@@ -25,7 +27,9 @@ const adminService = {
 
   getOrderTrendsData: async (period = "monthly") => {
     try {
-      const response = await apiService.get(`/admin/charts/orders?period=${period}`);
+      const response = await apiService.get(
+        `/admin/charts/orders?period=${period}`
+      );
       return response;
     } catch (error) {
       console.error("Error fetching order trends data:", error);
@@ -45,7 +49,9 @@ const adminService = {
 
   getCategoryPerformanceData: async () => {
     try {
-      const response = await apiService.get("/admin/charts/category-performance");
+      const response = await apiService.get(
+        "/admin/charts/category-performance"
+      );
       return response;
     } catch (error) {
       console.error("Error fetching category performance data:", error);
@@ -189,9 +195,43 @@ const adminService = {
   // Seller management
   getSellers: async (params = {}) => {
     try {
-      const queryParams = new URLSearchParams(params).toString();
-      const response = await apiService.get(`/admin/sellers?${queryParams}`);
-      return response;
+      // Filter out undefined, null, and empty string values
+      const cleanParams = Object.entries(params).reduce((acc, [key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          acc[key] = value;
+        }
+        return acc;
+      }, {});
+
+      const queryParams = new URLSearchParams(cleanParams).toString();
+      const url = `/sellers${queryParams ? `?${queryParams}` : ""}`;
+
+      console.log("[getSellers] Clean params:", cleanParams);
+      console.log("[getSellers] Final URL:", url);
+
+      // Call admin service directly on port 5006
+      const ADMIN_API_URL = "http://localhost:5006";
+      const token =
+        localStorage.getItem("token") || sessionStorage.getItem("token");
+
+      const response = await fetch(`${ADMIN_API_URL}${url}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        },
+      });
+
+      if (!response.ok) {
+        const error = await response.json().catch(() => ({
+          message: "Network error",
+        }));
+        throw new Error(error.message || `HTTP ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("[getSellers] API response:", result);
+      return result;
     } catch (error) {
       console.error("Error fetching sellers:", error);
       throw error;

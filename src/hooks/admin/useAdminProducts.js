@@ -1,39 +1,17 @@
 import useProductsCommon from "../common/useProducts.js";
+import { adminProductService } from "../../lib/services/productService.js";
 import { ADMIN_CONSTANTS } from "../../lib/constants/index.js";
-
-// Mock service for admin products
-const adminProductService = {
-  getProducts: async () => ({
-    success: true,
-    data: ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS,
-    pagination: {
-      total: ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS.length,
-      totalPages: Math.ceil(ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS.length / 10),
-    },
-  }),
-  // Add other mock methods as needed for admin
-  createProduct: async (product) => ({
-    success: true,
-    data: { id: Date.now(), ...product },
-  }),
-  updateProduct: async (id, updates) => ({
-    success: true,
-    data: { id, ...updates },
-  }),
-  deleteProduct: async (id) => ({ success: true, data: { id } }),
-};
 
 export const useAdminProducts = () => {
   // Use common hook with admin-specific configuration
   const commonHook = useProductsCommon({
     role: "admin",
     service: adminProductService,
+    mockData: null, // Use real database data for admin
     canDelete: true, // Admins can delete products
     pageSize: 10,
     hasImageManagement: false, // Simpler admin interface
     hasStockManagement: false, // Admin doesn't manage stock directly
-    useMockData: true, // Use mock data for admin
-    initialData: ADMIN_CONSTANTS.ADMIN_MOCK_PRODUCTS, // Provide initial mock data
   });
 
   // Admin-specific stats calculation from filtered products

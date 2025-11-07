@@ -69,12 +69,21 @@ const SellerLayout = ({ children }) => {
     if (path.includes("/dashboard")) setActiveMenu("dashboard");
     else if (path.includes("/products")) setActiveMenu("manageProduct");
     else if (path.includes("/orders")) setActiveMenu("order");
+    else if (path.includes("/messages")) setActiveMenu("messages");
     else if (path.includes("/shop")) setActiveMenu("shopPage");
   }, [location.pathname]);
 
+  // Prevent body scroll when seller layout is active
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+    <div className="h-screen bg-gray-50 flex flex-col overflow-hidden">
+      {/* Header - Fixed at top */}
       <SellerHeader
         shopInfo={shopInfo}
         shopLoading={shopLoading}
@@ -93,13 +102,13 @@ const SellerLayout = ({ children }) => {
         onAddCollaborator={handleAddCollaborator}
       />
 
-      <div className="flex">
-        {/* Sidebar */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar - Fixed on left */}
         <SellerSidebar activeMenu={activeMenu} />
 
-        {/* Main Content */}
-        <main className="flex-1 overflow-x-auto overflow-y-auto bg-gray-50">
-          {children}
+        {/* Main Content - Scrollable area */}
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="p-6">{children}</div>
         </main>
       </div>
 

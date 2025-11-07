@@ -3,6 +3,9 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import db from "../../db/index.js";
+import { sendCartSync } from "../../cart_service/services/kafkaProducer.js";
+import { getCartFromRedis } from "../../cart_service/services/redisService.js";
+import redis from "../../cart_service/services/redisService.js";
 
 export const register = async (req, res) => {
   try {
@@ -215,9 +218,46 @@ export const registerAdmin = async (req, res) => {
   }
 };
 
-export const logout = (req, res) => {
-  // Logout FE thường xóa token phía client, BE chỉ cần confirm
-  res.json({ message: "Logout successful" });
+export const logout = async (req, res) => {
+  try {
+    const userId = req.user?.id || req.headers["x-user-id"];
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Không xác định được người dùng",
+      });
+    }
+
+    console.log(`[LOGOUT] Syncing cart before logout for user: ${userId}`);
+
+    // 1. Lấy cart từ Redis
+    const cart = await getCartFromRedis(userId);
+    console.log(`[LOGOUT] Cart retrieved: ${Object.keys(cart).length} items`);
+
+    // 2. Gửi cart data trực tiếp sang Kafka (không để consumer đọc lại từ Redis)
+    await sendCartSync(userId, cart);
+
+    // 3. Xóa cache Redis SAU KHI đã gửi data vào Kafka
+    await redis.del(`cart:${userId}`);
+    await redis.del(`cart_products:${userId}`);
+
+    console.log(
+      `[LOGOUT] Cart synced and Redis cache cleared for user: ${userId}`
+    );
+
+    res.json({
+      success: true,
+      message: "Đăng xuất và đồng bộ giỏ hàng thành công",
+    });
+  } catch (error) {
+    console.error("[LOGOUT] Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Đăng xuất thất bại",
+      error: error.message,
+    });
+  }
 };
 
 // Get current user profile
@@ -225,23 +265,27 @@ export const getCurrentUser = async (req, res) => {
   try {
     console.log("[GET_CURRENT_USER] Request received");
     console.log("[GET_CURRENT_USER] Headers:", req.headers);
-    
+
     // Extract user info from headers (set by API Gateway)
-    const userId = req.headers['x-user-id'];
-    const userRole = req.headers['x-user-role'];
-    const userType = req.headers['x-user-type'];
-    
-    console.log("[GET_CURRENT_USER] User info from headers:", { userId, userRole, userType });
-    
+    const userId = req.headers["x-user-id"];
+    const userRole = req.headers["x-user-role"];
+    const userType = req.headers["x-user-type"];
+
+    console.log("[GET_CURRENT_USER] User info from headers:", {
+      userId,
+      userRole,
+      userType,
+    });
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Người dùng chưa đăng nhập"
+        message: "Người dùng chưa đăng nhập",
       });
     }
 
     let user = null;
-    
+
     // Find user based on userType
     if (userType === "admin") {
       console.log("[GET_CURRENT_USER] Looking for admin user");
@@ -255,7 +299,7 @@ export const getCurrentUser = async (req, res) => {
           DiaChi: user.DiaChi || null,
           VaiTro: "admin",
           userType: "admin",
-          Avatar: user.Avatar || null
+          Avatar: user.Avatar || null,
         };
       }
     } else {
@@ -273,7 +317,7 @@ export const getCurrentUser = async (req, res) => {
           NgaySinh: user.NgaySinh,
           VaiTro: user.VaiTro,
           userType: "user",
-          Avatar: user.Avatar || null
+          Avatar: user.Avatar || null,
         };
       }
     }
@@ -281,24 +325,23 @@ export const getCurrentUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: "Không tìm thấy thông tin người dùng"
+        message: "Không tìm thấy thông tin người dùng",
       });
     }
 
     console.log("[GET_CURRENT_USER] User found:", user.Email);
-    
+
     res.json({
       success: true,
       user: user,
-      message: "Lấy thông tin người dùng thành công"
+      message: "Lấy thông tin người dùng thành công",
     });
-
   } catch (error) {
     console.error("[GET_CURRENT_USER] Error:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi lấy thông tin người dùng",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -308,36 +351,36 @@ export const updateProfile = async (req, res) => {
   try {
     console.log("[UPDATE_PROFILE] Request received");
     console.log("[UPDATE_PROFILE] Body:", req.body);
-    
+
     // Extract user info from headers (set by API Gateway)
-    const userId = req.headers['x-user-id'];
-    const userType = req.headers['x-user-type'];
-    
+    const userId = req.headers["x-user-id"];
+    const userType = req.headers["x-user-type"];
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Người dùng chưa đăng nhập"
+        message: "Người dùng chưa đăng nhập",
       });
     }
 
     const { name, email, phone, gender, birthDate, address } = req.body;
-    
+
     let updatedUser = null;
-    
+
     if (userType === "admin") {
       // Update admin table
       const [result] = await db.execute(
         "UPDATE admin SET HoTen = ?, Email = ?, SoDienThoai = ?, DiaChi = ? WHERE ID_NguoiDung = ?",
         [name, email, phone || null, address || null, userId]
       );
-      
+
       if (result.affectedRows === 0) {
         return res.status(404).json({
           success: false,
-          message: "Không tìm thấy admin"
+          message: "Không tìm thấy admin",
         });
       }
-      
+
       // Get updated admin
       updatedUser = await Admin.findById(userId);
       if (updatedUser) {
@@ -348,23 +391,31 @@ export const updateProfile = async (req, res) => {
           SoDienThoai: updatedUser.SoDienThoai,
           DiaChi: updatedUser.DiaChi,
           VaiTro: "admin",
-          userType: "admin"
+          userType: "admin",
         };
       }
     } else {
       // Update user table
       const [result] = await db.execute(
         "UPDATE nguoidung SET HoTen = ?, Email = ?, SoDienThoai = ?, GioiTinh = ?, NgaySinh = ?, DiaChi = ? WHERE ID_NguoiDung = ?",
-        [name, email, phone || null, gender || null, birthDate || null, address || null, userId]
+        [
+          name,
+          email,
+          phone || null,
+          gender || null,
+          birthDate || null,
+          address || null,
+          userId,
+        ]
       );
-      
+
       if (result.affectedRows === 0) {
         return res.status(404).json({
           success: false,
-          message: "Không tìm thấy người dùng"
+          message: "Không tìm thấy người dùng",
         });
       }
-      
+
       // Get updated user
       updatedUser = await User.findById(userId);
       if (updatedUser) {
@@ -378,25 +429,27 @@ export const updateProfile = async (req, res) => {
           GioiTinh: updatedUser.GioiTinh,
           NgaySinh: updatedUser.NgaySinh,
           VaiTro: updatedUser.VaiTro,
-          userType: "user"
+          userType: "user",
         };
       }
     }
 
-    console.log("[UPDATE_PROFILE] Profile updated successfully for user:", userId);
-    
+    console.log(
+      "[UPDATE_PROFILE] Profile updated successfully for user:",
+      userId
+    );
+
     res.json({
       success: true,
       user: updatedUser,
-      message: "Cập nhật thông tin thành công"
+      message: "Cập nhật thông tin thành công",
     });
-
   } catch (error) {
     console.error("[UPDATE_PROFILE] Error:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi cập nhật thông tin",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -404,12 +457,12 @@ export const updateProfile = async (req, res) => {
 // Get user addresses
 export const getAddresses = async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
-    
+    const userId = req.headers["x-user-id"];
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Người dùng chưa đăng nhập"
+        message: "Người dùng chưa đăng nhập",
       });
     }
 
@@ -418,15 +471,14 @@ export const getAddresses = async (req, res) => {
     res.json({
       success: true,
       addresses: [],
-      message: "Lấy danh sách địa chỉ thành công"
+      message: "Lấy danh sách địa chỉ thành công",
     });
-
   } catch (error) {
     console.error("[GET_ADDRESSES] Error:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi lấy danh sách địa chỉ",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -434,27 +486,26 @@ export const getAddresses = async (req, res) => {
 // Add new address
 export const addAddress = async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
-    
+    const userId = req.headers["x-user-id"];
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Người dùng chưa đăng nhập"
+        message: "Người dùng chưa đăng nhập",
       });
     }
 
     // TODO: Implement add address functionality
     res.json({
       success: true,
-      message: "Thêm địa chỉ thành công"
+      message: "Thêm địa chỉ thành công",
     });
-
   } catch (error) {
     console.error("[ADD_ADDRESS] Error:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi thêm địa chỉ",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -462,28 +513,27 @@ export const addAddress = async (req, res) => {
 // Update address
 export const updateAddress = async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
+    const userId = req.headers["x-user-id"];
     const { id } = req.params;
-    
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Người dùng chưa đăng nhập"
+        message: "Người dùng chưa đăng nhập",
       });
     }
 
     // TODO: Implement update address functionality
     res.json({
       success: true,
-      message: "Cập nhật địa chỉ thành công"
+      message: "Cập nhật địa chỉ thành công",
     });
-
   } catch (error) {
     console.error("[UPDATE_ADDRESS] Error:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi cập nhật địa chỉ",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -491,28 +541,27 @@ export const updateAddress = async (req, res) => {
 // Delete address
 export const deleteAddress = async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
+    const userId = req.headers["x-user-id"];
     const { id } = req.params;
-    
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Người dùng chưa đăng nhập"
+        message: "Người dùng chưa đăng nhập",
       });
     }
 
     // TODO: Implement delete address functionality
     res.json({
       success: true,
-      message: "Xóa địa chỉ thành công"
+      message: "Xóa địa chỉ thành công",
     });
-
   } catch (error) {
     console.error("[DELETE_ADDRESS] Error:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi xóa địa chỉ",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -520,28 +569,27 @@ export const deleteAddress = async (req, res) => {
 // Set default address
 export const setDefaultAddress = async (req, res) => {
   try {
-    const userId = req.headers['x-user-id'];
+    const userId = req.headers["x-user-id"];
     const { id } = req.params;
-    
+
     if (!userId) {
       return res.status(401).json({
         success: false,
-        message: "Người dùng chưa đăng nhập"
+        message: "Người dùng chưa đăng nhập",
       });
     }
 
     // TODO: Implement set default address functionality
     res.json({
       success: true,
-      message: "Đặt địa chỉ mặc định thành công"
+      message: "Đặt địa chỉ mặc định thành công",
     });
-
   } catch (error) {
     console.error("[SET_DEFAULT_ADDRESS] Error:", error);
     res.status(500).json({
       success: false,
       message: "Lỗi server khi đặt địa chỉ mặc định",
-      error: error.message
+      error: error.message,
     });
   }
 };

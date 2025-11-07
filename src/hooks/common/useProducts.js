@@ -30,7 +30,7 @@ export const useProductsCommon = (options = {}) => {
   const [filteredProducts, setFilteredProducts] = useState(mockData || []);
   const [isLoading, setIsLoading] = useState(!mockData);
   const [error, setError] = useState(null);
-  const [stats, setStats] = useState(initialStats);
+  const [stats, _setStats] = useState(initialStats);
 
   // Filter and pagination state
   const [searchValue, setSearchValue] = useState("");
@@ -86,6 +86,18 @@ export const useProductsCommon = (options = {}) => {
           ? service.getAdminProducts || service.getProducts
           : service.getSellerProducts || service.getProducts;
 
+      console.log(`[useProductsCommon] ${role} fetchMethod:`, fetchMethod);
+      console.log(`[useProductsCommon] ${role} service:`, service);
+      console.log(`[useProductsCommon] Calling API with params:`, {
+        page: currentPage,
+        limit: pageSize,
+        search: debouncedSearchValue || undefined,
+        status: statusFilter || undefined,
+        category: categoryFilter || undefined,
+        sortBy: "created_date",
+        sortOrder: "DESC",
+      });
+
       const response = await fetchMethod({
         page: currentPage,
         limit: pageSize,
@@ -96,49 +108,232 @@ export const useProductsCommon = (options = {}) => {
         sortOrder: "DESC",
       });
 
+      console.log(`[useProductsCommon] ${role} API response:`, response);
+      console.log(
+        `[useProductsCommon] ${role} response.success:`,
+        response?.success
+      );
+      console.log(
+        `[useProductsCommon] ${role} response.data length:`,
+        response?.data?.length
+      );
+
+      console.log(`[useProductsCommon] ${role} API response:`, response);
+      console.log(`[useProductsCommon] Response success:`, response?.success);
+      console.log(`[useProductsCommon] Response data:`, response?.data);
+      console.log(`[useProductsCommon] Response type:`, typeof response);
+      console.log(
+        `[useProductsCommon] Response keys:`,
+        Object.keys(response || {})
+      );
+
       if (response?.success && response?.data) {
         let mappedProducts = [];
 
         if (role === "seller") {
           // Seller-specific data mapping
           mappedProducts = response.data.map((product) => {
+            console.log("[useProductsCommon] Mapping product:", product);
+
             const imageArray = product.image_urls
               ? product.image_urls.split(",").filter((url) => url.trim())
               : [];
 
-            return {
+            // Build proper image URLs
+            console.log(
+              "[useProductsCommon] Raw image_urls:",
+              product.image_urls
+            );
+            console.log("[useProductsCommon] imageArray:", imageArray);
+
+            const processedImages = imageArray.map((url) => {
+              // If URL already starts with http, return as is
+              if (url.startsWith("http")) {
+                return url;
+              }
+              // If URL starts with /uploads, add the server URL
+              if (url.startsWith("/uploads")) {
+                return `http://localhost:5002${url}`;
+              }
+              // Otherwise, assume it's a relative path and add full path
+              return `http://localhost:5002/uploads/product_images/${url}`;
+            });
+
+            console.log(
+              "[useProductsCommon] processedImages:",
+              processedImages
+            );
+
+            const mappedProduct = {
               id: product.ID_SanPham,
-              name: product.TenSanPham,
-              price: product.Gia?.toLocaleString("vi-VN"),
-              quantity: product.TonKho,
-              category: product.TenDanhMuc || "Chưa phân loại",
-              categoryId: product.ID_DanhMuc,
-              status: product.TrangThai,
+              name: product.TenSanPham || "Không có tên",
+              // Keep price as number for formatCurrency in ProductTable
+              price: product.Gia ? parseFloat(product.Gia) : 0,
+              quantity: product.TonKho || 0,
+              stock: product.TonKho || 0, // Add stock field for ProductTable consistency
+              category:
+                product.TenDanhMuc || product.category_name || "Chưa phân loại",
+              categoryId: product.ID_DanhMuc || product.category_id || 1,
+              status: product.TrangThai || product.status || "active",
               description: product.MoTa || "",
-              images: imageArray,
-              image:
-                imageArray.length > 0
-                  ? `http://localhost:5002${imageArray[0]}`
-                  : null,
+              images: processedImages,
+              image: processedImages.length > 0 ? processedImages[0] : null,
               imageFiles: [],
               shopName: product.TenCuaHang || "",
+              sellerName: product.TenCuaHang || "", // Add for admin view
               created_date: product.created_date,
+              // Add original Vietnamese fields for fallback
+              ID_SanPham: product.ID_SanPham,
+              TenSanPham: product.TenSanPham,
+              Gia: product.Gia,
+              TonKho: product.TonKho,
+              SoLuongTon: product.TonKho, // Alternative field name
+              TrangThai: product.TrangThai,
+              TenCuaHang: product.TenCuaHang,
+              DanhMuc: product.TenDanhMuc,
+              // Rating fields from backend
+              average_rating: parseFloat(
+                product.average_rating || product.DiemTrungBinh || 0
+              ),
+              review_count: parseInt(
+                product.review_count || product.SoLuongDanhGia || 0
+              ),
               actions: ["view", "edit", "delete"],
             };
+
+            console.log("[useProductsCommon] Final mapped product:", {
+              id: mappedProduct.id,
+              name: mappedProduct.name,
+              price: mappedProduct.price,
+              stock: mappedProduct.stock,
+              category: mappedProduct.category,
+              status: mappedProduct.status,
+              image: mappedProduct.image,
+              images: mappedProduct.images,
+            });
+            return mappedProduct;
+          });
+        } else if (role === "admin") {
+          // Admin mapping for real API data (already mapped in backend)
+          mappedProducts = (response.data || []).map((product) => {
+            console.log(
+              "[useProductsCommon] Admin raw product from API:",
+              product
+            );
+            console.log(
+              "[useProductsCommon] Admin product seller_name:",
+              product.seller_name
+            );
+            console.log(
+              "[useProductsCommon] Admin product image_urls:",
+              product.image_urls
+            );
+
+            // Admin API returns English field names already mapped
+            const mappedProduct = {
+              id: product.id,
+              name: product.name || "Không có tên",
+              // Keep price as number for formatCurrency
+              price: product.price ? parseFloat(product.price) : 0,
+              quantity: product.stock || 0,
+              stock: product.stock || 0,
+              category: product.category || "Chưa phân loại",
+              categoryId: product.category_id || 1,
+              status: product.status || "active",
+              description: product.description || "",
+              // Handle images - process similar to seller
+              images: (() => {
+                if (product.images && Array.isArray(product.images)) {
+                  return product.images;
+                } else if (product.image_urls) {
+                  const imageArray = product.image_urls
+                    .split(",")
+                    .filter((url) => url.trim());
+                  return imageArray.map((url) => {
+                    if (url.startsWith("http")) return url;
+                    if (url.startsWith("/uploads"))
+                      return `http://localhost:5002${url}`;
+                    return `http://localhost:5002/uploads/product_images/${url}`;
+                  });
+                }
+                return [];
+              })(),
+              image: (() => {
+                const processedImages = (() => {
+                  if (product.images && Array.isArray(product.images)) {
+                    return product.images;
+                  } else if (product.image_urls) {
+                    const imageArray = product.image_urls
+                      .split(",")
+                      .filter((url) => url.trim());
+                    return imageArray.map((url) => {
+                      if (url.startsWith("http")) return url;
+                      if (url.startsWith("/uploads"))
+                        return `http://localhost:5002${url}`;
+                      return `http://localhost:5002/uploads/product_images/${url}`;
+                    });
+                  }
+                  return [];
+                })();
+                return processedImages.length > 0 ? processedImages[0] : null;
+              })(),
+              imageFiles: [],
+              // Admin-specific fields (from admin API)
+              sellerName: product.seller_name || "Shop",
+              shopName: product.seller_name || "Shop",
+              created_date: product.updated_at,
+              createdAt: product.updated_at,
+              NgayTao: product.updated_at, // For date display fallback
+              // Rating fields
+              average_rating: parseFloat(product.average_rating || 0),
+              review_count: parseInt(product.review_count || 0),
+              actions: ["view", "edit", "delete"],
+            };
+
+            console.log("[useProductsCommon] Admin mapped product:", {
+              id: mappedProduct.id,
+              name: mappedProduct.name,
+              price: mappedProduct.price,
+              stock: mappedProduct.stock,
+              category: mappedProduct.category,
+              status: mappedProduct.status,
+              sellerName: mappedProduct.sellerName,
+              image: mappedProduct.image,
+              images: mappedProduct.images,
+              image_urls_raw: product.image_urls,
+            });
+            return mappedProduct;
           });
         } else {
-          // Admin or generic mapping
+          // Generic mapping
           mappedProducts = response.data || [];
         }
+
+        console.log(
+          "[useProductsCommon] About to set state with mappedProducts count:",
+          mappedProducts.length
+        );
+        console.log(
+          "[useProductsCommon] MappedProducts sample (first 2):",
+          mappedProducts.slice(0, 2)
+        );
 
         setProducts(mappedProducts);
         setAllProducts(mappedProducts);
         setFilteredProducts(mappedProducts);
 
+        console.log("[useProductsCommon] State set completed for role:", role);
+
         // Update pagination info
         if (response.pagination) {
           setTotalItems(response.pagination.total || 0);
           setTotalPages(response.pagination.totalPages || 1);
+          console.log(
+            "[useProductsCommon] Pagination updated:",
+            response.pagination
+          );
+        } else {
+          console.log("[useProductsCommon] No pagination info in response");
         }
       } else {
         setError(`Không có dữ liệu sản phẩm từ server`);
@@ -179,13 +374,17 @@ export const useProductsCommon = (options = {}) => {
 
     let filtered = [...allProducts];
 
-    // Apply search filter
-    if (searchValue.trim()) {
+    // Apply search filter (debounced)
+    if (debouncedSearchValue.trim()) {
       filtered = filtered.filter(
         (product) =>
-          product.name.toLowerCase().includes(searchValue.toLowerCase()) ||
+          product.name
+            .toLowerCase()
+            .includes(debouncedSearchValue.toLowerCase()) ||
           (product.seller &&
-            product.seller.toLowerCase().includes(searchValue.toLowerCase()))
+            product.seller
+              .toLowerCase()
+              .includes(debouncedSearchValue.toLowerCase()))
       );
     }
 
@@ -215,7 +414,7 @@ export const useProductsCommon = (options = {}) => {
     const endIndex = Math.min(pageSize, filtered.length);
     setProducts(filtered.slice(startIndex, endIndex));
   }, [
-    searchValue,
+    debouncedSearchValue,
     categoryFilter,
     statusFilter,
     allProducts,

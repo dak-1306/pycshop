@@ -43,14 +43,11 @@ const ProductManagement = React.memo(
       price: "",
     });
 
-    // Handle filter changes
+    // Handle filter changes - debounced search handled in SearchBar
     const handleFilterChange = (newFilters) => {
       setFilters((prev) => ({ ...prev, ...newFilters }));
 
-      // Call parent callbacks
-      if (newFilters.search !== undefined && onSearchChange) {
-        onSearchChange(newFilters.search);
-      }
+      // Call parent callbacks immediately for non-search filters
       if (newFilters.category !== undefined && onCategoryFilter) {
         onCategoryFilter(newFilters.category);
       }
@@ -59,6 +56,14 @@ const ProductManagement = React.memo(
       }
       if (newFilters.price !== undefined && onPriceFilter) {
         onPriceFilter(newFilters.price);
+      }
+    };
+
+    // Handle search separately (debounced from SearchBar)
+    const handleSearchChange = (searchValue) => {
+      setFilters((prev) => ({ ...prev, search: searchValue }));
+      if (onSearchChange) {
+        onSearchChange(searchValue);
       }
     };
 
@@ -71,7 +76,12 @@ const ProductManagement = React.memo(
         price: "",
       };
       setFilters(clearedFilters);
-      handleFilterChange(clearedFilters);
+
+      // Clear search separately
+      handleSearchChange("");
+
+      // Clear other filters
+      handleFilterChange({ category: "", status: "", price: "" });
     };
 
     // Check if any filters are active
@@ -116,7 +126,7 @@ const ProductManagement = React.memo(
           selectedCategory={filters.category}
           selectedStatus={filters.status}
           selectedPrice={filters.price}
-          onSearchChange={(search) => handleFilterChange({ search })}
+          onSearchChange={handleSearchChange}
           onCategoryChange={(category) => handleFilterChange({ category })}
           onStatusChange={(status) => handleFilterChange({ status })}
           onPriceChange={(price) => handleFilterChange({ price })}
@@ -170,7 +180,7 @@ const ProductManagement = React.memo(
                       onClick={() => onPageChange && onPageChange(pageNum)}
                       className={`relative inline-flex items-center px-4 py-2 text-sm font-medium border ${
                         pageNum === currentPage
-                          ? "z-10 bg-blue-50 border-blue-500 text-blue-600"
+                          ? "z-10 bg-info bg-opacity-10 border-info text-info"
                           : "bg-white border-gray-300 text-gray-500 hover:bg-gray-50"
                       }`}
                     >

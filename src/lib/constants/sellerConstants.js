@@ -215,6 +215,7 @@ export const SELLER_MOCK_PRODUCTS = [
     description: "Smartphone cao cấp với chip A17 Pro",
     status: "Còn hàng",
     average_rating: 4.8,
+    review_count: 124,
     images: [
       {
         image_url: "/images/iphone15.jpg",
@@ -235,6 +236,7 @@ export const SELLER_MOCK_PRODUCTS = [
     description: "Áo thun cotton 100% thoáng mát",
     status: "Còn hàng",
     average_rating: 4.5,
+    review_count: 89,
     images: [
       {
         image_url: "/images/aothun.jpg",
@@ -255,6 +257,7 @@ export const SELLER_MOCK_PRODUCTS = [
     description: "Laptop gaming hiệu năng cao",
     status: "Hết hàng",
     average_rating: 4.7,
+    review_count: 67,
     images: [
       {
         image_url: "/images/laptop.jpg",

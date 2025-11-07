@@ -1,4 +1,4 @@
-import sellerOrderService from "../../lib/services/sellerOrderService.js";
+import { sellerOrderService } from "../../lib/services/order.js";
 import useOrdersCommon from "../common/useOrders.js";
 import { SELLER_CONSTANTS } from "../../lib/constants/index.js";
 

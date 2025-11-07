@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 import ProductCard from "../../../components/buyers/ProductCard";
-import { productService } from "../../../lib/services/productService.js";
+import productService from "../../../lib/services/productService.js";
 import "../../../styles/pages/buyer/SearchResults.css";
 
 const SearchResults = () => {

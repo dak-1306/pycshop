@@ -51,7 +51,7 @@ const Sellers = () => {
     return (
       <div className="flex items-center justify-center h-96">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-admin-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">
             {ADMIN_CONSTANTS.PAGES.SELLERS.LOADING}
           </p>
@@ -61,7 +61,7 @@ const Sellers = () => {
   }
 
   return (
-    <div className="p-6">
+    <div>
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -97,7 +97,7 @@ const Sellers = () => {
 
             <button
               onClick={handleExport}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+              className="px-4 py-2 bg-admin-500 hover:bg-admin-600 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
             >
               <svg
                 className="w-4 h-4"

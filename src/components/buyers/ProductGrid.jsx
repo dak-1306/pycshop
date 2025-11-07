@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/components/buyer/ProductGrid.css";
 import ProductCard from "./ProductCard";
-import { productService } from "../../lib/services/productService.js";
+import productService from "../../lib/services/productService.js";
 
 const ProductGrid = ({
   products: externalProducts,

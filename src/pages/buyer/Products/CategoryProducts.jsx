@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 import ProductCard from "../../../components/buyers/ProductCard";
-import { productService } from "../../../lib/services/productService";
+import productService from "../../../lib/services/productService.js";
 import "../../../styles/pages/buyer/CategoryProducts.css";
 
 const CategoryProducts = () => {
@@ -89,13 +89,15 @@ const CategoryProducts = () => {
 
       // Handle price range - predefined or custom
       if (filters.priceRange) {
-        const [min, max] = filters.priceRange.split('-');
+        const [min, max] = filters.priceRange.split("-");
         filterParams.minPrice = min;
         filterParams.maxPrice = max;
         delete filterParams.priceRange;
       } else if (filters.customPriceMin || filters.customPriceMax) {
-        if (filters.customPriceMin) filterParams.minPrice = filters.customPriceMin;
-        if (filters.customPriceMax) filterParams.maxPrice = filters.customPriceMax;
+        if (filters.customPriceMin)
+          filterParams.minPrice = filters.customPriceMin;
+        if (filters.customPriceMax)
+          filterParams.maxPrice = filters.customPriceMax;
       }
 
       // Clean up custom price fields from params
@@ -107,7 +109,7 @@ const CategoryProducts = () => {
         filterParams.minRating = filters.rating;
       }
 
-      // Handle location filter  
+      // Handle location filter
       if (filters.location) {
         filterParams.location = filters.location;
       }
@@ -128,15 +130,26 @@ const CategoryProducts = () => {
                 .split(",")[0]
                 .trim()}`
             : product.HinhAnh || product.image || "",
-          rating: parseFloat(product.average_rating || product.DiemDanhGia || product.rating || 0),
-          sold: parseInt(product.review_count || product.SoLuongDanhGia || product.sold || 0),
-          location: product.shop_location || product.DiaChi || product.location || "TP.HCM",
+          rating: parseFloat(
+            product.average_rating || product.DiemDanhGia || product.rating || 0
+          ),
+          sold: parseInt(
+            product.review_count || product.SoLuongDanhGia || product.sold || 0
+          ),
+          location:
+            product.shop_location ||
+            product.DiaChi ||
+            product.location ||
+            "TP.HCM",
           category: product.TenDanhMuc || product.category,
           stock: parseInt(product.TonKho || product.stock || 0),
           discount: parseFloat(product.PhanTramGiam || product.discount || 0),
-          originalPrice: product.PhanTramGiam > 0 ? parseFloat(product.Gia || product.price || 0) : null,
+          originalPrice:
+            product.PhanTramGiam > 0
+              ? parseFloat(product.Gia || product.price || 0)
+              : null,
         }));
-        
+
         setProducts(transformedProducts);
       } else {
         throw new Error(response.message || "Không thể tải sản phẩm");
@@ -175,7 +188,7 @@ const CategoryProducts = () => {
   return (
     <div className="category-products-page">
       <Header />
-      
+
       {/* Breadcrumb */}
       <div className="breadcrumb-section">
         <div className="container">
@@ -209,15 +222,17 @@ const CategoryProducts = () => {
             <aside className="filters-sidebar">
               <div className="filters-header">
                 <h3>Bộ lọc tìm kiếm</h3>
-                <button 
-                  onClick={() => setFilters({
-                    priceRange: "",
-                    customPriceMin: "",
-                    customPriceMax: "",
-                    sortBy: "newest",
-                    rating: "",
-                    location: "",
-                  })}
+                <button
+                  onClick={() =>
+                    setFilters({
+                      priceRange: "",
+                      customPriceMin: "",
+                      customPriceMax: "",
+                      sortBy: "newest",
+                      rating: "",
+                      location: "",
+                    })
+                  }
                   className="clear-all-btn"
                 >
                   🗑️ Xóa tất cả
@@ -248,10 +263,10 @@ const CategoryProducts = () => {
                 <select
                   value={filters.priceRange}
                   onChange={(e) => {
-                    handleFilterChange({ 
+                    handleFilterChange({
                       priceRange: e.target.value,
-                      customPriceMin: "", 
-                      customPriceMax: "" 
+                      customPriceMin: "",
+                      customPriceMax: "",
                     });
                   }}
                   className="filter-select"
@@ -276,7 +291,9 @@ const CategoryProducts = () => {
                         type="number"
                         placeholder="Từ"
                         value={filters.customPriceMin}
-                        onChange={(e) => handleFilterChange({ customPriceMin: e.target.value })}
+                        onChange={(e) =>
+                          handleFilterChange({ customPriceMin: e.target.value })
+                        }
                         className="price-input"
                         min="0"
                       />
@@ -285,7 +302,9 @@ const CategoryProducts = () => {
                         type="number"
                         placeholder="Đến"
                         value={filters.customPriceMax}
-                        onChange={(e) => handleFilterChange({ customPriceMax: e.target.value })}
+                        onChange={(e) =>
+                          handleFilterChange({ customPriceMax: e.target.value })
+                        }
                         className="price-input"
                         min="0"
                       />
@@ -298,47 +317,59 @@ const CategoryProducts = () => {
               <div className="filter-section">
                 <label className="filter-label">Đánh giá</label>
                 <div className="rating-filter">
-                  <div 
+                  <div
                     key="rating-all"
-                    className={`rating-option ${filters.rating === "" ? "active" : ""}`}
+                    className={`rating-option ${
+                      filters.rating === "" ? "active" : ""
+                    }`}
                     onClick={() => handleFilterChange({ rating: "" })}
                   >
                     Tất cả
                   </div>
-                  <div 
+                  <div
                     key="rating-5"
-                    className={`rating-option ${filters.rating === "5" ? "active" : ""}`}
+                    className={`rating-option ${
+                      filters.rating === "5" ? "active" : ""
+                    }`}
                     onClick={() => handleFilterChange({ rating: "5" })}
                   >
                     <span className="stars-display">★★★★★</span>
                   </div>
-                  <div 
+                  <div
                     key="rating-4"
-                    className={`rating-option ${filters.rating === "4" ? "active" : ""}`}
+                    className={`rating-option ${
+                      filters.rating === "4" ? "active" : ""
+                    }`}
                     onClick={() => handleFilterChange({ rating: "4" })}
                   >
                     <span className="stars-display">★★★★☆</span>
                     <span className="rating-text">trở lên</span>
                   </div>
-                  <div 
+                  <div
                     key="rating-3"
-                    className={`rating-option ${filters.rating === "3" ? "active" : ""}`}
+                    className={`rating-option ${
+                      filters.rating === "3" ? "active" : ""
+                    }`}
                     onClick={() => handleFilterChange({ rating: "3" })}
                   >
                     <span className="stars-display">★★★☆☆</span>
                     <span className="rating-text">trở lên</span>
                   </div>
-                  <div 
+                  <div
                     key="rating-2"
-                    className={`rating-option ${filters.rating === "2" ? "active" : ""}`}
+                    className={`rating-option ${
+                      filters.rating === "2" ? "active" : ""
+                    }`}
                     onClick={() => handleFilterChange({ rating: "2" })}
                   >
                     <span className="stars-display">★★☆☆☆</span>
                     <span className="rating-text">trở lên</span>
                   </div>
-                  <div 
+                  <div
                     key="rating-1"
-                    className={`rating-option ${filters.rating === "1" ? "active" : ""}`}
+                    className={`rating-option ${
+                      filters.rating === "1" ? "active" : ""
+                    }`}
                     onClick={() => handleFilterChange({ rating: "1" })}
                   >
                     <span className="stars-display">★☆☆☆☆</span>

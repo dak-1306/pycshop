@@ -8,7 +8,8 @@ const Pagination = React.memo(
     setCurrentPage,
     totalItems = 0,
     itemsPerPage = 10,
-    variant = "default", // "admin" | "default"
+    variant = "default", // "admin" | "seller" | "default"
+    itemType = "mục", // "sản phẩm" | "đơn hàng" | "mục"
   }) => {
     // Memoize calculations to prevent unnecessary re-renders
     const paginationData = useMemo(() => {
@@ -83,7 +84,7 @@ const Pagination = React.memo(
       }
     };
 
-    // Admin variant with blue theme
+    // Admin variant with admin theme colors
     if (variant === "admin") {
       return (
         <div className="bg-white rounded-xl shadow-lg border p-6 mt-8">
@@ -91,16 +92,16 @@ const Pagination = React.memo(
             <div className="text-sm text-gray-600 font-medium flex items-center gap-2">
               <FontAwesomeIcon icon={["fas", "info-circle"]} />
               Hiển thị{" "}
-              <span className="font-bold text-blue-600">
+              <span className="font-bold text-admin-600">
                 {startItem}-{endItem}
               </span>{" "}
-              của <span className="font-bold">{safeTotalItems}</span> mục
+              của <span className="font-bold">{safeTotalItems}</span> {itemType}
             </div>
 
             <div className="flex items-center space-x-2">
               <button
                 onClick={handlePrevPage}
-                className="group p-3 text-gray-600 hover:text-white bg-gray-100 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 rounded-xl disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+                className="group p-3 text-gray-600 hover:text-white bg-gray-100 hover:bg-gradient-to-r hover:from-admin-500 hover:to-admin-600 rounded-xl disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 shadow-sm hover:shadow-md"
                 disabled={safeCurrentPage === 1}
                 title="Trang trước"
               >
@@ -117,7 +118,7 @@ const Pagination = React.memo(
                     onClick={() => handlePageClick(page)}
                     className={`w-11 h-11 rounded-xl font-bold text-sm transition-all duration-300 transform hover:scale-110 ${
                       safeCurrentPage === page
-                        ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg scale-105 ring-2 ring-blue-200"
+                        ? "bg-gradient-to-r from-admin-500 to-admin-600 text-white shadow-lg scale-105 ring-2 ring-admin-200"
                         : "text-gray-600 hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200 hover:text-gray-800 shadow-sm hover:shadow-md"
                     }`}
                     title={`Trang ${page}`}
@@ -129,7 +130,7 @@ const Pagination = React.memo(
 
               <button
                 onClick={handleNextPage}
-                className="group p-3 text-gray-600 hover:text-white bg-gray-100 hover:bg-gradient-to-r hover:from-blue-500 hover:to-blue-600 rounded-xl disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+                className="group p-3 text-gray-600 hover:text-white bg-gray-100 hover:bg-gradient-to-r hover:from-admin-500 hover:to-admin-600 rounded-xl disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 shadow-sm hover:shadow-md"
                 disabled={safeCurrentPage === totalPages}
                 title="Trang sau"
               >
@@ -144,7 +145,61 @@ const Pagination = React.memo(
       );
     }
 
-    // Default variant with orange theme (seller)
+    // Seller variant with seller theme colors
+    if (variant === "seller") {
+      return (
+        <div className="bg-white rounded-xl shadow-lg border p-6 mt-8">
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-gray-600 font-medium">
+              Hiển thị{" "}
+              <span className="font-bold text-seller-600">
+                {startItem}-{endItem}
+              </span>{" "}
+              của <span className="font-bold">{safeTotalItems}</span> {itemType}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={handlePrevPage}
+                className="group p-3 text-gray-600 hover:text-white bg-gray-100 hover:bg-gradient-to-r hover:from-seller-500 hover:to-seller-600 rounded-xl disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+                disabled={safeCurrentPage === 1}
+                title="Trang trước"
+              >
+                <FontAwesomeIcon icon={["fas", "chevron-left"]} />
+              </button>
+
+              <div className="flex space-x-1">
+                {visiblePages.map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageClick(page)}
+                    className={`w-11 h-11 rounded-xl font-bold text-sm transition-all duration-300 transform hover:scale-110 ${
+                      safeCurrentPage === page
+                        ? "bg-gradient-to-r from-seller-500 to-seller-600 text-white shadow-lg scale-105 ring-2 ring-seller-200"
+                        : "text-gray-600 hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200 hover:text-gray-800 shadow-sm hover:shadow-md"
+                    }`}
+                    title={`Trang ${page}`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+
+              <button
+                onClick={handleNextPage}
+                className="group p-3 text-gray-600 hover:text-white bg-gray-100 hover:bg-gradient-to-r hover:from-seller-500 hover:to-seller-600 rounded-xl disabled:text-gray-300 disabled:cursor-not-allowed disabled:bg-gray-50 transition-all duration-300 transform hover:scale-105 hover:-translate-y-0.5 shadow-sm hover:shadow-md"
+                disabled={safeCurrentPage === totalPages}
+                title="Trang sau"
+              >
+                <FontAwesomeIcon icon={["fas", "chevron-right"]} />
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Default variant with orange theme
     return (
       <div className="bg-white rounded-xl shadow-lg border p-6 mt-8">
         <div className="flex items-center justify-between">
@@ -153,7 +208,7 @@ const Pagination = React.memo(
             <span className="font-bold text-orange-600">
               {startItem}-{endItem}
             </span>{" "}
-            của <span className="font-bold">{safeTotalItems}</span> sản phẩm
+            của <span className="font-bold">{safeTotalItems}</span> {itemType}
           </div>
 
           <div className="flex items-center space-x-2">
@@ -205,7 +260,8 @@ Pagination.propTypes = {
   setCurrentPage: PropTypes.func.isRequired,
   totalItems: PropTypes.number,
   itemsPerPage: PropTypes.number,
-  variant: PropTypes.oneOf(["admin", "default"]),
+  variant: PropTypes.oneOf(["admin", "seller", "default"]),
+  itemType: PropTypes.string,
 };
 
 export default Pagination;

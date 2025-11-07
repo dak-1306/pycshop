@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../../styles/components/buyer/ProductGrid.css";
-import { productService } from "../../lib/services/productService.js";
+import productService from "../../lib/services/productService.js";
 
 const ProductGrid = ({ products: externalProducts }) => {
   const navigate = useNavigate();
@@ -110,9 +110,7 @@ const ProductGrid = ({ products: externalProducts }) => {
           <h2 className="section-title">
             {externalProducts ? "Sản Phẩm" : "Sản Phẩm Nổi Bật"}
           </h2>
-          <div className="products-count">
-            {products.length} sản phẩm
-          </div>
+          <div className="products-count">{products.length} sản phẩm</div>
         </div>
 
         <div className="products-grid">
@@ -124,19 +122,14 @@ const ProductGrid = ({ products: externalProducts }) => {
             >
               <div className="product-image">
                 <img
-                  src={
-                    product.HinhAnh ||
-                    "/images/products/placeholder.jpg"
-                  }
+                  src={product.HinhAnh || "/images/products/placeholder.jpg"}
                   alt={product.TenSanPham}
                   onError={(e) => {
                     e.target.src = "/images/products/placeholder.jpg";
                   }}
                 />
                 {product.PhanTramGiam > 0 && (
-                  <div className="discount-badge">
-                    -{product.PhanTramGiam}%
-                  </div>
+                  <div className="discount-badge">-{product.PhanTramGiam}%</div>
                 )}
               </div>
 

@@ -66,7 +66,7 @@ const ViewUserModal = ({ isOpen, onClose, user }) => {
       case "admin":
         return "bg-purple-100 text-purple-800 border-purple-200";
       case "seller":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-admin-100 text-admin-800 border-admin-200";
       case "customer":
         return "bg-gray-100 text-gray-800 border-gray-200";
       default:
@@ -77,7 +77,7 @@ const ViewUserModal = ({ isOpen, onClose, user }) => {
   const getStatusColor = (status) => {
     switch (status) {
       case "active":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-success text-white border-success";
       case "inactive":
         return "bg-red-100 text-red-800 border-red-200";
       case "banned":
@@ -178,7 +178,7 @@ const ViewUserModal = ({ isOpen, onClose, user }) => {
             <div className="bg-gray-50 rounded-lg p-4">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <svg
-                  className="w-5 h-5 mr-2 text-blue-600"
+                  className="w-5 h-5 mr-2 text-admin-600"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -204,7 +204,7 @@ const ViewUserModal = ({ isOpen, onClose, user }) => {
             <div className="bg-gray-50 rounded-lg p-4">
               <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
                 <svg
-                  className="w-5 h-5 mr-2 text-green-600"
+                  className="w-5 h-5 mr-2 text-success"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -287,13 +287,13 @@ const ViewUserModal = ({ isOpen, onClose, user }) => {
             </h4>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="text-center bg-white p-3 rounded border">
-                <div className="text-2xl font-bold text-blue-600">
+                <div className="text-2xl font-bold text-admin-600">
                   {user.totalOrders || 0}
                 </div>
                 <div className="text-sm text-gray-600">Đơn hàng</div>
               </div>
               <div className="text-center bg-white p-3 rounded border">
-                <div className="text-2xl font-bold text-green-600">
+                <div className="text-2xl font-bold text-success">
                   {user.totalSpent || "0đ"}
                 </div>
                 <div className="text-sm text-gray-600">Tổng chi tiêu</div>

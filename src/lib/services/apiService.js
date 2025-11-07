@@ -15,6 +15,13 @@ const getAuthToken = () => {
 const makeAuthenticatedRequest = async (url, options = {}) => {
   const token = getAuthToken();
 
+  console.log("[apiService] Making request to:", url);
+  console.log("[apiService] Token found:", !!token);
+  console.log(
+    "[apiService] Token preview:",
+    token ? token.substring(0, 20) + "..." : "none"
+  );
+
   const headers = {
     ...defaultHeaders,
     ...options.headers,

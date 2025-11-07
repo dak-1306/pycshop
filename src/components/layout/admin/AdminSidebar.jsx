@@ -15,7 +15,7 @@ const AdminSidebar = ({
   return (
     <div
       className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0
+        flex-shrink-0 w-64 bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 flex flex-col
         ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}
     >
@@ -38,7 +38,7 @@ const AdminSidebar = ({
       </div>
 
       {/* Navigation */}
-      <nav className="mt-8 px-6">
+      <nav className="flex-1 mt-8 px-6 overflow-y-auto">
         <ul className="space-y-2">
           {navigation.map((item) => (
             <li key={item.name}>
@@ -48,14 +48,16 @@ const AdminSidebar = ({
                   flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200
                   ${
                     isCurrentPath(item.href)
-                      ? "bg-blue-50 text-blue-700 border-r-4 border-blue-700"
+                      ? "bg-admin-50 text-admin-700 border-r-4 border-admin-700"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                   }
                 `}
               >
                 <span
                   className={
-                    isCurrentPath(item.href) ? "text-blue-700" : "text-gray-400"
+                    isCurrentPath(item.href)
+                      ? "text-admin-700"
+                      : "text-gray-400"
                   }
                 >
                   {item.icon}
@@ -68,7 +70,7 @@ const AdminSidebar = ({
       </nav>
 
       {/* Sidebar footer */}
-      <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-gray-200">
+      <div className="flex-shrink-0 p-6 border-t border-gray-200 bg-white dark:bg-gray-800">
         <div className="flex items-center space-x-3">
           <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
             <span className="text-gray-600 font-medium text-sm">A</span>

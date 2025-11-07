@@ -76,9 +76,9 @@ const OrderModal = ({
   const getStatusColor = (status) => {
     const statusColors = {
       pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      processing: "bg-blue-100 text-blue-800 border-blue-200",
+      processing: "bg-info bg-opacity-10 text-info border-info",
       shipping: "bg-purple-100 text-purple-800 border-purple-200",
-      delivered: "bg-green-100 text-green-800 border-green-200",
+      delivered: "bg-success text-white border-success",
       cancelled: "bg-red-100 text-red-800 border-red-200",
       returned: "bg-gray-100 text-gray-800 border-gray-200",
     };
@@ -422,7 +422,7 @@ const OrderModal = ({
                   </span>
                   <div className="text-right">
                     <div className="text-sm text-gray-600">Tổng tiền</div>
-                    <div className="text-xl font-bold text-green-600">
+                    <div className="text-xl font-bold text-success">
                       {formatCurrency(order.total)}
                     </div>
                   </div>
@@ -467,7 +467,7 @@ const OrderModal = ({
                     <h4 className="font-semibold text-gray-800 mb-2 flex items-center gap-2">
                       <FontAwesomeIcon
                         icon={["fas", "user"]}
-                        className="w-6 h-6 text-blue-600"
+                        className="w-6 h-6 text-info"
                       />
                       Khách hàng
                     </h4>
@@ -577,7 +577,7 @@ const OrderModal = ({
                             <div className="text-sm text-gray-500 line-through">
                               {formatCurrency(item.originalPrice)}
                             </div>
-                            <div className="font-bold text-green-600">
+                            <div className="font-bold text-success">
                               {formatCurrency(item.price)}
                             </div>
                           </div>
@@ -616,7 +616,7 @@ const OrderModal = ({
                   <hr className="my-2" />
                   <div className="flex justify-between text-lg font-bold">
                     <span>Tổng cộng:</span>
-                    <span className="text-green-600">
+                    <span className="text-success">
                       {formatCurrency(order.total)}
                     </span>
                   </div>
@@ -632,7 +632,7 @@ const OrderModal = ({
                       className={`px-3 py-1 rounded-full text-xs font-medium ${
                         order.paymentMethod === "cash"
                           ? "bg-yellow-100 text-yellow-800"
-                          : "bg-blue-100 text-blue-800"
+                          : "bg-info bg-opacity-10 text-info"
                       }`}
                     >
                       {order.paymentMethod === "cash" ? (

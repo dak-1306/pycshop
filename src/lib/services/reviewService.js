@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+const API_BASE_URL = "http://localhost:5000";
 
 export const reviewService = {
   // Thêm đánh giá mới
@@ -98,6 +98,41 @@ export const reviewService = {
         success: false,
         hasReviewed: false,
         error: error.message,
+      };
+    }
+  },
+
+  // Lấy thống kê đánh giá của sản phẩm
+  getReviewStats: async (productId) => {
+    try {
+      const response = await fetch(
+        `${API_BASE_URL}/api/products/${productId}/reviews/stats`
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Lỗi khi tải thống kê đánh giá");
+      }
+
+      return {
+        success: true,
+        data: data.data || {
+          totalReviews: 0,
+          averageRating: 0,
+          ratingBreakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+        },
+      };
+    } catch (error) {
+      console.error("Error fetching review stats:", error);
+      return {
+        success: false,
+        error: error.message || "Lỗi khi tải thống kê đánh giá",
+        data: {
+          totalReviews: 0,
+          averageRating: 0,
+          ratingBreakdown: { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 },
+        },
       };
     }
   },

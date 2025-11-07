@@ -98,7 +98,7 @@ const ShopHeader = ({ shopInfo, products = [], onEditShopInfo }) => {
                 )}
               </div>
               {/* Status Badge */}
-              <div className="absolute -bottom-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg">
+              <div className="absolute -bottom-2 -right-2 bg-seller-500 text-white text-xs px-2 py-1 rounded-full font-medium shadow-lg">
                 Online
               </div>
             </div>

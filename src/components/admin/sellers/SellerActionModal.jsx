@@ -57,10 +57,11 @@ const SellerActionModal = ({
           description:
             "Seller sẽ có thể đăng nhập và quản lý shop trở lại. Shop sẽ hiển thị lại trên trang chủ.",
           confirmText: "Bỏ chặn Seller",
-          confirmClass: "bg-green-600 hover:bg-green-700 focus:ring-green-500",
+          confirmClass:
+            "bg-status-success hover:bg-green-600 focus:ring-status-success",
           icon: (
             <svg
-              className="w-6 h-6 text-green-600"
+              className="w-6 h-6 text-status-success"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -82,10 +83,10 @@ const SellerActionModal = ({
           description:
             "Shop sẽ được đánh dấu đã xác minh và có thể được ưu tiên hiển thị trong kết quả tìm kiếm.",
           confirmText: "Xác minh Shop",
-          confirmClass: "bg-blue-600 hover:bg-blue-700 focus:ring-blue-500",
+          confirmClass: "bg-admin-500 hover:bg-admin-600 focus:ring-admin-500",
           icon: (
             <svg
-              className="w-6 h-6 text-blue-600"
+              className="w-6 h-6 text-admin-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -128,8 +129,8 @@ const SellerActionModal = ({
                 actionType === "block"
                   ? "bg-red-100"
                   : actionType === "unblock"
-                  ? "bg-green-100"
-                  : "bg-blue-100"
+                  ? "bg-status-success bg-opacity-10"
+                  : "bg-admin-100"
               }`}
             >
               {modalContent.icon}

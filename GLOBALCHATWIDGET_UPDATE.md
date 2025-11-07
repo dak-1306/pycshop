@@ -9,6 +9,7 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ### 🔧 Component Updates (GlobalChatWidget.jsx)
 
 1. **Header với PycShop theme:**
+
 ```jsx
 <div className="chat-avatar-container">
   <img className="shop-avatar" />
@@ -19,6 +20,7 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ```
 
 2. **Font Awesome icons thay vì emoji:**
+
 ```jsx
 // Old: ➖ ✕ 📷 📎 😊 📤
 // New: <i className="fas fa-minus"></i>
@@ -30,6 +32,7 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ```
 
 3. **Enhanced input với wrapper:**
+
 ```jsx
 <div className="chat-input-wrapper">
   <button className="chat-attachment-btn">
@@ -45,6 +48,7 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ### 🎨 CSS Updates (GlobalChatWidget.css)
 
 1. **PycShop Color Variables:**
+
 ```css
 :root {
   --pycshop-primary: #297d4e;
@@ -58,14 +62,20 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ```
 
 2. **Gradient Header:**
+
 ```css
 .chat-header {
-  background: linear-gradient(135deg, var(--pycshop-primary) 0%, var(--pycshop-primary-dark) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--pycshop-primary) 0%,
+    var(--pycshop-primary-dark) 100%
+  );
   color: white;
 }
 ```
 
 3. **Glass Morphism Effects:**
+
 ```css
 .chat-action-btn {
   background: rgba(255, 255, 255, 0.15);
@@ -74,6 +84,7 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ```
 
 4. **Focus States:**
+
 ```css
 .chat-input-wrapper:focus-within {
   border-color: var(--pycshop-primary);
@@ -84,17 +95,20 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ## 🎉 Features Added
 
 ### ✅ Visual Enhancements
+
 - **Online indicator** với pulse animation
 - **Gradient backgrounds** cho header
 - **Shadow effects** và rounded corners
 - **Focus rings** cho accessibility
 
 ### ✅ Icon Upgrades
+
 - **Header Actions**: `fa-phone`, `fa-video`, `fa-minus`, `fa-times`
 - **Input Actions**: `fa-paperclip`, `fa-smile`, `fa-paper-plane`
 - **Quick Actions**: `fa-camera`, `fa-image`, `fa-file-alt`, `fa-gift`
 
 ### ✅ Interaction Improvements
+
 - **Send button states** (active/inactive)
 - **Hover effects** với transform
 - **Smooth transitions** cho tất cả interactions
@@ -112,13 +126,14 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ## 📱 Responsive Features
 
 - **Glass morphism** effects
-- **Smooth animations** 
+- **Smooth animations**
 - **Consistent spacing**
 - **Touch-friendly** button sizes
 
 ## 🎯 Key Files Modified
 
 1. `src/components/common/GlobalChatWidget/GlobalChatWidget.jsx`
+
    - Cập nhật JSX structure với Font Awesome icons
    - Thêm chat-avatar-container và online-indicator
    - Cập nhật input wrapper structure
@@ -132,6 +147,7 @@ User báo cáo chatbox vẫn hiển thị giao diện cũ. Nguyên nhân: **Chat
 ## ✅ Result
 
 **GlobalChatWidget** giờ đây có:
+
 - ✅ Tông màu xanh PycShop nhất quán
 - ✅ Font Awesome icons chuyên nghiệp
 - ✅ Glass morphism và gradient effects

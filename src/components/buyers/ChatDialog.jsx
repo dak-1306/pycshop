@@ -71,18 +71,38 @@ const ChatDialog = ({ isOpen, onClose, shop }) => {
         {/* Chat Header */}
         <div className="chat-header">
           <div className="chat-shop-info">
-            <img src={shop?.avatar} alt={shop?.name} className="chat-avatar" />
+            <div className="chat-avatar-container">
+              <img
+                src={shop?.avatar}
+                alt={shop?.name}
+                className="chat-avatar"
+              />
+              <div className="online-indicator">
+                <i className="fas fa-circle"></i>
+              </div>
+            </div>
             <div className="chat-shop-details">
               <h3>{shop?.name}</h3>
               <span className="online-status">
-                <i className="fas fa-circle"></i>
+                <i className="fas fa-signal"></i>
                 Đang hoạt động
               </span>
             </div>
           </div>
-          <button className="chat-close-btn" onClick={onClose}>
-            <i className="fas fa-times"></i>
-          </button>
+          <div className="chat-header-actions">
+            <button className="chat-action-btn" title="Gọi điện">
+              <i className="fas fa-phone"></i>
+            </button>
+            <button className="chat-action-btn" title="Video call">
+              <i className="fas fa-video"></i>
+            </button>
+            <button className="chat-action-btn" title="Thông tin shop">
+              <i className="fas fa-info-circle"></i>
+            </button>
+            <button className="chat-close-btn" onClick={onClose} title="Đóng">
+              <i className="fas fa-times"></i>
+            </button>
+          </div>
         </div>
 
         {/* Chat Messages */}
@@ -136,34 +156,47 @@ const ChatDialog = ({ isOpen, onClose, shop }) => {
         {/* Chat Input */}
         <div className="chat-input-section">
           <div className="chat-input-container">
-            <textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Nhập tin nhắn..."
-              className="chat-input"
-              rows="1"
-            />
+            <div className="chat-input-wrapper">
+              <button className="chat-attachment-btn" title="Đính kèm">
+                <i className="fas fa-paperclip"></i>
+              </button>
+              <textarea
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Nhập tin nhắn của bạn..."
+                className="chat-input"
+                rows="1"
+              />
+              <button className="chat-emoji-btn" title="Emoji">
+                <i className="fas fa-smile"></i>
+              </button>
+            </div>
             <button
               onClick={handleSendMessage}
-              className="send-btn"
+              className={`send-btn ${newMessage.trim() ? "active" : ""}`}
               disabled={!newMessage.trim()}
+              title="Gửi tin nhắn"
             >
               <i className="fas fa-paper-plane"></i>
             </button>
           </div>
           <div className="chat-quick-actions">
             <button className="quick-action-btn">
+              <i className="fas fa-camera"></i>
+              <span>Camera</span>
+            </button>
+            <button className="quick-action-btn">
               <i className="fas fa-image"></i>
-              Hình ảnh
+              <span>Ảnh</span>
             </button>
             <button className="quick-action-btn">
-              <i className="fas fa-file"></i>
-              File
+              <i className="fas fa-file-alt"></i>
+              <span>File</span>
             </button>
             <button className="quick-action-btn">
-              <i className="fas fa-smile"></i>
-              Sticker
+              <i className="fas fa-gift"></i>
+              <span>Sticker</span>
             </button>
           </div>
         </div>

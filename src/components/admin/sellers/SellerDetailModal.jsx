@@ -24,50 +24,52 @@ const SellerDetailModal = ({
   if (!isOpen || !seller) return null;
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
-      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-          onClick={onClose}
-        ></div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+      <div
+        className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        onClick={onClose}
+      ></div>
 
-        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Chi tiết Seller
-            </h3>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 focus:outline-none"
+      <div className="relative bg-white rounded-lg shadow-xl max-w-5xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header - Fixed */}
+        <div className="flex justify-between items-center px-6 py-3 border-b border-gray-200 bg-white">
+          <h3 className="text-lg font-semibold text-gray-900">
+            Chi tiết Seller
+          </h3>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 focus:outline-none p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Content - No scroll */}
+        <div className="flex-1 p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 h-full">
             {/* Thông tin cá nhân */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">
                 Thông tin cá nhân
               </h4>
 
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 h-16 w-16">
-                    <div className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
-                      <span className="text-xl font-medium text-white">
+              <div className="space-y-2">
+                <div className="flex items-center mb-2">
+                  <div className="flex-shrink-0 h-8 w-8">
+                    <div className="h-8 w-8 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center">
+                      <span className="text-xs font-medium text-white">
                         {seller.name
                           .split(" ")
                           .map((n) => n[0])
@@ -76,69 +78,59 @@ const SellerDetailModal = ({
                       </span>
                     </div>
                   </div>
-                  <div className="ml-4">
-                    <div className="text-lg font-medium text-gray-900">
+                  <div className="ml-2">
+                    <div className="text-sm font-semibold text-gray-900">
                       {seller.name}
                     </div>
-                    <div className="text-sm text-gray-500">ID: {seller.id}</div>
+                    <div className="text-xs text-gray-500">ID: {seller.id}</div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-1.5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-500">
+                    <label className="block text-xs font-medium text-gray-500">
                       Email
                     </label>
-                    <div className="mt-1 text-sm text-gray-900">
+                    <div className="text-xs text-gray-900 truncate">
                       {seller.email}
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-500">
+                    <label className="block text-xs font-medium text-gray-500">
                       Điện thoại
                     </label>
-                    <div className="mt-1 text-sm text-gray-900">
-                      {seller.phone}
-                    </div>
+                    <div className="text-xs text-gray-900">{seller.phone}</div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-500">
+                    <label className="block text-xs font-medium text-gray-500">
                       Địa chỉ
                     </label>
-                    <div className="mt-1 text-sm text-gray-900">
+                    <div className="text-xs text-gray-900 truncate">
                       {seller.address}
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500">
-                        Ngày tham gia
-                      </label>
-                      <div className="mt-1 text-sm text-gray-900">
+                  <div className="grid grid-cols-1 gap-1.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">Tham gia:</span>
+                      <span className="text-xs text-gray-900">
                         {formatDate(seller.joinDate)}
-                      </div>
+                      </span>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500">
-                        Hoạt động cuối
-                      </label>
-                      <div className="mt-1 text-sm text-gray-900">
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">Hoạt động:</span>
+                      <span className="text-xs text-gray-900">
                         {formatDate(seller.lastActive)}
-                      </div>
+                      </span>
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500">
-                        Trạng thái
-                      </label>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">Trạng thái:</span>
                       <span
-                        className={`inline-flex mt-1 px-2 py-1 text-xs font-semibold rounded-full ${
+                        className={`inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full ${
                           seller.status === "active"
                             ? "bg-green-100 text-green-800"
                             : "bg-red-100 text-red-800"
@@ -148,12 +140,10 @@ const SellerDetailModal = ({
                       </span>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-500">
-                        Xác minh
-                      </label>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-gray-500">Xác minh:</span>
                       <span
-                        className={`inline-flex mt-1 px-2 py-1 text-xs font-semibold rounded-full ${
+                        className={`inline-flex px-1.5 py-0.5 text-xs font-medium rounded-full ${
                           seller.isVerified
                             ? "bg-blue-100 text-blue-800"
                             : "bg-yellow-100 text-yellow-800"
@@ -168,128 +158,101 @@ const SellerDetailModal = ({
             </div>
 
             {/* Thông tin shop */}
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">
                 Thông tin Shop
               </h4>
 
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">
+                  <label className="block text-xs font-medium text-gray-500">
                     Tên shop
                   </label>
-                  <div className="mt-1 text-lg font-medium text-gray-900">
+                  <div className="text-xs font-medium text-gray-900 truncate">
                     {seller.shop.name}
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-500">
+                  <label className="block text-xs font-medium text-gray-500">
                     Danh mục
                   </label>
-                  <div className="mt-1 text-sm text-gray-900">
+                  <div className="text-xs text-gray-900 truncate">
                     {seller.shop.category}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">
-                      Tổng sản phẩm
-                    </label>
-                    <div className="mt-1 text-lg font-semibold text-blue-600">
+                <div className="grid grid-cols-2 gap-1.5">
+                  <div className="text-center p-2 bg-blue-50 rounded">
+                    <div className="text-xs font-semibold text-blue-600">
                       {seller.shop.totalProducts.toLocaleString()}
                     </div>
+                    <div className="text-xs text-gray-500">Sản phẩm</div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">
-                      Tổng đơn hàng
-                    </label>
-                    <div className="mt-1 text-lg font-semibold text-green-600">
+                  <div className="text-center p-2 bg-green-50 rounded">
+                    <div className="text-xs font-semibold text-green-600">
                       {seller.shop.totalOrders.toLocaleString()}
                     </div>
+                    <div className="text-xs text-gray-500">Đơn hàng</div>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">
-                      Đánh giá
-                    </label>
-                    <div className="mt-1 flex items-center">
-                      <span className="text-lg font-semibold text-yellow-600">
+                  <div className="text-center p-2 bg-yellow-50 rounded">
+                    <div className="flex items-center justify-center">
+                      <span className="text-xs font-semibold text-yellow-600">
                         {seller.shop.rating}
                       </span>
-                      <span className="text-yellow-400 ml-1">★</span>
+                      <span className="text-yellow-400 ml-0.5 text-xs">★</span>
                     </div>
+                    <div className="text-xs text-gray-500">Đánh giá</div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-500">
-                      Doanh thu
-                    </label>
-                    <div className="mt-1 text-lg font-semibold text-purple-600">
+                  <div className="text-center p-2 bg-purple-50 rounded">
+                    <div className="text-xs font-semibold text-purple-600 truncate">
                       {formatCurrency(seller.shop.revenue)}
                     </div>
+                    <div className="text-xs text-gray-500">Doanh thu</div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Hiệu suất */}
-            <div className="lg:col-span-2 bg-gray-50 rounded-lg p-6">
-              <h4 className="text-lg font-medium text-gray-900 mb-4">
+            <div className="bg-gray-50 rounded-lg p-3">
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">
                 Hiệu suất kinh doanh
               </h4>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
+              <div className="grid grid-cols-2 gap-1.5">
+                <div className="text-center p-2 bg-green-50 rounded">
+                  <div className="text-xs font-bold text-green-600">
                     {seller.performance.orderCompletionRate}%
                   </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    Tỷ lệ hoàn thành đơn hàng
-                  </div>
+                  <div className="text-xs text-gray-500">Hoàn thành</div>
                 </div>
 
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
+                <div className="text-center p-2 bg-blue-50 rounded">
+                  <div className="text-xs font-bold text-blue-600">
                     {seller.performance.responseTime}
                   </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    Thời gian phản hồi trung bình
-                  </div>
+                  <div className="text-xs text-gray-500">Phản hồi</div>
                 </div>
 
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-600">
+                <div className="text-center p-2 bg-yellow-50 rounded">
+                  <div className="text-xs font-bold text-yellow-600">
                     {seller.performance.customerRating}★
                   </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    Đánh giá từ khách hàng
-                  </div>
+                  <div className="text-xs text-gray-500">Đánh giá KH</div>
                 </div>
 
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-red-600">
+                <div className="text-center p-2 bg-red-50 rounded">
+                  <div className="text-xs font-bold text-red-600">
                     {seller.performance.refundRate}%
                   </div>
-                  <div className="text-sm text-gray-500 mt-1">
-                    Tỷ lệ hoàn trả
-                  </div>
+                  <div className="text-xs text-gray-500">Hoàn trả</div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={onClose}
-              className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium py-2 px-4 rounded-md transition-colors duration-200"
-            >
-              Đóng
-            </button>
           </div>
         </div>
       </div>

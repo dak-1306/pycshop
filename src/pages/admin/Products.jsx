@@ -45,6 +45,8 @@ const AdminProducts = () => {
     handleResetFilters,
     handleExport,
     handleCloseProductModal,
+    handleCloseDetailModal,
+    handleCloseDeleteModal,
   } = useAdminProducts();
 
   if (isLoading) {
@@ -104,11 +106,11 @@ const AdminProducts = () => {
       {/* Product Detail Modal */}
       <ProductDetailModal
         isOpen={showDetailModal}
-        onClose={() => setShowDetailModal(false)}
+        onClose={handleCloseDetailModal}
         product={selectedProduct}
         variant="admin"
         onEdit={() => {
-          setShowDetailModal(false);
+          handleCloseDetailModal();
           handleEditProduct(selectedProduct?.id);
         }}
       />
@@ -116,7 +118,7 @@ const AdminProducts = () => {
       {/* Delete Confirmation Modal */}
       <DeleteModal
         isOpen={showDeleteModal}
-        onClose={() => setShowDeleteModal(false)}
+        onClose={handleCloseDeleteModal}
         onConfirm={confirmDeleteProduct}
         item={selectedProduct}
         itemType={ADMIN_CONSTANTS.ITEM_TYPES.PRODUCT}

@@ -53,7 +53,7 @@ const ProductFilters = React.memo(
       actionButtons.push({
         label: "Thêm sản phẩm",
         onClick: onAddProduct,
-        icon: ["fas", "plus"],
+        
         className:
           "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white",
         title: "Thêm sản phẩm mới",

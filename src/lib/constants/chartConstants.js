@@ -111,7 +111,6 @@ export const DASHBOARD_CHART_CONFIGS = {
       type: "userAnalytics",
       dataKey: "users",
       title: "Phân tích người dùng",
-      subtitle: "Phân bố users, sellers, admins",
       permissions: ["admin"],
       containerClass: "col-span-1 md:col-span-1 lg:col-span-1",
       gridSize: "medium",

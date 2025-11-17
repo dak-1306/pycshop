@@ -181,19 +181,41 @@ export const clearCart = async (userId) => {
   }
 };
 
-// Get cart item count
+// Get cart item count (number of unique products, not total quantity)
 export const getCartItemCount = async (userId) => {
   try {
     const key = `cart:${userId}`;
     const cartItems = await redis.hgetall(key);
 
-    const totalCount = Object.values(cartItems).reduce((total, quantity) => {
+    // Count number of unique products (not total quantity)
+    const uniqueProductCount = Object.keys(cartItems).length;
+
+    console.log(
+      `[REDIS] Cart item count for user ${userId}: ${uniqueProductCount} unique products`
+    );
+    return uniqueProductCount;
+  } catch (error) {
+    console.error("[REDIS] Error getting cart item count:", error);
+    throw error;
+  }
+};
+
+// Get cart total quantity (sum of all product quantities)
+export const getCartTotalQuantity = async (userId) => {
+  try {
+    const key = `cart:${userId}`;
+    const cartItems = await redis.hgetall(key);
+
+    const totalQuantity = Object.values(cartItems).reduce((total, quantity) => {
       return total + parseInt(quantity);
     }, 0);
 
-    return totalCount;
+    console.log(
+      `[REDIS] Cart total quantity for user ${userId}: ${totalQuantity} items`
+    );
+    return totalQuantity;
   } catch (error) {
-    console.error("[REDIS] Error getting cart item count:", error);
+    console.error("[REDIS] Error getting cart total quantity:", error);
     throw error;
   }
 };

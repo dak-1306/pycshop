@@ -5,6 +5,7 @@ import {
   removeFromCart,
   viewCart,
   getCartCount,
+  getCartTotalQuantityController,
   clearCartController,
   checkout,
 } from "../controllers/cartController.js";
@@ -24,8 +25,11 @@ router.delete("/remove/:productId", removeFromCart);
 router.get("/view", viewCart);
 router.get("/view/:userId", viewCart);
 
-// Get cart item count
+// Get cart item count (unique products)
 router.get("/count", getCartCount);
+
+// Get cart total quantity (sum of all quantities)
+router.get("/total-quantity", getCartTotalQuantityController);
 
 // Clear entire cart
 router.delete("/clear", clearCartController);

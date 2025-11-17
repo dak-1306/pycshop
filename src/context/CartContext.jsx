@@ -42,6 +42,7 @@ export const CartProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setCartCount(data.data?.totalItems || 0);
+        console.log("Fetched cart count:", data);
       } else {
         console.error("Failed to fetch cart count:", response.status);
         setCartCount(0);

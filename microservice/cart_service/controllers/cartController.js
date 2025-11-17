@@ -5,6 +5,7 @@ import {
   removeItemFromRedis,
   clearCart,
   getCartItemCount,
+  getCartTotalQuantity,
 } from "../services/redisService.js";
 import { sendCartUpdate, sendCartCheckout } from "../services/kafkaProducer.js";
 import { CartModel } from "../models/cartModel.js";
@@ -232,10 +233,7 @@ export const viewCart = async (req, res) => {
         `[CART_CONTROLLER] Redis cart empty for user ${userId}, loading from MySQL...`
       );
       cart = await loadCartFromMySQL(userId);
-      itemCount = Object.values(cart).reduce(
-        (total, item) => total + (item.quantity || 0),
-        0
-      );
+      itemCount = Object.keys(cart).length; // Count unique products, not total quantity
 
       // If we found cart in MySQL, restore it to Redis
       if (cart && Object.keys(cart).length > 0) {
@@ -270,7 +268,7 @@ export const viewCart = async (req, res) => {
   }
 };
 
-// Get cart item count
+// Get cart item count (unique products)
 export const getCartCount = async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
@@ -290,10 +288,7 @@ export const getCartCount = async (req, res) => {
         `[CART_CONTROLLER] Redis count is 0 for user ${userId}, checking MySQL...`
       );
       const cart = await loadCartFromMySQL(userId);
-      itemCount = Object.values(cart).reduce(
-        (total, item) => total + (item.quantity || 0),
-        0
-      );
+      itemCount = Object.keys(cart).length; // Count unique products, not total quantity
 
       // If we found cart in MySQL, restore it to Redis
       if (cart && Object.keys(cart).length > 0) {
@@ -316,6 +311,60 @@ export const getCartCount = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Lỗi khi lấy số lượng sản phẩm trong giỏ hàng",
+      error: error.message,
+    });
+  }
+};
+
+// Get cart total quantity (sum of all product quantities)
+export const getCartTotalQuantityController = async (req, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication required",
+      });
+    }
+
+    let totalQuantity = await getCartTotalQuantity(userId);
+
+    // If Redis total is 0, check MySQL
+    if (totalQuantity === 0) {
+      console.log(
+        `[CART_CONTROLLER] Redis total is 0 for user ${userId}, checking MySQL...`
+      );
+      const cart = await loadCartFromMySQL(userId);
+      totalQuantity = Object.values(cart).reduce(
+        (total, item) => total + (item.quantity || 0),
+        0
+      );
+
+      // If we found cart in MySQL, restore it to Redis
+      if (cart && Object.keys(cart).length > 0) {
+        console.log(
+          `[CART_CONTROLLER] Restoring cart to Redis for quantity check, user ${userId}`
+        );
+        await restoreCartToRedis(userId, cart);
+      }
+    }
+
+    res.json({
+      success: true,
+      data: {
+        totalQuantity,
+        userId,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "[CART_CONTROLLER] Error getting cart total quantity:",
+      error
+    );
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy tổng số lượng sản phẩm trong giỏ hàng",
       error: error.message,
     });
   }

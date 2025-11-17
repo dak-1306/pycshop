@@ -440,6 +440,78 @@ function setupRoutes(app) {
     })
   );
 
+  // Order Service Routes
+  app.use(
+    "/orders",
+    authMiddleware,
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /orders route for ${req.method} ${req.originalUrl}`
+      );
+      console.log(`[ROUTES] User info:`, req.user);
+
+      // Set user headers for order service
+      if (req.user) {
+        req.headers["x-user-id"] = req.user.id.toString();
+        req.headers["x-user-role"] = req.user.role;
+        req.headers["x-user-type"] = req.user.userType;
+        console.log(
+          `[ROUTES] Set headers for orders: x-user-id=${req.user.id}, x-user-role=${req.user.role}`
+        );
+      }
+      next();
+    },
+
+    createProxyMiddleware({
+      target: process.env.ORDER_SERVICE_URL || "http://localhost:5007",
+      changeOrigin: true,
+      pathRewrite: {
+        "^/orders": "/orders",
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`[PROXY] onProxyReq callback for order service`);
+
+        // Truyền thông tin user từ API Gateway xuống order service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id.toString());
+          proxyReq.setHeader("x-user-role", req.user.role);
+          proxyReq.setHeader("x-user-type", req.user.userType);
+          console.log("[PROXY] Set user headers for order:", {
+            id: req.user.id,
+            role: req.user.role,
+            userType: req.user.userType,
+          });
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.ORDER_SERVICE_URL || "http://localhost:5007"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Order Service`
+        );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Order Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Order service error", details: err.message });
+        }
+      },
+    })
+  );
+
   // Shop Service - Use function pathRewrite to preserve /shops prefix
   app.use(
     "/shops",

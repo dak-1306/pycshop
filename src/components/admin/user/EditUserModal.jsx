@@ -137,11 +137,11 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+        <div className="bg-white border-b border-gray-200 p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-lg font-semibold text-gray-900">
                 Chỉnh sửa người dùng
               </h2>
               <p className="text-sm text-gray-600 mt-1">
@@ -171,159 +171,169 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {errors.submit && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {errors.submit}
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tên người dùng <span className="text-red-500">*</span>
-              </label>
-              <input
-                ref={nameInputRef}
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.name ? "border-red-500" : "border-gray-300"
-                } ${isSubmitting ? "bg-gray-50" : ""}`}
-                placeholder="Nhập tên người dùng"
-                disabled={isSubmitting}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm mt-1">{errors.name}</p>
-              )}
-            </div>
-
-            {/* Email */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                } ${isSubmitting ? "bg-gray-50" : ""}`}
-                placeholder="Nhập email"
-                disabled={isSubmitting}
-              />
-              {errors.email && (
-                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-              )}
-            </div>
-
-            {/* Phone */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Số điện thoại
-              </label>
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  errors.phone ? "border-red-500" : "border-gray-300"
-                } ${isSubmitting ? "bg-gray-50" : ""}`}
-                placeholder="Nhập số điện thoại"
-                disabled={isSubmitting}
-              />
-              {errors.phone && (
-                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-              )}
-            </div>
-
-            {/* Role */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Vai trò
-              </label>
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  isSubmitting ? "bg-gray-50" : ""
-                }`}
-                disabled={isSubmitting}
-              >
-                <option value="customer">Khách hàng</option>
-                <option value="seller">Người bán</option>
-                {/* Admin role can be edited if current user is admin */}
-                {user.role === "admin" && <option value="admin">Admin</option>}
-              </select>
-            </div>
-
-            {/* Status */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Trạng thái
-              </label>
-              <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  isSubmitting ? "bg-gray-50" : ""
-                }`}
-                disabled={isSubmitting}
-              >
-                <option value="active">Hoạt động</option>
-                <option value="inactive">Không hoạt động</option>
-                <option value="pending">Chờ xác thực</option>
-                <option value="banned">Bị cấm</option>
-              </select>
-            </div>
-
-            {/* Address */}
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Địa chỉ
-              </label>
-              <textarea
-                name="address"
-                value={formData.address}
-                onChange={handleInputChange}
-                rows={3}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
-                  isSubmitting ? "bg-gray-50" : ""
-                }`}
-                placeholder="Nhập địa chỉ"
-                disabled={isSubmitting}
-              />
-            </div>
-          </div>
-
-          {/* User Info Display */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h4 className="text-sm font-medium text-gray-700 mb-2">
-              Thông tin bổ sung
-            </h4>
-            <div className="grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">ID:</span>
-                <span className="ml-2 font-mono">{user.id}</span>
+        <div className="flex-1 overflow-y-auto p-6">
+          <form
+            id="edit-user-form"
+            onSubmit={handleSubmit}
+            className="space-y-3"
+          >
+            {errors.submit && (
+              <div className="bg-red-50 border border-red-200 text-red-700 px-3 py-2 rounded text-sm">
+                {errors.submit}
               </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Name */}
               <div>
-                <span className="text-gray-600">Ngày tạo:</span>
-                <span className="ml-2">
-                  {new Date(user.joinDate).toLocaleDateString("vi-VN")}
-                </span>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Tên người dùng <span className="text-red-500">*</span>
+                </label>
+                <input
+                  ref={nameInputRef}
+                  type="text"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm ${
+                    errors.name ? "border-red-500" : "border-gray-300"
+                  } ${isSubmitting ? "bg-gray-50" : ""}`}
+                  placeholder="Nhập tên người dùng"
+                  disabled={isSubmitting}
+                />
+                {errors.name && (
+                  <p className="text-red-500 text-xs mt-0.5">{errors.name}</p>
+                )}
+              </div>
+
+              {/* Email */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm ${
+                    errors.email ? "border-red-500" : "border-gray-300"
+                  } ${isSubmitting ? "bg-gray-50" : ""}`}
+                  placeholder="Nhập email"
+                  disabled={isSubmitting}
+                />
+                {errors.email && (
+                  <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
+                )}
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Số điện thoại
+                </label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm ${
+                    errors.phone ? "border-red-500" : "border-gray-300"
+                  } ${isSubmitting ? "bg-gray-50" : ""}`}
+                  placeholder="Nhập số điện thoại"
+                  disabled={isSubmitting}
+                />
+                {errors.phone && (
+                  <p className="text-red-500 text-xs mt-0.5">{errors.phone}</p>
+                )}
+              </div>
+
+              {/* Role */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Vai trò
+                </label>
+                <select
+                  name="role"
+                  value={formData.role}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm ${
+                    isSubmitting ? "bg-gray-50" : ""
+                  }`}
+                  disabled={isSubmitting}
+                >
+                  <option value="customer">Khách hàng</option>
+                  <option value="seller">Người bán</option>
+                  {/* Admin role can be edited if current user is admin */}
+                  {user.role === "admin" && (
+                    <option value="admin">Admin</option>
+                  )}
+                </select>
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Trạng thái
+                </label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm ${
+                    isSubmitting ? "bg-gray-50" : ""
+                  }`}
+                  disabled={isSubmitting}
+                >
+                  <option value="active">Hoạt động</option>
+                  <option value="inactive">Không hoạt động</option>
+                  <option value="pending">Chờ xác thực</option>
+                  <option value="banned">Bị cấm</option>
+                </select>
+              </div>
+
+              {/* Address */}
+              <div className="md:col-span-2">
+                <label className="block text-xs font-medium text-gray-700 mb-1">
+                  Địa chỉ
+                </label>
+                <textarea
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  rows={2}
+                  className={`w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm ${
+                    isSubmitting ? "bg-gray-50" : ""
+                  }`}
+                  placeholder="Nhập địa chỉ"
+                  disabled={isSubmitting}
+                />
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center justify-end space-x-3 pt-4 border-t border-gray-200">
+            {/* User Info Display */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
+                Thông tin bổ sung
+              </h4>
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-600">ID:</span>
+                  <span className="ml-2 font-mono">{user.id}</span>
+                </div>
+                <div>
+                  <span className="text-gray-600">Ngày tạo:</span>
+                  <span className="ml-2">
+                    {new Date(user.joinDate).toLocaleDateString("vi-VN")}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div className="bg-white border-t border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-end space-x-3">
             <button
               type="button"
               onClick={handleClose}
@@ -334,6 +344,7 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
             </button>
             <button
               type="submit"
+              form="edit-user-form"
               disabled={isSubmitting}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -365,7 +376,7 @@ const EditUserModal = ({ isOpen, onClose, onSubmit, user }) => {
               )}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

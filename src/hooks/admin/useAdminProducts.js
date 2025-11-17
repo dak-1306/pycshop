@@ -117,6 +117,8 @@ export const useAdminProducts = () => {
     handleResetFilters: commonHook.handleResetFilters,
     handleExport: commonHook.handleExport,
     handleCloseProductModal: commonHook.handleCloseProductModal,
+    handleCloseDetailModal: commonHook.handleCloseDetailModal,
+    handleCloseDeleteModal: commonHook.handleCloseDeleteModal,
 
     // Utility functions
     formatCurrency,

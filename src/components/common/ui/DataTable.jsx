@@ -85,9 +85,9 @@ const DataTable = React.memo(
         case "image":
           return (
             <div className="flex items-center">
-              <div className="flex-shrink-0 h-12 w-12">
+              <div className="flex-shrink-0 h-10 w-10">
                 <img
-                  className="h-12 w-12 rounded-lg object-cover border"
+                  className="h-10 w-10 rounded-lg object-cover border"
                   src={
                     column.getImageUrl
                       ? column.getImageUrl(item)
@@ -100,11 +100,11 @@ const DataTable = React.memo(
                 />
               </div>
               {column.showDetails && (
-                <div className="ml-4">
-                  <div className="text-sm font-medium text-gray-900 max-w-xs truncate">
+                <div className="ml-3">
+                  <div className="text-sm font-medium text-gray-900 truncate max-w-32">
                     {column.getTitle ? column.getTitle(item) : item.name}
                   </div>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-xs text-gray-500 truncate">
                     {column.getSubtitle
                       ? column.getSubtitle(item)
                       : `#${item.id}`}
@@ -148,7 +148,7 @@ const DataTable = React.memo(
         case "status":
           return (
             <span
-              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColorInternal(
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getStatusColorInternal(
                 value,
                 column.statusType || "default"
               )}`}
@@ -159,18 +159,22 @@ const DataTable = React.memo(
 
         case "date":
           return (
-            <span className="text-sm text-gray-500">
+            <span className="text-xs text-gray-500">
               {column.format
                 ? column.format(value, item)
                 : value
-                ? new Date(value).toLocaleDateString("vi-VN")
+                ? new Date(value).toLocaleDateString("vi-VN", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })
                 : "-"}
             </span>
           );
 
         case "actions":
           return (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1">
               {column.actions.map((action, actionIndex) => {
                 // Skip action if shouldShow function returns false
                 if (action.shouldShow && !action.shouldShow(item)) {
@@ -185,7 +189,7 @@ const DataTable = React.memo(
                       onRowAction && onRowAction(action.type, item)
                     }
                     role={variant}
-                    size="sm"
+                    size="xs"
                     title={action.title}
                   >
                     {action.label}
@@ -218,14 +222,32 @@ const DataTable = React.memo(
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                {visibleColumns.map((column, index) => (
-                  <th
-                    key={index}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    {column.header}
-                  </th>
-                ))}
+                {visibleColumns.map((column, index) => {
+                  // Define responsive column widths using valid Tailwind classes
+                  const getColumnWidth = (column, index) => {
+                    if (column.type === "image") return "min-w-40 w-40"; // Product with image
+                    if (column.type === "actions") return "min-w-32 w-32"; // Actions
+                    if (column.header === "Danh mục") return "min-w-20 w-24";
+                    if (column.header === "Người bán") return "min-w-24 w-28";
+                    if (column.header === "Giá") return "min-w-20 w-24";
+                    if (column.header === "Tồn kho") return "min-w-16 w-20";
+                    if (column.header === "Trạng thái") return "min-w-24 w-28";
+                    if (column.header === "Ngày tạo") return "min-w-20 w-24";
+                    return "min-w-0";
+                  };
+
+                  return (
+                    <th
+                      key={index}
+                      className={`px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${getColumnWidth(
+                        column,
+                        index
+                      )}`}
+                    >
+                      {column.header}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -237,8 +259,8 @@ const DataTable = React.memo(
                   {visibleColumns.map((column, columnIndex) => (
                     <td
                       key={columnIndex}
-                      className={`px-6 py-4 ${
-                        column.nowrap ? "whitespace-nowrap" : ""
+                      className={`px-3 py-3 ${
+                        column.nowrap ? "whitespace-nowrap" : "break-words"
                       }`}
                     >
                       {renderCell(item, column)}

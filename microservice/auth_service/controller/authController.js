@@ -3,9 +3,9 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import db from "../../db/index.js";
-import { sendCartSync } from "../../cart_service/services/kafkaProducer.js";
-import { getCartFromRedis } from "../../cart_service/services/redisService.js";
-import redis from "../../cart_service/services/redisService.js";
+// import { sendCartSync } from "../../cart_service/services/kafkaProducer.js";
+// import { getCartFromRedis } from "../../cart_service/services/redisService.js";
+// import redis from "../../cart_service/services/redisService.js";
 
 export const register = async (req, res) => {
   try {
@@ -231,20 +231,14 @@ export const logout = async (req, res) => {
 
     console.log(`[LOGOUT] Syncing cart before logout for user: ${userId}`);
 
-    // 1. Lấy cart từ Redis
-    const cart = await getCartFromRedis(userId);
-    console.log(`[LOGOUT] Cart retrieved: ${Object.keys(cart).length} items`);
+    // TODO: Re-enable cart sync when cart service is running
+    // const cart = await getCartFromRedis(userId);
+    // console.log(`[LOGOUT] Cart retrieved: ${Object.keys(cart).length} items`);
+    // await sendCartSync(userId, cart);
+    // await redis.del(`cart:${userId}`);
+    // await redis.del(`cart_products:${userId}`);
 
-    // 2. Gửi cart data trực tiếp sang Kafka (không để consumer đọc lại từ Redis)
-    await sendCartSync(userId, cart);
-
-    // 3. Xóa cache Redis SAU KHI đã gửi data vào Kafka
-    await redis.del(`cart:${userId}`);
-    await redis.del(`cart_products:${userId}`);
-
-    console.log(
-      `[LOGOUT] Cart synced and Redis cache cleared for user: ${userId}`
-    );
+    console.log(`[LOGOUT] Cart sync temporarily disabled - user: ${userId}`);
 
     res.json({
       success: true,

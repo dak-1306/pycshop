@@ -125,7 +125,6 @@ const UserAnalyticsChart = React.memo(
             )}
           </div>
           <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-600">Phân loại theo vai trò</div>
             {(onDetailClick || onChartClick) && (
               <button
                 onClick={onDetailClick || onChartClick}

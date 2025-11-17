@@ -115,10 +115,6 @@ const AdminLogin = () => {
                 </>
               ) : (
                 <>
-                  <FontAwesomeIcon
-                    icon={["fas", "check"]}
-                    className="w-5 h-5"
-                  />
                   <span>{ADMIN_CONSTANTS.UI_TEXT.SUBMIT_BUTTON}</span>
                 </>
               )}
@@ -132,7 +128,6 @@ const AdminLogin = () => {
                 to={ADMIN_CONSTANTS.ROUTES.CUSTOMER_LOGIN}
                 className="text-slate-300 hover:text-white transition-colors flex items-center space-x-2"
               >
-                <FontAwesomeIcon icon={["fas", "user"]} className="w-4 h-4" />
                 <span>{ADMIN_CONSTANTS.UI_TEXT.CUSTOMER_LOGIN_LINK}</span>
               </Link>
 

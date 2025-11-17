@@ -83,18 +83,6 @@ const Reports = () => {
       </div>
       {/* Date Range Filters */}
       <ReportFilters dateRange={dateRange} onDateRangeChange={setDateRange} />
-      {/* System Overview */}
-      <StatsCards
-        variant="admin"
-        stats={{
-          totalUsers: userAnalytics?.totalUsers || 0,
-          totalOrders: orderAnalytics?.totalOrders || 0,
-          totalProducts: productAnalytics?.totalProducts || 0,
-          totalRevenue: financialData?.totalRevenue || 0,
-        }}
-      />
-      {/* Advanced Filters */}
-      {/* Detailed Analytics */}
       {/* Analytics Sections */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 mb-8">
         {/* User Analytics */}

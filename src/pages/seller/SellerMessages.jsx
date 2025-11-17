@@ -96,10 +96,9 @@ const SellerMessages = () => {
 
   return (
     <SellerLayout>
-      <div className="flex min-h-screen shadow-sm rounded-lg overflow-hidden bg-gray-100">
-        {/* Main Chat Area - Full height */}
+      <div className="flex h-[calc(100vh-4rem)] shadow-sm rounded-lg overflow-hidden bg-gray-100">
         {/* Conversations Sidebar */}
-        <div className="w-80 bg-white border-r border-gray-200 flex flex-col shadow-sm min-h-0">
+        <div className="w-80 bg-white border-r border-gray-200 flex flex-col shadow-sm">
           {/* Search Header với nút làm mới */}
           <div className="p-4 border-b border-gray-100 bg-gray-50 flex-shrink-0">
             <div className="flex items-center space-x-3">
@@ -143,7 +142,7 @@ const SellerMessages = () => {
           </div>
 
           {/* Conversation List - Scrollable */}
-          <div className="flex-1 min-h-0 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <ConversationList
               conversations={filteredConversations}
               activeConversation={activeConversation}
@@ -179,7 +178,7 @@ const SellerMessages = () => {
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 flex flex-col min-h-0 bg-white">
+        <div className="flex-1 flex flex-col bg-white overflow-hidden">
           {activeConversation ? (
             <>
               {/* Chat Header - Fixed */}
@@ -188,14 +187,13 @@ const SellerMessages = () => {
                   <div className="flex items-center space-x-4">
                     <div className="relative">
                       <img
-                        src={
-                          activeConversation.customerAvatar ||
-                          "/images/default-avatar.png"
-                        }
+                        src={activeConversation.customerAvatar}
                         alt={activeConversation.customerName}
                         className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                         onError={(e) => {
-                          e.target.src = "/images/default-avatar.png";
+                          e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                            activeConversation.customerName
+                          )}&background=f97316&color=fff&size=128`;
                         }}
                       />
                       {activeConversation.isOnline && (
@@ -259,7 +257,7 @@ const SellerMessages = () => {
               </div>
 
               {/* Messages Thread - Scrollable */}
-              <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className="flex-1 overflow-y-auto">
                 <MessageThread
                   messages={messages}
                   currentSellerId={user?.id}

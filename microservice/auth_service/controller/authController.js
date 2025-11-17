@@ -231,14 +231,20 @@ export const logout = async (req, res) => {
 
     console.log(`[LOGOUT] Syncing cart before logout for user: ${userId}`);
 
-    // TODO: Re-enable cart sync when cart service is running
+    // 1. Lấy cart từ Redis
     const cart = await getCartFromRedis(userId);
     console.log(`[LOGOUT] Cart retrieved: ${Object.keys(cart).length} items`);
+
+    // 2. Gửi cart data trực tiếp sang Kafka (không để consumer đọc lại từ Redis)
     await sendCartSync(userId, cart);
+
+    // 3. Xóa cache Redis SAU KHI đã gửi data vào Kafka
     await redis.del(`cart:${userId}`);
     await redis.del(`cart_products:${userId}`);
 
-    console.log(`[LOGOUT] Cart sync temporarily disabled - user: ${userId}`);
+    console.log(
+      `[LOGOUT] Cart synced and Redis cache cleared for user: ${userId}`
+    );
 
     res.json({
       success: true,

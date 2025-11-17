@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { CartModel } from "../models/cartModel.js";
 
 const redis = new Redis({
   host: process.env.REDIS_HOST || "localhost",
@@ -79,7 +80,7 @@ export const addItemToRedis = async (
   }
 };
 
-// Get cart from Redis
+// Get cart from Redis with MySQL fallback
 export const getCartFromRedis = async (userId) => {
   try {
     const key = `cart:${userId}`;
@@ -87,6 +88,30 @@ export const getCartFromRedis = async (userId) => {
 
     const cartItems = await redis.hgetall(key);
     const productData = await redis.hgetall(productKey);
+
+    // If Redis has no cart data, try to load from MySQL
+    if (!cartItems || Object.keys(cartItems).length === 0) {
+      console.log(
+        `[REDIS] No cart data in Redis for user ${userId}, loading from MySQL...`
+      );
+
+      const mysqlCart = await CartModel.loadFromDatabase(userId);
+
+      if (mysqlCart && Object.keys(mysqlCart).length > 0) {
+        console.log(
+          `[REDIS] Found cart in MySQL for user ${userId}, restoring to Redis...`
+        );
+
+        // Restore cart to Redis
+        await restoreCartToRedis(userId, mysqlCart);
+
+        return mysqlCart;
+      }
+
+      // No cart found in either Redis or MySQL
+      console.log(`[REDIS] No cart found for user ${userId} in Redis or MySQL`);
+      return {};
+    }
 
     // Combine cart quantities with product data
     const cart = {};
@@ -181,41 +206,137 @@ export const clearCart = async (userId) => {
   }
 };
 
-// Get cart item count (number of unique products, not total quantity)
+// Get cart item count (number of unique products, not total quantity) with MySQL fallback
 export const getCartItemCount = async (userId) => {
   try {
     const key = `cart:${userId}`;
     const cartItems = await redis.hgetall(key);
 
-    // Count number of unique products (not total quantity)
-    const uniqueProductCount = Object.keys(cartItems).length;
+    // If Redis has cart data, return count
+    if (cartItems && Object.keys(cartItems).length > 0) {
+      const uniqueProductCount = Object.keys(cartItems).length;
+      console.log(
+        `[REDIS] Cart item count for user ${userId}: ${uniqueProductCount} unique products`
+      );
+      return uniqueProductCount;
+    }
+
+    // If Redis is empty, try MySQL fallback
+    console.log(
+      `[REDIS] Redis count is 0 for user ${userId}, checking MySQL...`
+    );
+
+    const mysqlCart = await CartModel.loadFromDatabase(userId);
+    const mysqlCount = Object.keys(mysqlCart).length;
+
+    // If MySQL has cart data, restore to Redis
+    if (mysqlCart && mysqlCount > 0) {
+      console.log(
+        `[REDIS] Found ${mysqlCount} items in MySQL for user ${userId}, restoring to Redis...`
+      );
+      await restoreCartToRedis(userId, mysqlCart);
+    }
 
     console.log(
-      `[REDIS] Cart item count for user ${userId}: ${uniqueProductCount} unique products`
+      `[REDIS] Cart item count for user ${userId}: ${mysqlCount} unique products (from MySQL)`
     );
-    return uniqueProductCount;
+    return mysqlCount;
   } catch (error) {
     console.error("[REDIS] Error getting cart item count:", error);
     throw error;
   }
 };
 
-// Get cart total quantity (sum of all product quantities)
+// Get cart total quantity (sum of all product quantities) with MySQL fallback
 export const getCartTotalQuantity = async (userId) => {
   try {
     const key = `cart:${userId}`;
     const cartItems = await redis.hgetall(key);
 
-    const totalQuantity = Object.values(cartItems).reduce((total, quantity) => {
-      return total + parseInt(quantity);
-    }, 0);
+    // If Redis has cart data, calculate total
+    if (cartItems && Object.keys(cartItems).length > 0) {
+      const totalQuantity = Object.values(cartItems).reduce(
+        (total, quantity) => {
+          return total + parseInt(quantity);
+        },
+        0
+      );
+
+      console.log(
+        `[REDIS] Cart total quantity for user ${userId}: ${totalQuantity} items`
+      );
+      return totalQuantity;
+    }
+
+    // If Redis is empty, try MySQL fallback
+    console.log(
+      `[REDIS] Redis total is 0 for user ${userId}, checking MySQL...`
+    );
+
+    const mysqlCart = await CartModel.loadFromDatabase(userId);
+    const mysqlTotalQuantity = Object.values(mysqlCart).reduce(
+      (total, item) => total + (item.quantity || 0),
+      0
+    );
+
+    // If MySQL has cart data, restore to Redis
+    if (mysqlCart && Object.keys(mysqlCart).length > 0) {
+      console.log(
+        `[REDIS] Found cart in MySQL for user ${userId}, restoring to Redis...`
+      );
+      await restoreCartToRedis(userId, mysqlCart);
+    }
 
     console.log(
-      `[REDIS] Cart total quantity for user ${userId}: ${totalQuantity} items`
+      `[REDIS] Cart total quantity for user ${userId}: ${mysqlTotalQuantity} items (from MySQL)`
     );
-    return totalQuantity;
+    return mysqlTotalQuantity;
   } catch (error) {
     console.error("[REDIS] Error getting cart total quantity:", error);
+    throw error;
+  }
+};
+
+// Helper function to restore cart from MySQL to Redis (without triggering sync)
+export const restoreCartToRedis = async (userId, cart) => {
+  try {
+    const key = `cart:${userId}`;
+    const productKey = `cart_products:${userId}`;
+
+    // Clear existing Redis data
+    await redis.del(key);
+    await redis.del(productKey);
+
+    // Restore cart items
+    for (const [productId, itemData] of Object.entries(cart)) {
+      if (itemData.quantity > 0) {
+        // Set cart quantity
+        await redis.hset(key, productId, itemData.quantity);
+
+        // Set product data if available
+        if (itemData.product) {
+          await redis.hset(
+            productKey,
+            `product:${productId}`,
+            JSON.stringify(itemData.product)
+          );
+        }
+      }
+    }
+
+    // Set TTL = 7 days
+    if (Object.keys(cart).length > 0) {
+      await redis.expire(key, 7 * 24 * 60 * 60);
+      await redis.expire(productKey, 7 * 24 * 60 * 60);
+    }
+
+    console.log(
+      `[REDIS] Restored ${
+        Object.keys(cart).length
+      } items to Redis for user ${userId}`
+    );
+  } catch (error) {
+    console.error("[REDIS] Error restoring cart to Redis:", error);
     throw error;
   }
 };

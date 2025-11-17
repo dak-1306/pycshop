@@ -1,11 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProductRating } from "../common/ui/StarRating";
+import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../hooks/useToast";
 import "../../styles/components/buyer/ProductCard.css";
-import CartService from "../../lib/services/cartService";
 
 const ProductCard = ({ product, onClick }) => {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const { showSuccess, showError } = useToast();
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   const formatPrice = (price) => {
     if (price == null || isNaN(price)) {
@@ -129,55 +135,52 @@ const ProductCard = ({ product, onClick }) => {
         {/* Action Buttons */}
         <div className="product-card-actions">
           <button
-            className="btn-add-cart"
+            className={`btn-add-cart ${isAddingToCart ? "loading" : ""}`}
+            disabled={isAddingToCart || safeProduct.stock === 0}
             onClick={async (e) => {
               e.stopPropagation();
 
-              try {
-                // Check if user is logged in
-                const token = localStorage.getItem("token");
-                if (!token) {
-                  alert("Vui lòng đăng nhập để thêm vào giỏ hàng!");
-                  navigate("/login");
-                  return;
-                }
+              // Check if user is logged in
+              if (!isAuthenticated) {
+                showError("Vui lòng đăng nhập để thêm vào giỏ hàng!");
+                navigate("/login");
+                return;
+              }
 
+              // Check stock
+              if (safeProduct.stock === 0) {
+                showError("Sản phẩm đã hết hàng!");
+                return;
+              }
+
+              setIsAddingToCart(true);
+
+              try {
                 // Prepare product data for cart service
                 const productData = {
                   id: safeProduct.id,
                   name: safeProduct.name,
                   price: safeProduct.price,
                   image: safeProduct.image,
-                  variant: "Mặc định",
+                  description: safeProduct.description || "",
                 };
 
-                // Use CartService.addToCart method
-                const result = await CartService.addToCart(
-                  safeProduct.id,
-                  1,
-                  productData
-                );
+                // Use CartContext addToCart method (handles realtime updates)
+                await addToCart(safeProduct.id, 1, productData);
 
-                if (result.success) {
-                  alert("Đã thêm vào giỏ hàng!");
-                  // Dispatch cart updated event
-                  window.dispatchEvent(
-                    new CustomEvent("cartUpdated", {
-                      detail: { totalItems: result.data.totalItems },
-                    })
-                  );
-                } else {
-                  alert(
-                    result.message || "Có lỗi xảy ra khi thêm vào giỏ hàng!"
-                  );
-                }
+                // Show success toast
+                showSuccess(`Đã thêm "${safeProduct.name}" vào giỏ hàng!`);
               } catch (error) {
                 console.error("Error adding to cart:", error);
-                alert("Có lỗi xảy ra khi thêm vào giỏ hàng!");
+                showError(
+                  error.message || "Có lỗi xảy ra khi thêm vào giỏ hàng!"
+                );
+              } finally {
+                setIsAddingToCart(false);
               }
             }}
           >
-            Thêm vào giỏ
+            {isAddingToCart ? "Đang thêm..." : "Thêm vào giỏ"}
           </button>
           <button
             className="btn-buy-now"

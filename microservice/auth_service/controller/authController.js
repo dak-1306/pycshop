@@ -3,9 +3,9 @@ import bcrypt from "bcryptjs";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import db from "../../db/index.js";
-// import { sendCartSync } from "../../cart_service/services/kafkaProducer.js";
-// import { getCartFromRedis } from "../../cart_service/services/redisService.js";
-// import redis from "../../cart_service/services/redisService.js";
+import { sendCartSync } from "../../cart_service/services/kafkaProducer.js";
+import { getCartFromRedis } from "../../cart_service/services/redisService.js";
+import redis from "../../cart_service/services/redisService.js";
 
 export const register = async (req, res) => {
   try {
@@ -232,11 +232,11 @@ export const logout = async (req, res) => {
     console.log(`[LOGOUT] Syncing cart before logout for user: ${userId}`);
 
     // TODO: Re-enable cart sync when cart service is running
-    // const cart = await getCartFromRedis(userId);
-    // console.log(`[LOGOUT] Cart retrieved: ${Object.keys(cart).length} items`);
-    // await sendCartSync(userId, cart);
-    // await redis.del(`cart:${userId}`);
-    // await redis.del(`cart_products:${userId}`);
+    const cart = await getCartFromRedis(userId);
+    console.log(`[LOGOUT] Cart retrieved: ${Object.keys(cart).length} items`);
+    await sendCartSync(userId, cart);
+    await redis.del(`cart:${userId}`);
+    await redis.del(`cart_products:${userId}`);
 
     console.log(`[LOGOUT] Cart sync temporarily disabled - user: ${userId}`);
 

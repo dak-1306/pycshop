@@ -1,4 +1,4 @@
-import { OrderModel } from "../models/OrderModel.js";
+import OrderModel from "../models/OrderModel.js";
 import { ExternalServiceClient } from "../services/externalService.js";
 
 // Tạo đơn hàng mới
@@ -22,6 +22,7 @@ export const createOrder = async (req, res) => {
       shippingFee,
       voucherDiscount,
       total,
+      voucher, // Thông tin voucher được áp dụng
     } = req.body;
 
     // Validate input
@@ -69,10 +70,32 @@ export const createOrder = async (req, res) => {
       }
     }
 
+    // Validate voucher nếu có
+    if (voucher && voucher.code) {
+      console.log(`[ORDER_CONTROLLER] Validating voucher: ${voucher.code}`);
+
+      const voucherValidation = await ExternalServiceClient.validateVoucher(
+        voucher.code,
+        subtotal + shippingFee // Validate với subtotal trước khi áp voucher
+      );
+
+      if (!voucherValidation.success || !voucherValidation.data.valid) {
+        return res.status(400).json({
+          success: false,
+          message: voucherValidation.message || "Voucher không hợp lệ",
+          code: "INVALID_VOUCHER",
+        });
+      }
+
+      console.log(`[ORDER_CONTROLLER] Voucher validated successfully`);
+    }
+
     console.log(`[ORDER_CONTROLLER] Creating order for user ${userId}:`, {
       itemCount: items.length,
       total: total,
       paymentMethod: paymentMethod,
+      hasVoucher: !!voucher,
+      voucherCode: voucher?.code,
     });
 
     // Tạo đơn hàng
@@ -86,6 +109,7 @@ export const createOrder = async (req, res) => {
       shippingFee: shippingFee || 0,
       voucherDiscount: voucherDiscount || 0,
       total,
+      voucher: voucher || null,
     };
 
     const result = await OrderModel.createOrder(orderData);
@@ -95,6 +119,24 @@ export const createOrder = async (req, res) => {
     // Post-order processing (async, don't block response)
     setImmediate(async () => {
       try {
+        // Use voucher if provided
+        if (voucher && voucher.code) {
+          console.log(`[ORDER_CONTROLLER] Using voucher: ${voucher.code}`);
+
+          const voucherResult = await ExternalServiceClient.useVoucher({
+            id: voucher.id,
+            code: voucher.code,
+            orderValue: subtotal + shippingFee,
+          });
+
+          if (voucherResult) {
+            console.log(`[ORDER_CONTROLLER] Voucher used successfully`);
+          } else {
+            console.error(`[ORDER_CONTROLLER] Failed to mark voucher as used`);
+            // Don't fail the order, just log the error
+          }
+        }
+
         // Clear user's cart
         await ExternalServiceClient.clearUserCart(userId);
 
@@ -102,6 +144,8 @@ export const createOrder = async (req, res) => {
         await ExternalServiceClient.sendOrderNotification(userId, {
           orderId: result.orderId,
           total: total,
+          voucherUsed: voucher?.code || null,
+          savings: voucherDiscount || 0,
         });
 
         // Update product inventory

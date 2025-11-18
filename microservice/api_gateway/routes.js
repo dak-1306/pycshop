@@ -512,6 +512,118 @@ function setupRoutes(app) {
     })
   );
 
+  // Promotion Service Routes
+  app.use(
+    "/promotions",
+    // Middleware for logging and optional auth
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /promotions route for ${req.method} ${req.originalUrl}`
+      );
+
+      // Check if route requires auth (admin routes)
+      const adminRoutes = ["/promotions/admin"];
+      const requiresAuth = adminRoutes.some((route) =>
+        req.originalUrl.startsWith(route)
+      );
+
+      // Public routes don't require auth
+      const publicRoutes = [
+        "/promotions/available",
+        "/promotions/validate",
+        "/promotions/voucher",
+        "/promotions/health",
+      ];
+      const isPublicRoute = publicRoutes.some((route) =>
+        req.originalUrl.startsWith(route)
+      );
+
+      // Internal routes (called by other services)
+      const internalRoutes = ["/promotions/use"];
+      const isInternalRoute = internalRoutes.some((route) =>
+        req.originalUrl.startsWith(route)
+      );
+
+      console.log(`[ROUTES] Promotion route analysis:`, {
+        requiresAuth,
+        isPublicRoute,
+        isInternalRoute,
+        hasUser: !!req.user,
+      });
+
+      // Apply auth middleware for admin routes
+      if (requiresAuth && !req.user) {
+        return res.status(401).json({
+          success: false,
+          message: "Cần đăng nhập để truy cập chức năng này",
+          code: "NO_TOKEN",
+        });
+      }
+
+      // Set user headers if available
+      if (req.user) {
+        req.headers["x-user-id"] = req.user.id.toString();
+        req.headers["x-user-role"] = req.user.role;
+        req.headers["x-user-type"] = req.user.userType;
+        console.log(
+          `[ROUTES] Set headers for promotions: x-user-id=${req.user.id}, x-user-role=${req.user.role}`
+        );
+      }
+      next();
+    },
+
+    createProxyMiddleware({
+      target: process.env.PROMOTION_SERVICE_URL || "http://localhost:5009",
+      changeOrigin: true,
+      pathRewrite: {
+        "^/promotions": "/api/promotions",
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`[PROXY] onProxyReq callback for promotion service`);
+
+        // Forward user info to promotion service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id.toString());
+          proxyReq.setHeader("x-user-role", req.user.role);
+          proxyReq.setHeader("x-user-type", req.user.userType);
+          console.log("[PROXY] Set user headers for promotion:", {
+            id: req.user.id,
+            role: req.user.role,
+            userType: req.user.userType,
+          });
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.PROMOTION_SERVICE_URL || "http://localhost:5009"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from Promotion Service`
+        );
+
+        // Ensure CORS headers
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Promotion Service Error:`, err.message);
+        if (!res.headersSent) {
+          res.status(500).json({
+            success: false,
+            error: "Promotion service error",
+            details: err.message,
+          });
+        }
+      },
+    })
+  );
+
   // Shop Service - Use function pathRewrite to preserve /shops prefix
   app.use(
     "/shops",

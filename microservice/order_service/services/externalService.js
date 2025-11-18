@@ -117,6 +117,94 @@ export class ExternalServiceClient {
       );
     }
   }
+
+  // Use voucher (mark as used in promotion service)
+  static async useVoucher(voucherData) {
+    try {
+      const promotionServiceUrl =
+        process.env.PROMOTION_SERVICE_URL || "http://localhost:5009";
+
+      console.log(
+        `[EXTERNAL_SERVICE] Using voucher: ${
+          voucherData.code || voucherData.id
+        }`
+      );
+
+      const response = await fetch(
+        `${promotionServiceUrl}/api/promotions/use`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            voucherId: voucherData.id,
+            voucherCode: voucherData.code,
+            orderValue: voucherData.orderValue,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`[EXTERNAL_SERVICE] Successfully used voucher`);
+        return result;
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(
+          `[EXTERNAL_SERVICE] Failed to use voucher: ${response.status}`,
+          errorData.message || "Unknown error"
+        );
+        return null;
+      }
+    } catch (error) {
+      console.error("[EXTERNAL_SERVICE] Error using voucher:", error);
+      return null;
+    }
+  }
+
+  // Validate voucher before using (optional double-check)
+  static async validateVoucher(voucherCode, orderValue) {
+    try {
+      const promotionServiceUrl =
+        process.env.PROMOTION_SERVICE_URL || "http://localhost:5009";
+
+      console.log(`[EXTERNAL_SERVICE] Validating voucher: ${voucherCode}`);
+
+      const response = await fetch(
+        `${promotionServiceUrl}/api/promotions/validate`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            voucherCode: voucherCode,
+            orderValue: orderValue,
+          }),
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log(
+          `[EXTERNAL_SERVICE] Voucher validation result:`,
+          result.data?.valid
+        );
+        return result;
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        console.error(
+          `[EXTERNAL_SERVICE] Voucher validation failed: ${response.status}`,
+          errorData.message || "Unknown error"
+        );
+        return { success: false, data: { valid: false } };
+      }
+    } catch (error) {
+      console.error("[EXTERNAL_SERVICE] Error validating voucher:", error);
+      return { success: false, data: { valid: false } };
+    }
+  }
 }
 
 export default ExternalServiceClient;

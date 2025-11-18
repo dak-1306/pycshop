@@ -172,14 +172,41 @@ const OrderTable = React.memo(
             type: "edit",
             label: "Sửa",
             title: "Chỉnh sửa đơn hàng",
-            shouldShow: () => variant === "admin",
+            shouldShow: (order) => {
+              console.log(
+                "Edit button shouldShow - variant:",
+                variant,
+                "order:",
+                order
+              );
+              // Admin có thể edit tất cả đơn hàng
+              if (variant === "admin") return true;
+              // Seller: Tạm thời hiển thị cho tất cả để test
+              return true;
+
+              // TODO: Sau khi test xong sẽ dùng logic này
+              // const orderStatus = order.status || order.TrangThai;
+              // return (
+              //   orderStatus === "pending" ||
+              //   orderStatus === "processing" ||
+              //   orderStatus === "Chờ xử lý" ||
+              //   orderStatus === "Đang xử lý"
+              // );
+            },
           },
           {
             type: "cancel",
             label: "Hủy",
             title: "Hủy đơn hàng",
-            shouldShow: (order) =>
-              order.status === "pending" || order.status === "processing",
+            shouldShow: (order) => {
+              const orderStatus = order.status || order.TrangThai;
+              return (
+                orderStatus === "pending" ||
+                orderStatus === "processing" ||
+                orderStatus === "Chờ xử lý" ||
+                orderStatus === "Đang xử lý"
+              );
+            },
           },
           {
             type: "delete",

@@ -277,18 +277,21 @@ const OrderDetailModal = React.memo(
                 >
                   Đóng
                 </button>
-                {onEdit && (
-                  <button
-                    onClick={() => {
-                      onClose();
-                      onEdit(order.id);
-                    }}
-                    className={`px-8 py-3 bg-gradient-to-r ${headerGradient} hover:shadow-lg text-white rounded-xl font-medium transition-all transform hover:scale-105 flex items-center space-x-2`}
-                  >
-                    <FontAwesomeIcon icon={["fas", "edit"]} />
-                    <span>Chỉnh sửa</span>
-                  </button>
-                )}
+                {onEdit &&
+                  (order.status === "pending" ||
+                    order.status === "processing" ||
+                    variant === "admin") && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onEdit(order.id);
+                      }}
+                      className={`px-8 py-3 bg-gradient-to-r ${headerGradient} hover:shadow-lg text-white rounded-xl font-medium transition-all transform hover:scale-105 flex items-center space-x-2`}
+                    >
+                      <FontAwesomeIcon icon={["fas", "edit"]} />
+                      <span>Chỉnh sửa</span>
+                    </button>
+                  )}
               </div>
             </div>
           </div>

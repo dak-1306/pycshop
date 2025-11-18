@@ -128,8 +128,7 @@ const Cart = () => {
       // Dispatch cart update event
       window.dispatchEvent(new CustomEvent("cartUpdated"));
 
-      alert("Đặt hàng thành công!");
-      navigate("/orders"); // Redirect to orders page if available
+      navigate("/checkout", { state: { cartItems } }); // Redirect to orders page if available
     } catch (error) {
       console.error("Error during checkout:", error);
       // Fallback to normal checkout

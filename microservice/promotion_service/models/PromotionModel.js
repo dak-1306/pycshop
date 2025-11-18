@@ -22,8 +22,8 @@ class PromotionModel {
           (SoLanDungDuoc - SoLanDaDung) as RemainingUses
         FROM phieugiamgia 
         WHERE 
-          NgayHieuLuc <= CURDATE() 
-          AND NgayHetHan >= CURDATE()
+          NgayHieuLuc <= NOW() 
+          AND NgayHetHan >= NOW()
           AND SoLanDaDung < SoLanDungDuoc
           AND (GiaTriDonHangToiThieu IS NULL OR GiaTriDonHangToiThieu <= ?)
         ORDER BY 

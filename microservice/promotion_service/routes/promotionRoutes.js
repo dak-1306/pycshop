@@ -40,7 +40,7 @@ router.use((error, req, res, next) => {
 });
 
 // 404 handler
-router.use("*", (req, res) => {
+router.use((req, res) => {
   res.status(404).json({
     success: false,
     message: "Endpoint not found",

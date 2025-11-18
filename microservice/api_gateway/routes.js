@@ -575,11 +575,15 @@ function setupRoutes(app) {
     createProxyMiddleware({
       target: process.env.PROMOTION_SERVICE_URL || "http://localhost:5009",
       changeOrigin: true,
-      pathRewrite: {
-        "^/promotions": "/api/promotions",
+      pathRewrite: (path, req) => {
+        const newPath = `/api/promotions${path}`;
+        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
+        return newPath;
       },
       onProxyReq: (proxyReq, req, res) => {
         console.log(`[PROXY] onProxyReq callback for promotion service`);
+        console.log(`[PROXY] Original URL: ${req.originalUrl}`);
+        console.log(`[PROXY] Proxy path: ${proxyReq.path}`);
 
         // Forward user info to promotion service
         if (req.user) {
@@ -932,6 +936,151 @@ function setupRoutes(app) {
       },
     })
   );
+
+  // User Service
+  app.use(
+    "/api/users",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /users route for ${req.method} ${req.originalUrl}`
+      );
+      console.log(`[ROUTES] req.user:`, req.user);
+      next();
+    },
+    // apply auth middle manual
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Applying auth middleware for users route: ${req.path}`
+      );
+      authMiddleware(req, res, next);
+    },
+    //apply header manual
+    (req, res, next) => {
+      console.log(`[ROUTES] Setting headers for users route: ${req.path}`);
+      // Manually set headers for proxy
+      if (req.user) {
+        req.headers["x-user-id"] = req.user.id;
+        req.headers["x-user-role"] = req.user.role;
+        req.headers["x-user-type"] = req.user.userType;
+        console.log(
+          `[ROUTES] Set headers manually: x-user-id=${req.user.id}, x-user-role=${req.user.role}, x-user-type=${req.user.userType}`
+        );
+      }
+      next();
+    },
+
+    createProxyMiddleware({
+      target: process.env.USER_SERVICE_URL || "http://localhost:5010",
+      changeOrigin: true,
+      pathRewrite: (path, req) => {
+        const newPath = `/api/users${path}`;
+        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
+        return newPath;
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(`[PROXY] onProxyReq callback triggered for users service`);
+
+        // Truyền thông tin user từ API Gateway xuống cart service
+        if (req.user) {
+          proxyReq.setHeader("x-user-id", req.user.id.toString());
+          proxyReq.setHeader("x-user-role", req.user.role);
+          proxyReq.setHeader("x-user-type", req.user.userType);
+          console.log("[PROXY] Set user headers:", {
+            id: req.user.id,
+            role: req.user.role,
+            userType: req.user.userType,
+          });
+        } else {
+          console.log(`[PROXY] No req.user found for this users request`);
+        }
+
+        console.log(
+          `[PROXY] Forwarding ${req.method} ${req.url} to ${
+            process.env.USER_SERVICE_URL || "http://localhost:5010"
+          }${proxyReq.path}`
+        );
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `[PROXY] Response ${proxyRes.statusCode} from User Service`
+        );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
+      },
+      onError: (err, req, res) => {
+        console.error(`[PROXY] Users Service Error:`, err.message);
+        if (!res.headersSent) {
+          res
+            .status(500)
+            .json({ error: "Users service error", details: err.message });
+        }
+      },
+    })
+  );
+
+  // // User Service Routes - GET methods only
+  // app.use(
+  //   "/api/users",
+  //   authMiddleware, // Require authentication for all user routes
+  //   createProxyMiddleware({
+  //     target: process.env.USER_SERVICE_URL || "http://localhost:5010",
+  //     changeOrigin: true,
+  //     pathRewrite: {
+  //       "^/api/users": "/api/users", // Keep the full path
+  //     },
+  //     onProxyReq: (proxyReq, req, res) => {
+  //       console.log(`[PROXY] onProxyReq callback for user service`);
+
+  //       // Forward user information to user service
+  //       if (req.user) {
+  //         proxyReq.setHeader("x-user-id", req.user.id);
+  //         proxyReq.setHeader("x-user-role", req.user.role || "buyer");
+  //         proxyReq.setHeader("x-user-type", req.user.userType || "buyer");
+
+  //         console.log(
+  //           `[PROXY] Adding user headers for user service - user ID: ${
+  //             req.user.id
+  //           }, role: ${req.user.role}, userType: ${
+  //             req.user.userType || "buyer"
+  //           }`
+  //         );
+  //       }
+
+  //       console.log(
+  //         `[PROXY] Forwarding ${req.method} ${req.url} to ${
+  //           process.env.USER_SERVICE_URL || "http://localhost:5010"
+  //         }${proxyReq.path}`
+  //       );
+  //     },
+  //     onProxyRes: (proxyRes, req, res) => {
+  //       console.log(
+  //         `[PROXY] Response ${proxyRes.statusCode} from User Service`
+  //       );
+
+  //       // Ensure CORS headers
+  //       const origin = req.headers.origin;
+  //       if (origin) {
+  //         res.setHeader("Access-Control-Allow-Origin", origin);
+  //         res.setHeader("Access-Control-Allow-Credentials", "true");
+  //       }
+  //     },
+  //     onError: (err, req, res) => {
+  //       console.error(`[PROXY] User Service Error:`, err.message);
+  //       if (!res.headersSent) {
+  //         res.status(500).json({
+  //           success: false,
+  //           error: "User service error",
+  //           details: err.message,
+  //         });
+  //       }
+  //     },
+  //   })
+  // );
 
   // Temporary Notifications endpoint (until proper notification service is implemented)
   app.get("/notifications", authMiddleware, (req, res) => {

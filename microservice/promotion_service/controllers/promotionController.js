@@ -6,7 +6,14 @@ class PromotionController {
   static async getAvailableVouchers(req, res) {
     try {
       const { orderValue } = req.query;
-      const userId = req.user?.userId; // From auth middleware
+      const userId =
+        req.headers["x-user-id"] || req.user?.id || req.user?.userId; // From API Gateway
+
+      console.log(`[PROMOTION_CONTROLLER] Request headers:`, {
+        "x-user-id": req.headers["x-user-id"],
+        "x-user-role": req.headers["x-user-role"],
+        "x-user-type": req.headers["x-user-type"],
+      });
 
       // Validate orderValue
       if (!orderValue || isNaN(orderValue) || orderValue <= 0) {

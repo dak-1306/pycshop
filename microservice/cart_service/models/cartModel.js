@@ -107,6 +107,7 @@ export class CartModel {
 
       // Insert current cart items
       let totalQuantity = 0;
+      let uniqueProductCount = 0;
       for (const [productId, itemData] of Object.entries(cart)) {
         const quantity = itemData.quantity || 0;
         if (quantity > 0) {
@@ -115,13 +116,14 @@ export class CartModel {
             [cartId, productId, quantity]
           );
           totalQuantity += quantity;
+          uniqueProductCount++;
         }
       }
 
-      // Update cart timestamp to indicate last sync
+      // Update cart with unique product count (matches frontend logic)
       await connection.query(
-        "UPDATE giohang SET ThoiGianTao = CURRENT_TIMESTAMP WHERE ID_GioHang = ?",
-        [cartId]
+        "UPDATE giohang SET SoLuong = ?, ThoiGianTao = CURRENT_TIMESTAMP WHERE ID_GioHang = ?",
+        [uniqueProductCount, cartId]
       );
 
       await connection.commit();
@@ -195,9 +197,9 @@ export class CartModel {
         [cartId]
       );
 
-      // Update cart timestamp
+      // Update cart with 0 items and timestamp
       await connection.query(
-        "UPDATE giohang SET ThoiGianTao = CURRENT_TIMESTAMP WHERE ID_GioHang = ?",
+        "UPDATE giohang SET SoLuong = 0, ThoiGianTao = CURRENT_TIMESTAMP WHERE ID_GioHang = ?",
         [cartId]
       );
 

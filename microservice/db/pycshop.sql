@@ -2,8 +2,8 @@
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
--- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 10, 2025 lúc 12:17 PM
+-- Máy chủ: 127.0.0.1:3306
+-- Thời gian đã tạo: Th10 17, 2025 lúc 03:49 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -191,7 +191,7 @@ CREATE TABLE `baocao` (
   `ID_SpBiBC` bigint(20) DEFAULT NULL,
   `LoaiBaoCao` enum('User','Product') NOT NULL,
   `LiDo` text NOT NULL,
-  `TrangThai` enum('in_progress','resolved') NOT NULL DEFAULT 'in_progress',
+  `TrangThai` enum('in_progress','resolved','rejected') NOT NULL DEFAULT 'in_progress',
   `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -259,7 +259,7 @@ CREATE TABLE `cuahang` (
   `ID_DanhMuc` int(11) NOT NULL,
   `DiaChiCH` varchar(255) NOT NULL,
   `SoDienThoaiCH` varchar(20) NOT NULL,
-  `NgayCapNhat` datetime DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `NgayCapNhat` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -267,9 +267,9 @@ CREATE TABLE `cuahang` (
 --
 
 INSERT INTO `cuahang` (`ID_CuaHang`, `TenCuaHang`, `DanhGiaTB`, `ID_DanhMuc`, `DiaChiCH`, `SoDienThoaiCH`, `NgayCapNhat`) VALUES
-(1, 'Thời Trang Nam Unisex', 4.4, 1, '123 Lê Lợi, Quận 1, TP.HCM', '0901234567', '2025-10-10 15:56:01'),
-(3, 'Cửa hàng sách Hải Nam', 4.8, 18, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-10 15:56:33'),
-(7, 'Shop của Bảnh', 3.0, 11, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-10 16:39:11');
+(1, 'Thời Trang Nam Unisex', 4.4, 1, '123 Lê Lợi, Quận 1, TP.HCM', '0901234567', '2025-10-10 08:56:01'),
+(3, 'Cửa hàng sách Hải Nam', 4.8, 18, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-10 08:56:33'),
+(7, 'Shop của Bảnh', 3.0, 11, '741 Võ Văn Ngân, Phường Linh Chiểu, TP.Thủ Đức, TP.HCM', '0192478948', '2025-10-10 09:39:11');
 
 -- --------------------------------------------------------
 
@@ -490,8 +490,16 @@ CREATE TABLE `giaohang` (
 CREATE TABLE `giohang` (
   `ID_GioHang` bigint(20) NOT NULL,
   `ID_NguoiMua` bigint(20) NOT NULL,
+  `SoLuong` int(11) NOT NULL DEFAULT 0,
   `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `giohang`
+--
+
+INSERT INTO `giohang` (`ID_GioHang`, `ID_NguoiMua`, `SoLuong`, `ThoiGianTao`) VALUES
+(1, 4, 9, '2025-11-17 14:02:29');
 
 -- --------------------------------------------------------
 
@@ -705,6 +713,21 @@ CREATE TABLE `sanphamtronggio` (
   `SoLuong` int(11) NOT NULL CHECK (`SoLuong` > 0),
   `ThemLuc` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `sanphamtronggio`
+--
+
+INSERT INTO `sanphamtronggio` (`ID_MatHang`, `ID_GioHang`, `ID_SanPham`, `SoLuong`, `ThemLuc`) VALUES
+(146, 1, 5, 1, '2025-11-17 14:02:29'),
+(147, 1, 6, 1, '2025-11-17 14:02:29'),
+(148, 1, 9, 1, '2025-11-17 14:02:29'),
+(149, 1, 11, 1, '2025-11-17 14:02:29'),
+(150, 1, 12, 2, '2025-11-17 14:02:29'),
+(151, 1, 13, 1, '2025-11-17 14:02:29'),
+(152, 1, 15, 2, '2025-11-17 14:02:29'),
+(153, 1, 17, 1, '2025-11-17 14:02:29'),
+(154, 1, 32, 1, '2025-11-17 14:02:29');
 
 -- --------------------------------------------------------
 
@@ -1007,7 +1030,7 @@ ALTER TABLE `giaohang`
 -- AUTO_INCREMENT cho bảng `giohang`
 --
 ALTER TABLE `giohang`
-  MODIFY `ID_GioHang` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_GioHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `hoithoai`
@@ -1043,7 +1066,7 @@ ALTER TABLE `sanpham`
 -- AUTO_INCREMENT cho bảng `sanphamtronggio`
 --
 ALTER TABLE `sanphamtronggio`
-  MODIFY `ID_MatHang` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_MatHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=155;
 
 --
 -- AUTO_INCREMENT cho bảng `thanhtoan`

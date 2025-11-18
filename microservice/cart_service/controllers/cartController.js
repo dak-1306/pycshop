@@ -5,35 +5,9 @@ import {
   removeItemFromRedis,
   clearCart,
   getCartItemCount,
+  getCartTotalQuantity,
 } from "../services/redisService.js";
 import { sendCartUpdate, sendCartCheckout } from "../services/kafkaProducer.js";
-import { CartModel } from "../models/cartModel.js";
-
-// Load cart from MySQL when Redis is empty
-const loadCartFromMySQL = async (userId) => {
-  return await CartModel.loadFromDatabase(userId);
-};
-
-// Restore cart from MySQL to Redis
-const restoreCartToRedis = async (userId, cart) => {
-  try {
-    for (const [productId, itemData] of Object.entries(cart)) {
-      await addItemToRedis(
-        userId,
-        productId,
-        itemData.quantity,
-        itemData.product || {}
-      );
-    }
-    console.log(
-      `[CART_CONTROLLER] Restored ${
-        Object.keys(cart).length
-      } items to Redis for user ${userId}`
-    );
-  } catch (error) {
-    console.error("[CART_CONTROLLER] Error restoring cart to Redis:", error);
-  }
-};
 
 // Add item to cart
 export const addToCart = async (req, res) => {
@@ -211,6 +185,7 @@ export const removeFromCart = async (req, res) => {
 };
 
 // View cart
+// View cart - fallback logic handled in redisService
 export const viewCart = async (req, res) => {
   try {
     const userId = req.headers["x-user-id"] || req.params.userId;
@@ -222,31 +197,9 @@ export const viewCart = async (req, res) => {
       });
     }
 
-    // Get cart from Redis first
-    let cart = await getCartFromRedis(userId);
-    let itemCount = await getCartItemCount(userId);
-
-    // If Redis cart is empty, try to load from MySQL
-    if (!cart || Object.keys(cart).length === 0) {
-      console.log(
-        `[CART_CONTROLLER] Redis cart empty for user ${userId}, loading from MySQL...`
-      );
-      cart = await loadCartFromMySQL(userId);
-      itemCount = Object.values(cart).reduce(
-        (total, item) => total + (item.quantity || 0),
-        0
-      );
-
-      // If we found cart in MySQL, restore it to Redis
-      if (cart && Object.keys(cart).length > 0) {
-        console.log(
-          `[CART_CONTROLLER] Restoring ${
-            Object.keys(cart).length
-          } items to Redis for user ${userId}`
-        );
-        await restoreCartToRedis(userId, cart);
-      }
-    }
+    // getCartFromRedis and getCartItemCount now handle MySQL fallback internally
+    const cart = await getCartFromRedis(userId);
+    const itemCount = await getCartItemCount(userId);
 
     console.log(
       `[CART_CONTROLLER] Retrieved cart for user ${userId} with ${itemCount} items`
@@ -270,7 +223,7 @@ export const viewCart = async (req, res) => {
   }
 };
 
-// Get cart item count
+// Get cart item count (unique products) - fallback logic handled in redisService
 export const getCartCount = async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
@@ -282,27 +235,8 @@ export const getCartCount = async (req, res) => {
       });
     }
 
-    let itemCount = await getCartItemCount(userId);
-
-    // If Redis count is 0, check MySQL
-    if (itemCount === 0) {
-      console.log(
-        `[CART_CONTROLLER] Redis count is 0 for user ${userId}, checking MySQL...`
-      );
-      const cart = await loadCartFromMySQL(userId);
-      itemCount = Object.values(cart).reduce(
-        (total, item) => total + (item.quantity || 0),
-        0
-      );
-
-      // If we found cart in MySQL, restore it to Redis
-      if (cart && Object.keys(cart).length > 0) {
-        console.log(
-          `[CART_CONTROLLER] Restoring cart to Redis for count check, user ${userId}`
-        );
-        await restoreCartToRedis(userId, cart);
-      }
-    }
+    // getCartItemCount now handles MySQL fallback internally
+    const itemCount = await getCartItemCount(userId);
 
     res.json({
       success: true,
@@ -316,6 +250,41 @@ export const getCartCount = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Lỗi khi lấy số lượng sản phẩm trong giỏ hàng",
+      error: error.message,
+    });
+  }
+};
+
+// Get cart total quantity (sum of all product quantities) - fallback logic handled in redisService
+export const getCartTotalQuantityController = async (req, res) => {
+  try {
+    const userId = req.headers["x-user-id"];
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication required",
+      });
+    }
+
+    // getCartTotalQuantity now handles MySQL fallback internally
+    const totalQuantity = await getCartTotalQuantity(userId);
+
+    res.json({
+      success: true,
+      data: {
+        totalQuantity,
+        userId,
+      },
+    });
+  } catch (error) {
+    console.error(
+      "[CART_CONTROLLER] Error getting cart total quantity:",
+      error
+    );
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi lấy tổng số lượng sản phẩm trong giỏ hàng",
       error: error.message,
     });
   }

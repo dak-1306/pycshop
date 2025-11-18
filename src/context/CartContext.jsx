@@ -42,6 +42,7 @@ export const CartProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         setCartCount(data.data?.totalItems || 0);
+        console.log("Fetched cart count:", data);
       } else {
         console.error("Failed to fetch cart count:", response.status);
         setCartCount(0);
@@ -78,7 +79,16 @@ export const CartProvider = ({ children }) => {
       if (response.ok) {
         const data = await response.json();
         // Update cart count from response
-        setCartCount(data.data?.totalItems || cartCount + quantity);
+        const newCartCount = data.data?.totalItems || cartCount + quantity;
+        setCartCount(newCartCount);
+
+        // Dispatch cart updated event for other components
+        window.dispatchEvent(
+          new CustomEvent("cartUpdated", {
+            detail: { totalItems: newCartCount },
+          })
+        );
+
         return data;
       } else {
         throw new Error("Failed to add item to cart");
@@ -111,7 +121,16 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setCartCount(data.data?.totalItems || 0);
+        const newCartCount = data.data?.totalItems || 0;
+        setCartCount(newCartCount);
+
+        // Dispatch cart updated event for other components
+        window.dispatchEvent(
+          new CustomEvent("cartUpdated", {
+            detail: { totalItems: newCartCount },
+          })
+        );
+
         return data;
       } else {
         throw new Error("Failed to update cart item");
@@ -143,7 +162,16 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         const data = await response.json();
-        setCartCount(data.data?.totalItems || 0);
+        const newCartCount = data.data?.totalItems || 0;
+        setCartCount(newCartCount);
+
+        // Dispatch cart updated event for other components
+        window.dispatchEvent(
+          new CustomEvent("cartUpdated", {
+            detail: { totalItems: newCartCount },
+          })
+        );
+
         return data;
       } else {
         throw new Error("Failed to remove item from cart");
@@ -172,6 +200,14 @@ export const CartProvider = ({ children }) => {
 
       if (response.ok) {
         setCartCount(0);
+
+        // Dispatch cart updated event for other components
+        window.dispatchEvent(
+          new CustomEvent("cartUpdated", {
+            detail: { totalItems: 0 },
+          })
+        );
+
         return await response.json();
       } else {
         throw new Error("Failed to clear cart");
@@ -186,6 +222,24 @@ export const CartProvider = ({ children }) => {
   useEffect(() => {
     fetchCartCount();
   }, [isAuthenticated]);
+
+  // Listen for cart updates from other components
+  useEffect(() => {
+    const handleCartUpdate = (event) => {
+      if (event.detail && event.detail.totalItems !== undefined) {
+        console.log("Cart updated via custom event:", event.detail.totalItems);
+        setCartCount(event.detail.totalItems);
+      }
+    };
+
+    // Add event listener for cart updates
+    window.addEventListener("cartUpdated", handleCartUpdate);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener("cartUpdated", handleCartUpdate);
+    };
+  }, []);
 
   const value = {
     cartCount,

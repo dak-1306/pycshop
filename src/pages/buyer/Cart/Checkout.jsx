@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useCart } from "../../../context/CartContext";
+import { useToast } from "../../../hooks/useToast";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 
 const Checkout = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { clearCart } = useCart();
+  const { showSuccess, showError } = useToast();
 
   // Get cart items from location state or localStorage
   const [cartItems, setCartItems] = useState([]);
@@ -72,10 +76,14 @@ const Checkout = () => {
     setError("");
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Vui lòng đăng nhập để đặt hàng");
+        navigate("/login");
+        return;
+      }
 
-      // Create order object
+      // Create order object for API
       const orderData = {
         items: cartItems,
         address: address,
@@ -85,33 +93,64 @@ const Checkout = () => {
         shippingFee: shippingFee,
         voucherDiscount: voucherDiscount,
         total: total,
-        orderDate: new Date().toISOString(),
-        status: "pending",
       };
 
-      // Save order to localStorage (in real app, send to API)
-      const orders = JSON.parse(localStorage.getItem("orders") || "[]");
-      const newOrder = {
-        id: Date.now(),
-        ...orderData,
-      };
-      orders.push(newOrder);
-      localStorage.setItem("orders", JSON.stringify(orders));
+      console.log("Sending order data:", orderData);
 
-      // Clear cart
-      localStorage.removeItem("cartItems");
+      // Call order API
+      const response = await fetch("http://localhost:5000/orders", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderData),
+      });
 
-      setSuccess(
-        "Đặt hàng thành công! Bạn sẽ được chuyển đến trang theo dõi đơn hàng."
-      );
+      const result = await response.json();
+      console.log("Order API response:", result);
 
-      // Redirect to orders page after 2 seconds
-      setTimeout(() => {
-        navigate("/profile/orders", { state: { newOrderId: newOrder.id } });
-      }, 2000);
+      if (!response.ok) {
+        throw new Error(result.message || "Lỗi khi tạo đơn hàng");
+      }
+
+      if (result.success) {
+        // Clear cart using CartContext (also clears in backend)
+        try {
+          await clearCart();
+          console.log("Cart cleared successfully after order placement");
+        } catch (cartError) {
+          console.error("Error clearing cart:", cartError);
+          // Don't fail the order if cart clear fails
+        }
+
+        // Clear local cart items
+        localStorage.removeItem("cartItems");
+
+        const successMessage = `Đặt hàng thành công! Mã đơn hàng: ${result.data.orderId}`;
+        setSuccess(
+          successMessage + ". Bạn sẽ được chuyển đến trang theo dõi đơn hàng."
+        );
+        showSuccess(successMessage);
+
+        // Redirect to orders page after 3 seconds
+        setTimeout(() => {
+          navigate("/profile/orders", {
+            state: {
+              newOrderId: result.data.orderId,
+              orderTotal: result.data.totalAmount,
+            },
+          });
+        }, 3000);
+      } else {
+        throw new Error(result.message || "Đặt hàng không thành công");
+      }
     } catch (error) {
-      setError("Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.");
       console.error("Order error:", error);
+      const errorMessage =
+        error.message || "Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại.";
+      setError(errorMessage);
+      showError(errorMessage);
     } finally {
       setLoading(false);
     }

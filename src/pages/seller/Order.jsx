@@ -4,6 +4,7 @@ import { OrderManagement } from "../../components/common/order";
 import OrderModal from "../../components/common/modals/OrderModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
+import SellerOrderEditModal from "../../components/seller/order/SellerOrderEditModal";
 import { useOrders } from "../../hooks/seller/useOrders";
 
 // CSS animations (giữ nguyên)
@@ -86,6 +87,7 @@ const Order = () => {
           // Data
           orders={orders}
           // Actions
+          onCreateOrder={handleAddOrder}
           onViewOrder={handleViewOrder}
           onEditOrder={handleEditOrder}
           onCancelOrder={handleCancelOrder}
@@ -105,18 +107,27 @@ const Order = () => {
         />
 
         {/* Modals */}
-        <OrderModal
-          isOpen={showOrderModal}
-          onClose={handleCloseOrderModal}
-          order={currentOrder}
-          variant="seller"
-          modalMode={modalMode}
-          onSave={handleSaveOrder}
-          onUpdateStatus={(orderId, status) =>
-            console.log("Update status:", orderId, status)
-          }
-          onViewDetails={handleViewOrder}
-        />
+        {modalMode === "edit" ? (
+          <SellerOrderEditModal
+            isOpen={showOrderModal}
+            onClose={handleCloseOrderModal}
+            order={currentOrder}
+            onSave={handleSaveOrder}
+          />
+        ) : (
+          <OrderModal
+            isOpen={showOrderModal}
+            onClose={handleCloseOrderModal}
+            order={currentOrder}
+            variant="seller"
+            modalMode={modalMode}
+            onSave={handleSaveOrder}
+            onUpdateStatus={(orderId, status) =>
+              console.log("Update status:", orderId, status)
+            }
+            onViewDetails={handleViewOrder}
+          />
+        )}
 
         <OrderDetailModal
           isOpen={showDetailModal}

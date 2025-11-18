@@ -1,6 +1,7 @@
 import { sellerOrderService } from "../../lib/services/order.js";
 import useOrdersCommon from "../common/useOrders.js";
 import { SELLER_CONSTANTS } from "../../lib/constants/index.js";
+import orderService from "../../lib/services/order.js";
 
 export const useOrders = () => {
   // Use common hook with seller-specific configuration
@@ -39,7 +40,34 @@ export const useOrders = () => {
   const handleViewOrder = commonHook.handleViewOrder;
   const handleEditOrder = commonHook.handleEditOrder;
   const handleAddOrder = commonHook.handleAddOrder;
-  const handleSaveOrder = commonHook.handleSaveOrder;
+
+  // Seller-specific save order function
+  const handleSaveOrder = async (formData) => {
+    try {
+      if (commonHook.modalMode === "edit" && commonHook.selectedOrder) {
+        // Use seller order service to update
+        const response = await sellerOrderService.updateOrder(formData.id, {
+          status: formData.status,
+          notes: formData.notes,
+          shippingAddress: formData.shippingAddress,
+          trackingNumber: formData.trackingNumber,
+          estimatedDelivery: formData.estimatedDelivery,
+        });
+
+        if (response?.success) {
+          await commonHook.loadOrders(); // Reload from server
+          alert("🎉 Cập nhật đơn hàng thành công!");
+        }
+      }
+
+      commonHook.handleCloseOrderModal();
+    } catch (error) {
+      console.error("Error saving seller order:", error);
+      alert(
+        "❌ Lỗi khi cập nhật đơn hàng: " + (error.message || "Unknown error")
+      );
+    }
+  };
   const handleDeleteOrder = commonHook.handleDeleteOrder;
   const confirmDeleteOrder = commonHook.confirmDeleteOrder;
 

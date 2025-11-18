@@ -3,6 +3,8 @@ import { OrderManagement } from "../../components/common/order";
 import OrderModal from "../../components/common/modals/OrderModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
+import AdminOrderEditModal from "../../components/admin/order/AdminOrderEditModal";
+import AdminOrderDetailModal from "../../components/admin/order/AdminOrderDetailModal";
 import { useAdminOrders } from "../../hooks/admin/useAdminOrders";
 import { ADMIN_CONSTANTS } from "../../lib/constants/adminConstants";
 
@@ -80,20 +82,29 @@ const AdminOrders = () => {
         isLoading={isLoading}
       />
 
-      {/* Order Modal */}
-      <OrderModal
-        isOpen={showOrderModal}
-        onClose={() => setShowOrderModal(false)}
-        order={selectedOrder}
-        variant="admin"
-        modalMode={modalMode}
-        onSave={handleSaveOrder}
-        onUpdateStatus={handleUpdateOrderStatus}
-        onViewDetails={handleViewOrder}
-      />
+      {/* Order Modal - Conditional Rendering */}
+      {modalMode === "edit" ? (
+        <AdminOrderEditModal
+          isOpen={showOrderModal}
+          onClose={() => setShowOrderModal(false)}
+          order={selectedOrder}
+          onSave={handleSaveOrder}
+        />
+      ) : (
+        <OrderModal
+          isOpen={showOrderModal}
+          onClose={() => setShowOrderModal(false)}
+          order={selectedOrder}
+          variant="admin"
+          modalMode={modalMode}
+          onSave={handleSaveOrder}
+          onUpdateStatus={handleUpdateOrderStatus}
+          onViewDetails={handleViewOrder}
+        />
+      )}
 
       {/* Order Detail Modal */}
-      <OrderDetailModal
+      <AdminOrderDetailModal
         isOpen={showDetailModal}
         onClose={() => setShowDetailModal(false)}
         order={selectedOrder}
@@ -101,7 +112,6 @@ const AdminOrders = () => {
           setShowDetailModal(false);
           handleEditOrder(selectedOrder?.id);
         }}
-        variant="admin"
       />
 
       {/* Delete Confirmation Modal */}

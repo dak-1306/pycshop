@@ -1,7 +1,7 @@
-import OrderModel from "../models/OrderModel.js";
-import CartService from "../services/cartService.js";
-import ProductService from "../services/productService.js";
-import PromotionService from "../services/promotionService.js";
+import OrderModel from "../../models/buyer/OrderModel.js";
+import CartService from "../../services/cartService.js";
+import ProductService from "../../services/productService.js";
+import PromotionService from "../../services/promotionService.js";
 
 // Tạo đơn hàng mới
 export const createOrder = async (req, res) => {

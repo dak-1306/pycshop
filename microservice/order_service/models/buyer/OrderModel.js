@@ -1,4 +1,4 @@
-import smartDB from "../../db/index.js";
+import smartDB from "../../../db/index.js";
 
 class OrderModel {
   // Tạo đơn hàng mới với transaction

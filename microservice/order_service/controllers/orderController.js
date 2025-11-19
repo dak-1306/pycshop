@@ -1,4 +1,6 @@
 import OrderModel from "../models/OrderModel.js";
+import CartService from "../services/cartService.js";
+import ProductService from "../services/productService.js";
 
 // Tạo đơn hàng mới
 export const createOrder = async (req, res) => {
@@ -76,6 +78,51 @@ export const createOrder = async (req, res) => {
       }
     }
 
+    // Kiểm tra tồn kho trước khi tạo đơn hàng
+    console.log(
+      `[ORDER_CONTROLLER] Checking inventory availability before creating order`
+    );
+    const inventoryCheck = await ProductService.checkInventoryAvailability(
+      items
+    );
+
+    if (!inventoryCheck.success) {
+      console.error(
+        `[ORDER_CONTROLLER] Failed to check inventory:`,
+        inventoryCheck.message
+      );
+      return res.status(500).json({
+        success: false,
+        message: "Không thể kiểm tra tồn kho. Vui lòng thử lại sau.",
+        error: inventoryCheck.error,
+      });
+    }
+
+    if (!inventoryCheck.allAvailable) {
+      const unavailableItems = inventoryCheck.items.filter(
+        (item) => !item.available
+      );
+      console.warn(
+        `[ORDER_CONTROLLER] Some items are not available:`,
+        unavailableItems
+      );
+      return res.status(400).json({
+        success: false,
+        message: "Một số sản phẩm không đủ hàng hoặc không khả dụng",
+        unavailableItems: unavailableItems.map((item) => ({
+          productId: item.productId,
+          productName: item.productName,
+          reason: item.reason,
+          currentStock: item.currentStock,
+          requestedQuantity: item.requestedQuantity,
+        })),
+      });
+    }
+
+    console.log(
+      `[ORDER_CONTROLLER] All items are available. Proceeding with order creation.`
+    );
+
     // Chuẩn bị dữ liệu cho database
     const orderData = {
       userId: parseInt(userId),
@@ -99,6 +146,68 @@ export const createOrder = async (req, res) => {
     const result = await OrderModel.createOrder(orderData);
 
     console.log(`[ORDER_CONTROLLER] Order created successfully:`, result);
+
+    // Cập nhật tồn kho sau khi tạo đơn hàng thành công
+    try {
+      console.log(
+        `[ORDER_CONTROLLER] Updating inventory for order ${result.orderId}`
+      );
+      const inventoryUpdateResult =
+        await ProductService.updateInventoryAfterOrder(
+          result.orderId,
+          orderData.items
+        );
+
+      if (inventoryUpdateResult.success) {
+        console.log(
+          `[ORDER_CONTROLLER] Successfully updated inventory for order ${result.orderId}`
+        );
+      } else {
+        console.error(
+          `[ORDER_CONTROLLER] Failed to update inventory for order ${result.orderId}:`,
+          inventoryUpdateResult.message
+        );
+        // Note: We don't fail the order here as the order was already created successfully
+        // In a production system, you might want to implement compensation logic
+      }
+    } catch (inventoryError) {
+      console.error(
+        `[ORDER_CONTROLLER] Error updating inventory for order ${result.orderId}:`,
+        inventoryError
+      );
+      // Note: We don't fail the order here as the order was already created successfully
+    }
+
+    // Clear user's cart after successful order creation
+    try {
+      console.log(
+        `[ORDER_CONTROLLER] Clearing cart for user ${userId} after successful order ${result.orderId}`
+      );
+
+      // Option 1: Clear entire cart (recommended for checkout process)
+      const cartClearResult = await CartService.clearUserCart(userId);
+
+      // Option 2: Remove only ordered items (alternative approach)
+      // const productIds = items.map(item => item.id);
+      // const cartClearResult = await CartService.removeItemsFromCart(userId, productIds);
+
+      if (cartClearResult.success) {
+        console.log(
+          `[ORDER_CONTROLLER] Successfully cleared cart for user ${userId}`
+        );
+      } else {
+        console.warn(
+          `[ORDER_CONTROLLER] Failed to clear cart for user ${userId}:`,
+          cartClearResult.message
+        );
+      }
+    } catch (cartError) {
+      // Don't fail the order if cart clearing fails
+      console.error(
+        `[ORDER_CONTROLLER] Error clearing cart for user ${userId}:`,
+        cartError
+      );
+    }
 
     res.status(201).json({
       success: true,

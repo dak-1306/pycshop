@@ -6,6 +6,7 @@ import morgan from "morgan";
 
 import productRoutes from "./routes/buyer/routeGetProduct.js";
 import sellerRoutes from "./routes/seller/SellerRoutes.js";
+import inventoryRoutes from "./routes/buyer/inventoryRoutes.js";
 
 const app = express();
 
@@ -68,6 +69,7 @@ app.get("/health", (req, res) => {
 
 // Routes - Mount seller routes BEFORE buyer routes to avoid conflicts
 app.use("/seller", sellerRoutes);
+app.use("/inventory", inventoryRoutes);
 app.use("/", productRoutes);
 
 // 404 handler - sử dụng catch-all route thay vì wildcard *

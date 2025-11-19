@@ -16,10 +16,21 @@ router.get("/voucher/:code", PromotionController.getVoucherByCode);
 
 // Internal service routes (được gọi từ các service khác)
 router.post("/use", PromotionController.useVoucher);
+router.post("/use-voucher", PromotionController.useVoucherWithLogging);
+
+// User routes
+router.get("/user-history/:userId", PromotionController.getUserVoucherHistory);
 
 // Admin routes (cần admin auth middleware)
 router.post("/admin/create", PromotionController.createVoucher);
 router.get("/admin/all", PromotionController.getAllVouchers);
+router.get(
+  "/voucher-history/:voucherId",
+  PromotionController.getVoucherUsageHistory
+);
+// Statistics routes - separate routes for general and specific voucher stats
+router.get("/statistics", PromotionController.getVoucherStatistics);
+router.get("/statistics/:voucherId", PromotionController.getVoucherStatistics);
 
 // Error handling middleware
 router.use((error, req, res, next) => {

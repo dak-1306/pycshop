@@ -162,7 +162,7 @@ class PromotionModel {
     }
   }
 
-  // Sử dụng voucher (tăng số lần đã dùng)
+  // Sử dụng voucher đơn giản (chỉ cập nhật số lần đã dùng)
   static async useVoucher(voucherId) {
     try {
       console.log(`[PROMOTION_MODEL] Using voucher ${voucherId}`);
@@ -283,33 +283,6 @@ class PromotionModel {
     }
   }
 
-  // Lấy thống kê voucher (cho admin)
-  static async getVoucherStatistics() {
-    try {
-      const [stats] = await smartDB.executeRead(
-        `SELECT 
-          COUNT(*) as totalVouchers,
-          SUM(CASE WHEN NgayHetHan >= CURDATE() AND NgayHieuLuc <= CURDATE() AND SoLanDaDung < SoLanDungDuoc THEN 1 ELSE 0 END) as activeVouchers,
-          SUM(CASE WHEN NgayHetHan < CURDATE() THEN 1 ELSE 0 END) as expiredVouchers,
-          SUM(CASE WHEN SoLanDaDung >= SoLanDungDuoc THEN 1 ELSE 0 END) as usedUpVouchers,
-          SUM(SoLanDaDung) as totalUsages,
-          AVG(PhanTramGiam) as averageDiscount
-        FROM phieugiamgia`
-      );
-
-      return {
-        success: true,
-        statistics: stats[0],
-      };
-    } catch (error) {
-      console.error(
-        "[PROMOTION_MODEL] Error getting voucher statistics:",
-        error
-      );
-      throw error;
-    }
-  }
-
   // Xóa voucher (cho admin)
   static async deleteVoucher(voucherId) {
     try {
@@ -399,6 +372,433 @@ class PromotionModel {
       }
     } catch (error) {
       console.error("[PROMOTION_MODEL] Error updating voucher:", error);
+      throw error;
+    }
+  }
+
+  // Sử dụng voucher với đầy đủ thông tin đơn hàng (cập nhật cả phieugiamgia và apma)
+  static async useVoucherForOrder(voucherData) {
+    const connection = await smartDB.getConnection();
+
+    try {
+      await connection.beginTransaction();
+      console.log(
+        `[PROMOTION_MODEL] Using voucher for order ${voucherData.orderId}`
+      );
+
+      const {
+        voucherId,
+        userId,
+        orderId,
+        orderValue,
+        discountAmount,
+        voucherCode,
+      } = voucherData;
+
+      // 1. Kiểm tra voucher có còn khả dụng không
+      const [voucherRows] = await connection.execute(
+        `SELECT ID_Phieu, MaGiam, SoLanDungDuoc, SoLanDaDung, PhanTramGiam, GiaTriDonHangToiThieu
+         FROM phieugiamgia 
+         WHERE ID_Phieu = ? AND SoLanDaDung < SoLanDungDuoc`,
+        [voucherId]
+      );
+
+      if (voucherRows.length === 0) {
+        throw new Error("Voucher không khả dụng hoặc đã hết lượt sử dụng");
+      }
+
+      // 2. Cập nhật số lần đã dùng trong bảng phieugiamgia
+      const [updateResult] = await connection.execute(
+        "UPDATE phieugiamgia SET SoLanDaDung = SoLanDaDung + 1 WHERE ID_Phieu = ?",
+        [voucherId]
+      );
+
+      if (updateResult.affectedRows === 0) {
+        throw new Error("Không thể cập nhật voucher");
+      }
+
+      // 3. Ghi lịch sử sử dụng vào bảng apma
+      const [insertResult] = await connection.execute(
+        `INSERT INTO apma (ID_Phieu, ID_NguoiDung, ID_DonHang, GiaTriDonHang, SoTienGiam, ThoiGianSuDung, TrangThai, GhiChu)
+         VALUES (?, ?, ?, ?, ?, NOW(), 'used', ?)`,
+        [
+          voucherId,
+          userId,
+          orderId,
+          orderValue,
+          discountAmount,
+          `Sử dụng voucher ${voucherCode} cho đơn hàng ${orderId}`,
+        ]
+      );
+
+      await connection.commit();
+      console.log(
+        `[PROMOTION_MODEL] Successfully used voucher ${voucherCode} for order ${orderId}`
+      );
+
+      return {
+        success: true,
+        message: "Sử dụng voucher thành công",
+        data: {
+          usageId: insertResult.insertId,
+          voucherId: voucherId,
+          discountAmount: discountAmount,
+        },
+      };
+    } catch (error) {
+      await connection.rollback();
+      console.error("[PROMOTION_MODEL] Error using voucher for order:", error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // Rollback voucher usage (trong trường hợp hủy đơn hàng)
+  static async rollbackVoucherUsage(orderId) {
+    const connection = await smartDB.getConnection();
+
+    try {
+      await connection.beginTransaction();
+      console.log(
+        `[PROMOTION_MODEL] Rolling back voucher usage for order ${orderId}`
+      );
+
+      // 1. Tìm voucher đã sử dụng cho đơn hàng này
+      const [usageRows] = await connection.execute(
+        "SELECT ID_Phieu, ID_ApMa FROM apma WHERE ID_DonHang = ? AND TrangThai = 'used'",
+        [orderId]
+      );
+
+      if (usageRows.length === 0) {
+        console.log(
+          `[PROMOTION_MODEL] No voucher usage found for order ${orderId}`
+        );
+        await connection.commit();
+        return { success: true, message: "No voucher to rollback" };
+      }
+
+      for (const usage of usageRows) {
+        // 2. Giảm số lần đã dùng trong bảng phieugiamgia
+        await connection.execute(
+          "UPDATE phieugiamgia SET SoLanDaDung = SoLanDaDung - 1 WHERE ID_Phieu = ?",
+          [usage.ID_Phieu]
+        );
+
+        // 3. Cập nhật trạng thái trong bảng apma
+        await connection.execute(
+          "UPDATE apma SET TrangThai = 'cancelled', GhiChu = CONCAT(IFNULL(GhiChu, ''), ' - Đã hủy do hủy đơn hàng') WHERE ID_ApMa = ?",
+          [usage.ID_ApMa]
+        );
+
+        console.log(
+          `[PROMOTION_MODEL] Rolled back voucher ${usage.ID_Phieu} for order ${orderId}`
+        );
+      }
+
+      await connection.commit();
+
+      return {
+        success: true,
+        message: "Rollback voucher usage completed",
+        rolledBackCount: usageRows.length,
+      };
+    } catch (error) {
+      await connection.rollback();
+      console.error(
+        "[PROMOTION_MODEL] Error rolling back voucher usage:",
+        error
+      );
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // Kiểm tra user đã sử dụng voucher này bao nhiều lần
+  static async getUserVoucherUsageCount(userId, voucherId) {
+    try {
+      const [countRows] = await smartDB.executeRead(
+        "SELECT COUNT(*) as usageCount FROM apma WHERE ID_NguoiDung = ? AND ID_Phieu = ?",
+        [userId, voucherId]
+      );
+
+      return countRows[0].usageCount;
+    } catch (error) {
+      console.error(
+        "[PROMOTION_MODEL] Error getting user voucher usage count:",
+        error
+      );
+      throw error;
+    }
+  }
+
+  // Ghi log sử dụng voucher vào bảng apma và cập nhật số lần đã dùng
+  static async useVoucherWithLogging(voucherId, userId, orderId) {
+    const connection = await smartDB.getConnection();
+
+    try {
+      await connection.beginTransaction();
+      console.log(
+        `[PROMOTION_MODEL] Starting transaction to use voucher ${voucherId} for order ${orderId}`
+      );
+
+      // 1. Kiểm tra voucher có còn hiệu lực và còn lượt sử dụng không
+      const [voucherRows] = await connection.execute(
+        `SELECT ID_Phieu, MaGiam, SoLanDungDuoc, SoLanDaDung, NgayHieuLuc, NgayHetHan 
+         FROM phieugiamgia 
+         WHERE ID_Phieu = ? AND NgayHieuLuc <= NOW() AND NgayHetHan >= NOW()`,
+        [voucherId]
+      );
+
+      if (voucherRows.length === 0) {
+        throw new Error("Voucher not found or expired");
+      }
+
+      const voucher = voucherRows[0];
+
+      if (voucher.SoLanDaDung >= voucher.SoLanDungDuoc) {
+        throw new Error("Voucher usage limit exceeded");
+      }
+
+      // 2. Kiểm tra user đã sử dụng voucher này cho đơn hàng này chưa
+      const [existingUsage] = await connection.execute(
+        "SELECT ID_ApMa FROM apma WHERE ID_Phieu = ? AND ID_NguoiDung = ? AND ID_DonHang = ?",
+        [voucherId, userId, orderId]
+      );
+
+      if (existingUsage.length > 0) {
+        throw new Error("Voucher already used for this order");
+      }
+
+      // 3. Ghi log vào bảng apma
+      await connection.execute(
+        "INSERT INTO apma (ID_Phieu, ID_NguoiDung, ID_DonHang, SuDungLuc) VALUES (?, ?, ?, NOW())",
+        [voucherId, userId, orderId]
+      );
+
+      // 4. Cập nhật số lần đã dùng trong bảng phieugiamgia
+      await connection.execute(
+        "UPDATE phieugiamgia SET SoLanDaDung = SoLanDaDung + 1 WHERE ID_Phieu = ?",
+        [voucherId]
+      );
+
+      await connection.commit();
+      console.log(
+        `[PROMOTION_MODEL] Successfully used voucher ${voucher.MaGiam} for order ${orderId}`
+      );
+
+      return {
+        success: true,
+        message: "Voucher used successfully",
+        data: {
+          voucherId,
+          voucherCode: voucher.MaGiam,
+          userId,
+          orderId,
+          usedAt: new Date(),
+        },
+      };
+    } catch (error) {
+      await connection.rollback();
+      console.error("[PROMOTION_MODEL] Error using voucher:", error);
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
+
+  // Lấy lịch sử sử dụng voucher của user
+  static async getUserVoucherHistory(userId, page = 1, limit = 20) {
+    try {
+      const offset = (page - 1) * limit;
+
+      const [historyRows] = await smartDB.executeRead(
+        `SELECT 
+          a.ID_ApMa,
+          a.ID_DonHang,
+          a.SuDungLuc,
+          p.MaGiam,
+          p.PhanTramGiam,
+          dh.TongGia as orderValue
+        FROM apma a
+        LEFT JOIN phieugiamgia p ON a.ID_Phieu = p.ID_Phieu
+        LEFT JOIN donhang dh ON a.ID_DonHang = dh.ID_DonHang
+        WHERE a.ID_NguoiDung = ?
+        ORDER BY a.SuDungLuc DESC
+        LIMIT ? OFFSET ?`,
+        [userId, limit, offset]
+      );
+
+      // Đếm tổng số records
+      const [countResult] = await smartDB.executeRead(
+        "SELECT COUNT(*) as total FROM apma WHERE ID_NguoiDung = ?",
+        [userId]
+      );
+
+      const total = countResult[0].total;
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        success: true,
+        data: historyRows.map((row) => ({
+          id: row.ID_ApMa,
+          orderId: row.ID_DonHang,
+          voucherCode: row.MaGiam,
+          discountPercent: parseFloat(row.PhanTramGiam),
+          orderValue: parseFloat(row.orderValue),
+          discountAmount: Math.floor(
+            (parseFloat(row.orderValue) * parseFloat(row.PhanTramGiam)) / 100
+          ),
+          usedAt: row.SuDungLuc,
+        })),
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: parseInt(total),
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+    } catch (error) {
+      console.error(
+        "[PROMOTION_MODEL] Error getting user voucher history:",
+        error
+      );
+      throw error;
+    }
+  }
+
+  // Lấy lịch sử sử dụng của một voucher cụ thể
+  static async getVoucherUsageHistory(voucherId, page = 1, limit = 20) {
+    try {
+      const offset = (page - 1) * limit;
+
+      const [historyRows] = await smartDB.executeRead(
+        `SELECT 
+          a.ID_ApMa,
+          a.ID_NguoiDung,
+          a.ID_DonHang,
+          a.SuDungLuc,
+          nd.HoTen as userName,
+          dh.TongGia as orderValue
+        FROM apma a
+        LEFT JOIN nguoidung nd ON a.ID_NguoiDung = nd.ID_NguoiDung
+        LEFT JOIN donhang dh ON a.ID_DonHang = dh.ID_DonHang
+        WHERE a.ID_Phieu = ?
+        ORDER BY a.SuDungLuc DESC
+        LIMIT ? OFFSET ?`,
+        [voucherId, limit, offset]
+      );
+
+      // Đếm tổng số records
+      const [countResult] = await smartDB.executeRead(
+        "SELECT COUNT(*) as total FROM apma WHERE ID_Phieu = ?",
+        [voucherId]
+      );
+
+      const total = countResult[0].total;
+      const totalPages = Math.ceil(total / limit);
+
+      return {
+        success: true,
+        data: historyRows.map((row) => ({
+          id: row.ID_ApMa,
+          userId: row.ID_NguoiDung,
+          userName: row.userName,
+          orderId: row.ID_DonHang,
+          orderValue: parseFloat(row.orderValue),
+          usedAt: row.SuDungLuc,
+        })),
+        pagination: {
+          page: parseInt(page),
+          limit: parseInt(limit),
+          total: parseInt(total),
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+    } catch (error) {
+      console.error(
+        "[PROMOTION_MODEL] Error getting voucher usage history:",
+        error
+      );
+      throw error;
+    }
+  }
+
+  // Kiểm tra voucher đã được sử dụng cho đơn hàng cụ thể chưa
+  static async isVoucherUsedForOrder(voucherId, orderId) {
+    try {
+      const [rows] = await smartDB.executeRead(
+        "SELECT ID_ApMa FROM apma WHERE ID_Phieu = ? AND ID_DonHang = ?",
+        [voucherId, orderId]
+      );
+
+      return rows.length > 0;
+    } catch (error) {
+      console.error(
+        "[PROMOTION_MODEL] Error checking voucher usage for order:",
+        error
+      );
+      throw error;
+    }
+  }
+
+  // Lấy thống kê tổng quan về voucher
+  static async getVoucherStatistics(voucherId = null) {
+    try {
+      let query, params;
+
+      if (voucherId) {
+        // Thống kê cho voucher cụ thể
+        query = `
+          SELECT 
+            p.ID_Phieu,
+            p.MaGiam,
+            p.SoLanDungDuoc,
+            p.SoLanDaDung,
+            (p.SoLanDungDuoc - p.SoLanDaDung) as remainingUses,
+            COUNT(a.ID_ApMa) as actualUsageCount,
+            COUNT(DISTINCT a.ID_NguoiDung) as uniqueUsers,
+            COALESCE(SUM(dh.TongGia), 0) as totalOrderValue,
+            COALESCE(AVG(dh.TongGia), 0) as avgOrderValue
+          FROM phieugiamgia p
+          LEFT JOIN apma a ON p.ID_Phieu = a.ID_Phieu
+          LEFT JOIN donhang dh ON a.ID_DonHang = dh.ID_DonHang
+          WHERE p.ID_Phieu = ?
+          GROUP BY p.ID_Phieu
+        `;
+        params = [voucherId];
+      } else {
+        // Thống kê tổng quan
+        query = `
+          SELECT 
+            COUNT(DISTINCT p.ID_Phieu) as totalVouchers,
+            COUNT(DISTINCT a.ID_ApMa) as totalUsages,
+            COUNT(DISTINCT a.ID_NguoiDung) as totalUniqueUsers,
+            COALESCE(SUM(dh.TongGia), 0) as totalOrderValue,
+            COALESCE(AVG(dh.TongGia), 0) as avgOrderValue
+          FROM phieugiamgia p
+          LEFT JOIN apma a ON p.ID_Phieu = a.ID_Phieu
+          LEFT JOIN donhang dh ON a.ID_DonHang = dh.ID_DonHang
+        `;
+        params = [];
+      }
+
+      const [rows] = await smartDB.executeRead(query, params);
+
+      return {
+        success: true,
+        data: rows[0],
+      };
+    } catch (error) {
+      console.error(
+        "[PROMOTION_MODEL] Error getting voucher statistics:",
+        error
+      );
       throw error;
     }
   }

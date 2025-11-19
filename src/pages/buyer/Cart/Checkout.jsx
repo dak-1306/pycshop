@@ -165,6 +165,16 @@ const Checkout = () => {
         shippingFee: shippingFee,
         voucherDiscount: voucherDiscount,
         total: total,
+        // Thêm thông tin voucher đầy đủ
+        voucher: selectedVoucher
+          ? {
+              id: selectedVoucher.id,
+              code: selectedVoucher.code,
+              discountPercent: selectedVoucher.discountPercent,
+              discountAmount: selectedVoucher.discountAmount,
+              minOrderValue: selectedVoucher.minOrderValue,
+            }
+          : null,
       };
 
       console.log("Sending order data:", orderData);

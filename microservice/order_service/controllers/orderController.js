@@ -1,6 +1,7 @@
 import OrderModel from "../models/OrderModel.js";
 import CartService from "../services/cartService.js";
 import ProductService from "../services/productService.js";
+import PromotionService from "../services/promotionService.js";
 
 // Tạo đơn hàng mới
 export const createOrder = async (req, res) => {
@@ -24,6 +25,8 @@ export const createOrder = async (req, res) => {
       shippingFee,
       voucherDiscount,
       total,
+      // Thông tin voucher từ frontend
+      voucher,
     } = req.body;
 
     console.log(`[ORDER_CONTROLLER] Processing order:`, {
@@ -31,6 +34,9 @@ export const createOrder = async (req, res) => {
       itemCount: items?.length || 0,
       total,
       paymentMethod,
+      hasVoucher: !!voucher,
+      voucherCode: voucher?.code,
+      voucherDiscount,
     });
 
     // Validation cơ bản
@@ -76,6 +82,45 @@ export const createOrder = async (req, res) => {
           message: "Thông tin sản phẩm không hợp lệ",
         });
       }
+    }
+
+    // Validate voucher nếu có
+    let validatedVoucher = null;
+    if (voucher && voucher.code) {
+      console.log(`[ORDER_CONTROLLER] Validating voucher: ${voucher.code}`);
+      const voucherValidation = await PromotionService.validateVoucher(
+        voucher.code,
+        subtotal
+      );
+
+      if (!voucherValidation.success) {
+        console.error(
+          `[ORDER_CONTROLLER] Failed to validate voucher:`,
+          voucherValidation.message
+        );
+        return res.status(500).json({
+          success: false,
+          message: "Không thể xác thực mã giảm giá. Vui lòng thử lại sau.",
+          error: voucherValidation.error,
+        });
+      }
+
+      if (!voucherValidation.valid) {
+        console.warn(`[ORDER_CONTROLLER] Invalid voucher:`, voucher.code);
+        return res.status(400).json({
+          success: false,
+          message:
+            voucherValidation.message ||
+            "Mã giảm giá không hợp lệ hoặc đã hết hạn",
+        });
+      }
+
+      validatedVoucher = voucherValidation.data.voucher;
+      console.log(`[ORDER_CONTROLLER] Voucher validated successfully:`, {
+        code: validatedVoucher.code,
+        discount: validatedVoucher.discountPercent,
+        minOrder: validatedVoucher.minOrderValue,
+      });
     }
 
     // Kiểm tra tồn kho trước khi tạo đơn hàng
@@ -176,6 +221,38 @@ export const createOrder = async (req, res) => {
         inventoryError
       );
       // Note: We don't fail the order here as the order was already created successfully
+    }
+
+    // Áp dụng voucher sau khi tạo đơn hàng thành công
+    if (validatedVoucher) {
+      try {
+        console.log(
+          `[ORDER_CONTROLLER] Applying voucher ${validatedVoucher.code} for order ${result.orderId}`
+        );
+        const voucherResult = await PromotionService.useVoucher(
+          validatedVoucher.id,
+          userId,
+          result.orderId
+        );
+
+        if (voucherResult.success) {
+          console.log(
+            `[ORDER_CONTROLLER] Successfully applied voucher ${validatedVoucher.code}`
+          );
+        } else {
+          console.error(
+            `[ORDER_CONTROLLER] Failed to apply voucher ${validatedVoucher.code}:`,
+            voucherResult.message
+          );
+          // Note: We don't fail the order here as the order was already created successfully
+        }
+      } catch (voucherError) {
+        console.error(
+          `[ORDER_CONTROLLER] Error applying voucher:`,
+          voucherError
+        );
+        // Note: We don't fail the order here as the order was already created successfully
+      }
     }
 
     // Clear user's cart after successful order creation

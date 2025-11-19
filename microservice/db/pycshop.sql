@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th10 17, 2025 lúc 03:49 PM
+-- Thời gian đã tạo: Th10 19, 2025 lúc 03:00 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -246,6 +246,18 @@ CREATE TABLE `chitietdonhang` (
   `SoLuong` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `chitietdonhang`
+--
+
+INSERT INTO `chitietdonhang` (`ID_ChiTietDH`, `ID_DonHang`, `ID_SanPham`, `DonGia`, `SoLuong`) VALUES
+(4, 4, 17, 800000.00, 1),
+(5, 5, 17, 800000.00, 1),
+(6, 5, 19, 50000.00, 1),
+(7, 6, 15, 400000.00, 1),
+(8, 6, 35, 15530999.00, 1),
+(9, 7, 35, 15530999.00, 1);
+
 -- --------------------------------------------------------
 
 --
@@ -466,6 +478,16 @@ CREATE TABLE `donhang` (
   `TrangThai` enum('pending','confirmed','shipped','cancelled') NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Đang đổ dữ liệu cho bảng `donhang`
+--
+
+INSERT INTO `donhang` (`ID_DonHang`, `ID_NguoiMua`, `TongGia`, `ThoiGianTao`, `TrangThai`) VALUES
+(4, 3, 830000.00, '2025-11-19 10:47:36', 'pending'),
+(5, 3, 880000.00, '2025-11-19 12:04:23', 'pending'),
+(6, 3, 15960999.00, '2025-11-19 13:01:55', 'pending'),
+(7, 3, 15560999.00, '2025-11-19 13:21:03', 'pending');
+
 -- --------------------------------------------------------
 
 --
@@ -476,10 +498,20 @@ CREATE TABLE `giaohang` (
   `ID_GiaoHang` bigint(20) NOT NULL,
   `ID_DonHang` bigint(20) NOT NULL,
   `DiaChi` text NOT NULL,
-  `TrangThai` enum('undelivery','out_for_delivery','delivered') DEFAULT NULL,
-  `NgayVanChuyen` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `NgayGiaoToi` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00'
+  `TrangThai` enum('undelivery','out_for_delivery','delivered') NOT NULL,
+  `NgayVanChuyen` timestamp NULL DEFAULT NULL,
+  `NgayGiaoToi` timestamp NULL DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `giaohang`
+--
+
+INSERT INTO `giaohang` (`ID_GiaoHang`, `ID_DonHang`, `DiaChi`, `TrangThai`, `NgayVanChuyen`, `NgayGiaoToi`) VALUES
+(4, 4, 'Nguyễn Văn Test, 0123456789, 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'undelivery', NULL, NULL),
+(5, 5, 'Nguyễn Văn Test, 0123456789, 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'undelivery', NULL, NULL),
+(6, 6, 'Nguyễn Văn Test, 0123456789, 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'undelivery', NULL, NULL),
+(7, 7, 'Nguyễn Văn Test, 0123456789, 123 Nguyễn Huệ, Phường Bến Nghé, Quận 1, TP.HCM', 'undelivery', NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -499,7 +531,9 @@ CREATE TABLE `giohang` (
 --
 
 INSERT INTO `giohang` (`ID_GioHang`, `ID_NguoiMua`, `SoLuong`, `ThoiGianTao`) VALUES
-(1, 4, 9, '2025-11-17 14:02:29');
+(1, 4, 9, '2025-11-19 13:55:40'),
+(2, 3, 0, '2025-11-19 13:51:03'),
+(3, 5, 0, '2025-11-18 11:35:46');
 
 -- --------------------------------------------------------
 
@@ -570,7 +604,8 @@ INSERT INTO `nhatkythaydoitonkho` (`ID_NhatKy`, `ID_SanPham`, `SoLuongThayDoi`, 
 (4, 26, 5, 'import', '2025-10-04 07:09:38'),
 (5, 26, 10, 'import', '2025-10-04 07:12:59'),
 (6, 25, 18, 'import', '2025-10-05 09:41:19'),
-(7, 4, 18, 'import', '2025-10-08 16:09:01');
+(7, 4, 18, 'import', '2025-10-08 16:09:01'),
+(8, 35, 1, 'export', '2025-11-19 13:21:03');
 
 -- --------------------------------------------------------
 
@@ -585,9 +620,16 @@ CREATE TABLE `phieugiamgia` (
   `SoLanDungDuoc` int(11) NOT NULL DEFAULT 1,
   `SoLanDaDung` int(11) NOT NULL DEFAULT 0,
   `GiaTriDonHangToiThieu` decimal(12,2) DEFAULT NULL,
-  `NgayHieuLuc` date NOT NULL,
-  `NgayHetHan` date NOT NULL
+  `NgayHieuLuc` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `NgayHetHan` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `phieugiamgia`
+--
+
+INSERT INTO `phieugiamgia` (`ID_Phieu`, `MaGiam`, `PhanTramGiam`, `SoLanDungDuoc`, `SoLanDaDung`, `GiaTriDonHangToiThieu`, `NgayHieuLuc`, `NgayHetHan`) VALUES
+(1, 'TET2026', 10.00, 100, 0, 500000.00, '2025-11-18 14:19:58', '2026-02-01 17:00:00');
 
 -- --------------------------------------------------------
 
@@ -698,7 +740,7 @@ INSERT INTO `sanpham` (`ID_SanPham`, `ID_NguoiBan`, `ID_DanhMuc`, `TenSanPham`, 
 (32, 3, 18, 'Sách lớp 2', 'omg', 300000.00, 30, 'active', '2025-10-08 17:50:56'),
 (33, 4, 1, 'Áo thun xám', 'Chất liệu cotton, mát mẻ', 159000.00, 100, 'active', '2025-10-08 14:37:14'),
 (34, 4, 1, 'Áo thun xanh', 'Áo hot trend cho mùa hè', 199000.00, 100, 'active', '2025-10-08 17:36:31'),
-(35, 5, 11, 'Dàn pc gaming', 'Chống nước, chơi game siêu mượt', 15530999.00, 60, 'active', '2025-10-10 09:00:35');
+(35, 5, 11, 'Dàn pc gaming', 'Chống nước, chơi game siêu mượt', 15530999.00, 59, 'active', '2025-11-19 13:21:03');
 
 -- --------------------------------------------------------
 
@@ -719,15 +761,15 @@ CREATE TABLE `sanphamtronggio` (
 --
 
 INSERT INTO `sanphamtronggio` (`ID_MatHang`, `ID_GioHang`, `ID_SanPham`, `SoLuong`, `ThemLuc`) VALUES
-(146, 1, 5, 1, '2025-11-17 14:02:29'),
-(147, 1, 6, 1, '2025-11-17 14:02:29'),
-(148, 1, 9, 1, '2025-11-17 14:02:29'),
-(149, 1, 11, 1, '2025-11-17 14:02:29'),
-(150, 1, 12, 2, '2025-11-17 14:02:29'),
-(151, 1, 13, 1, '2025-11-17 14:02:29'),
-(152, 1, 15, 2, '2025-11-17 14:02:29'),
-(153, 1, 17, 1, '2025-11-17 14:02:29'),
-(154, 1, 32, 1, '2025-11-17 14:02:29');
+(942, 1, 5, 1, '2025-11-19 13:55:40'),
+(943, 1, 6, 1, '2025-11-19 13:55:40'),
+(944, 1, 9, 1, '2025-11-19 13:55:40'),
+(945, 1, 11, 1, '2025-11-19 13:55:40'),
+(946, 1, 12, 2, '2025-11-19 13:55:40'),
+(947, 1, 13, 1, '2025-11-19 13:55:40'),
+(948, 1, 15, 2, '2025-11-19 13:55:40'),
+(949, 1, 17, 1, '2025-11-19 13:55:40'),
+(950, 1, 32, 1, '2025-11-19 13:55:40');
 
 -- --------------------------------------------------------
 
@@ -742,6 +784,16 @@ CREATE TABLE `thanhtoan` (
   `TrangThai` enum('paid','unpaid') NOT NULL DEFAULT 'unpaid',
   `ThoiGianTao` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `thanhtoan`
+--
+
+INSERT INTO `thanhtoan` (`ID_ThanhToan`, `ID_DonHang`, `PhuongThuc`, `TrangThai`, `ThoiGianTao`) VALUES
+(4, 4, 'COD', 'unpaid', '2025-11-19 10:47:36'),
+(5, 5, 'COD', 'unpaid', '2025-11-19 12:04:23'),
+(6, 6, 'COD', 'unpaid', '2025-11-19 13:01:55'),
+(7, 7, 'COD', 'unpaid', '2025-11-19 13:21:03');
 
 -- --------------------------------------------------------
 
@@ -994,7 +1046,7 @@ ALTER TABLE `baocao`
 -- AUTO_INCREMENT cho bảng `chitietdonhang`
 --
 ALTER TABLE `chitietdonhang`
-  MODIFY `ID_ChiTietDH` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_ChiTietDH` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT cho bảng `cuahang`
@@ -1018,19 +1070,19 @@ ALTER TABLE `danhmuc`
 -- AUTO_INCREMENT cho bảng `donhang`
 --
 ALTER TABLE `donhang`
-  MODIFY `ID_DonHang` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_DonHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `giaohang`
 --
 ALTER TABLE `giaohang`
-  MODIFY `ID_GiaoHang` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_GiaoHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `giohang`
 --
 ALTER TABLE `giohang`
-  MODIFY `ID_GioHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `ID_GioHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT cho bảng `hoithoai`
@@ -1048,13 +1100,13 @@ ALTER TABLE `nguoidung`
 -- AUTO_INCREMENT cho bảng `nhatkythaydoitonkho`
 --
 ALTER TABLE `nhatkythaydoitonkho`
-  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `ID_NhatKy` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT cho bảng `phieugiamgia`
 --
 ALTER TABLE `phieugiamgia`
-  MODIFY `ID_Phieu` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_Phieu` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `sanpham`
@@ -1066,13 +1118,13 @@ ALTER TABLE `sanpham`
 -- AUTO_INCREMENT cho bảng `sanphamtronggio`
 --
 ALTER TABLE `sanphamtronggio`
-  MODIFY `ID_MatHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=155;
+  MODIFY `ID_MatHang` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=951;
 
 --
 -- AUTO_INCREMENT cho bảng `thanhtoan`
 --
 ALTER TABLE `thanhtoan`
-  MODIFY `ID_ThanhToan` bigint(20) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID_ThanhToan` bigint(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT cho bảng `thongbao`

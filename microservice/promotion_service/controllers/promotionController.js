@@ -321,6 +321,183 @@ class PromotionController {
     }
   }
 
+  // [POST] /api/promotions/use-voucher
+  // Sử dụng voucher và ghi log (được gọi từ order service)
+  static async useVoucherWithLogging(req, res) {
+    try {
+      const { voucherId, userId, orderId } = req.body;
+
+      console.log(
+        `[PROMOTION_CONTROLLER] Using voucher ${voucherId} for order ${orderId} by user ${userId}`
+      );
+
+      // Validation
+      if (!voucherId || !userId || !orderId) {
+        return res.status(400).json({
+          success: false,
+          message: "Thiếu thông tin: voucherId, userId, orderId",
+        });
+      }
+
+      const result = await PromotionModel.useVoucherWithLogging(
+        voucherId,
+        userId,
+        orderId
+      );
+
+      res.json({
+        success: true,
+        message: "Áp dụng voucher thành công",
+        data: result.data,
+      });
+    } catch (error) {
+      console.error("[PROMOTION_CONTROLLER] Error using voucher:", error);
+
+      let statusCode = 500;
+      let message = "Lỗi khi áp dụng voucher";
+
+      if (
+        error.message.includes("not found") ||
+        error.message.includes("expired")
+      ) {
+        statusCode = 404;
+        message = "Voucher không tồn tại hoặc đã hết hạn";
+      } else if (error.message.includes("limit exceeded")) {
+        statusCode = 400;
+        message = "Voucher đã hết lượt sử dụng";
+      } else if (error.message.includes("already used")) {
+        statusCode = 400;
+        message = "Voucher đã được sử dụng cho đơn hàng này";
+      }
+
+      res.status(statusCode).json({
+        success: false,
+        message,
+        error: error.message,
+      });
+    }
+  }
+
+  // [GET] /api/promotions/user-history/:userId
+  // Lấy lịch sử sử dụng voucher của user
+  static async getUserVoucherHistory(req, res) {
+    try {
+      const { userId } = req.params;
+      const { page = 1, limit = 20 } = req.query;
+
+      console.log(
+        `[PROMOTION_CONTROLLER] Getting voucher history for user ${userId}`
+      );
+
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: "User ID is required",
+        });
+      }
+
+      const result = await PromotionModel.getUserVoucherHistory(
+        userId,
+        parseInt(page),
+        parseInt(limit)
+      );
+
+      res.json({
+        success: true,
+        data: result.data,
+        pagination: result.pagination,
+        message: `Lấy lịch sử sử dụng voucher thành công`,
+      });
+    } catch (error) {
+      console.error(
+        "[PROMOTION_CONTROLLER] Error getting user voucher history:",
+        error
+      );
+      res.status(500).json({
+        success: false,
+        message: "Lỗi khi lấy lịch sử sử dụng voucher",
+        error: error.message,
+      });
+    }
+  }
+
+  // [GET] /api/promotions/voucher-history/:voucherId
+  // Lấy lịch sử sử dụng của voucher cụ thể (cho admin)
+  static async getVoucherUsageHistory(req, res) {
+    try {
+      const { voucherId } = req.params;
+      const { page = 1, limit = 20 } = req.query;
+
+      console.log(
+        `[PROMOTION_CONTROLLER] Getting usage history for voucher ${voucherId}`
+      );
+
+      if (!voucherId) {
+        return res.status(400).json({
+          success: false,
+          message: "Voucher ID is required",
+        });
+      }
+
+      const result = await PromotionModel.getVoucherUsageHistory(
+        voucherId,
+        parseInt(page),
+        parseInt(limit)
+      );
+
+      res.json({
+        success: true,
+        data: result.data,
+        pagination: result.pagination,
+        message: `Lấy lịch sử sử dụng voucher thành công`,
+      });
+    } catch (error) {
+      console.error(
+        "[PROMOTION_CONTROLLER] Error getting voucher usage history:",
+        error
+      );
+      res.status(500).json({
+        success: false,
+        message: "Lỗi khi lấy lịch sử sử dụng voucher",
+        error: error.message,
+      });
+    }
+  }
+
+  // [GET] /api/promotions/statistics/:voucherId?
+  // Lấy thống kê voucher
+  static async getVoucherStatistics(req, res) {
+    try {
+      const { voucherId } = req.params;
+
+      console.log(
+        `[PROMOTION_CONTROLLER] Getting statistics for voucher ${
+          voucherId || "all"
+        }`
+      );
+
+      const result = await PromotionModel.getVoucherStatistics(
+        voucherId || null
+      );
+
+      res.json({
+        success: true,
+        data: result.data,
+        message: "Lấy thống kê voucher thành công",
+      });
+    } catch (error) {
+      console.error(
+        "[PROMOTION_CONTROLLER] Error getting voucher statistics:",
+        error
+      );
+      res.status(500).json({
+        success: false,
+        message: "Lỗi khi lấy thống kê voucher",
+        error: error.message,
+      });
+    }
+  }
+
   // [GET] /api/promotions/health
   // Health check endpoint
   static async healthCheck(req, res) {

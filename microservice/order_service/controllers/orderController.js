@@ -380,3 +380,53 @@ export const getUserOrders = async (req, res) => {
     });
   }
 };
+
+// Hủy đơn hàng
+export const cancelOrder = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const userId = req.headers["x-user-id"];
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication required",
+      });
+    }
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: "Order ID is required",
+      });
+    }
+
+    console.log(
+      `[ORDER_CONTROLLER] Cancelling order ${orderId} for user ${userId}`
+    );
+
+    const result = await OrderModel.cancelOrder(orderId, userId);
+
+    if (!result.success) {
+      return res.status(400).json({
+        success: false,
+        message: result.message,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: result.message,
+      data: {
+        orderId: result.orderId,
+      },
+    });
+  } catch (error) {
+    console.error("[ORDER_CONTROLLER] Error cancelling order:", error);
+    res.status(500).json({
+      success: false,
+      message: "Lỗi khi hủy đơn hàng",
+      error: error.message,
+    });
+  }
+};

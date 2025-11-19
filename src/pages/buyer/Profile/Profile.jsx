@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { useToast } from "../../../hooks/useToast";
 import UserService from "../../../services/userService";
 import OrderService from "../../../services/orderService";
 import Header from "../../../components/buyers/Header";
@@ -11,6 +12,7 @@ import "../../../styles/components/OrderDetailModal.css";
 
 const Profile = () => {
   const { user, isAuthenticated, loading, login } = useAuth();
+  const { showSuccess, showError, showWarning } = useToast();
 
   const [activeTab, setActiveTab] = useState("profile");
   const [editMode, setEditMode] = useState(false);
@@ -212,6 +214,54 @@ const Profile = () => {
   const handleCloseOrderDetail = () => {
     setShowOrderDetail(false);
     setSelectedOrderId(null);
+  };
+
+  // Handle cancel order
+  const handleCancelOrder = async (orderId) => {
+    // Show confirmation dialog
+    // const confirmed = window.confirm(
+    //   "Bạn có chắc chắn muốn hủy đơn hàng này? Đơn hàng sẽ được chuyển sang trạng thái đã hủy."
+    // );
+
+    // if (!confirmed) {
+    //   return;
+    // }
+
+    try {
+      setOrdersLoading(true);
+      console.log(`[PROFILE] Cancelling order ${orderId}`);
+
+      const result = await OrderService.cancelOrder(orderId);
+
+      if (result.success) {
+        showSuccess(`Đã hủy đơn hàng #${orderId} thành công!`);
+
+        // Update the order status to cancelled in local state
+        setOrders((prevOrders) =>
+          prevOrders.map((order) =>
+            order.orderId === orderId
+              ? { ...order, status: "cancelled" }
+              : order
+          )
+        );
+
+        // Close order detail modal if it's showing the cancelled order
+        if (selectedOrderId === orderId) {
+          handleCloseOrderDetail();
+        }
+      } else {
+        showError(
+          result.message || "Không thể hủy đơn hàng. Vui lòng thử lại."
+        );
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      showError(
+        error.message || "Có lỗi xảy ra khi hủy đơn hàng. Vui lòng thử lại."
+      );
+    } finally {
+      setOrdersLoading(false);
+    }
   };
 
   // Filter orders based on status
@@ -714,12 +764,11 @@ const Profile = () => {
                             {order.status === "pending" && (
                               <button
                                 className="btn-outline"
-                                onClick={() => {
-                                  console.log("Cancel order:", order.orderId);
-                                }}
+                                onClick={() => handleCancelOrder(order.orderId)}
+                                disabled={ordersLoading}
                               >
                                 <i className="fas fa-times"></i>
-                                Hủy đơn
+                                {ordersLoading ? "Đang hủy..." : "Hủy đơn"}
                               </button>
                             )}
 

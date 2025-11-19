@@ -3,6 +3,7 @@ import {
   createOrder,
   getOrderById,
   getUserOrders,
+  cancelOrder,
 } from "../controllers/orderController.js";
 
 const router = express.Router();
@@ -47,6 +48,9 @@ router.post("/", createOrder);
 
 // Lấy danh sách đơn hàng của user
 router.get("/", getUserOrders);
+
+// Hủy đơn hàng (cập nhật trạng thái thành cancelled)
+router.delete("/:orderId", cancelOrder);
 
 // Lấy thông tin chi tiết đơn hàng (must be last)
 router.get("/:orderId", getOrderById);

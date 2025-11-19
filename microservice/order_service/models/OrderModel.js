@@ -197,6 +197,62 @@ class OrderModel {
     }
   }
 
+  // Hủy đơn hàng (cập nhật trạng thái thành cancelled)
+  static async cancelOrder(orderId, userId = null) {
+    try {
+      console.log(
+        `[ORDER_MODEL] Cancelling order ${orderId} for user ${
+          userId || "admin"
+        }`
+      );
+
+      // Kiểm tra đơn hàng có tồn tại và thuộc về user không (nếu có userId)
+      let checkQuery = `SELECT ID_DonHang, ID_NguoiMua, TrangThai FROM donhang WHERE ID_DonHang = ?`;
+      const checkParams = [orderId];
+
+      if (userId) {
+        checkQuery += ` AND ID_NguoiMua = ?`;
+        checkParams.push(userId);
+      }
+
+      const [orderRows] = await smartDB.execute(checkQuery, checkParams);
+
+      if (orderRows.length === 0) {
+        return {
+          success: false,
+          message:
+            "Không tìm thấy đơn hàng hoặc bạn không có quyền hủy đơn hàng này",
+        };
+      }
+
+      const order = orderRows[0];
+
+      // Kiểm tra trạng thái đơn hàng (chỉ cho phép hủy đơn hàng pending)
+      if (order.TrangThai !== "pending") {
+        return {
+          success: false,
+          message: "Chỉ có thể hủy đơn hàng đang chờ xác nhận",
+        };
+      }
+
+      // Cập nhật trạng thái đơn hàng thành 'cancelled'
+      await smartDB.execute(
+        `UPDATE donhang SET TrangThai = 'cancelled' WHERE ID_DonHang = ?`,
+        [orderId]
+      );
+      console.log(`[ORDER_MODEL] Updated order ${orderId} status to cancelled`);
+
+      return {
+        success: true,
+        message: "Đơn hàng đã được hủy thành công",
+        orderId: orderId,
+      };
+    } catch (error) {
+      console.error(`[ORDER_MODEL] Error cancelling order ${orderId}:`, error);
+      throw error;
+    }
+  }
+
   // Lấy danh sách đơn hàng của user
   static async getUserOrders(userId, page = 1, limit = 10) {
     try {

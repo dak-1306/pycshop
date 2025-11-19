@@ -69,6 +69,16 @@ class OrderService {
     }
   }
 
+  // Hủy đơn hàng
+  async cancelOrder(orderId) {
+    try {
+      const response = await this.api.delete(`/${orderId}`);
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   // Xử lý lỗi
   handleError(error) {
     if (error.response) {

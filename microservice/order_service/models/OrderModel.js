@@ -45,7 +45,7 @@ class OrderModel {
       };
 
       const dbPaymentMethod = paymentMethodMap[paymentMethod] || "COD";
-      const paymentStatus = paymentMethod === "cod" ? "unpaid" : "unpaid";
+      const paymentStatus = paymentMethod === "cod" ? "unpaid" : "paid";
 
       await connection.execute(
         `INSERT INTO thanhtoan (ID_DonHang, PhuongThuc, TrangThai, ThoiGianTao)
@@ -133,6 +133,62 @@ class OrderModel {
       );
 
       order.items = itemRows;
+
+      // Tính tổng tiền hàng (subtotal) từ các sản phẩm
+      const subtotal = itemRows.reduce((sum, item) => {
+        return sum + parseFloat(item.price) * parseInt(item.quantity);
+      }, 0);
+
+      // Phí vận chuyển mặc định
+      const defaultShippingFee = 30000;
+
+      // Kiểm tra xem có sử dụng voucher không
+      const [voucherRows] = await smartDB.execute(
+        `SELECT 
+          apma.ID_ApMa,
+          apma.SuDungLuc,
+          pgm.MaGiam as voucherCode,
+          pgm.PhanTramGiam as discountPercent,
+          pgm.GiaTriDonHangToiThieu as minOrderValue
+        FROM apma 
+        LEFT JOIN phieugiamgia pgm ON apma.ID_Phieu = pgm.ID_Phieu
+        WHERE apma.ID_DonHang = ?`,
+        [orderId]
+      );
+
+      // Tính toán chi tiết đơn hàng
+      let voucherDiscount = 0;
+      let shippingFee = defaultShippingFee;
+
+      if (voucherRows.length > 0) {
+        const voucher = voucherRows[0];
+        // Tính discount dựa trên phần trăm
+        voucherDiscount = Math.floor(
+          subtotal * (parseFloat(voucher.discountPercent) / 100)
+        );
+
+        order.voucher = {
+          code: voucher.voucherCode,
+          discountPercent: parseFloat(voucher.discountPercent),
+          discountAmount: voucherDiscount,
+          minOrderValue: parseFloat(voucher.minOrderValue || 0),
+          usedAt: voucher.SuDungLuc,
+        };
+      }
+
+      // // Miễn phí vận chuyển nếu đơn hàng >= 500k
+      // if (subtotal >= 500000) {
+      //   shippingFee = 0;
+      // }
+
+      // Thêm thông tin chi tiết vào order
+      order.orderDetails = {
+        subtotal: subtotal,
+        shippingFee: shippingFee,
+        voucherDiscount: voucherDiscount,
+        totalBeforeDiscount: subtotal + shippingFee,
+        finalTotal: parseFloat(order.totalAmount),
+      };
 
       return order;
     } catch (error) {

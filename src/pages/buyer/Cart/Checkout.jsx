@@ -217,7 +217,7 @@ const Checkout = () => {
 
         // Redirect to orders page after 3 seconds
         setTimeout(() => {
-          navigate("/profile/orders", {
+          navigate("/profile", {
             state: {
               newOrderId: result.data.orderId,
               orderTotal: result.data.totalAmount,

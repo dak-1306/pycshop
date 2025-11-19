@@ -121,31 +121,31 @@ const OrderModal = ({
         },
       ];
     } else {
-      // Seller has limited status options
+      // Seller has limited status options (matching backend)
       return [
         {
           value: "pending",
-          label: "Chờ xử lý",
+          label: "Chờ xác nhận",
           icon: <FontAwesomeIcon icon={["fas", "hourglass"]} />,
         },
         {
-          value: "processing",
-          label: "Đang chuẩn bị",
-          icon: <FontAwesomeIcon icon={["fas", "box-open"]} />,
+          value: "confirmed",
+          label: "Đã xác nhận",
+          icon: <FontAwesomeIcon icon={["fas", "check-circle"]} />,
         },
         {
-          value: "shipping",
-          label: "Đã giao shipper",
+          value: "shipped",
+          label: "Đang giao hàng",
           icon: <FontAwesomeIcon icon={["fas", "truck"]} />,
         },
         {
           value: "delivered",
-          label: "Hoàn thành",
+          label: "Đã giao hàng",
           icon: <FontAwesomeIcon icon={["fas", "check"]} />,
         },
         {
           value: "cancelled",
-          label: "Hủy đơn",
+          label: "Đã hủy",
           icon: <FontAwesomeIcon icon={["fas", "times"]} />,
         },
       ];

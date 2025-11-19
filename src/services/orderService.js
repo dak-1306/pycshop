@@ -79,6 +79,28 @@ class OrderService {
     }
   }
 
+  // Lấy danh sách đơn hàng cho seller
+  async getSellerOrders(page = 1, limit = 10, status = "all") {
+    try {
+      const response = await this.api.get(
+        `/seller/orders?page=${page}&limit=${limit}&status=${status}`
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  // Cập nhật trạng thái đơn hàng (cho seller)
+  async updateOrderStatus(orderId, status) {
+    try {
+      const response = await this.api.put(`/${orderId}/status`, { status });
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   // Xử lý lỗi
   handleError(error) {
     if (error.response) {

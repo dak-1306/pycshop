@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import OrderService from "../../../services/orderService";
+import { useToast } from "../../../hooks/useToast";
 
 const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
   const [formData, setFormData] = useState({
@@ -11,17 +13,17 @@ const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const { showSuccess, showError } = useToast();
 
   // Populate form when order changes
   useEffect(() => {
     if (order && isOpen) {
       setFormData({
-        status: order.status || order.TrangThai || "pending",
-        notes: order.notes || order.GhiChu || "",
-        shippingAddress: order.shippingAddress || order.DiaChiGiaoHang || "",
-        trackingNumber: order.trackingNumber || order.MaVanDon || "",
-        estimatedDelivery:
-          order.estimatedDelivery || order.NgayGiaoHangDuKien || "",
+        status: order.status || "pending",
+        notes: order.notes || "",
+        shippingAddress: order.shippingAddress || "",
+        trackingNumber: order.trackingNumber || "",
+        estimatedDelivery: order.estimatedDelivery || "",
       });
     }
   }, [order, isOpen]);
@@ -39,35 +41,51 @@ const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
 
     // Basic validation
     if (!formData.status) {
-      alert("⚠️ Vui lòng chọn trạng thái đơn hàng!");
+      showError("Vui lòng chọn trạng thái đơn hàng!");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      if (onSave) {
-        await onSave({
-          id: order.id || order.ID_DonHang,
-          ...formData,
-        });
+      const orderId = order.orderId || order.id || order.ID_DonHang;
+
+      // Call OrderService to update status
+      const response = await OrderService.updateOrderStatus(
+        orderId,
+        formData.status
+      );
+
+      if (response.success) {
+        showSuccess(`Đã cập nhật trạng thái đơn hàng #${orderId} thành công!`);
+
+        // Call parent onSave callback if provided
+        if (onSave) {
+          await onSave({
+            orderId: orderId,
+            ...formData,
+          });
+        }
+
         onClose();
+      } else {
+        throw new Error(
+          response.message || "Không thể cập nhật trạng thái đơn hàng"
+        );
       }
     } catch (error) {
-      console.error("Error saving order:", error);
-      alert(
-        "❌ Lỗi khi cập nhật đơn hàng: " + (error.message || "Unknown error")
-      );
+      console.error("Error updating order:", error);
+      showError(error.message || "Lỗi khi cập nhật đơn hàng");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Order status options for seller
+  // Order status options for seller (matching backend logic)
   const statusOptions = [
     {
       value: "pending",
-      label: "Chờ xử lý",
+      label: "Chờ xác nhận",
       color: "bg-yellow-100 text-yellow-800",
     },
     {
@@ -76,12 +94,7 @@ const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
       color: "bg-blue-100 text-blue-800",
     },
     {
-      value: "processing",
-      label: "Đang chuẩn bị",
-      color: "bg-purple-100 text-purple-800",
-    },
-    {
-      value: "shipping",
+      value: "shipped",
       label: "Đang giao hàng",
       color: "bg-orange-100 text-orange-800",
     },
@@ -139,7 +152,7 @@ const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
                 <div>
                   <span className="font-medium text-gray-600">Khách hàng:</span>
                   <p className="text-gray-900 truncate">
-                    {order.customerName || order.TenNguoiNhan || "N/A"}
+                    {order.buyerName || "N/A"}
                   </p>
                 </div>
                 <div>
@@ -148,20 +161,18 @@ const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
                     {new Intl.NumberFormat("vi-VN", {
                       style: "currency",
                       currency: "VND",
-                    }).format(order.total || order.TongTien || 0)}
+                    }).format(order.totalAmount || 0)}
                   </p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-600">Điện thoại:</span>
-                  <p className="text-gray-900">{order.SoDienThoai || "N/A"}</p>
+                  <p className="text-gray-900">{order.buyerPhone || "N/A"}</p>
                 </div>
                 <div>
                   <span className="font-medium text-gray-600">Ngày đặt:</span>
                   <p className="text-gray-900">
-                    {order.createdAt || order.ThoiGianTao
-                      ? new Date(
-                          order.createdAt || order.ThoiGianTao
-                        ).toLocaleDateString("vi-VN")
+                    {order.createdAt
+                      ? new Date(order.createdAt).toLocaleDateString("vi-VN")
                       : "N/A"}
                   </p>
                 </div>

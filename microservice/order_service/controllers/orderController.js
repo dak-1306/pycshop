@@ -1,10 +1,10 @@
 import OrderModel from "../models/OrderModel.js";
-import { ExternalServiceClient } from "../services/externalService.js";
 
 // Tạo đơn hàng mới
 export const createOrder = async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
+    console.log(`[ORDER_CONTROLLER] createOrder called by userId: ${userId}`);
 
     if (!userId) {
       return res.status(401).json({
@@ -22,10 +22,16 @@ export const createOrder = async (req, res) => {
       shippingFee,
       voucherDiscount,
       total,
-      voucher, // Thông tin voucher được áp dụng
     } = req.body;
 
-    // Validate input
+    console.log(`[ORDER_CONTROLLER] Processing order:`, {
+      userId,
+      itemCount: items?.length || 0,
+      total,
+      paymentMethod,
+    });
+
+    // Validation cơ bản
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({
         success: false,
@@ -54,7 +60,7 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    // Validate items
+    // Validate từng item
     for (const item of items) {
       if (
         !item.id ||
@@ -70,98 +76,29 @@ export const createOrder = async (req, res) => {
       }
     }
 
-    // Validate voucher nếu có
-    if (voucher && voucher.code) {
-      console.log(`[ORDER_CONTROLLER] Validating voucher: ${voucher.code}`);
-
-      const voucherValidation = await ExternalServiceClient.validateVoucher(
-        voucher.code,
-        subtotal + shippingFee // Validate với subtotal trước khi áp voucher
-      );
-
-      if (!voucherValidation.success || !voucherValidation.data.valid) {
-        return res.status(400).json({
-          success: false,
-          message: voucherValidation.message || "Voucher không hợp lệ",
-          code: "INVALID_VOUCHER",
-        });
-      }
-
-      console.log(`[ORDER_CONTROLLER] Voucher validated successfully`);
-    }
-
-    console.log(`[ORDER_CONTROLLER] Creating order for user ${userId}:`, {
-      itemCount: items.length,
-      total: total,
+    // Chuẩn bị dữ liệu cho database
+    const orderData = {
+      userId: parseInt(userId),
+      totalAmount: total,
       paymentMethod: paymentMethod,
-      hasVoucher: !!voucher,
-      voucherCode: voucher?.code,
+      shippingAddress: `${address.name}, ${address.phone}, ${address.street}`,
+      items: items.map((item) => ({
+        productId: item.id,
+        price: item.price,
+        quantity: item.quantity,
+      })),
+    };
+
+    console.log(`[ORDER_CONTROLLER] Calling OrderModel.createOrder with:`, {
+      userId: orderData.userId,
+      totalAmount: orderData.totalAmount,
+      itemsCount: orderData.items.length,
     });
 
     // Tạo đơn hàng
-    const orderData = {
-      userId,
-      items,
-      address,
-      paymentMethod,
-      note: note || "",
-      subtotal: subtotal || 0,
-      shippingFee: shippingFee || 0,
-      voucherDiscount: voucherDiscount || 0,
-      total,
-      voucher: voucher || null,
-    };
-
     const result = await OrderModel.createOrder(orderData);
 
     console.log(`[ORDER_CONTROLLER] Order created successfully:`, result);
-
-    // Post-order processing (async, don't block response)
-    setImmediate(async () => {
-      try {
-        // Use voucher if provided
-        if (voucher && voucher.code) {
-          console.log(`[ORDER_CONTROLLER] Using voucher: ${voucher.code}`);
-
-          const voucherResult = await ExternalServiceClient.useVoucher({
-            id: voucher.id,
-            code: voucher.code,
-            orderValue: subtotal + shippingFee,
-          });
-
-          if (voucherResult) {
-            console.log(`[ORDER_CONTROLLER] Voucher used successfully`);
-          } else {
-            console.error(`[ORDER_CONTROLLER] Failed to mark voucher as used`);
-            // Don't fail the order, just log the error
-          }
-        }
-
-        // Clear user's cart
-        await ExternalServiceClient.clearUserCart(userId);
-
-        // Send order notification
-        await ExternalServiceClient.sendOrderNotification(userId, {
-          orderId: result.orderId,
-          total: total,
-          voucherUsed: voucher?.code || null,
-          savings: voucherDiscount || 0,
-        });
-
-        // Update product inventory
-        await ExternalServiceClient.updateProductInventory(items);
-
-        console.log(
-          `[ORDER_CONTROLLER] Post-order processing completed for order ${result.orderId}`
-        );
-      } catch (error) {
-        console.error(
-          "[ORDER_CONTROLLER] Error in post-order processing:",
-          error
-        );
-        // Don't fail the order if post-processing fails
-      }
-    });
 
     res.status(201).json({
       success: true,
@@ -253,166 +190,6 @@ export const getUserOrders = async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Lỗi khi lấy danh sách đơn hàng",
-      error: error.message,
-    });
-  }
-};
-
-// Cập nhật trạng thái đơn hàng
-export const updateOrderStatus = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { status } = req.body;
-    const userId = req.headers["x-user-id"];
-
-    if (!orderId || !status) {
-      return res.status(400).json({
-        success: false,
-        message: "Order ID và status là bắt buộc",
-      });
-    }
-
-    const validStatuses = ["pending", "confirmed", "shipped", "cancelled"];
-    if (!validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Trạng thái không hợp lệ",
-      });
-    }
-
-    console.log(
-      `[ORDER_CONTROLLER] Updating order ${orderId} status to ${status}`
-    );
-
-    const updated = await OrderModel.updateOrderStatus(orderId, status, userId);
-
-    if (!updated) {
-      return res.status(404).json({
-        success: false,
-        message: "Không tìm thấy đơn hàng hoặc không có quyền cập nhật",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Cập nhật trạng thái đơn hàng thành công",
-      data: {
-        orderId: orderId,
-        newStatus: status,
-      },
-    });
-  } catch (error) {
-    console.error("[ORDER_CONTROLLER] Error updating order status:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lỗi khi cập nhật trạng thái đơn hàng",
-      error: error.message,
-    });
-  }
-};
-
-// Hủy đơn hàng
-export const cancelOrder = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const userId = req.headers["x-user-id"];
-
-    if (!userId) {
-      return res.status(401).json({
-        success: false,
-        message: "User authentication required",
-      });
-    }
-
-    if (!orderId) {
-      return res.status(400).json({
-        success: false,
-        message: "Order ID is required",
-      });
-    }
-
-    console.log(
-      `[ORDER_CONTROLLER] Cancelling order ${orderId} for user ${userId}`
-    );
-
-    await OrderModel.cancelOrder(orderId, userId);
-
-    res.json({
-      success: true,
-      message: "Hủy đơn hàng thành công",
-      data: {
-        orderId: orderId,
-        status: "cancelled",
-      },
-    });
-  } catch (error) {
-    console.error("[ORDER_CONTROLLER] Error cancelling order:", error);
-
-    if (
-      error.message.includes("không tồn tại") ||
-      error.message.includes("Không thể hủy")
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: error.message,
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: "Lỗi khi hủy đơn hàng",
-      error: error.message,
-    });
-  }
-};
-
-// Cập nhật trạng thái thanh toán
-export const updatePaymentStatus = async (req, res) => {
-  try {
-    const { orderId } = req.params;
-    const { status } = req.body;
-
-    if (!orderId || !status) {
-      return res.status(400).json({
-        success: false,
-        message: "Order ID và payment status là bắt buộc",
-      });
-    }
-
-    const validPaymentStatuses = ["paid", "unpaid"];
-    if (!validPaymentStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Trạng thái thanh toán không hợp lệ",
-      });
-    }
-
-    console.log(
-      `[ORDER_CONTROLLER] Updating payment status for order ${orderId} to ${status}`
-    );
-
-    const updated = await OrderModel.updatePaymentStatus(orderId, status);
-
-    if (!updated) {
-      return res.status(404).json({
-        success: false,
-        message: "Không tìm thấy đơn hàng",
-      });
-    }
-
-    res.json({
-      success: true,
-      message: "Cập nhật trạng thái thanh toán thành công",
-      data: {
-        orderId: orderId,
-        paymentStatus: status,
-      },
-    });
-  } catch (error) {
-    console.error("[ORDER_CONTROLLER] Error updating payment status:", error);
-    res.status(500).json({
-      success: false,
-      message: "Lỗi khi cập nhật trạng thái thanh toán",
       error: error.message,
     });
   }

@@ -440,77 +440,73 @@ function setupRoutes(app) {
     })
   );
 
-  // Order Service Routes
-  app.use(
-    "/orders",
-    authMiddleware,
-    (req, res, next) => {
+  // Order Service Routes - Manual Proxy to avoid timeout issues
+  app.use("/orders", authMiddleware, async (req, res) => {
+    try {
       console.log(
-        `[ROUTES] Matched /orders route for ${req.method} ${req.originalUrl}`
+        `[ROUTES] Manual order proxy for ${req.method} ${req.originalUrl}`
       );
       console.log(`[ROUTES] User info:`, req.user);
 
-      // Set user headers for order service
-      if (req.user) {
-        req.headers["x-user-id"] = req.user.id.toString();
-        req.headers["x-user-role"] = req.user.role;
-        req.headers["x-user-type"] = req.user.userType;
+      // Build target URL - remove /orders prefix since Order Service expects it
+      const targetPath = req.url; // This will be like "/", "/test", "/123" etc.
+      const targetUrl = `${
+        process.env.ORDER_SERVICE_URL || "http://localhost:5007"
+      }/orders${targetPath}`;
+
+      console.log(`🔥 [MANUAL_ORDER_PROXY] Forwarding to: ${targetUrl}`);
+
+      // Prepare headers - copy from original request
+      const headers = {
+        ...req.headers,
+        "x-user-id": req.user?.id?.toString() || "",
+        "x-user-role": req.user?.role || "",
+        "x-user-type": req.user?.userType || "",
+      };
+
+      delete headers.host; // Remove host header to avoid conflicts
+
+      // Prepare request options
+      const requestOptions = {
+        method: req.method,
+        headers,
+        timeout: 10000, // 10 second timeout
+      };
+
+      // Add body for POST/PUT requests
+      if (req.body && (req.method === "POST" || req.method === "PUT")) {
+        requestOptions.body = JSON.stringify(req.body);
         console.log(
-          `[ROUTES] Set headers for orders: x-user-id=${req.user.id}, x-user-role=${req.user.role}`
+          `🔥 [MANUAL_ORDER_PROXY] Body: ${JSON.stringify(req.body)}`
         );
       }
-      next();
-    },
 
-    createProxyMiddleware({
-      target: process.env.ORDER_SERVICE_URL || "http://localhost:5007",
-      changeOrigin: true,
-      pathRewrite: {
-        "^/orders": "/orders",
-      },
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(`[PROXY] onProxyReq callback for order service`);
+      // Make request to order service
+      const response = await fetch(targetUrl, requestOptions);
+      const data = await response.json();
 
-        // Truyền thông tin user từ API Gateway xuống order service
-        if (req.user) {
-          proxyReq.setHeader("x-user-id", req.user.id.toString());
-          proxyReq.setHeader("x-user-role", req.user.role);
-          proxyReq.setHeader("x-user-type", req.user.userType);
-          console.log("[PROXY] Set user headers for order:", {
-            id: req.user.id,
-            role: req.user.role,
-            userType: req.user.userType,
-          });
-        }
+      console.log(
+        `🔥 [MANUAL_ORDER_PROXY] Response ${response.status} from order service`
+      );
 
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.ORDER_SERVICE_URL || "http://localhost:5007"
-          }${proxyReq.path}`
-        );
-      },
-      onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Order Service`
-        );
+      // Set CORS headers
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+      }
 
-        // Ensure CORS headers are set
-        const origin = req.headers.origin;
-        if (origin) {
-          res.setHeader("Access-Control-Allow-Origin", origin);
-          res.setHeader("Access-Control-Allow-Credentials", "true");
-        }
-      },
-      onError: (err, req, res) => {
-        console.error(`[PROXY] Order Service Error:`, err.message);
-        if (!res.headersSent) {
-          res
-            .status(500)
-            .json({ error: "Order service error", details: err.message });
-        }
-      },
-    })
-  );
+      // Return response
+      res.status(response.status).json(data);
+    } catch (error) {
+      console.error(`🔥 [MANUAL_ORDER_PROXY] Error:`, error.message);
+      res.status(500).json({
+        success: false,
+        message: "Order service error",
+        error: error.message,
+      });
+    }
+  });
 
   // Promotion Service Routes
   app.use(

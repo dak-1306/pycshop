@@ -184,12 +184,44 @@ const ProductCard = ({ product, onClick }) => {
           </button>
           <button
             className="btn-buy-now"
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation();
-              // Buy now logic - redirect to product detail for more options
-              navigate(`/product/${safeProduct.id}`, {
-                state: { buyNow: true },
-              });
+
+              // Check if user is logged in
+              if (!isAuthenticated) {
+                showError("Vui lòng đăng nhập để mua hàng!");
+                navigate("/login");
+                return;
+              }
+
+              // Check stock
+              if (safeProduct.stock === 0) {
+                showError("Sản phẩm đã hết hàng!");
+                return;
+              }
+
+              try {
+                // Create cart item for checkout with quantity 1
+                const cartItem = {
+                  id: safeProduct.id,
+                  name: safeProduct.name,
+                  price: safeProduct.price,
+                  image: safeProduct.image,
+                  quantity: 1,
+                  variant: "Mặc định",
+                };
+
+                // Navigate to checkout with this single item
+                navigate("/checkout", {
+                  state: {
+                    cartItems: [cartItem],
+                    fromBuyNow: true,
+                  },
+                });
+              } catch (error) {
+                console.error("Error with buy now:", error);
+                showError("Có lỗi xảy ra khi mua hàng!");
+              }
             }}
           >
             Mua ngay

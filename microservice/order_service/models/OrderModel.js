@@ -1,4 +1,5 @@
 import smartDB from "../../db/index.js";
+import notificationHelper from "../helpers/NotificationHelper.js";
 
 class OrderModel {
   // Tạo đơn hàng mới với transaction
@@ -65,6 +66,41 @@ class OrderModel {
       // Commit transaction
       await connection.commit();
       console.log(`[ORDER_MODEL] Transaction committed successfully`);
+
+      // Send notification to buyer asynchronously (don't wait for it to complete)
+      notificationHelper
+        .createOrderNotification(userId, orderId, "pending")
+        .then((result) => {
+          if (result.success) {
+            console.log(
+              `[ORDER_MODEL] ✅ Order creation notification sent successfully for order ${orderId}`
+            );
+          } else {
+            console.log(
+              `[ORDER_MODEL] ⚠️ Failed to send order creation notification for order ${orderId}: ${result.message}`
+            );
+          }
+        })
+        .catch((error) => {
+          console.error(
+            `[ORDER_MODEL] ❌ Error sending order creation notification for order ${orderId}:`,
+            error.message
+          );
+        });
+
+      // Send notifications to sellers asynchronously
+      this.notifySellersAboutNewOrder(orderId, userId, items)
+        .then((results) => {
+          console.log(
+            `[ORDER_MODEL] ✅ Seller notifications process completed for order ${orderId}`
+          );
+        })
+        .catch((error) => {
+          console.error(
+            `[ORDER_MODEL] ❌ Error in seller notification process for order ${orderId}:`,
+            error.message
+          );
+        });
 
       return {
         success: true,
@@ -241,6 +277,28 @@ class OrderModel {
         [orderId]
       );
       console.log(`[ORDER_MODEL] Updated order ${orderId} status to cancelled`);
+
+      // Send cancellation notification asynchronously
+      const buyerId = userId || order.ID_NguoiMua;
+      notificationHelper
+        .createOrderNotification(buyerId, orderId, "cancelled")
+        .then((result) => {
+          if (result.success) {
+            console.log(
+              `[ORDER_MODEL] ✅ Order cancellation notification sent successfully for order ${orderId}`
+            );
+          } else {
+            console.log(
+              `[ORDER_MODEL] ⚠️ Failed to send order cancellation notification for order ${orderId}: ${result.message}`
+            );
+          }
+        })
+        .catch((error) => {
+          console.error(
+            `[ORDER_MODEL] ❌ Error sending order cancellation notification for order ${orderId}:`,
+            error.message
+          );
+        });
 
       return {
         success: true,
@@ -537,6 +595,36 @@ class OrderModel {
         `[ORDER_MODEL] Successfully updated order ${orderId} from ${currentStatus} to ${newStatus}`
       );
 
+      // Get buyer ID to send notification
+      const [buyerRows] = await smartDB.execute(
+        `SELECT ID_NguoiMua FROM donhang WHERE ID_DonHang = ?`,
+        [orderId]
+      );
+
+      if (buyerRows.length > 0) {
+        const buyerId = buyerRows[0].ID_NguoiMua;
+        // Send notification asynchronously (don't wait for it to complete)
+        notificationHelper
+          .createOrderNotification(buyerId, orderId, newStatus)
+          .then((result) => {
+            if (result.success) {
+              console.log(
+                `[ORDER_MODEL] ✅ Notification sent successfully for order ${orderId}`
+              );
+            } else {
+              console.log(
+                `[ORDER_MODEL] ⚠️ Failed to send notification for order ${orderId}: ${result.message}`
+              );
+            }
+          })
+          .catch((error) => {
+            console.error(
+              `[ORDER_MODEL] ❌ Error sending notification for order ${orderId}:`,
+              error.message
+            );
+          });
+      }
+
       return {
         success: true,
         message: "Cập nhật trạng thái đơn hàng thành công",
@@ -553,6 +641,128 @@ class OrderModel {
       throw error;
     } finally {
       connection.release();
+    }
+  }
+
+  // Gửi thông báo cho tất cả người bán có sản phẩm trong đơn hàng
+  static async notifySellersAboutNewOrder(orderId, buyerId, items) {
+    try {
+      console.log(
+        `[ORDER_MODEL] Starting seller notification process for order ${orderId}`
+      );
+
+      // Lấy thông tin người mua
+      const [buyerRows] = await smartDB.execute(
+        `SELECT HoTen FROM nguoidung WHERE ID_NguoiDung = ?`,
+        [buyerId]
+      );
+      const buyerName = buyerRows.length > 0 ? buyerRows[0].HoTen : null;
+
+      // Lấy danh sách người bán duy nhất từ các sản phẩm trong đơn hàng
+      const productIds = items.map((item) => item.productId);
+      const placeholders = productIds.map(() => "?").join(",");
+
+      const [sellerRows] = await smartDB.execute(
+        `SELECT DISTINCT sp.ID_NguoiBan as sellerId, nd.HoTen as sellerName
+         FROM sanpham sp 
+         LEFT JOIN nguoidung nd ON sp.ID_NguoiBan = nd.ID_NguoiDung
+         WHERE sp.ID_SanPham IN (${placeholders})`,
+        productIds
+      );
+
+      console.log(
+        `[ORDER_MODEL] Found ${sellerRows.length} sellers to notify for order ${orderId}`
+      );
+
+      // Gửi thông báo cho mỗi người bán
+      const notificationPromises = sellerRows.map(async (seller) => {
+        try {
+          // Lấy các sản phẩm của seller này trong đơn hàng
+          const sellerProducts = items.filter((item) => {
+            // Tìm sản phẩm thuộc về seller này
+            return productIds.includes(item.productId);
+          });
+
+          // Lấy thông tin chi tiết sản phẩm của seller này
+          const [sellerProductDetails] = await smartDB.execute(
+            `SELECT sp.TenSanPham, ct.SoLuong, ct.DonGia
+             FROM sanpham sp
+             JOIN chitietdonhang ct ON sp.ID_SanPham = ct.ID_SanPham
+             WHERE ct.ID_DonHang = ? AND sp.ID_NguoiBan = ?`,
+            [orderId, seller.sellerId]
+          );
+
+          // Tạo message chi tiết với thông tin sản phẩm
+          let productList = sellerProductDetails
+            .map((p) => `${p.TenSanPham} (x${p.SoLuong})`)
+            .join(", ");
+
+          const customMessage = `Bạn có đơn hàng mới #${orderId}${
+            buyerName ? ` từ khách hàng ${buyerName}` : ""
+          }.\nSản phẩm: ${productList}\nVui lòng xác nhận đơn hàng sớm nhất có thể.`;
+
+          const result = await notificationHelper.createSellerNotification(
+            seller.sellerId,
+            orderId,
+            buyerName,
+            customMessage
+          );
+
+          if (result.success) {
+            console.log(
+              `[ORDER_MODEL] ✅ Notification sent to seller ${
+                seller.sellerName || seller.sellerId
+              } for order ${orderId}`
+            );
+          } else {
+            console.log(
+              `[ORDER_MODEL] ⚠️ Failed to send notification to seller ${
+                seller.sellerName || seller.sellerId
+              }: ${result.message}`
+            );
+          }
+
+          return result;
+        } catch (error) {
+          console.error(
+            `[ORDER_MODEL] ❌ Error sending notification to seller ${seller.sellerId}:`,
+            error.message
+          );
+          return {
+            success: false,
+            error: error.message,
+            sellerId: seller.sellerId,
+          };
+        }
+      });
+
+      // Đợi tất cả notifications được gửi
+      const results = await Promise.allSettled(notificationPromises);
+
+      const successCount = results.filter(
+        (r) => r.status === "fulfilled" && r.value.success
+      ).length;
+      const totalCount = results.length;
+
+      console.log(
+        `[ORDER_MODEL] Seller notifications completed: ${successCount}/${totalCount} successful for order ${orderId}`
+      );
+
+      return {
+        success: true,
+        totalSellers: totalCount,
+        successfulNotifications: successCount,
+        results: results,
+      };
+    } catch (error) {
+      console.error(
+        `[ORDER_MODEL] ❌ Error in seller notification process for order ${orderId}:`,
+        error
+      );
+      return {
+        success: false,
+        error: error.message,
+      };
     }
   }
 }

@@ -752,13 +752,13 @@ function setupRoutes(app) {
       next();
     },
     createProxyMiddleware({
-      target: process.env.ADMIN_SERVICE_URL || "http://localhost:5005",
+      target: process.env.ADMIN_SERVICE_URL || "http://localhost:5006",
       changeOrigin: true,
       pathRewrite: { "^/admin": "" },
       onProxyReq: (proxyReq, req, res) => {
         console.log(
           `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.ADMIN_SERVICE_URL || "http://localhost:5005"
+            process.env.ADMIN_SERVICE_URL || "http://localhost:5006"
           }${proxyReq.path}`
         );
         // Truyền thông tin user từ API Gateway xuống admin service
@@ -1019,207 +1019,72 @@ function setupRoutes(app) {
     })
   );
 
-  // // User Service Routes - GET methods only
-  // app.use(
-  //   "/api/users",
-  //   authMiddleware, // Require authentication for all user routes
-  //   createProxyMiddleware({
-  //     target: process.env.USER_SERVICE_URL || "http://localhost:5010",
-  //     changeOrigin: true,
-  //     pathRewrite: {
-  //       "^/api/users": "/api/users", // Keep the full path
-  //     },
-  //     onProxyReq: (proxyReq, req, res) => {
-  //       console.log(`[PROXY] onProxyReq callback for user service`);
+  // Notification Service - Manual Proxy for better control
+  app.use("/notifications", authMiddleware, async (req, res) => {
+    try {
+      console.log(
+        `[ROUTES] Notification proxy for ${req.method} ${req.originalUrl}`
+      );
+      console.log(`[ROUTES] User info:`, req.user);
 
-  //       // Forward user information to user service
-  //       if (req.user) {
-  //         proxyReq.setHeader("x-user-id", req.user.id);
-  //         proxyReq.setHeader("x-user-role", req.user.role || "buyer");
-  //         proxyReq.setHeader("x-user-type", req.user.userType || "buyer");
+      // Build target URL
+      const targetPath = req.url; // This will be like "/", "/unread-count", "/123/read" etc.
+      const targetUrl = `${
+        process.env.NOTIFICATION_SERVICE_URL || "http://localhost:5008"
+      }/notifications${targetPath}`;
 
-  //         console.log(
-  //           `[PROXY] Adding user headers for user service - user ID: ${
-  //             req.user.id
-  //           }, role: ${req.user.role}, userType: ${
-  //             req.user.userType || "buyer"
-  //           }`
-  //         );
-  //       }
+      console.log(`🔔 [NOTIFICATION_PROXY] Forwarding to: ${targetUrl}`);
 
-  //       console.log(
-  //         `[PROXY] Forwarding ${req.method} ${req.url} to ${
-  //           process.env.USER_SERVICE_URL || "http://localhost:5010"
-  //         }${proxyReq.path}`
-  //       );
-  //     },
-  //     onProxyRes: (proxyRes, req, res) => {
-  //       console.log(
-  //         `[PROXY] Response ${proxyRes.statusCode} from User Service`
-  //       );
+      // Prepare headers - copy from original request
+      const headers = {
+        ...req.headers,
+        "x-user-id": req.user?.id?.toString() || "",
+        "x-user-role": req.user?.role || "",
+        "x-user-type": req.user?.userType || "",
+      };
 
-  //       // Ensure CORS headers
-  //       const origin = req.headers.origin;
-  //       if (origin) {
-  //         res.setHeader("Access-Control-Allow-Origin", origin);
-  //         res.setHeader("Access-Control-Allow-Credentials", "true");
-  //       }
-  //     },
-  //     onError: (err, req, res) => {
-  //       console.error(`[PROXY] User Service Error:`, err.message);
-  //       if (!res.headersSent) {
-  //         res.status(500).json({
-  //           success: false,
-  //           error: "User service error",
-  //           details: err.message,
-  //         });
-  //       }
-  //     },
-  //   })
-  // );
+      delete headers.host; // Remove host header to avoid conflicts
 
-  // Temporary Notifications endpoint (until proper notification service is implemented)
-  app.get("/notifications", authMiddleware, (req, res) => {
-    console.log(`[ROUTES] Handling /notifications request for user:`, req.user);
+      // Prepare request options
+      const requestOptions = {
+        method: req.method,
+        headers,
+        timeout: 10000, // 10 second timeout
+      };
 
-    const { userType = "admin", limit = 50 } = req.query;
+      // Add body for POST/PUT requests
+      if (req.body && (req.method === "POST" || req.method === "PUT")) {
+        requestOptions.body = JSON.stringify(req.body);
+        console.log(
+          `🔔 [NOTIFICATION_PROXY] Body: ${JSON.stringify(req.body)}`
+        );
+      }
 
-    // Mock notification data based on user type
-    const mockNotifications = {
-      admin: [
-        {
-          id: 1,
-          title: "Đơn hàng mới",
-          message: "Có đơn hàng mới cần xử lý từ khách hàng Nguyễn Văn A",
-          type: "order",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 30).toISOString(), // 30 minutes ago
-        },
-        {
-          id: 2,
-          title: "Sản phẩm hết hàng",
-          message: "Sản phẩm iPhone 15 Pro Max đã hết hàng",
-          type: "inventory",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(), // 2 hours ago
-        },
-        {
-          id: 3,
-          title: "Người bán mới đăng ký",
-          message: "Có người bán mới đăng ký tài khoản: TechStore VN",
-          type: "user",
-          isRead: true,
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(), // 1 day ago
-        },
-      ],
-      seller: [
-        {
-          id: 1,
-          title: "Đơn hàng được xác nhận",
-          message: "Đơn hàng #ORD-001 đã được khách hàng xác nhận",
-          type: "order",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 15).toISOString(), // 15 minutes ago
-        },
-        {
-          id: 2,
-          title: "Sản phẩm được duyệt",
-          message: "Sản phẩm MacBook Air M2 đã được duyệt và hiển thị",
-          type: "product",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 60).toISOString(), // 1 hour ago
-        },
-        {
-          id: 3,
-          title: "Đánh giá mới",
-          message: "Bạn có đánh giá 5 sao mới từ khách hàng",
-          type: "review",
-          isRead: true,
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 12).toISOString(), // 12 hours ago
-        },
-      ],
-      buyer: [
-        {
-          id: 1,
-          title: "Đơn hàng đang giao",
-          message: "Đơn hàng #ORD-123 đang được giao đến bạn",
-          type: "shipping",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 45).toISOString(), // 45 minutes ago
-        },
-        {
-          id: 2,
-          title: "Khuyến mãi đặc biệt",
-          message: "Giảm giá 20% cho tất cả sản phẩm điện tử",
-          type: "promotion",
-          isRead: false,
-          createdAt: new Date(Date.now() - 1000 * 60 * 60 * 3).toISOString(), // 3 hours ago
-        },
-      ],
-    };
+      // Make request to notification service
+      const response = await fetch(targetUrl, requestOptions);
+      const data = await response.json();
 
-    const notifications =
-      mockNotifications[userType] || mockNotifications.admin;
-    const limitedNotifications = notifications.slice(0, parseInt(limit));
-    const unreadCount = limitedNotifications.filter((n) => !n.isRead).length;
+      console.log(
+        `🔔 [NOTIFICATION_PROXY] Response ${response.status} from notification service`
+      );
 
-    res.json({
-      success: true,
-      data: limitedNotifications,
-      unreadCount,
-      total: notifications.length,
-    });
-  });
+      // Set CORS headers
+      const origin = req.headers.origin;
+      if (origin) {
+        res.setHeader("Access-Control-Allow-Origin", origin);
+        res.setHeader("Access-Control-Allow-Credentials", "true");
+      }
 
-  // Mark notification as read
-  app.patch("/notifications/:id/read", authMiddleware, (req, res) => {
-    console.log(
-      `[ROUTES] Marking notification ${req.params.id} as read for user:`,
-      req.user
-    );
-    res.json({ success: true, message: "Notification marked as read" });
-  });
-
-  // Mark all notifications as read
-  app.patch("/notifications/read-all", authMiddleware, (req, res) => {
-    console.log(
-      `[ROUTES] Marking all notifications as read for user:`,
-      req.user
-    );
-    res.json({ success: true, message: "All notifications marked as read" });
-  });
-
-  // Delete notification
-  app.delete("/notifications/:id", authMiddleware, (req, res) => {
-    console.log(
-      `[ROUTES] Deleting notification ${req.params.id} for user:`,
-      req.user
-    );
-    res.json({ success: true, message: "Notification deleted" });
-  });
-
-  // Clear all notifications
-  app.delete("/notifications/clear-all", authMiddleware, (req, res) => {
-    console.log(`[ROUTES] Clearing all notifications for user:`, req.user);
-    res.json({ success: true, message: "All notifications cleared" });
-  });
-
-  // Get unread count
-  app.get("/notifications/unread-count", authMiddleware, (req, res) => {
-    console.log(`[ROUTES] Getting unread count for user:`, req.user);
-    const { userType = "admin" } = req.query;
-
-    // Mock unread counts based on user type
-    const unreadCounts = {
-      admin: 2,
-      seller: 2,
-      buyer: 2,
-    };
-
-    res.json({
-      success: true,
-      unreadCount: unreadCounts[userType] || 0,
-    });
+      // Return response
+      res.status(response.status).json(data);
+    } catch (error) {
+      console.error(`🔔 [NOTIFICATION_PROXY] Error:`, error.message);
+      res.status(500).json({
+        success: false,
+        message: "Notification service error",
+        error: error.message,
+      });
+    }
   });
 }
 

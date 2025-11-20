@@ -470,38 +470,38 @@ app.all("/users", authMiddleware, (req, res) => {
     });
 });
 
-// Handle notifications route specifically (route to admin service)
-app.get("/notifications", authMiddleware, (req, res) => {
-  console.log(
-    `[GATEWAY] Notifications route: ${req.method} ${req.originalUrl}`
-  );
-  console.log(`[GATEWAY] User for notifications:`, req.user);
+// // Handle notifications route specifically (route to admin service)
+// app.get("/notifications", authMiddleware, (req, res) => {
+//   console.log(
+//     `[GATEWAY] Notifications route: ${req.method} ${req.originalUrl}`
+//   );
+//   console.log(`[GATEWAY] User for notifications:`, req.user);
 
-  const targetUrl = `http://localhost:5006${req.originalUrl}`;
-  console.log(`[GATEWAY] Proxying notifications to: ${targetUrl}`);
+//   const targetUrl = `http://localhost:5006${req.originalUrl}`;
+//   console.log(`[GATEWAY] Proxying notifications to: ${targetUrl}`);
 
-  const requestOptions = {
-    method: req.method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: req.headers.authorization,
-      "x-user-id": req.user.id.toString(),
-      "x-user-role": req.user.role,
-      "x-user-type": req.user.userType,
-    },
-  };
+//   const requestOptions = {
+//     method: req.method,
+//     headers: {
+//       "Content-Type": "application/json",
+//       Authorization: req.headers.authorization,
+//       "x-user-id": req.user.id.toString(),
+//       "x-user-role": req.user.role,
+//       "x-user-type": req.user.userType,
+//     },
+//   };
 
-  fetch(targetUrl, requestOptions)
-    .then(async (response) => {
-      const data = await response.json();
-      console.log(`[GATEWAY] Notifications response:`, response.status);
-      res.status(response.status).json(data);
-    })
-    .catch((error) => {
-      console.error(`[GATEWAY] Notifications error:`, error);
-      res.status(500).json({ error: "Notifications service error" });
-    });
-});
+//   fetch(targetUrl, requestOptions)
+//     .then(async (response) => {
+//       const data = await response.json();
+//       console.log(`[GATEWAY] Notifications response:`, response.status);
+//       res.status(response.status).json(data);
+//     })
+//     .catch((error) => {
+//       console.error(`[GATEWAY] Notifications error:`, error);
+//       res.status(500).json({ error: "Notifications service error" });
+//     });
+// });
 
 // Handle dashboard stats route specifically (route to admin service)
 app.get("/dashboard/stats", authMiddleware, (req, res) => {

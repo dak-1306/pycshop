@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 import CollaboratorModal from "../../seller/CollaboratorModal";
-import { useNotifications } from "../../../hooks/common/useNotifications";
 import { useShopInfo } from "../../../hooks/seller/useShopInfo";
 import SellerHeader from "./SellerHeader";
 import SellerSidebar from "./SellerSidebar";
@@ -18,22 +17,6 @@ const SellerLayout = ({ children }) => {
 
   // Get shop information
   const { shopInfo, isLoading: shopLoading } = useShopInfo();
-
-  // Notification system
-  const {
-    notifications,
-    isOpen: notificationsOpen,
-    unreadCount,
-    toggleNotifications,
-    closeNotifications,
-    markAsRead,
-    markAllAsRead,
-    deleteNotification,
-    clearAllNotifications,
-    getRelativeTime,
-    getPriorityColor,
-    getNotificationIcon,
-  } = useNotifications("seller");
 
   const handleAddCollaborator = () => {
     setShowCollaboratorModal(true);
@@ -87,18 +70,6 @@ const SellerLayout = ({ children }) => {
       <SellerHeader
         shopInfo={shopInfo}
         shopLoading={shopLoading}
-        notifications={notifications}
-        notificationsOpen={notificationsOpen}
-        unreadCount={unreadCount}
-        toggleNotifications={toggleNotifications}
-        closeNotifications={closeNotifications}
-        markAsRead={markAsRead}
-        markAllAsRead={markAllAsRead}
-        deleteNotification={deleteNotification}
-        clearAllNotifications={clearAllNotifications}
-        getRelativeTime={getRelativeTime}
-        getPriorityColor={getPriorityColor}
-        getNotificationIcon={getNotificationIcon}
         onAddCollaborator={handleAddCollaborator}
       />
 

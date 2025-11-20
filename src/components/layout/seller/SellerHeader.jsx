@@ -2,25 +2,47 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PropTypes from "prop-types";
-import NotificationPanel from "../../common/notifications/NotificationPanel";
+import NotificationIcon from "../../NotificationIcon";
 import logoImage from "../../../images/logo.svg";
+
+// CSS styles for seller header notification
+const sellerNotificationStyles = `
+  .seller-notification-wrapper button {
+    color: white !important;
+  }
+  
+  .seller-notification-wrapper button:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: white !important;
+  }
+  
+  .seller-notification-wrapper .text-gray-600 {
+    color: white !important;
+  }
+  
+  .seller-notification-wrapper .hover\\:text-blue-600:hover {
+    color: white !important;
+  }
+  
+  .seller-notification-wrapper .hover\\:bg-blue-50:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+  }
+`;
+
+// Inject styles if not already injected
+if (
+  typeof document !== "undefined" &&
+  !document.getElementById("seller-notification-styles")
+) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = "seller-notification-styles";
+  styleSheet.textContent = sellerNotificationStyles;
+  document.head.appendChild(styleSheet);
+}
 
 const SellerHeader = ({
   shopInfo,
   shopLoading,
-  // Notification props
-  notifications,
-  notificationsOpen,
-  unreadCount,
-  toggleNotifications,
-  closeNotifications,
-  markAsRead,
-  markAllAsRead,
-  deleteNotification,
-  clearAllNotifications,
-  getRelativeTime,
-  getPriorityColor,
-  getNotificationIcon,
   // Action handlers
   onAddCollaborator,
 }) => {
@@ -48,34 +70,8 @@ const SellerHeader = ({
           {/* User Actions */}
           <div className="flex items-center space-x-2">
             {/* Notifications */}
-            <div className="relative">
-              <button
-                onClick={toggleNotifications}
-                className="relative p-2 text-white hover:bg-seller-500 rounded-lg transition-colors"
-                title="Thông báo"
-              >
-                <FontAwesomeIcon icon={["fas", "bell"]} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {unreadCount > 99 ? "99+" : unreadCount}
-                  </span>
-                )}
-              </button>
-
-              <NotificationPanel
-                notifications={notifications}
-                isOpen={notificationsOpen}
-                unreadCount={unreadCount}
-                onToggle={toggleNotifications}
-                onClose={closeNotifications}
-                onMarkAsRead={markAsRead}
-                onMarkAllAsRead={markAllAsRead}
-                onDelete={deleteNotification}
-                onClearAll={clearAllNotifications}
-                getRelativeTime={getRelativeTime}
-                getPriorityColor={getPriorityColor}
-                getNotificationIcon={getNotificationIcon}
-              />
+            <div className="seller-notification-wrapper">
+              <NotificationIcon />
             </div>
 
             {/* Add Collaborator Button */}
@@ -109,28 +105,12 @@ SellerHeader.propTypes = {
     name: PropTypes.string,
   }),
   shopLoading: PropTypes.bool,
-  // Notification props
-  notifications: PropTypes.array,
-  notificationsOpen: PropTypes.bool,
-  unreadCount: PropTypes.number,
-  toggleNotifications: PropTypes.func,
-  closeNotifications: PropTypes.func,
-  markAsRead: PropTypes.func,
-  markAllAsRead: PropTypes.func,
-  deleteNotification: PropTypes.func,
-  clearAllNotifications: PropTypes.func,
-  getRelativeTime: PropTypes.func,
-  getPriorityColor: PropTypes.func,
-  getNotificationIcon: PropTypes.func,
   // Action handlers
   onAddCollaborator: PropTypes.func.isRequired,
 };
 
 SellerHeader.defaultProps = {
   shopLoading: false,
-  unreadCount: 0,
-  notifications: [],
-  notificationsOpen: false,
 };
 
 export default SellerHeader;

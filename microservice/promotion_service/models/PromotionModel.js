@@ -466,7 +466,7 @@ class PromotionModel {
 
       // 1. Tìm voucher đã sử dụng cho đơn hàng này
       const [usageRows] = await connection.execute(
-        "SELECT ID_Phieu, ID_ApMa FROM apma WHERE ID_DonHang = ? AND TrangThai = 'used'",
+        "SELECT ID_Phieu, ID_ApMa FROM apma WHERE ID_DonHang = ?",
         [orderId]
       );
 
@@ -485,11 +485,11 @@ class PromotionModel {
           [usage.ID_Phieu]
         );
 
-        // 3. Cập nhật trạng thái trong bảng apma
-        await connection.execute(
-          "UPDATE apma SET TrangThai = 'cancelled', GhiChu = CONCAT(IFNULL(GhiChu, ''), ' - Đã hủy do hủy đơn hàng') WHERE ID_ApMa = ?",
-          [usage.ID_ApMa]
-        );
+        // // 3. Cập nhật trạng thái trong bảng apma
+        // await connection.execute(
+        //   "UPDATE apma SET TrangThai = 'cancelled', GhiChu = CONCAT(IFNULL(GhiChu, ''), ' - Đã hủy do hủy đơn hàng') WHERE ID_ApMa = ?",
+        //   [usage.ID_ApMa]
+        // );
 
         console.log(
           `[PROMOTION_MODEL] Rolled back voucher ${usage.ID_Phieu} for order ${orderId}`

@@ -275,6 +275,8 @@ const Profile = () => {
         return orders.filter((order) => order.status === "confirmed");
       case "shipped":
         return orders.filter((order) => order.status === "shipped");
+      case "delivered":
+        return orders.filter((order) => order.status === "delivered");
       case "cancelled":
         return orders.filter((order) => order.status === "cancelled");
       default:
@@ -622,7 +624,15 @@ const Profile = () => {
                 }`}
                 onClick={() => setActiveOrderTab("shipped")}
               >
-                Đã nhận ({getOrderCount("shipped")})
+                Đang giao hàng ({getOrderCount("shipped")})
+              </div>
+              <div
+                className={`order-tab ${
+                  activeOrderTab === "delivered" ? "active" : ""
+                }`}
+                onClick={() => setActiveOrderTab("delivered")}
+              >
+                Đã nhận ({getOrderCount("delivered")})
               </div>
               <div
                 className={`order-tab ${
@@ -679,12 +689,14 @@ const Profile = () => {
                                   className={`fas ${
                                     order.status === "pending"
                                       ? "fa-clock"
-                                      : order.status === "completed"
+                                      : order.status === "confirmed"
                                       ? "fa-check-circle"
+                                      : order.status === "shipped"
+                                      ? "fa-truck-loading"
+                                      : order.status === "delivered"
+                                      ? "fa-check-double"
                                       : order.status === "cancelled"
                                       ? "fa-times-circle"
-                                      : order.status === "shipping"
-                                      ? "fa-truck"
                                       : "fa-hourglass-half"
                                   }`}
                                 ></i>
@@ -693,11 +705,11 @@ const Profile = () => {
                                   : order.status === "confirmed"
                                   ? "Chờ giao hàng"
                                   : order.status === "shipped"
-                                  ? "Đã nhận"
+                                  ? "Đang giao hàng"
                                   : order.status === "cancelled"
                                   ? "Đã hủy"
-                                  : order.status === "completed"
-                                  ? "Hoàn thành"
+                                  : order.status === "delivered"
+                                  ? "Đã nhận"
                                   : order.status || "Đang xử lý"}
                               </span>
                             </div>
@@ -800,6 +812,8 @@ const Profile = () => {
                           {activeOrderTab === "confirmed" &&
                             "Chưa có đơn hàng nào đang chờ giao hàng"}
                           {activeOrderTab === "shipped" &&
+                            "Chưa có đơn hàng nào đang giao hàng"}
+                          {activeOrderTab === "delivered" &&
                             "Chưa có đơn hàng nào đã nhận"}
                           {activeOrderTab === "cancelled" &&
                             "Chưa có đơn hàng nào bị hủy"}

@@ -61,14 +61,14 @@ const OrderDetailModal = ({ orderId, isOpen, onClose }) => {
           class: "confirmed",
         };
       case "shipped":
-        return { text: "Đã nhận", icon: "fa-check-circle", class: "shipped" };
+        return { text: "Đang giao", icon: "fa-check-circle", class: "shipped" };
       case "cancelled":
         return { text: "Đã hủy", icon: "fa-times-circle", class: "cancelled" };
-      case "completed":
+      case "delivered":
         return {
-          text: "Hoàn thành",
+          text: "Đã giao",
           icon: "fa-check-circle",
-          class: "completed",
+          class: "delivered",
         };
       default:
         return {

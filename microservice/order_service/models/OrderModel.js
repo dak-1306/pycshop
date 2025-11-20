@@ -406,7 +406,10 @@ class OrderModel {
 
   // Cập nhật trạng thái đơn hàng (cho seller)
   static async updateOrderStatus(orderId, newStatus, sellerId = null) {
+    const connection = await smartDB.getConnection();
+
     try {
+      await connection.beginTransaction();
       console.log(
         `[ORDER_MODEL] Updating order ${orderId} status to ${newStatus} by seller ${
           sellerId || "admin"
@@ -422,6 +425,7 @@ class OrderModel {
         "cancelled",
       ];
       if (!validStatuses.includes(newStatus)) {
+        await connection.rollback();
         return {
           success: false,
           message: "Trạng thái đơn hàng không hợp lệ",
@@ -430,7 +434,7 @@ class OrderModel {
 
       // If sellerId is provided, check if seller has products in this order
       if (sellerId) {
-        const [checkRows] = await smartDB.execute(
+        const [checkRows] = await connection.execute(
           `SELECT COUNT(*) as count
            FROM donhang dh
            INNER JOIN chitietdonhang ct ON dh.ID_DonHang = ct.ID_DonHang
@@ -440,6 +444,7 @@ class OrderModel {
         );
 
         if (checkRows[0].count === 0) {
+          await connection.rollback();
           return {
             success: false,
             message: "Bạn không có quyền cập nhật đơn hàng này",
@@ -447,13 +452,14 @@ class OrderModel {
         }
       }
 
-      // Check current order status
-      const [orderRows] = await smartDB.execute(
-        `SELECT TrangThai FROM donhang WHERE ID_DonHang = ?`,
+      // Check current order status WITH ROW LOCK to prevent race conditions
+      const [orderRows] = await connection.execute(
+        `SELECT TrangThai FROM donhang WHERE ID_DonHang = ? FOR UPDATE`,
         [orderId]
       );
 
       if (orderRows.length === 0) {
+        await connection.rollback();
         return {
           success: false,
           message: "Không tìm thấy đơn hàng",
@@ -461,20 +467,46 @@ class OrderModel {
       }
 
       const currentStatus = orderRows[0].TrangThai;
+      console.log(
+        `[ORDER_MODEL] Current status: ${currentStatus}, Target status: ${newStatus}`
+      );
 
       // Business logic for status transitions
       const statusTransitions = {
         pending: ["confirmed", "cancelled"],
-        confirmed: ["shipped", "cancelled"],
+        confirmed: ["shipped"],
         shipped: ["delivered"],
         delivered: [], // Final state
         cancelled: [], // Final state
       };
 
+      // Allow idempotent operations (setting the same status)
+      if (currentStatus === newStatus) {
+        console.log(
+          `[ORDER_MODEL] Idempotent operation detected: ${currentStatus} -> ${newStatus}`
+        );
+        await connection.commit();
+        return {
+          success: true,
+          message: "Trạng thái đơn hàng không thay đổi",
+          orderId: orderId,
+          oldStatus: currentStatus,
+          newStatus: newStatus,
+        };
+      }
+
       if (
         !statusTransitions[currentStatus] ||
         !statusTransitions[currentStatus].includes(newStatus)
       ) {
+        console.log(
+          `[ORDER_MODEL] Invalid transition: ${currentStatus} -> ${newStatus}`
+        );
+        console.log(
+          `[ORDER_MODEL] Valid transitions for ${currentStatus}:`,
+          statusTransitions[currentStatus]
+        );
+        await connection.rollback();
         return {
           success: false,
           message: `Không thể chuyển từ trạng thái "${currentStatus}" sang "${newStatus}"`,
@@ -482,24 +514,25 @@ class OrderModel {
       }
 
       // Update order status
-      await smartDB.execute(
+      await connection.execute(
         `UPDATE donhang SET TrangThai = ? WHERE ID_DonHang = ?`,
         [newStatus, orderId]
       );
 
       // Update delivery status if needed
       if (newStatus === "shipped") {
-        await smartDB.execute(
-          `UPDATE giaohang SET TrangThai = 'shipping', NgayVanChuyen = NOW() WHERE ID_DonHang = ?`,
+        await connection.execute(
+          `UPDATE giaohang SET TrangThai = 'out_for_delivery', NgayVanChuyen = NOW() WHERE ID_DonHang = ?`,
           [orderId]
         );
       } else if (newStatus === "delivered") {
-        await smartDB.execute(
+        await connection.execute(
           `UPDATE giaohang SET TrangThai = 'delivered', NgayGiaoToi = NOW() WHERE ID_DonHang = ?`,
           [orderId]
         );
       }
 
+      await connection.commit();
       console.log(
         `[ORDER_MODEL] Successfully updated order ${orderId} from ${currentStatus} to ${newStatus}`
       );
@@ -512,11 +545,14 @@ class OrderModel {
         newStatus: newStatus,
       };
     } catch (error) {
+      await connection.rollback();
       console.error(
         `[ORDER_MODEL] Error updating order status for order ${orderId}:`,
         error
       );
       throw error;
+    } finally {
+      connection.release();
     }
   }
 }

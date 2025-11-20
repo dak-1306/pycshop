@@ -13,6 +13,7 @@ const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const [lastRequestId, setLastRequestId] = useState(null);
   const { showSuccess, showError } = useToast();
 
   // Populate form when order changes
@@ -45,10 +46,31 @@ const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
       return;
     }
 
+    // Prevent duplicate requests in StrictMode
+    const requestId = `${Date.now()}-${Math.random()}`;
+    console.log(
+      `[MODAL] Request ID: ${requestId}, isLoading: ${isLoading}, lastRequestId: ${lastRequestId}`
+    );
+
+    if (isLoading) {
+      console.log("[MODAL] Request blocked - already loading");
+      return;
+    }
+
     setIsLoading(true);
+    setLastRequestId(requestId);
+    console.log(
+      `[MODAL] Starting request for order ${
+        order.orderId || order.id || order.ID_DonHang
+      } with status ${formData.status}`
+    );
 
     try {
       const orderId = order.orderId || order.id || order.ID_DonHang;
+
+      console.log(
+        `[MODAL] Updating order ${orderId} status to ${formData.status}`
+      );
 
       // Call OrderService to update status
       const response = await OrderService.updateOrderStatus(
@@ -78,6 +100,7 @@ const SellerOrderEditModal = ({ isOpen, onClose, order, onSave }) => {
       showError(error.message || "Lỗi khi cập nhật đơn hàng");
     } finally {
       setIsLoading(false);
+      setLastRequestId(null);
     }
   };
 

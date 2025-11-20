@@ -4,7 +4,7 @@ import { useCart } from "../../../context/CartContext";
 import { useToast } from "../../../hooks/useToast";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
-import userService from "../../../services/userService";
+import userService from "../../../services/userService.js";
 import VoucherModal from "../../../components/VoucherModal";
 
 const Checkout = () => {

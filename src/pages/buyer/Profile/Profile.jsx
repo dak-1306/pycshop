@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../hooks/useToast";
-import UserService from "../../../services/userService";
+import UserService from "../../../services/userService.js";
 import OrderService from "../../../services/orderService";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";

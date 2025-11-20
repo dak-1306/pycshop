@@ -366,6 +366,10 @@ export const getUserOrders = async (req, res) => {
 
     const result = await OrderModel.getUserOrders(userId, page, limit);
 
+    console.log(
+      `[ORDER_CONTROLLER] Retrieved ${result.orders.length} orders for user ${userId}`
+    );
+    console.log(`[ORDER_CONTROLLER] Orders:`, result.orders);
     res.json({
       success: true,
       data: result.orders,

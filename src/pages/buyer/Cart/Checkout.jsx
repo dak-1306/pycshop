@@ -209,7 +209,7 @@ const Checkout = () => {
         // Clear local cart items
         localStorage.removeItem("cartItems");
 
-        const successMessage = `Đặt hàng thành công! Mã đơn hàng: ${result.data.orderId}`;
+        const successMessage = `Đặt hàng thành công!`;
         setSuccess(
           successMessage + ". Bạn sẽ được chuyển đến trang theo dõi đơn hàng."
         );

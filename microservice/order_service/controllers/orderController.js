@@ -187,52 +187,64 @@ export const createOrder = async (req, res) => {
       itemsCount: orderData.items.length,
     });
 
-    // Tạo đơn hàng
+    // Tạo đơn hàng (có thể tạo nhiều đơn hàng cho các seller khác nhau)
     const result = await OrderModel.createOrder(orderData);
 
-    console.log(`[ORDER_CONTROLLER] Order created successfully:`, result);
+    console.log(`[ORDER_CONTROLLER] Orders created successfully:`, {
+      totalOrders: result.totalOrders,
+      orders: result.orders
+    });
 
     // Cập nhật tồn kho sau khi tạo đơn hàng thành công
-    try {
-      console.log(
-        `[ORDER_CONTROLLER] Updating inventory for order ${result.orderId}`
-      );
-      const inventoryUpdateResult =
-        await ProductService.updateInventoryAfterOrder(
-          result.orderId,
-          orderData.items
-        );
-
-      if (inventoryUpdateResult.success) {
+    // Cập nhật cho tất cả các đơn hàng đã tạo
+    for (const order of result.orders) {
+      try {
         console.log(
-          `[ORDER_CONTROLLER] Successfully updated inventory for order ${result.orderId}`
+          `[ORDER_CONTROLLER] Updating inventory for order ${order.orderId}`
         );
-      } else {
+        
+        // Lấy items của order này từ orderData.items dựa trên sellerId
+        const orderItems = orderData.items; // Tất cả items sẽ được xử lý bởi ProductService
+        
+        const inventoryUpdateResult =
+          await ProductService.updateInventoryAfterOrder(
+            order.orderId,
+            orderItems
+          );
+
+        if (inventoryUpdateResult.success) {
+          console.log(
+            `[ORDER_CONTROLLER] Successfully updated inventory for order ${order.orderId}`
+          );
+        } else {
+          console.error(
+            `[ORDER_CONTROLLER] Failed to update inventory for order ${order.orderId}:`,
+            inventoryUpdateResult.message
+          );
+          // Note: We don't fail the order here as the order was already created successfully
+          // In a production system, you might want to implement compensation logic
+        }
+      } catch (inventoryError) {
         console.error(
-          `[ORDER_CONTROLLER] Failed to update inventory for order ${result.orderId}:`,
-          inventoryUpdateResult.message
+          `[ORDER_CONTROLLER] Error updating inventory for order ${order.orderId}:`,
+          inventoryError
         );
         // Note: We don't fail the order here as the order was already created successfully
-        // In a production system, you might want to implement compensation logic
       }
-    } catch (inventoryError) {
-      console.error(
-        `[ORDER_CONTROLLER] Error updating inventory for order ${result.orderId}:`,
-        inventoryError
-      );
-      // Note: We don't fail the order here as the order was already created successfully
     }
 
     // Áp dụng voucher sau khi tạo đơn hàng thành công
-    if (validatedVoucher) {
+    // Chỉ áp dụng cho đơn hàng đầu tiên (hoặc có thể chia voucher theo tỷ lệ)
+    if (validatedVoucher && result.orders.length > 0) {
       try {
+        const firstOrderId = result.orders[0].orderId;
         console.log(
-          `[ORDER_CONTROLLER] Applying voucher ${validatedVoucher.code} for order ${result.orderId}`
+          `[ORDER_CONTROLLER] Applying voucher ${validatedVoucher.code} for order ${firstOrderId}`
         );
         const voucherResult = await PromotionService.useVoucher(
           validatedVoucher.id,
           userId,
-          result.orderId
+          firstOrderId
         );
 
         if (voucherResult.success) {
@@ -253,12 +265,11 @@ export const createOrder = async (req, res) => {
         );
         // Note: We don't fail the order here as the order was already created successfully
       }
-    }
-
-    // Clear user's cart after successful order creation
+    }    // Clear user's cart after successful order creation
     try {
+      const orderIds = result.orders.map(order => order.orderId);
       console.log(
-        `[ORDER_CONTROLLER] Clearing cart for user ${userId} after successful order ${result.orderId}`
+        `[ORDER_CONTROLLER] Clearing cart for user ${userId} after successful orders: ${orderIds.join(', ')}`
       );
 
       // Option 1: Clear entire cart (recommended for checkout process)
@@ -288,9 +299,10 @@ export const createOrder = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: "Đặt hàng thành công!",
+      message: `Đặt hàng thành công! Đã tạo ${result.totalOrders} đơn hàng.`,
       data: {
-        orderId: result.orderId,
+        orders: result.orders,
+        totalOrders: result.totalOrders,
         totalAmount: total,
         paymentMethod: paymentMethod,
       },

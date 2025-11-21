@@ -50,14 +50,14 @@ export const getBuyerOrderById = async (id) => {
 export const createOrder = async (orderData) => {
   try {
     const response = await api.post("/buyer/orders", orderData);
-    
+
     // Log the response to help with debugging
     console.log("[ORDER_SERVICE] Create order response:", {
       success: response.data?.success,
       totalOrders: response.data?.data?.totalOrders,
-      message: response.data?.message
+      message: response.data?.message,
     });
-    
+
     return response;
   } catch (error) {
     console.error("Error creating order:", error);

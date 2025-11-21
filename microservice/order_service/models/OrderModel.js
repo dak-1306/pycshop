@@ -16,9 +16,9 @@ class OrderModel {
         orderData;
 
       // 1. Lấy thông tin người bán cho từng sản phẩm
-      const productIds = items.map(item => item.productId);
+      const productIds = items.map((item) => item.productId);
       const placeholders = productIds.map(() => "?").join(",");
-      
+
       const [sellerData] = await connection.execute(
         `SELECT ID_SanPham, ID_NguoiBan FROM sanpham WHERE ID_SanPham IN (${placeholders})`,
         productIds
@@ -26,8 +26,10 @@ class OrderModel {
 
       // 2. Nhóm sản phẩm theo người bán
       const sellerGroups = {};
-      items.forEach(item => {
-        const productInfo = sellerData.find(p => p.ID_SanPham == item.productId);
+      items.forEach((item) => {
+        const productInfo = sellerData.find(
+          (p) => p.ID_SanPham == item.productId
+        );
         if (productInfo) {
           const sellerId = productInfo.ID_NguoiBan;
           if (!sellerGroups[sellerId]) {
@@ -37,7 +39,11 @@ class OrderModel {
         }
       });
 
-      console.log(`[ORDER_MODEL] Found ${Object.keys(sellerGroups).length} different sellers`);
+      console.log(
+        `[ORDER_MODEL] Found ${
+          Object.keys(sellerGroups).length
+        } different sellers`
+      );
 
       const createdOrders = [];
       const paymentMethodMap = {
@@ -53,10 +59,12 @@ class OrderModel {
       for (const [sellerId, sellerItems] of Object.entries(sellerGroups)) {
         // Tính tổng tiền cho đơn hàng của seller này
         const sellerTotal = sellerItems.reduce((sum, item) => {
-          return sum + (parseFloat(item.price) * parseInt(item.quantity));
+          return sum + parseFloat(item.price) * parseInt(item.quantity);
         }, 0);
 
-        console.log(`[ORDER_MODEL] Creating order for seller ${sellerId} with total: ${sellerTotal}`);
+        console.log(
+          `[ORDER_MODEL] Creating order for seller ${sellerId} with total: ${sellerTotal}`
+        );
 
         // Tạo đơn hàng cho seller này
         const [orderResult] = await connection.execute(
@@ -66,7 +74,9 @@ class OrderModel {
         );
 
         const orderId = orderResult.insertId;
-        console.log(`[ORDER_MODEL] Created order ID: ${orderId} for seller ${sellerId}`);
+        console.log(
+          `[ORDER_MODEL] Created order ID: ${orderId} for seller ${sellerId}`
+        );
 
         // Thêm chi tiết đơn hàng
         for (const item of sellerItems) {
@@ -86,7 +96,9 @@ class OrderModel {
            VALUES (?, ?, ?, NOW())`,
           [orderId, dbPaymentMethod, paymentStatus]
         );
-        console.log(`[ORDER_MODEL] Created payment record for order ${orderId}: ${dbPaymentMethod}`);
+        console.log(
+          `[ORDER_MODEL] Created payment record for order ${orderId}: ${dbPaymentMethod}`
+        );
 
         // Tạo thông tin giao hàng
         await connection.execute(
@@ -94,22 +106,26 @@ class OrderModel {
            VALUES (?, ?, 'undelivery')`,
           [orderId, shippingAddress]
         );
-        console.log(`[ORDER_MODEL] Created delivery record for order ${orderId}`);
+        console.log(
+          `[ORDER_MODEL] Created delivery record for order ${orderId}`
+        );
 
         createdOrders.push({
           orderId: orderId,
           sellerId: sellerId,
           items: sellerItems,
-          total: sellerTotal
+          total: sellerTotal,
         });
       }
 
       // Commit transaction
       await connection.commit();
-      console.log(`[ORDER_MODEL] Transaction committed successfully - Created ${createdOrders.length} orders`);
+      console.log(
+        `[ORDER_MODEL] Transaction committed successfully - Created ${createdOrders.length} orders`
+      );
 
       // Send notifications asynchronously
-      createdOrders.forEach(order => {
+      createdOrders.forEach((order) => {
         // Send notification to buyer for each order
         notificationHelper
           .createOrderNotification(userId, order.orderId, "pending")
@@ -148,11 +164,11 @@ class OrderModel {
 
       return {
         success: true,
-        orders: createdOrders.map(order => ({
+        orders: createdOrders.map((order) => ({
           orderId: order.orderId,
           sellerId: order.sellerId,
           total: order.total,
-          itemCount: order.items.length
+          itemCount: order.items.length,
         })),
         totalOrders: createdOrders.length,
         message: `Successfully created ${createdOrders.length} orders`,

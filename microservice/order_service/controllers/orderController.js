@@ -192,7 +192,7 @@ export const createOrder = async (req, res) => {
 
     console.log(`[ORDER_CONTROLLER] Orders created successfully:`, {
       totalOrders: result.totalOrders,
-      orders: result.orders
+      orders: result.orders,
     });
 
     // Cập nhật tồn kho sau khi tạo đơn hàng thành công
@@ -202,10 +202,10 @@ export const createOrder = async (req, res) => {
         console.log(
           `[ORDER_CONTROLLER] Updating inventory for order ${order.orderId}`
         );
-        
+
         // Lấy items của order này từ orderData.items dựa trên sellerId
         const orderItems = orderData.items; // Tất cả items sẽ được xử lý bởi ProductService
-        
+
         const inventoryUpdateResult =
           await ProductService.updateInventoryAfterOrder(
             order.orderId,
@@ -265,11 +265,13 @@ export const createOrder = async (req, res) => {
         );
         // Note: We don't fail the order here as the order was already created successfully
       }
-    }    // Clear user's cart after successful order creation
+    } // Clear user's cart after successful order creation
     try {
-      const orderIds = result.orders.map(order => order.orderId);
+      const orderIds = result.orders.map((order) => order.orderId);
       console.log(
-        `[ORDER_CONTROLLER] Clearing cart for user ${userId} after successful orders: ${orderIds.join(', ')}`
+        `[ORDER_CONTROLLER] Clearing cart for user ${userId} after successful orders: ${orderIds.join(
+          ", "
+        )}`
       );
 
       // Option 1: Clear entire cart (recommended for checkout process)

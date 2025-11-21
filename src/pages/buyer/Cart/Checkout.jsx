@@ -34,6 +34,55 @@ const Checkout = () => {
   const [showVoucherModal, setShowVoucherModal] = useState(false);
 
   useEffect(() => {
+    const loadDefaultAddress = async () => {
+      try {
+        setLoadingAddress(true);
+        const result = await userService.getUserAddresses();
+
+        if (result.success && result.data) {
+          console.log("Default address loaded:", result);
+          setAddress({
+            name: result.data.name,
+            phone: result.data.phone,
+            street: result.data.addresses,
+            ward: "",
+            district: "",
+            city: "",
+            isDefault: true,
+          });
+        } else {
+          // Nếu không có địa chỉ mặc định, sử dụng địa chỉ fallback
+          setAddress({
+            name: "Chưa có địa chỉ",
+            phone: "",
+            street: "Vui lòng thêm địa chỉ nhận hàng",
+            ward: "",
+            district: "",
+            city: "",
+            isDefault: false,
+          });
+          showError(
+            result.message ||
+              "Chưa có địa chỉ nhận hàng. Vui lòng thêm địa chỉ mới."
+          );
+        }
+      } catch (error) {
+        console.error("Error loading default address:", error);
+        setAddress({
+          name: "Lỗi tải địa chỉ",
+          phone: "",
+          street: "Không thể tải địa chỉ nhận hàng",
+          ward: "",
+          district: "",
+          city: "",
+          isDefault: false,
+        });
+        showError("Không thể tải địa chỉ nhận hàng. Vui lòng thử lại.");
+      } finally {
+        setLoadingAddress(false);
+      }
+    };
+
     // Get cart items from location state or localStorage
     const items =
       location.state?.cartItems ||
@@ -47,56 +96,7 @@ const Checkout = () => {
 
     // Load default address
     loadDefaultAddress();
-  }, [location.state, navigate]);
-
-  const loadDefaultAddress = async () => {
-    try {
-      setLoadingAddress(true);
-      const result = await userService.getUserAddresses();
-
-      if (result.success && result.data) {
-        console.log("Default address loaded:", result);
-        setAddress({
-          name: result.data.name,
-          phone: result.data.phone,
-          street: result.data.addresses,
-          ward: "",
-          district: "",
-          city: "",
-          isDefault: true,
-        });
-      } else {
-        // Nếu không có địa chỉ mặc định, sử dụng địa chỉ fallback
-        setAddress({
-          name: "Chưa có địa chỉ",
-          phone: "",
-          street: "Vui lòng thêm địa chỉ nhận hàng",
-          ward: "",
-          district: "",
-          city: "",
-          isDefault: false,
-        });
-        showError(
-          result.message ||
-            "Chưa có địa chỉ nhận hàng. Vui lòng thêm địa chỉ mới."
-        );
-      }
-    } catch (error) {
-      console.error("Error loading default address:", error);
-      setAddress({
-        name: "Lỗi tải địa chỉ",
-        phone: "",
-        street: "Không thể tải địa chỉ nhận hàng",
-        ward: "",
-        district: "",
-        city: "",
-        isDefault: false,
-      });
-      showError("Không thể tải địa chỉ nhận hàng. Vui lòng thử lại.");
-    } finally {
-      setLoadingAddress(false);
-    }
-  };
+  }, [location.state, navigate, showError]);
 
   // Calculate totals
   const subtotal = cartItems.reduce(

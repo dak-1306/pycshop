@@ -1,7 +1,7 @@
 import React from "react";
 import { OrderManagement } from "../../components/common/order";
 import OrderModal from "../../components/common/modals/OrderModal";
-import OrderDetailModal from "../../components/common/order/OrderDetailModal";
+import { OrderDetailModal } from "../../components/common/modals";
 import DeleteModal from "../../components/common/modals/DeleteModal";
 import AdminOrderEditModal from "../../components/admin/order/AdminOrderEditModal";
 import AdminOrderDetailModal from "../../components/admin/order/AdminOrderDetailModal";

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import NotificationService from "../services/notificationService.js";
-import { useToast } from "../hooks/useToast.js";
+import NotificationService from "../../../services/notificationService.js";
+import { useToast } from "../../../hooks/useToast.js";
 
-const NotificationPanel = ({ isOpen, onClose }) => {
+const NotificationDropdown = ({ isOpen, onClose }) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -112,6 +112,7 @@ const NotificationPanel = ({ isOpen, onClose }) => {
     if (isOpen) {
       loadNotifications(1, filterType);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, filterType]);
 
   // Filter change
@@ -309,4 +310,4 @@ const NotificationPanel = ({ isOpen, onClose }) => {
   );
 };
 
-export default NotificationPanel;
+export default NotificationDropdown;

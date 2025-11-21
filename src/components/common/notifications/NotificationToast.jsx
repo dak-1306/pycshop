@@ -1,6 +1,6 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useNotification } from "../context/NotificationContext.jsx";
+import { useNotification } from "../../../context/NotificationContext.jsx";
 
 const NotificationToast = () => {
   const { notifications, removeNotification } = useNotification();

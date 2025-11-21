@@ -1,7 +1,7 @@
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PropTypes from "prop-types";
-import NotificationPanel from "../../common/notifications/NotificationPanel";
+import { NotificationPanel } from "../../common/notifications";
 import ThemeToggle from "../../common/controls/ThemeToggle";
 import LanguageToggle from "../../common/controls/LanguageToggle";
 

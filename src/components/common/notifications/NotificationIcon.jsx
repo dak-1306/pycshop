@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import NotificationService from "../services/notificationService";
-import NotificationPanel from "./NotificationPanel";
+import NotificationService from "../../../services/notificationService";
+import NotificationDropdown from "./NotificationDropdown";
 
 const NotificationIcon = () => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -77,7 +77,7 @@ const NotificationIcon = () => {
         )}
       </button>
 
-      <NotificationPanel isOpen={showPanel} onClose={handleClosePanel} />
+      <NotificationDropdown isOpen={showPanel} onClose={handleClosePanel} />
     </>
   );
 };

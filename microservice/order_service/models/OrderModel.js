@@ -831,6 +831,27 @@ class OrderModel {
       };
     }
   }
+
+  // Lấy danh sách seller IDs từ order
+  static async getSellerIdsByOrderId(orderId) {
+    try {
+      const [rows] = await smartDB.execute(
+        `SELECT DISTINCT sp.ID_NguoiBan as sellerId
+         FROM chitietdonhang ct
+         INNER JOIN sanpham sp ON ct.ID_SanPham = sp.ID_SanPham
+         WHERE ct.ID_DonHang = ?`,
+        [orderId]
+      );
+
+      return rows.map((row) => row.sellerId);
+    } catch (error) {
+      console.error(
+        `[ORDER_MODEL] Error getting seller IDs for order ${orderId}:`,
+        error
+      );
+      return [];
+    }
+  }
 }
 
 export default OrderModel;

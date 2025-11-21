@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import SellerLayout from "../../components/layout/seller/SellerLayout";
 import { OrderManagement } from "../../components/common/order";
 import OrderModal from "../../components/common/modals/OrderModal";
@@ -6,6 +6,7 @@ import DeleteModal from "../../components/common/modals/DeleteModal";
 import OrderDetailModal from "../../components/common/order/OrderDetailModal";
 import SellerOrderEditModal from "../../components/seller/order/SellerOrderEditModal";
 import { useSellerOrders } from "../../hooks/seller/useSellerOrders";
+import { useOrderWebSocket } from "../../hooks/common/useWebSocket";
 
 // CSS animations (giữ nguyên)
 const styles = `
@@ -77,6 +78,43 @@ const Order = () => {
     // Utils
     getStatusInfo,
   } = useSellerOrders();
+
+  // Setup WebSocket for real-time updates
+  const { joinOrderRoom, leaveOrderRoom } = useOrderWebSocket({
+    onNewOrder: (data) => {
+      console.log('[SELLER_ORDERS] New order received:', data);
+      // Reload orders to show the new order
+      loadOrders();
+    },
+    onOrderUpdated: (data) => {
+      console.log('[SELLER_ORDERS] Order updated:', data);
+      // Reload orders to show updated status
+      loadOrders();
+    },
+    onOrderCancelled: (data) => {
+      console.log('[SELLER_ORDERS] Order cancelled:', data);
+      // Reload orders to reflect cancellation
+      loadOrders();
+    },
+    onRefreshOrdersList: (data) => {
+      console.log('[SELLER_ORDERS] Refresh orders list:', data);
+      // Reload orders when requested
+      loadOrders();
+    }
+  });
+
+  // Join order rooms when viewing order details
+  useEffect(() => {
+    if (selectedOrder) {
+      joinOrderRoom(selectedOrder.orderId || selectedOrder.ID_DonHang);
+    }
+
+    return () => {
+      if (selectedOrder) {
+        leaveOrderRoom(selectedOrder.orderId || selectedOrder.ID_DonHang);
+      }
+    };
+  }, [selectedOrder, joinOrderRoom, leaveOrderRoom]);
 
   return (
     <SellerLayout title="Quản lý đơn hàng">

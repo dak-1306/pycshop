@@ -50,26 +50,6 @@ services:
     networks:
       - kafka-network
 
-  redis:
-    image: redis:7-alpine
-    container_name: redis-pycshop
-    ports:
-      - "6379:6379"
-    command: redis-server --appendonly yes
-    volumes:
-      - redis_data:/data
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    networks:
-      - kafka-network
-
 networks:
   kafka-network:
     driver: bridge
-
-volumes:
-  redis_data:

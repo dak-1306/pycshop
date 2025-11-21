@@ -1,84 +1,140 @@
 import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NotificationService from "../services/notificationService";
-import NotificationPanel from "./NotificationPanel";
 
 const NotificationIcon = () => {
   const [unreadCount, setUnreadCount] = useState(0);
-  const [showPanel, setShowPanel] = useState(false);
+  const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Load unread count on component mount and periodically
+  // Load unread count on component mount
   const loadUnreadCount = async () => {
     try {
-      setIsLoading(true);
       const response = await NotificationService.getUnreadCount();
       if (response.success) {
         setUnreadCount(response.data.unreadCount);
       }
     } catch (error) {
       console.error("Error loading notification count:", error);
+    }
+  };
+
+  // Load recent notifications for dropdown
+  const loadRecentNotifications = async () => {
+    try {
+      setIsLoading(true);
+      const response = await NotificationService.getNotifications(1, 5, "all");
+      if (response.success) {
+        setNotifications(response.data.notifications || []);
+      }
+    } catch (error) {
+      console.error("Error loading notifications:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Load unread count on mount
+  // Mark as read
+  const markAsRead = async (notificationId) => {
+    try {
+      await NotificationService.markAsRead(notificationId);
+      setNotifications((prev) =>
+        prev.map((n) =>
+          n.notificationId === notificationId ? { ...n, isRead: true } : n
+        )
+      );
+      loadUnreadCount();
+    } catch (error) {
+      console.error("Error marking as read:", error);
+    }
+  };
+
   useEffect(() => {
     loadUnreadCount();
+    loadRecentNotifications();
 
-    // Refresh count every 30 seconds
-    const interval = setInterval(loadUnreadCount, 30000);
+    // Refresh every 30 seconds
+    const interval = setInterval(() => {
+      loadUnreadCount();
+      loadRecentNotifications();
+    }, 30000);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Listen for storage changes (when user interacts with notifications in another tab)
-  useEffect(() => {
-    const handleStorageChange = (e) => {
-      if (e.key === "notifications_updated") {
-        loadUnreadCount();
-      }
-    };
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = Math.floor((now - date) / 1000); // seconds
 
-    window.addEventListener("storage", handleStorageChange);
-    return () => window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  const handleClick = () => {
-    setShowPanel(!showPanel);
-    // Refresh count when opening panel
-    if (!showPanel) {
-      loadUnreadCount();
-    }
-  };
-
-  const handleClosePanel = () => {
-    setShowPanel(false);
-    // Refresh count when closing panel
-    loadUnreadCount();
+    if (diff < 60) return "Vừa xong";
+    if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+    return `${Math.floor(diff / 86400)} ngày trước`;
   };
 
   return (
-    <>
-      <button
-        onClick={handleClick}
-        className="relative p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-        title="Thông báo"
-      >
-        <FontAwesomeIcon
-          icon={["fas", "bell"]}
-          className={`w-5 h-5 ${isLoading ? "animate-pulse" : ""}`}
-        />
+    <div className="notification-container">
+      <div className="notification-icon">
+        <i className="fas fa-bell"></i>
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-medium">
+          <span className="notification-count">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-      </button>
+      </div>
 
-      <NotificationPanel isOpen={showPanel} onClose={handleClosePanel} />
-    </>
+      {/* Notification Dropdown */}
+      <div className="notification-dropdown">
+        <div className="notification-dropdown-header">
+          <h3>Thông báo mới nhận</h3>
+        </div>
+
+        <div className="notification-dropdown-content">
+          {isLoading ? (
+            <div className="notification-loading">
+              <i className="fas fa-spinner fa-spin"></i>
+              <p>Đang tải...</p>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="notification-empty">
+              <div className="notification-empty-icon">
+                <i className="fas fa-bell-slash"></i>
+              </div>
+              <p>Chưa có thông báo mới</p>
+            </div>
+          ) : (
+            <div className="notification-list">
+              {notifications.map((notification) => (
+                <div
+                  key={notification.notificationId}
+                  className={`notification-item ${!notification.isRead ? "unread" : ""}`}
+                  onClick={() => !notification.isRead && markAsRead(notification.notificationId)}
+                >
+                  <div className="notification-item-icon">
+                    <i className={`fas fa-${NotificationService.getNotificationIcon(notification.type)}`}></i>
+                  </div>
+                  <div className="notification-item-content">
+                    <p className="notification-item-text">{notification.content}</p>
+                    <span className="notification-item-time">
+                      {formatTime(notification.createdAt)}
+                    </span>
+                  </div>
+                  {!notification.isRead && (
+                    <div className="notification-item-badge"></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="notification-dropdown-footer">
+          <a href="/notifications" className="view-all-notifications">
+            Xem tất cả thông báo
+          </a>
+        </div>
+      </div>
+    </div>
   );
 };
 

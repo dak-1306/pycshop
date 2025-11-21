@@ -7,12 +7,15 @@ const ReviewList = ({ productId, newReview }) => {
   const [error, setError] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showAll, setShowAll] = useState(false);
+  const [starFilter, setStarFilter] = useState(0); // 0 = all stars
   const reviewsPerPage = 5;
 
   // Load reviews
   useEffect(() => {
     loadReviews();
-  }, [productId, currentPage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [productId, currentPage, starFilter]);
 
   // Add new review to list when received
   useEffect(() => {
@@ -26,9 +29,12 @@ const ReviewList = ({ productId, newReview }) => {
       setLoading(true);
       setError("");
 
-      const response = await fetch(
-        `http://localhost:5000/api/products/${productId}/reviews?page=${currentPage}&limit=${reviewsPerPage}`
-      );
+      let url = `http://localhost:5000/api/products/${productId}/reviews?page=${currentPage}&limit=${reviewsPerPage}`;
+      if (starFilter > 0) {
+        url += `&rating=${starFilter}`;
+      }
+
+      const response = await fetch(url);
 
       const data = await response.json();
 
@@ -127,6 +133,25 @@ const ReviewList = ({ productId, newReview }) => {
     <div className="reviews-section">
       <h3>Đánh giá sản phẩm</h3>
 
+      {/* Star Filter */}
+      <div className="star-filter">
+        <button
+          className={`star-filter-btn ${starFilter === 0 ? "active" : ""}`}
+          onClick={() => setStarFilter(0)}
+        >
+          Tất cả
+        </button>
+        {[5, 4, 3, 2, 1].map((star) => (
+          <button
+            key={star}
+            className={`star-filter-btn ${starFilter === star ? "active" : ""}`}
+            onClick={() => setStarFilter(star)}
+          >
+            {star} <span className="star-icon">★</span>
+          </button>
+        ))}
+      </div>
+
       {reviews.length === 0 ? (
         <div className="reviews-empty">
           <i className="fas fa-comment-slash"></i>
@@ -136,7 +161,7 @@ const ReviewList = ({ productId, newReview }) => {
       ) : (
         <>
           <div className="reviews-list">
-            {reviews.map((review) => (
+            {(showAll ? reviews : reviews.slice(0, 3)).map((review) => (
               <div key={review.ID_DanhGia} className="review-item">
                 <div className="review-header">
                   <div className="review-user-info">
@@ -162,6 +187,32 @@ const ReviewList = ({ productId, newReview }) => {
               </div>
             ))}
           </div>
+
+          {/* Show More Button */}
+          {!showAll && reviews.length > 3 && (
+            <div className="show-more-container">
+              <button
+                className="show-more-btn"
+                onClick={() => setShowAll(true)}
+              >
+                Xem thêm {reviews.length - 3} đánh giá
+                <i className="fas fa-chevron-down"></i>
+              </button>
+            </div>
+          )}
+
+          {/* Show Less Button */}
+          {showAll && reviews.length > 3 && (
+            <div className="show-more-container">
+              <button
+                className="show-more-btn"
+                onClick={() => setShowAll(false)}
+              >
+                Thu gọn
+                <i className="fas fa-chevron-up"></i>
+              </button>
+            </div>
+          )}
 
           {totalPages > 1 && (
             <div className="reviews-pagination">

@@ -120,7 +120,8 @@ app.use((req, res, next) => {
     req.url.startsWith("/shops") ||
     req.url.startsWith("/cart") ||
     req.url.startsWith("/api/reviews") ||
-    req.url.includes("/reviews")
+    req.url.includes("/reviews") ||
+    req.url.startsWith("/api/users") // Skip for user service (upload avatar)
   ) {
     console.log(`[GATEWAY] Skipping JSON parsing for proxy route: ${req.url}`);
     return next();

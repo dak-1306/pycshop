@@ -224,7 +224,7 @@ const Header = ({ onSearch }) => {
                       <i className="fas fa-user" style={{ color: "white" }}></i>
                     </div>
                     <span className="user-name">
-                      {user?.name || user?.email}
+                      {user?.HoTen || user?.TenDangNhap || user?.name || user?.Email}
                     </span>
                     <i
                       className="fas fa-chevron-down"

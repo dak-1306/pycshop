@@ -8,7 +8,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5007;
-const WS_PORT = process.env.WS_PORT || 5008;
+const WS_PORT = process.env.WS_PORT || 5018;
 
 // Middleware
 app.use(

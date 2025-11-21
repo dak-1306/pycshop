@@ -3,34 +3,7 @@ import CartService from "../services/cartService.js";
 import ProductService from "../services/productService.js";
 import PromotionService from "../services/promotionService.js";
 import kafkaService from "../../shared/kafka/KafkaService.js";
-// Send order created event to Kafka for real-time notifications
-try {
-  await kafkaService.sendOrderEvent("ORDER_CREATED", {
-    orders: result.orders,
-    buyerId: userId,
-    totalAmount: total,
-    paymentMethod: paymentMethod,
-    items: items,
-  });
-  console.log(`[ORDER_CONTROLLER] Order created event sent to Kafka`);
-} catch (kafkaError) {
-  console.error(
-    `[ORDER_CONTROLLER] Failed to send order event to Kafka:`,
-    kafkaError
-  );
-  // Don't fail the order creation if Kafka fails
-}
 
-res.status(201).json({
-  success: true,
-  message: `Đặt hàng thành công! Đã tạo ${result.totalOrders} đơn hàng.`,
-  data: {
-    orders: result.orders,
-    totalOrders: result.totalOrders,
-    totalAmount: total,
-    paymentMethod: paymentMethod,
-  },
-});
 export const createOrder = async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
@@ -324,6 +297,24 @@ export const createOrder = async (req, res) => {
         `[ORDER_CONTROLLER] Error clearing cart for user ${userId}:`,
         cartError
       );
+    }
+
+    // Send order created event to Kafka for real-time notifications
+    try {
+      await kafkaService.sendOrderEvent("ORDER_CREATED", {
+        orders: result.orders,
+        buyerId: userId,
+        totalAmount: total,
+        paymentMethod: paymentMethod,
+        items: items,
+      });
+      console.log(`[ORDER_CONTROLLER] Order created event sent to Kafka`);
+    } catch (kafkaError) {
+      console.error(
+        `[ORDER_CONTROLLER] Failed to send order event to Kafka:`,
+        kafkaError
+      );
+      // Don't fail the order creation if Kafka fails
     }
 
     res.status(201).json({

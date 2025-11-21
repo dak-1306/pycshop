@@ -3,31 +3,34 @@ import CartService from "../services/cartService.js";
 import ProductService from "../services/productService.js";
 import PromotionService from "../services/promotionService.js";
 import kafkaService from "../../shared/kafka/KafkaService.js";
-    // Send order created event to Kafka for real-time notifications
-    try {
-      await kafkaService.sendOrderEvent('ORDER_CREATED', {
-        orders: result.orders,
-        buyerId: userId,
-        totalAmount: total,
-        paymentMethod: paymentMethod,
-        items: items
-      });
-      console.log(`[ORDER_CONTROLLER] Order created event sent to Kafka`);
-    } catch (kafkaError) {
-      console.error(`[ORDER_CONTROLLER] Failed to send order event to Kafka:`, kafkaError);
-      // Don't fail the order creation if Kafka fails
-    }
+// Send order created event to Kafka for real-time notifications
+try {
+  await kafkaService.sendOrderEvent("ORDER_CREATED", {
+    orders: result.orders,
+    buyerId: userId,
+    totalAmount: total,
+    paymentMethod: paymentMethod,
+    items: items,
+  });
+  console.log(`[ORDER_CONTROLLER] Order created event sent to Kafka`);
+} catch (kafkaError) {
+  console.error(
+    `[ORDER_CONTROLLER] Failed to send order event to Kafka:`,
+    kafkaError
+  );
+  // Don't fail the order creation if Kafka fails
+}
 
-    res.status(201).json({
-      success: true,
-      message: `Đặt hàng thành công! Đã tạo ${result.totalOrders} đơn hàng.`,
-      data: {
-        orders: result.orders,
-        totalOrders: result.totalOrders,
-        totalAmount: total,
-        paymentMethod: paymentMethod,
-      },
-    });
+res.status(201).json({
+  success: true,
+  message: `Đặt hàng thành công! Đã tạo ${result.totalOrders} đơn hàng.`,
+  data: {
+    orders: result.orders,
+    totalOrders: result.totalOrders,
+    totalAmount: total,
+    paymentMethod: paymentMethod,
+  },
+});
 export const createOrder = async (req, res) => {
   try {
     const userId = req.headers["x-user-id"];
@@ -463,17 +466,22 @@ export const cancelOrder = async (req, res) => {
       if (orderInfo) {
         // Get seller info from order items
         const sellerIds = await OrderModel.getSellerIdsByOrderId(orderId);
-        
-        await kafkaService.sendOrderEvent('ORDER_CANCELLED', {
+
+        await kafkaService.sendOrderEvent("ORDER_CANCELLED", {
           orderId: result.orderId,
           buyerId: userId,
           sellerIds: sellerIds,
-          cancelledBy: 'buyer'
+          cancelledBy: "buyer",
         });
-        console.log(`[ORDER_CONTROLLER] Order cancelled event sent to Kafka for order ${orderId}`);
+        console.log(
+          `[ORDER_CONTROLLER] Order cancelled event sent to Kafka for order ${orderId}`
+        );
       }
     } catch (kafkaError) {
-      console.error(`[ORDER_CONTROLLER] Failed to send order cancel event to Kafka:`, kafkaError);
+      console.error(
+        `[ORDER_CONTROLLER] Failed to send order cancel event to Kafka:`,
+        kafkaError
+      );
       // Don't fail the cancellation if Kafka fails
     }
 
@@ -601,18 +609,23 @@ export const updateOrderStatus = async (req, res) => {
       // Get buyer ID from order
       const orderInfo = await OrderModel.getOrderById(orderId);
       if (orderInfo) {
-        await kafkaService.sendOrderEvent('ORDER_UPDATED', {
+        await kafkaService.sendOrderEvent("ORDER_UPDATED", {
           orderId: result.orderId,
           buyerId: orderInfo.userId,
           sellerId: userId,
           oldStatus: result.oldStatus,
           newStatus: result.newStatus,
-          updatedBy: 'seller'
+          updatedBy: "seller",
         });
-        console.log(`[ORDER_CONTROLLER] Order updated event sent to Kafka for order ${orderId}`);
+        console.log(
+          `[ORDER_CONTROLLER] Order updated event sent to Kafka for order ${orderId}`
+        );
       }
     } catch (kafkaError) {
-      console.error(`[ORDER_CONTROLLER] Failed to send order update event to Kafka:`, kafkaError);
+      console.error(
+        `[ORDER_CONTROLLER] Failed to send order update event to Kafka:`,
+        kafkaError
+      );
       // Don't fail the status update if Kafka fails
     }
 

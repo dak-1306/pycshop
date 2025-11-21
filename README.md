@@ -105,11 +105,13 @@ A modern, scalable e-commerce platform built with microservices architecture, fe
    ```
 
 5. **Start the full application with real-time notifications**
+
    ```bash
    npm run start:full-realtime
    ```
 
    Or for standard mode:
+
    ```bash
    npm run start:full
    ```
@@ -126,11 +128,13 @@ The application will be available at:
 For detailed setup and usage of the real-time notification system, see [REALTIME_SETUP.md](./REALTIME_SETUP.md).
 
 ### Quick Start Real-time
+
 ```bash
 npm run start:full-realtime
 ```
 
 This will start:
+
 - ✅ Kafka + Zookeeper
 - ✅ All microservices with real-time features
 - ✅ WebSocket server (port 5008)
@@ -161,33 +165,37 @@ pycshop/
 ## 🛠️ Available Scripts
 
 ### Development
-| Command                    | Description                         |
-| -------------------------- | ----------------------------------- |
-| `npm run dev`              | Start frontend development server   |
-| `npm run build`            | Build for production                |
-| `npm run backend`          | Start all microservices             |
-| `npm run fullstack`        | Start frontend + backend            |
+
+| Command             | Description                       |
+| ------------------- | --------------------------------- |
+| `npm run dev`       | Start frontend development server |
+| `npm run build`     | Build for production              |
+| `npm run backend`   | Start all microservices           |
+| `npm run fullstack` | Start frontend + backend          |
 
 ### Real-time System
-| Command                    | Description                              |
-| -------------------------- | ---------------------------------------- |
-| `npm run start:full-realtime` | **🚀 Start complete real-time system**   |
-| `npm run backend-realtime`    | Start backend with real-time features    |
-| `npm run start:backend-realtime` | Start Kafka + backend real-time       |
+
+| Command                          | Description                            |
+| -------------------------------- | -------------------------------------- |
+| `npm run start:full-realtime`    | **🚀 Start complete real-time system** |
+| `npm run backend-realtime`       | Start backend with real-time features  |
+| `npm run start:backend-realtime` | Start Kafka + backend real-time        |
 
 ### Infrastructure
-| Command               | Description                       |
-| --------------------- | --------------------------------- |
-| `npm run kafka:start` | Start Kafka infrastructure        |
-| `npm run kafka:stop`  | Stop Kafka infrastructure         |
-| `npm run kafka:ui`    | Open Kafka UI monitor             |
+
+| Command                  | Description                        |
+| ------------------------ | ---------------------------------- |
+| `npm run kafka:start`    | Start Kafka infrastructure         |
+| `npm run kafka:stop`     | Stop Kafka infrastructure          |
+| `npm run kafka:ui`       | Open Kafka UI monitor              |
 | `npm run services:start` | Start all services (Kafka + Redis) |
 
 ### Database
-| Command               | Description                       |
-| --------------------- | --------------------------------- |
-| `npm run setup-db`    | Initialize database schema        |
-| `npm run optimize-db` | Optimize database performance     |
+
+| Command               | Description                   |
+| --------------------- | ----------------------------- |
+| `npm run setup-db`    | Initialize database schema    |
+| `npm run optimize-db` | Optimize database performance |
 
 ## 🔧 Configuration
 

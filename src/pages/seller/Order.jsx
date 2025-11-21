@@ -82,25 +82,25 @@ const Order = () => {
   // Setup WebSocket for real-time updates
   const { joinOrderRoom, leaveOrderRoom } = useOrderWebSocket({
     onNewOrder: (data) => {
-      console.log('[SELLER_ORDERS] New order received:', data);
+      console.log("[SELLER_ORDERS] New order received:", data);
       // Reload orders to show the new order
       loadOrders();
     },
     onOrderUpdated: (data) => {
-      console.log('[SELLER_ORDERS] Order updated:', data);
+      console.log("[SELLER_ORDERS] Order updated:", data);
       // Reload orders to show updated status
       loadOrders();
     },
     onOrderCancelled: (data) => {
-      console.log('[SELLER_ORDERS] Order cancelled:', data);
+      console.log("[SELLER_ORDERS] Order cancelled:", data);
       // Reload orders to reflect cancellation
       loadOrders();
     },
     onRefreshOrdersList: (data) => {
-      console.log('[SELLER_ORDERS] Refresh orders list:', data);
+      console.log("[SELLER_ORDERS] Refresh orders list:", data);
       // Reload orders when requested
       loadOrders();
-    }
+    },
   });
 
   // Join order rooms when viewing order details

@@ -1,6 +1,6 @@
-import React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useNotification } from '../context/NotificationContext.jsx';
+import React from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useNotification } from "../context/NotificationContext.jsx";
 
 const NotificationToast = () => {
   const { notifications, removeNotification } = useNotification();
@@ -9,22 +9,22 @@ const NotificationToast = () => {
 
   const getIcon = (type) => {
     const iconMap = {
-      success: 'check-circle',
-      error: 'exclamation-circle',
-      warning: 'exclamation-triangle',
-      info: 'info-circle',
+      success: "check-circle",
+      error: "exclamation-circle",
+      warning: "exclamation-triangle",
+      info: "info-circle",
     };
-    return iconMap[type] || 'bell';
+    return iconMap[type] || "bell";
   };
 
   const getStyles = (type) => {
     const styleMap = {
-      success: 'bg-green-500 border-green-600',
-      error: 'bg-red-500 border-red-600',
-      warning: 'bg-yellow-500 border-yellow-600',
-      info: 'bg-blue-500 border-blue-600',
+      success: "bg-green-500 border-green-600",
+      error: "bg-red-500 border-red-600",
+      warning: "bg-yellow-500 border-yellow-600",
+      info: "bg-blue-500 border-blue-600",
     };
-    return styleMap[type] || 'bg-gray-500 border-gray-600';
+    return styleMap[type] || "bg-gray-500 border-gray-600";
   };
 
   return (
@@ -40,15 +40,15 @@ const NotificationToast = () => {
             <div className="flex items-start">
               <div className="flex-shrink-0">
                 <FontAwesomeIcon
-                  icon={['fas', getIcon(notification.type)]}
+                  icon={["fas", getIcon(notification.type)]}
                   className={`w-5 h-5 ${
-                    notification.type === 'success'
-                      ? 'text-green-500'
-                      : notification.type === 'error'
-                      ? 'text-red-500'
-                      : notification.type === 'warning'
-                      ? 'text-yellow-500'
-                      : 'text-blue-500'
+                    notification.type === "success"
+                      ? "text-green-500"
+                      : notification.type === "error"
+                      ? "text-red-500"
+                      : notification.type === "warning"
+                      ? "text-yellow-500"
+                      : "text-blue-500"
                   }`}
                 />
               </div>
@@ -65,7 +65,10 @@ const NotificationToast = () => {
                   onClick={() => removeNotification(notification.id)}
                   className="inline-flex text-gray-400 hover:text-gray-600 focus:outline-none focus:text-gray-600 transition ease-in-out duration-150"
                 >
-                  <FontAwesomeIcon icon={['fas', 'times']} className="w-4 h-4" />
+                  <FontAwesomeIcon
+                    icon={["fas", "times"]}
+                    className="w-4 h-4"
+                  />
                 </button>
               </div>
             </div>

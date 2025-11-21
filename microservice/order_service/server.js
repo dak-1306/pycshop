@@ -129,22 +129,21 @@ async function startServers() {
     await webSocketServer.initialize();
     await webSocketServer.start(WS_PORT);
     console.log(`[ORDER_SERVICE] WebSocket Server running on port ${WS_PORT}`);
-    
   } catch (error) {
-    console.error('[ORDER_SERVICE] Failed to start servers:', error);
+    console.error("[ORDER_SERVICE] Failed to start servers:", error);
     process.exit(1);
   }
 }
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
-  console.log('[ORDER_SERVICE] Received SIGTERM, shutting down gracefully...');
+process.on("SIGTERM", async () => {
+  console.log("[ORDER_SERVICE] Received SIGTERM, shutting down gracefully...");
   await webSocketServer.stop();
   process.exit(0);
 });
 
-process.on('SIGINT', async () => {
-  console.log('[ORDER_SERVICE] Received SIGINT, shutting down gracefully...');
+process.on("SIGINT", async () => {
+  console.log("[ORDER_SERVICE] Received SIGINT, shutting down gracefully...");
   await webSocketServer.stop();
   process.exit(0);
 });

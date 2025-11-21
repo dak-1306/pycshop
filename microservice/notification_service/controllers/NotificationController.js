@@ -218,13 +218,18 @@ class NotificationController {
       // Send notification event to Kafka for real-time updates
       if (result.success && result.notification) {
         try {
-          await kafkaService.sendNotificationEvent('NOTIFICATION_CREATED', {
+          await kafkaService.sendNotificationEvent("NOTIFICATION_CREATED", {
             userId: userId,
-            notification: result.notification
+            notification: result.notification,
           });
-          console.log(`[NOTIFICATION_CONTROLLER] Notification event sent to Kafka for user ${userId}`);
+          console.log(
+            `[NOTIFICATION_CONTROLLER] Notification event sent to Kafka for user ${userId}`
+          );
         } catch (kafkaError) {
-          console.error(`[NOTIFICATION_CONTROLLER] Failed to send notification event to Kafka:`, kafkaError);
+          console.error(
+            `[NOTIFICATION_CONTROLLER] Failed to send notification event to Kafka:`,
+            kafkaError
+          );
           // Don't fail the notification creation if Kafka fails
         }
       }
@@ -270,13 +275,18 @@ class NotificationController {
       // Send notification event to Kafka for real-time updates
       if (result.success && result.notification) {
         try {
-          await kafkaService.sendNotificationEvent('NOTIFICATION_CREATED', {
+          await kafkaService.sendNotificationEvent("NOTIFICATION_CREATED", {
             userId: userId,
-            notification: result.notification
+            notification: result.notification,
           });
-          console.log(`[NOTIFICATION_CONTROLLER] Notification event sent to Kafka for user ${userId}`);
+          console.log(
+            `[NOTIFICATION_CONTROLLER] Notification event sent to Kafka for user ${userId}`
+          );
         } catch (kafkaError) {
-          console.error(`[NOTIFICATION_CONTROLLER] Failed to send notification event to Kafka:`, kafkaError);
+          console.error(
+            `[NOTIFICATION_CONTROLLER] Failed to send notification event to Kafka:`,
+            kafkaError
+          );
           // Don't fail the notification creation if Kafka fails
         }
       }

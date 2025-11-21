@@ -112,8 +112,8 @@ const ProductDetail = () => {
             }
           } catch (similarError) {
             console.error("Error loading similar products:", similarError);
-            // Keep mock similar products as fallback
-            setSimilarProducts(mockSimilarProducts);
+            // Keep empty array as fallback
+            setSimilarProducts([]);
           }
 
           setLoading(false);
@@ -130,7 +130,6 @@ const ProductDetail = () => {
     if (id) {
       loadProduct();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]); // Only depend on id
 
   // Check if user has reviewed this product

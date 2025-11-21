@@ -57,10 +57,10 @@ class OrderModel {
 
       // 3. Tạo đơn hàng riêng cho từng người bán
       const totalSellers = Object.keys(sellerGroups).length;
-      
+
       for (const [sellerId, sellerItems] of Object.entries(sellerGroups)) {
         let sellerTotal;
-        
+
         if (totalSellers === 1) {
           // Nếu chỉ có 1 seller, sử dụng totalAmount đã tính toán (bao gồm voucher và phí ship)
           sellerTotal = parseFloat(totalAmount);
@@ -72,14 +72,15 @@ class OrderModel {
           const sellerItemsTotal = sellerItems.reduce((sum, item) => {
             return sum + parseFloat(item.price) * parseInt(item.quantity);
           }, 0);
-          
+
           const allItemsTotal = items.reduce((sum, item) => {
             return sum + parseFloat(item.price) * parseInt(item.quantity);
           }, 0);
-          
+
           // Phân bổ totalAmount theo tỷ lệ
-          sellerTotal = (sellerItemsTotal / allItemsTotal) * parseFloat(totalAmount);
-          
+          sellerTotal =
+            (sellerItemsTotal / allItemsTotal) * parseFloat(totalAmount);
+
           console.log(
             `[ORDER_MODEL] Multi-seller order - proportional amount for seller ${sellerId}: ${sellerTotal}`
           );

@@ -107,14 +107,25 @@ const NotificationIcon = () => {
               {notifications.map((notification) => (
                 <div
                   key={notification.notificationId}
-                  className={`notification-item ${!notification.isRead ? "unread" : ""}`}
-                  onClick={() => !notification.isRead && markAsRead(notification.notificationId)}
+                  className={`notification-item ${
+                    !notification.isRead ? "unread" : ""
+                  }`}
+                  onClick={() =>
+                    !notification.isRead &&
+                    markAsRead(notification.notificationId)
+                  }
                 >
                   <div className="notification-item-icon">
-                    <i className={`fas fa-${NotificationService.getNotificationIcon(notification.type)}`}></i>
+                    <i
+                      className={`fas fa-${NotificationService.getNotificationIcon(
+                        notification.type
+                      )}`}
+                    ></i>
                   </div>
                   <div className="notification-item-content">
-                    <p className="notification-item-text">{notification.content}</p>
+                    <p className="notification-item-text">
+                      {notification.content}
+                    </p>
                     <span className="notification-item-time">
                       {formatTime(notification.createdAt)}
                     </span>

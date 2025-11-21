@@ -49,6 +49,17 @@ class UserService {
     }
   }
 
+  // Lấy danh sách users (Admin function)
+  async getUsers(params = {}) {
+    try {
+      const queryString = new URLSearchParams(params).toString();
+      const response = await this.api.get(`/?${queryString}`);
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
   // Lấy danh sách địa chỉ của user
   async getUserAddresses() {
     try {

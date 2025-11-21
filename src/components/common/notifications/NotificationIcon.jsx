@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NotificationService from "../services/notificationService";
+import NotificationPanel from "./NotificationPanel";
 
 const NotificationIcon = () => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -81,71 +83,10 @@ const NotificationIcon = () => {
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
-      </div>
+      </button>
 
-      {/* Notification Dropdown */}
-      <div className="notification-dropdown">
-        <div className="notification-dropdown-header">
-          <h3>Thông báo mới nhận</h3>
-        </div>
-
-        <div className="notification-dropdown-content">
-          {isLoading ? (
-            <div className="notification-loading">
-              <i className="fas fa-spinner fa-spin"></i>
-              <p>Đang tải...</p>
-            </div>
-          ) : notifications.length === 0 ? (
-            <div className="notification-empty">
-              <div className="notification-empty-icon">
-                <i className="fas fa-bell-slash"></i>
-              </div>
-              <p>Chưa có thông báo mới</p>
-            </div>
-          ) : (
-            <div className="notification-list">
-              {notifications.map((notification) => (
-                <div
-                  key={notification.notificationId}
-                  className={`notification-item ${
-                    !notification.isRead ? "unread" : ""
-                  }`}
-                  onClick={() =>
-                    !notification.isRead &&
-                    markAsRead(notification.notificationId)
-                  }
-                >
-                  <div className="notification-item-icon">
-                    <i
-                      className={`fas fa-${NotificationService.getNotificationIcon(
-                        notification.type
-                      )}`}
-                    ></i>
-                  </div>
-                  <div className="notification-item-content">
-                    <p className="notification-item-text">
-                      {notification.content}
-                    </p>
-                    <span className="notification-item-time">
-                      {formatTime(notification.createdAt)}
-                    </span>
-                  </div>
-                  {!notification.isRead && (
-                    <div className="notification-item-badge"></div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="notification-dropdown-footer">
-          <a href="/notifications" className="view-all-notifications">
-            Xem tất cả thông báo
-          </a>
-        </div>
-      </div>
-    </div>
+      <NotificationPanel isOpen={showPanel} onClose={handleClosePanel} />
+    </>
   );
 };
 

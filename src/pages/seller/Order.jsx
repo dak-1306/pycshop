@@ -3,7 +3,7 @@ import SellerLayout from "../../components/layout/seller/SellerLayout";
 import { OrderManagement } from "../../components/common/order";
 import OrderModal from "../../components/common/modals/OrderModal";
 import DeleteModal from "../../components/common/modals/DeleteModal";
-import OrderDetailModal from "../../components/common/order/OrderDetailModal";
+import { OrderDetailModal } from "../../components/common/modals";
 import SellerOrderEditModal from "../../components/seller/order/SellerOrderEditModal";
 import { useSellerOrders } from "../../hooks/seller/useSellerOrders";
 import { useOrderWebSocket } from "../../hooks/common/useWebSocket";

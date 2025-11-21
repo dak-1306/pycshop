@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PropTypes from "prop-types";
-import NotificationIcon from "../../NotificationIcon";
+import { NotificationIcon } from "../../common/notifications";
 import logoImage from "../../../images/logo.svg";
 
 // CSS styles for seller header notification

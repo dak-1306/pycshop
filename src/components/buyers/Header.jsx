@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
-import NotificationIcon from "../NotificationIcon";
+import { NotificationIcon } from "../common/notifications";
 import "../../styles/components/buyer/Header.css";
 import logoImage from "../../images/logo.svg";
 

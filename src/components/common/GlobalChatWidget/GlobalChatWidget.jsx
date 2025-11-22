@@ -20,6 +20,8 @@ const GlobalChatWidget = () => {
     },
   ]);
   const [newMessage, setNewMessage] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showAttachMenu, setShowAttachMenu] = useState(false);
   const messagesEndRef = useRef(null);
 
   // Mock data cho danh sách shop
@@ -224,14 +226,14 @@ const GlobalChatWidget = () => {
                   onClick={handleMinimize}
                   title="Thu nhỏ"
                 >
-                  ➖
+                  <i className="fas fa-minus"></i>
                 </button>
                 <button
                   className="close-btn"
                   onClick={handleClose}
                   title="Đóng"
                 >
-                  ✕
+                  <i className="fas fa-times"></i>
                 </button>
               </div>
             </div>
@@ -255,6 +257,55 @@ const GlobalChatWidget = () => {
 
             <div className="chat-input">
               <div className="input-container">
+                {/* Attach Menu */}
+                {showAttachMenu && (
+                  <div className="attach-menu">
+                    <button className="attach-menu-item" title="Gửi ảnh">
+                      <i className="fas fa-image"></i>
+                      <span>Ảnh</span>
+                    </button>
+                    <button className="attach-menu-item" title="Gửi file">
+                      <i className="fas fa-file"></i>
+                      <span>File</span>
+                    </button>
+                    <button className="attach-menu-item" title="Gửi vị trí">
+                      <i className="fas fa-map-marker-alt"></i>
+                      <span>Vị trí</span>
+                    </button>
+                  </div>
+                )}
+
+                {/* Emoji Picker */}
+                {showEmojiPicker && (
+                  <div className="emoji-picker">
+                    {["😊", "😂", "❤️", "👍", "🎉", "😢", "😍", "🔥", "👏", "🙏", "💯", "😎", "🤔", "😅", "🥰"].map((emoji, index) => (
+                      <button
+                        key={index}
+                        className="emoji-item"
+                        onClick={() => {
+                          setNewMessage(newMessage + emoji);
+                          setShowEmojiPicker(false);
+                        }}
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <div className="input-actions-left">
+                  <button 
+                    className="input-action-btn" 
+                    title="Đính kèm"
+                    onClick={() => {
+                      setShowAttachMenu(!showAttachMenu);
+                      setShowEmojiPicker(false);
+                    }}
+                  >
+                    <i className="fas fa-plus-circle"></i>
+                  </button>
+                </div>
+
                 <textarea
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
@@ -264,14 +315,15 @@ const GlobalChatWidget = () => {
                   rows="1"
                 />
                 <div className="input-actions">
-                  <button className="input-action-btn" title="Gửi ảnh">
-                    📷
-                  </button>
-                  <button className="input-action-btn" title="Gửi file">
-                    📎
-                  </button>
-                  <button className="input-action-btn" title="Emoji">
-                    😊
+                  <button 
+                    className="input-action-btn" 
+                    title="Emoji"
+                    onClick={() => {
+                      setShowEmojiPicker(!showEmojiPicker);
+                      setShowAttachMenu(false);
+                    }}
+                  >
+                    <i className="far fa-smile"></i>
                   </button>
                 </div>
               </div>
@@ -281,7 +333,7 @@ const GlobalChatWidget = () => {
                 disabled={!newMessage.trim()}
                 title="Gửi tin nhắn"
               >
-                📤
+                <i className="fas fa-paper-plane"></i>
               </button>
             </div>
           </div>

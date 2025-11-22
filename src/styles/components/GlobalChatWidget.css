@@ -12,7 +12,7 @@
   width: 60px;
   height: 60px;
   border-radius: 50%;
-  background: #ff6b35;
+  background: #42b883;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -101,7 +101,7 @@
 }
 
 .chat-search input:focus {
-  border-color: #ff6b35;
+  border-color: #42b883;
   background: white;
 }
 
@@ -125,7 +125,7 @@
 
 .chat-sidebar .shop-item.active {
   background: #e7f3ff;
-  border-right: 3px solid #ff6b35;
+  border-right: 3px solid #42b883;
 }
 
 .chat-sidebar .shop-item-avatar {
@@ -164,9 +164,13 @@
   color: #65676b;
   margin-left: 8px;
 }
-
+.fa-paper-plane {
+  position: relative;
+  left: 4px;
+  bottom: 5px;
+}
 .chat-sidebar .shop-item-badge {
-  background: #ff6b35;
+  background: #f43b2b;
   color: white;
   border-radius: 12px;
   padding: 2px 6px;
@@ -320,6 +324,103 @@
   border-radius: 20px;
   padding: 8px 16px;
   min-height: 36px;
+  position: relative;
+}
+
+/* Attach Menu */
+.attach-menu {
+  position: absolute;
+  bottom: 100%;
+  left: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+  margin-bottom: 8px;
+  display: flex;
+  gap: 8px;
+  animation: slideUp 0.2s ease;
+}
+
+.attach-menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  background: #f0f2f5;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 70px;
+}
+
+.attach-menu-item:hover {
+  background: #e4e6ea;
+  transform: translateY(-2px);
+}
+
+.attach-menu-item i {
+  font-size: 20px;
+  color: #42b883;
+}
+
+.attach-menu-item span {
+  font-size: 12px;
+  color: #65676b;
+}
+
+/* Emoji Picker */
+.emoji-picker {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  margin-bottom: 8px;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  width: 300px;
+  animation: slideUp 0.2s ease;
+}
+
+.emoji-item {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.emoji-item:hover {
+  background: #f0f2f5;
+  transform: scale(1.2);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.input-actions-left {
+  display: flex;
+  align-items: center;
+  margin-right: 8px;
 }
 
 .message-input {
@@ -364,7 +465,7 @@
 }
 
 .send-btn {
-  background: #ff6b35;
+  background: #42b883;
   border: none;
   padding: 8px;
   border-radius: 50%;
@@ -387,13 +488,32 @@
   cursor: not-allowed;
   transform: none;
 }
-
+.fa-camera,
+.fa-smile,
+.fa-minus,
+.fa-times,
+.fa-plus-circle {
+  font-size: 1.2rem;
+  position: relative;
+  top: -5px;
+  left: 5px;
+}
+.fa-plus-circle {
+  top: -4px;
+}
+.fa-minus,
+.fa-times {
+  top: 0;
+}
 /* Scrollbar styles */
 .chat-messages::-webkit-scrollbar,
 .chat-sidebar .shop-list::-webkit-scrollbar {
   width: 4px;
 }
-
+.attach-menu i {
+  position: relative;
+  left: 5px;
+}
 .chat-messages::-webkit-scrollbar-track,
 .chat-sidebar .shop-list::-webkit-scrollbar-track {
   background: transparent;

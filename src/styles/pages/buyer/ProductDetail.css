@@ -286,7 +286,11 @@
   color: #ccc;
   cursor: not-allowed;
 }
-
+.fa-plus {
+  color: #166534 !important;
+  position: relative;
+  top: 0px !important;
+}
 .pd-quantity-input {
   width: 60px;
   height: 32px;
@@ -715,7 +719,7 @@
   .pd-container {
     width: 90% !important;
   }
-  
+
   .pd-content {
     grid-template-columns: 1fr;
     gap: 20px;

@@ -351,9 +351,7 @@ const ShopProfile = () => {
                   onClick={handleFollowShop}
                 >
                   <i
-                    className={`fas ${
-                      shop.isFollowing ? "fa-check" : "fa-plus"
-                    }`}
+                    className={`fas ${shop.isFollowing ? "fa-check" : ""}`}
                   ></i>
                   {shop.isFollowing ? "Đang theo dõi" : "Theo dõi"}
                 </button>
@@ -496,10 +494,7 @@ const ShopProfile = () => {
                           Đang tải...
                         </>
                       ) : (
-                        <>
-                          <i className="fas fa-plus"></i>
-                          Xem thêm sản phẩm
-                        </>
+                        <>Xem thêm sản phẩm</>
                       )}
                     </button>
                   </div>

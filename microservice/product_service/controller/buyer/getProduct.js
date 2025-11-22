@@ -209,9 +209,9 @@ export const searchProducts = async (req, res) => {
 export const getProductReviews = async (req, res) => {
   try {
     const { id } = req.params;
-    const { page = 1, limit = 10 } = req.query;
+    const { page = 1, limit = 10, rating } = req.query;
 
-    console.log(`[PRODUCT_CONTROLLER] Get reviews for product ID: ${id}`);
+    console.log(`[PRODUCT_CONTROLLER] Get reviews for product ID: ${id}, rating filter: ${rating}`);
 
     if (!id || isNaN(id)) {
       return res.status(400).json({
@@ -222,8 +222,9 @@ export const getProductReviews = async (req, res) => {
 
     const pageNum = Math.max(1, parseInt(page));
     const limitNum = Math.min(Math.max(1, parseInt(limit)), 50);
+    const ratingFilter = rating ? parseInt(rating) : null;
 
-    const result = await Product.getProductReviews(id, pageNum, limitNum);
+    const result = await Product.getProductReviews(id, pageNum, limitNum, ratingFilter);
 
     console.log(`[PRODUCT_CONTROLLER] Found ${result.reviews.length} reviews`);
 

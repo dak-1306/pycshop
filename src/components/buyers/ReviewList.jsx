@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../../styles/components/buyer/ReviewList.css";
 
 const ReviewList = ({ productId, newReview }) => {
+  const [allReviews, setAllReviews] = useState([]); // Store all reviews
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,7 +16,17 @@ const ReviewList = ({ productId, newReview }) => {
   useEffect(() => {
     loadReviews();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [productId, currentPage, starFilter]);
+  }, [productId, currentPage]);
+
+  // Filter reviews when starFilter changes
+  useEffect(() => {
+    if (starFilter === 0) {
+      setReviews(allReviews);
+    } else {
+      const filtered = allReviews.filter(review => review.TyLe === starFilter);
+      setReviews(filtered);
+    }
+  }, [starFilter, allReviews]);
 
   // Add new review to list when received
   useEffect(() => {
@@ -30,20 +41,30 @@ const ReviewList = ({ productId, newReview }) => {
       setError("");
 
       let url = `http://localhost:5000/api/products/${productId}/reviews?page=${currentPage}&limit=${reviewsPerPage}`;
-      if (starFilter > 0) {
-        url += `&rating=${starFilter}`;
-      }
+
+      console.log('[ReviewList] Loading reviews with URL:', url);
 
       const response = await fetch(url);
 
       const data = await response.json();
+      
+      console.log('[ReviewList] Response data:', data);
 
       if (!response.ok) {
         throw new Error(data.message || "Lỗi khi tải đánh giá");
       }
 
-      setReviews(data.data || []);
-      setTotalPages(data.totalPages || 1);
+      const fetchedReviews = data.data || [];
+      setAllReviews(fetchedReviews);
+      
+      // Apply filter
+      if (starFilter === 0) {
+        setReviews(fetchedReviews);
+      } else {
+        setReviews(fetchedReviews.filter(review => review.TyLe === starFilter));
+      }
+      
+      setTotalPages(data.pagination?.totalPages || 1);
     } catch (error) {
       console.error("Error loading reviews:", error);
       setError("Không thể tải đánh giá. Vui lòng thử lại.");
@@ -137,7 +158,10 @@ const ReviewList = ({ productId, newReview }) => {
       <div className="star-filter">
         <button
           className={`star-filter-btn ${starFilter === 0 ? "active" : ""}`}
-          onClick={() => setStarFilter(0)}
+          onClick={() => {
+            setStarFilter(0);
+            setCurrentPage(1);
+          }}
         >
           Tất cả
         </button>
@@ -145,7 +169,10 @@ const ReviewList = ({ productId, newReview }) => {
           <button
             key={star}
             className={`star-filter-btn ${starFilter === star ? "active" : ""}`}
-            onClick={() => setStarFilter(star)}
+            onClick={() => {
+              setStarFilter(star);
+              setCurrentPage(1);
+            }}
           >
             {star} <span className="star-icon">★</span>
           </button>
@@ -170,7 +197,7 @@ const ReviewList = ({ productId, newReview }) => {
                     </div>
                     <div className="review-user-details">
                       <div className="review-username">
-                        {review.user_name || "Người dùng ẩn danh"}
+                        {review.reviewer_name || review.user_name || "Người dùng ẩn danh"}
                       </div>
                       <div className="review-date">
                         {formatDate(review.ThoiGian)}

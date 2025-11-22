@@ -293,9 +293,20 @@ class Product {
   }
 
   // Get product reviews by product ID (optimized for high traffic)
-  static async getProductReviews(productId, page = 1, limit = 10) {
+  static async getProductReviews(productId, page = 1, limit = 10, rating = null) {
     try {
       const offset = (page - 1) * limit;
+
+      // Build WHERE clause with optional rating filter
+      const whereConditions = ['dg.ID_SanPham = ?'];
+      const queryParams = [productId];
+      
+      if (rating !== null && rating >= 1 && rating <= 5) {
+        whereConditions.push('dg.TyLe = ?');
+        queryParams.push(rating);
+      }
+      
+      const whereClause = whereConditions.join(' AND ');
 
       const query = `
         SELECT 
@@ -308,21 +319,21 @@ class Product {
           nd.HoTen as reviewer_name
         FROM DanhGiaSanPham dg
         INNER JOIN NguoiDung nd ON dg.ID_NguoiMua = nd.ID_NguoiDung
-        WHERE dg.ID_SanPham = ?
+        WHERE ${whereClause}
         ORDER BY dg.ThoiGian DESC
         LIMIT ? OFFSET ?
       `;
 
-      const [rows] = await db.execute(query, [productId, limit, offset]);
+      const [rows] = await db.execute(query, [...queryParams, limit, offset]);
 
-      // Get total count for pagination
+      // Get total count for pagination with same filter
       const countQuery = `
         SELECT COUNT(*) as total
-        FROM DanhGiaSanPham
-        WHERE ID_SanPham = ?
+        FROM DanhGiaSanPham dg
+        WHERE ${whereClause}
       `;
 
-      const [countResult] = await db.execute(countQuery, [productId]);
+      const [countResult] = await db.execute(countQuery, queryParams);
       const total = countResult[0].total;
 
       return {

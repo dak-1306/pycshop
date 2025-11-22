@@ -32,19 +32,22 @@ const Notifications = () => {
     try {
       setLoading(true);
       const currentPage = reset ? 1 : page;
-      
+
       const response = await NotificationService.getNotifications(
         currentPage,
         20,
         activeFilter
       );
 
-      console.log('[NOTIFICATIONS] API Response:', response);
+      console.log("[NOTIFICATIONS] API Response:", response);
 
       if (response.success) {
         const allNotifications = response.data.notifications || [];
-        
-        console.log("[NOTIFICATIONS PAGE] All notifications:", allNotifications);
+
+        console.log(
+          "[NOTIFICATIONS PAGE] All notifications:",
+          allNotifications
+        );
 
         if (reset) {
           setNotifications(allNotifications);
@@ -54,7 +57,8 @@ const Notifications = () => {
         }
 
         setHasMore(
-          allNotifications.length === 20 && response.data.total > currentPage * 20
+          allNotifications.length === 20 &&
+            response.data.total > currentPage * 20
         );
       }
     } catch (error) {
@@ -146,7 +150,9 @@ const Notifications = () => {
         )
       );
       setNotifications((prev) =>
-        prev.filter((notif) => !selectedNotifications.includes(notif.notificationId))
+        prev.filter(
+          (notif) => !selectedNotifications.includes(notif.notificationId)
+        )
       );
       setSelectedNotifications([]);
     } catch (error) {
@@ -176,7 +182,10 @@ const Notifications = () => {
               </button>
             )}
             {selectedNotifications.length > 0 && (
-              <button className="btn-delete-selected" onClick={handleDeleteSelected}>
+              <button
+                className="btn-delete-selected"
+                onClick={handleDeleteSelected}
+              >
                 <i className="fas fa-trash"></i>
                 Xóa đã chọn ({selectedNotifications.length})
               </button>
@@ -262,7 +271,11 @@ const Notifications = () => {
                       {notification.type === "system" && "Hệ thống"}
                       {!notification.type && "Thông báo"}
                     </h3>
-                    <p>{notification.content || notification.NoiDung || "Không có nội dung"}</p>
+                    <p>
+                      {notification.content ||
+                        notification.NoiDung ||
+                        "Không có nội dung"}
+                    </p>
                     <span className="notification-time">
                       {NotificationService.formatNotificationTime(
                         notification.createdAt || notification.ThoiGianGui

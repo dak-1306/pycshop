@@ -8,7 +8,7 @@ class NotificationModel {
         ID_NguoiNhan,
         Loai,
         NoiDung,
-        VaiTro = 'buyer', // Default to buyer if not specified
+        VaiTro = "buyer", // Default to buyer if not specified
         ID_LienQuan = null,
       } = notificationData;
 
@@ -46,8 +46,13 @@ class NotificationModel {
   ) {
     try {
       const offset = (page - 1) * limit;
-      
-      console.log(`[NOTIFICATION_MODEL] 🔍 Query params:`, { userId, page, limit, type });
+
+      console.log(`[NOTIFICATION_MODEL] 🔍 Query params:`, {
+        userId,
+        page,
+        limit,
+        type,
+      });
 
       let query = `
         SELECT 

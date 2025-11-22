@@ -29,7 +29,10 @@ const NotificationIcon = () => {
       console.log("[NOTIFICATION ICON] ✅ Got response:", response);
       if (response.success) {
         setNotifications(response.data.notifications || []);
-        console.log("[NOTIFICATION ICON] 📋 Set notifications:", response.data.notifications?.length);
+        console.log(
+          "[NOTIFICATION ICON] 📋 Set notifications:",
+          response.data.notifications?.length
+        );
       }
     } catch (error) {
       console.error("Error loading notifications:", error);

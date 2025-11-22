@@ -79,7 +79,10 @@ function App() {
                       <Route path="/shop/:shopId" element={<ShopProfile />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/checkout" element={<Checkout />} />
-                      <Route path="/notifications" element={<Notifications />} />
+                      <Route
+                        path="/notifications"
+                        element={<Notifications />}
+                      />
 
                       {/* Seller Routes */}
                       <Route path="/seller/dashboard" element={<Dashboard />} />

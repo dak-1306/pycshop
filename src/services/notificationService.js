@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 class NotificationService {
   // Lấy danh sách thông báo
@@ -10,7 +9,7 @@ class NotificationService {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || user.ID_NguoiDung;
-      
+
       if (!token || !userId) {
         throw new Error("No authentication token or user ID found");
       }
@@ -47,12 +46,14 @@ class NotificationService {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || user.ID_NguoiDung;
-      
+
       if (!token || !userId) {
         throw new Error("No authentication token or user ID found");
       }
 
-      console.log(`[NOTIFICATION_SERVICE] Getting unread count for user: ${userId}`);
+      console.log(
+        `[NOTIFICATION_SERVICE] Getting unread count for user: ${userId}`
+      );
 
       const response = await axios.get(
         `${API_BASE_URL}/notifications/unread-count`,
@@ -81,7 +82,7 @@ class NotificationService {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || user.ID_NguoiDung;
-      
+
       if (!token || !userId) {
         throw new Error("No authentication token or user ID found");
       }
@@ -121,7 +122,7 @@ class NotificationService {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || user.ID_NguoiDung;
-      
+
       if (!token || !userId) {
         throw new Error("No authentication token or user ID found");
       }
@@ -159,7 +160,7 @@ class NotificationService {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || user.ID_NguoiDung;
-      
+
       if (!token || !userId) {
         throw new Error("No authentication token or user ID found");
       }

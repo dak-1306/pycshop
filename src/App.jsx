@@ -41,6 +41,7 @@ import CategoryProducts from "./pages/buyer/Products/CategoryProducts";
 import ShopProfile from "./pages/buyer/Shop/ShopProfile";
 import Checkout from "./pages/buyer/Cart/Checkout";
 import Cart from "./pages/buyer/Cart/Cart";
+import Notifications from "./pages/buyer/Notifications/Notifications";
 import "./styles/App.css";
 
 function App() {
@@ -78,6 +79,7 @@ function App() {
                       <Route path="/shop/:shopId" element={<ShopProfile />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/checkout" element={<Checkout />} />
+                      <Route path="/notifications" element={<Notifications />} />
 
                       {/* Seller Routes */}
                       <Route path="/seller/dashboard" element={<Dashboard />} />

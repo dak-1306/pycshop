@@ -24,9 +24,12 @@ const NotificationIcon = () => {
   const loadRecentNotifications = async () => {
     try {
       setIsLoading(true);
+      console.log("[NOTIFICATION ICON] 🔔 Loading notifications");
       const response = await NotificationService.getNotifications(1, 5, "all");
+      console.log("[NOTIFICATION ICON] ✅ Got response:", response);
       if (response.success) {
         setNotifications(response.data.notifications || []);
+        console.log("[NOTIFICATION ICON] 📋 Set notifications:", response.data.notifications?.length);
       }
     } catch (error) {
       console.error("Error loading notifications:", error);
@@ -127,10 +130,14 @@ const NotificationIcon = () => {
                   </div>
                   <div className="notification-item-content">
                     <p className="notification-item-text">
-                      {notification.content}
+                      {notification.content ||
+                        notification.NoiDung ||
+                        "Thông báo mới"}
                     </p>
                     <span className="notification-item-time">
-                      {formatTime(notification.createdAt)}
+                      {formatTime(
+                        notification.createdAt || notification.ThoiGianGui
+                      )}
                     </span>
                   </div>
                   {!notification.isRead && (

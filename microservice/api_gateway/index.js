@@ -55,6 +55,8 @@ const corsOptions = {
     "Origin",
     "Access-Control-Request-Method",
     "Access-Control-Request-Headers",
+    "x-user-id",
+    "x-user-role",
   ],
   exposedHeaders: ["Authorization"],
   optionsSuccessStatus: 200, // Support legacy browsers
@@ -223,6 +225,7 @@ app.use((req, res, next) => {
     "/auth/register-admin", // Admin register route
     "/products", // Cho phép xem sản phẩm không cần đăng nhập
     "/uploads", // Static files (product images)
+    "/notifications", // Allow notifications (uses x-user-id header)
   ];
 
   // Review public routes - allow viewing reviews without authentication

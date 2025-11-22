@@ -8,17 +8,18 @@ class NotificationModel {
         ID_NguoiNhan,
         Loai,
         NoiDung,
+        VaiTro = 'buyer', // Default to buyer if not specified
         ID_LienQuan = null,
       } = notificationData;
 
       console.log(
-        `[NOTIFICATION_MODEL] Creating notification for user ${ID_NguoiNhan}, type: ${Loai}`
+        `[NOTIFICATION_MODEL] Creating notification for user ${ID_NguoiNhan}, type: ${Loai}, role: ${VaiTro}`
       );
 
       const [result] = await smartDB.execute(
-        `INSERT INTO thongbao (ID_NguoiNhan, Loai, NoiDung, ThoiGianGui)
-         VALUES (?, ?, ?, NOW())`,
-        [ID_NguoiNhan, Loai, NoiDung]
+        `INSERT INTO thongbao (ID_NguoiNhan, Loai, VaiTro, NoiDung, ThoiGianGui)
+         VALUES (?, ?, ?, ?, NOW())`,
+        [ID_NguoiNhan, Loai, VaiTro, NoiDung]
       );
 
       console.log(
@@ -45,12 +46,15 @@ class NotificationModel {
   ) {
     try {
       const offset = (page - 1) * limit;
+      
+      console.log(`[NOTIFICATION_MODEL] 🔍 Query params:`, { userId, page, limit, type });
 
       let query = `
         SELECT 
           ID_ThongBao as notificationId,
           ID_NguoiNhan as userId,
           Loai as type,
+          VaiTro as recipientRole,
           NoiDung as content,
           ThoiGianGui as createdAt,
           DaDoc as isRead
@@ -68,6 +72,9 @@ class NotificationModel {
 
       query += ` ORDER BY ThoiGianGui DESC LIMIT ? OFFSET ?`;
       params.push(limit, offset);
+
+      console.log(`[NOTIFICATION_MODEL] 📋 SQL Query:`, query);
+      console.log(`[NOTIFICATION_MODEL] 📊 Params:`, params);
 
       const [notifications] = await smartDB.execute(query, params);
 

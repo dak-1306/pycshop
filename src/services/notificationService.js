@@ -1,15 +1,18 @@
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
+  import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 class NotificationService {
   // Lấy danh sách thông báo
   static async getNotifications(page = 1, limit = 20, type = "all") {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || user.ID_NguoiDung;
+      
+      if (!token || !userId) {
+        throw new Error("No authentication token or user ID found");
       }
 
       console.log(
@@ -20,6 +23,7 @@ class NotificationService {
         params: { page, limit, type },
         headers: {
           Authorization: `Bearer ${token}`,
+          "x-user-id": userId,
         },
       });
 
@@ -41,17 +45,21 @@ class NotificationService {
   static async getUnreadCount() {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || user.ID_NguoiDung;
+      
+      if (!token || !userId) {
+        throw new Error("No authentication token or user ID found");
       }
 
-      console.log(`[NOTIFICATION_SERVICE] Getting unread count`);
+      console.log(`[NOTIFICATION_SERVICE] Getting unread count for user: ${userId}`);
 
       const response = await axios.get(
         `${API_BASE_URL}/notifications/unread-count`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "x-user-id": userId,
           },
         }
       );
@@ -71,8 +79,11 @@ class NotificationService {
   static async markAsRead(notificationId) {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || user.ID_NguoiDung;
+      
+      if (!token || !userId) {
+        throw new Error("No authentication token or user ID found");
       }
 
       console.log(
@@ -85,6 +96,7 @@ class NotificationService {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "x-user-id": userId,
           },
         }
       );
@@ -107,8 +119,11 @@ class NotificationService {
   static async markAllAsRead() {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || user.ID_NguoiDung;
+      
+      if (!token || !userId) {
+        throw new Error("No authentication token or user ID found");
       }
 
       console.log(`[NOTIFICATION_SERVICE] Marking all notifications as read`);
@@ -119,6 +134,7 @@ class NotificationService {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "x-user-id": userId,
           },
         }
       );
@@ -141,8 +157,11 @@ class NotificationService {
   static async deleteNotification(notificationId) {
     try {
       const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("No authentication token found");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const userId = user.id || user.ID_NguoiDung;
+      
+      if (!token || !userId) {
+        throw new Error("No authentication token or user ID found");
       }
 
       console.log(
@@ -154,6 +173,7 @@ class NotificationService {
         {
           headers: {
             Authorization: `Bearer ${token}`,
+            "x-user-id": userId,
           },
         }
       );

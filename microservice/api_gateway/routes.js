@@ -1026,9 +1026,10 @@ function setupRoutes(app) {
         `[ROUTES] Notification proxy for ${req.method} ${req.originalUrl}`
       );
       console.log(`[ROUTES] User info:`, req.user);
+      console.log(`[ROUTES] Query params:`, req.query);
 
-      // Build target URL
-      const targetPath = req.url; // This will be like "/", "/unread-count", "/123/read" etc.
+      // Build target URL with query parameters
+      const targetPath = req.url; // This includes query string already (e.g., "/?page=1&role=buyer")
       const targetUrl = `${
         process.env.NOTIFICATION_SERVICE_URL || "http://localhost:5008"
       }/notifications${targetPath}`;

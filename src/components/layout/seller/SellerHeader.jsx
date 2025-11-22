@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import PropTypes from "prop-types";
-import { NotificationIcon } from "../../common/notifications";
+import NotificationIcon from "../../common/notifications/NotificationIcon";
 import logoImage from "../../../images/logo.svg";
 
 // CSS styles for seller header notification
@@ -70,9 +70,7 @@ const SellerHeader = ({
           {/* User Actions */}
           <div className="flex items-center space-x-2">
             {/* Notifications */}
-            <div className="seller-notification-wrapper">
-              <NotificationIcon />
-            </div>
+            <NotificationIcon />
 
             {/* Add Collaborator Button */}
             <button

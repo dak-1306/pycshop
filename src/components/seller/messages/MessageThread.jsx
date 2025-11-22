@@ -161,12 +161,16 @@ const MessageThread = ({
                           <img
                             src={
                               message.senderAvatar ||
-                              "/images/default-avatar.png"
+                              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                message.senderName || "User"
+                              )}&background=6b7280&color=fff&size=32`
                             }
                             alt={message.senderName}
-                            className="w-8 h-8 rounded-full object-cover ring-2 ring-white shadow-sm"
+                            className="w-8 h-8 rounded-full object-cover border border-gray-200"
                             onError={(e) => {
-                              e.target.src = "/images/default-avatar.png";
+                              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                                message.senderName || "User"
+                              )}&background=6b7280&color=fff&size=32`;
                             }}
                           />
                         </div>
@@ -179,19 +183,13 @@ const MessageThread = ({
                         }`}
                       >
                         <div
-                          className={`px-4 py-3 rounded-2xl relative ${
+                          className={`px-3 py-2 rounded-lg relative ${
                             isFromSeller
-                              ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-md"
-                              : "bg-white text-gray-900 shadow-md border border-gray-100"
-                          } ${
-                            showAvatar
-                              ? isFromSeller
-                                ? "rounded-br-md"
-                                : "rounded-bl-md"
-                              : ""
+                              ? "bg-blue-500 text-white"
+                              : "bg-white text-gray-900 border border-gray-200"
                           }`}
                         >
-                          <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
                             {message.content}
                           </p>
                         </div>

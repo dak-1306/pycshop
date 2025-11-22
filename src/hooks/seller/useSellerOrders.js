@@ -1,5 +1,8 @@
 import { useState, useEffect } from "react";
-import OrderService from "../../services/orderService";
+import {
+  getSellerOrders,
+  updateSellerOrderStatus,
+} from "../../lib/services/order";
 import { useToast } from "../useToast";
 
 export const useSellerOrders = () => {
@@ -30,7 +33,13 @@ export const useSellerOrders = () => {
       setLoading(true);
       setError(null);
 
-      const response = await OrderService.getSellerOrders(page, 10, status);
+      const params = {
+        page,
+        limit: 10,
+        status: status !== "all" ? status : undefined,
+      };
+
+      const response = await getSellerOrders(params);
 
       if (response.success) {
         setOrders(response.data || []);
@@ -42,8 +51,16 @@ export const useSellerOrders = () => {
       }
     } catch (error) {
       console.error("Error loading seller orders:", error);
-      setError(error.message || "Lỗi khi tải danh sách đơn hàng");
-      showError(error.message || "Lỗi khi tải danh sách đơn hàng");
+      setError(
+        error.response?.data?.message ||
+          error.message ||
+          "Lỗi khi tải danh sách đơn hàng"
+      );
+      showError(
+        error.response?.data?.message ||
+          error.message ||
+          "Lỗi khi tải danh sách đơn hàng"
+      );
     } finally {
       setLoading(false);
     }
@@ -54,7 +71,7 @@ export const useSellerOrders = () => {
     try {
       setLoading(true);
 
-      const response = await OrderService.updateOrderStatus(orderId, newStatus);
+      const response = await updateSellerOrderStatus(orderId, newStatus);
 
       if (response.success) {
         // Update local state

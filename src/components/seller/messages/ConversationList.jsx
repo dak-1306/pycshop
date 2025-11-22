@@ -41,32 +41,37 @@ const ConversationList = ({
   }
 
   return (
-    <div className="space-y-2">
+    <div className="py-2">
       {conversations.map((conversation) => (
         <div
           key={conversation.id}
           onClick={() => onSelectConversation(conversation)}
-          className={`p-4 rounded-lg cursor-pointer transition-all duration-200 hover:bg-orange-50 ${
+          className={`mx-2 mb-2 p-4 rounded-lg cursor-pointer transition-colors duration-200 ${
             activeConversation?.id === conversation.id
-              ? "bg-orange-100 border-l-4 border-orange-500"
-              : "bg-white hover:shadow-md"
+              ? "bg-blue-50 border-l-4 border-blue-500"
+              : "bg-white hover:bg-gray-50"
           }`}
         >
           <div className="flex items-start space-x-3">
-            {/* Avatar */}
+            {/* Avatar ổn định */}
             <div className="relative flex-shrink-0">
               <img
                 src={
-                  conversation.customerAvatar || "/images/default-avatar.png"
+                  conversation.customerAvatar ||
+                  `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    conversation.customerName
+                  )}&background=6b7280&color=fff&size=48`
                 }
                 alt={conversation.customerName}
-                className="w-12 h-12 rounded-full object-cover"
+                className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                 onError={(e) => {
-                  e.target.src = "/images/default-avatar.png";
+                  e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                    conversation.customerName
+                  )}&background=6b7280&color=fff&size=48`;
                 }}
               />
               {conversation.isOnline && (
-                <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-seller-500 border-2 border-white rounded-full"></div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border border-white rounded-full"></div>
               )}
             </div>
 
@@ -82,26 +87,16 @@ const ConversationList = ({
               </div>
 
               <div className="flex items-center justify-between">
-                <p className="text-sm text-gray-600 truncate">
+                <p className="text-sm text-gray-600 truncate pr-2">
                   {conversation.lastMessage}
                 </p>
 
                 {conversation.unreadCount > 0 && (
-                  <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-500 rounded-full ml-2 flex-shrink-0">
+                  <span className="inline-flex items-center justify-center min-w-[18px] h-5 px-1.5 text-xs font-semibold text-white bg-blue-500 rounded-full">
                     {conversation.unreadCount}
                   </span>
                 )}
               </div>
-
-              {/* Online status */}
-              {conversation.isOnline && (
-                <div className="flex items-center mt-1">
-                  <div className="w-2 h-2 bg-seller-500 rounded-full mr-2"></div>
-                  <span className="text-xs text-seller-600">
-                    Đang hoạt động
-                  </span>
-                </div>
-              )}
             </div>
           </div>
         </div>

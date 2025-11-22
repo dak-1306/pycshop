@@ -15,10 +15,10 @@ const Footer = () => {
                   <a href="#">Trung tâm hỗ trợ</a>
                 </li>
                 <li>
-                  <a href="#">Shopee Blog</a>
+                  <a href="#">Pycshop Blog</a>
                 </li>
                 <li>
-                  <a href="#">Shopee Mall</a>
+                  <a href="#">Pycshop Mall</a>
                 </li>
                 <li>
                   <a href="#">Hướng dẫn mua hàng</a>
@@ -30,7 +30,7 @@ const Footer = () => {
                   <a href="#">Thanh toán</a>
                 </li>
                 <li>
-                  <a href="#">Shopee Xu</a>
+                  <a href="#">Pycshop Xu</a>
                 </li>
                 <li>
                   <a href="#">Vận chuyển</a>
@@ -47,18 +47,18 @@ const Footer = () => {
               </ul>
             </div>
 
-            {/* Về Shopee */}
+            {/* Về Pycshop */}
             <div className="footer-column">
-              <h3 className="footer-title">Về Shopee</h3>
+              <h3 className="footer-title">Về Pycshop</h3>
               <ul className="footer-links">
                 <li>
-                  <a href="#">Giới thiệu về Shopee Việt Nam</a>
+                  <a href="#">Giới thiệu về Pycshop Việt Nam</a>
                 </li>
                 <li>
                   <a href="#">Tuyển dụng</a>
                 </li>
                 <li>
-                  <a href="#">Điều khoản Shopee</a>
+                  <a href="#">Điều khoản Pycshop</a>
                 </li>
                 <li>
                   <a href="#">Chính sách bảo mật</a>
@@ -73,7 +73,7 @@ const Footer = () => {
                   <a href="#">Flash Sales</a>
                 </li>
                 <li>
-                  <a href="#">Chương trình Tiếp thị liên kết Shopee</a>
+                  <a href="#">Chương trình Tiếp thị liên kết Pycshop</a>
                 </li>
                 <li>
                   <a href="#">Liên hệ với truyền thông</a>
@@ -91,7 +91,7 @@ const Footer = () => {
                 <div className="payment-item">💳 AMEX</div>
                 <div className="payment-item">🏦 COD</div>
                 <div className="payment-item">💰 Trả góp</div>
-                <div className="payment-item">📱 ShopeePay</div>
+                <div className="payment-item">📱 PycshopPay</div>
                 <div className="payment-item">🏧 Internet Banking</div>
               </div>
             </div>
@@ -100,7 +100,7 @@ const Footer = () => {
             <div className="footer-column">
               <h3 className="footer-title">Đơn vị vận chuyển</h3>
               <div className="shipping-methods">
-                <div className="shipping-item">🚚 Shopee Express</div>
+                <div className="shipping-item">🚚 Pycshop Express</div>
                 <div className="shipping-item">📦 Giao hàng tiết kiệm</div>
                 <div className="shipping-item">🚛 GHN</div>
                 <div className="shipping-item">🚐 Viettel Post</div>
@@ -127,7 +127,7 @@ const Footer = () => {
               </ul>
 
               <h3 className="footer-title" style={{ marginTop: "20px" }}>
-                Tải ứng dụng Shopee ngay thôi
+                Tải ứng dụng Pycshop ngay thôi
               </h3>
               <div className="app-download">
                 <div className="qr-code">
@@ -155,7 +155,7 @@ const Footer = () => {
         <div className="container">
           <div className="footer-bottom-content">
             <div className="copyright">
-              <p>© 2024 Shopee. Tất cả các quyền được bảo lưu.</p>
+              <p>© 2024 Pycshop. Tất cả các quyền được bảo lưu.</p>
             </div>
             <div className="location">
               <p>
@@ -168,11 +168,11 @@ const Footer = () => {
 
           <div className="footer-info">
             <div className="company-info">
-              <h4>Công ty TNHH Shopee</h4>
+              <h4>Công ty TNHH Pycshop</h4>
               <p>
                 Địa chỉ: Tầng 4-5-6, Tòa nhà Capital Place, số 29 đường Liễu
                 Giai, Phường Ngọc Khánh, Quận Ba Đình, Thành phố Hà Nội, Việt
-                Nam. Tổng đài hỗ trợ: 19001221 - Email: cskh@hotro.shopee.vn
+                Nam. Tổng đài hỗ trợ: 19001221 - Email: cskh@hotro.pycshop.vn
               </p>
               <p>
                 Chịu Trách Nhiệm Quản Lý Nội Dung: Nguyễn Đức Trí - Điện thoại
@@ -182,7 +182,7 @@ const Footer = () => {
                 Mã số doanh nghiệp: 0106773786 do Sở Kế hoạch & Đầu tư TP Hà Nội
                 cấp lần đầu ngày 10/02/2015
               </p>
-              <p>© 2015 - Bản quyền thuộc về Công ty TNHH Shopee</p>
+              <p>© 2015 - Bản quyền thuộc về Công ty TNHH Pycshop</p>
             </div>
           </div>
         </div>

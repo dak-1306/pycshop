@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCart } from "../../context/CartContext";
+import { useChat } from "../../context/ChatContext";
 import { NotificationIcon } from "../common/notifications";
 import "../../styles/components/buyer/Header.css";
 import logoImage from "../../images/logo.svg";
@@ -9,6 +10,7 @@ import logoImage from "../../images/logo.svg";
 const Header = ({ onSearch }) => {
   const { user, isAuthenticated, logout } = useAuth();
   const { cartCount } = useCart();
+  const { toggleChat } = useChat();
   const navigate = useNavigate();
   const [searchKeyword, setSearchKeyword] = useState("");
 
@@ -170,8 +172,28 @@ const Header = ({ onSearch }) => {
             {/* Notifications */}
             {isAuthenticated && <NotificationIcon />}
 
+            {/* Chat Icon */}
+            {isAuthenticated && (
+              <div className="chat-icon-container" style={{ position: 'relative', marginLeft: '8px' }}>
+                <button
+                  onClick={toggleChat}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    padding: '8px',
+                    position: 'relative',
+                    top: '-6px'
+                  }}
+                  title="Tin nhắn"
+                >
+                  <i className="fas fa-comment-dots" style={{ color: 'white', fontSize: '24px' }}></i>
+                </button>
+              </div>
+            )}
+
             {/* Cart */}
-            <div className="cart">
+            <div className="cart" style={{ marginLeft: '8px' }}>
               <div
                 className="cart-icon"
                 onClick={() => navigate("/cart")}

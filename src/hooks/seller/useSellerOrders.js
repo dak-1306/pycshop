@@ -111,15 +111,47 @@ export const useSellerOrders = () => {
   };
 
   // Handle view order detail
-  const handleViewOrder = (order) => {
-    setSelectedOrder(order);
-    setShowDetailModal(true);
+  const handleViewOrder = (orderOrId) => {
+    // Nếu truyền vào là ID, tìm order từ danh sách
+    let order;
+    if (typeof orderOrId === "string" || typeof orderOrId === "number") {
+      order = orders.find(
+        (o) => (o.id || o.ID_DonHang || o.orderId) == orderOrId
+      );
+    } else {
+      order = orderOrId; // Đã là object order
+    }
+
+    console.log("[HANDLE_VIEW_ORDER]", { orderOrId, foundOrder: order });
+
+    if (order) {
+      setSelectedOrder(order);
+      setShowDetailModal(true);
+    } else {
+      console.error("Order not found:", orderOrId);
+    }
   };
 
   // Handle edit order
-  const handleEditOrder = (order) => {
-    setSelectedOrder(order);
-    setShowEditModal(true);
+  const handleEditOrder = (orderOrId) => {
+    // Nếu truyền vào là ID, tìm order từ danh sách
+    let order;
+    if (typeof orderOrId === "string" || typeof orderOrId === "number") {
+      order = orders.find(
+        (o) => (o.id || o.ID_DonHang || o.orderId) == orderOrId
+      );
+    } else {
+      order = orderOrId; // Đã là object order
+    }
+
+    console.log("[HANDLE_EDIT_ORDER]", { orderOrId, foundOrder: order });
+
+    if (order) {
+      setSelectedOrder(order);
+      setShowEditModal(true);
+    } else {
+      console.error("Order not found:", orderOrId);
+    }
   };
 
   // Handle save order (update status)

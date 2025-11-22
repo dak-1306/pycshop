@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
 import SellerLayout from "../../components/layout/seller/SellerLayout";
-import { OrderManagement } from "../../components/common/order";
-import { OrderDetailModal } from "../../components/common/modals";
+import {
+  OrderManagement,
+  OrderDetailModal,
+} from "../../components/common/order";
 import SellerOrderEditModal from "../../components/seller/order/SellerOrderEditModal";
 import { useSellerOrders } from "../../hooks/seller/useSellerOrders";
 import { useOrderWebSocket } from "../../hooks/common/useWebSocket";
@@ -119,16 +121,6 @@ const Order = () => {
   return (
     <SellerLayout title="Quản lý đơn hàng">
       <div className="p-6">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Quản lý đơn hàng
-          </h1>
-          <p className="text-gray-600">
-            Xem và cập nhật trạng thái các đơn hàng có sản phẩm của shop
-          </p>
-        </div>
-
         {/* Error Message */}
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -157,25 +149,27 @@ const Order = () => {
             </button>
           </div>
         ) : (
-          <OrderManagement
-            // Data
-            orders={orders}
-            // Actions
-            onViewOrder={handleViewOrder}
-            onEditOrder={handleEditOrder}
-            // Filters
-            onSearchChange={setSearchTerm}
-            onStatusFilter={handleStatusFilter}
-            // Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            // Config
-            variant="seller"
-            isLoading={loading}
-            // Styling
-            getStatusColor={(status) => getStatusInfo(status).color}
-          />
+          <>
+            <OrderManagement
+              // Data
+              orders={orders}
+              // Actions
+              onViewOrder={handleViewOrder}
+              onEditOrder={handleEditOrder}
+              // Filters
+              onSearchChange={setSearchTerm}
+              onStatusFilter={handleStatusFilter}
+              // Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+              // Config
+              variant="seller"
+              isLoading={loading}
+              // Styling
+              getStatusColor={(status) => getStatusInfo(status).color}
+            />
+          </>
         )}
 
         {/* Modals */}

@@ -1086,6 +1086,52 @@ function setupRoutes(app) {
       });
     }
   });
+
+  // Chat Service - Proxy to Chat Service (5011)
+  app.use(
+    "/api/chat",
+    authMiddleware,
+    createProxyMiddleware({
+      target: process.env.CHAT_SERVICE_URL || "http://localhost:5011",
+      changeOrigin: true,
+      timeout: 30000,
+      proxyTimeout: 30000,
+      pathRewrite: {
+        "^/api/chat": "/api/chat", // Keep the same path
+      },
+      headers: {
+        Connection: "keep-alive",
+      },
+      onProxyReq: (proxyReq, req, res) => {
+        console.log(
+          `💬 [CHAT_PROXY] ${req.method} ${req.originalUrl} -> Chat Service`
+        );
+
+        // Forward user info to chat service
+        if (req.user?.id) {
+          proxyReq.setHeader("x-user-id", req.user.id.toString());
+        }
+        if (req.user?.role) {
+          proxyReq.setHeader("x-user-role", req.user.role);
+        }
+      },
+      onProxyRes: (proxyRes, req, res) => {
+        console.log(
+          `💬 [CHAT_PROXY] Response ${proxyRes.statusCode} from chat service for ${req.method} ${req.originalUrl}`
+        );
+      },
+      onError: (err, req, res) => {
+        console.error(`💬 [CHAT_PROXY] Error:`, err.message);
+        if (!res.headersSent) {
+          res.status(503).json({
+            success: false,
+            message: "Chat service unavailable",
+            error: err.message,
+          });
+        }
+      },
+    })
+  );
 }
 
 export default setupRoutes;

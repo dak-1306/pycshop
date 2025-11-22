@@ -8,8 +8,8 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "backend": "concurrently \"cd microservice/api_gateway && node index.js\" \"cd microservice/auth_service && node app.js\" \"cd microservice/product_service && node app.js\" \"cd microservice/admin_service && node app.js\" \"cd microservice/shop_service && node server.js\" \"cd microservice/danhgia_service && node server.js\" \"cd microservice/cart_service && node server.js\" \"cd microservice/order_service && node server.js\" \"cd microservice/promotion_service && node server.js\" \"cd microservice/user_service && node server.js\" \"cd microservice/notification_service && node server.js\"",
-    "backend-realtime": "concurrently \"cd microservice/api_gateway && node index.js\" \"cd microservice/auth_service && node app.js\" \"cd microservice/product_service && node app.js\" \"cd microservice/admin_service && node app.js\" \"cd microservice/shop_service && node server.js\" \"cd microservice/danhgia_service && node server.js\" \"cd microservice/cart_service && node server.js\" \"cd microservice/order_service && nodemon server.js\" \"cd microservice/promotion_service && node server.js\" \"cd microservice/user_service && node server.js\" \"cd microservice/notification_service && nodemon server.js\"",
+    "backend": "concurrently \"cd microservice/api_gateway && node index.js\" \"cd microservice/auth_service && node app.js\" \"cd microservice/product_service && node app.js\" \"cd microservice/admin_service && node app.js\" \"cd microservice/shop_service && node server.js\" \"cd microservice/danhgia_service && node server.js\" \"cd microservice/cart_service && node server.js\" \"cd microservice/order_service && node server.js\" \"cd microservice/promotion_service && node server.js\" \"cd microservice/user_service && node server.js\" \"cd microservice/notification_service && node server.js\" \"cd microservice/chat_service && node server.js\"",
+    "backend-realtime": "concurrently \"cd microservice/api_gateway && node index.js\" \"cd microservice/auth_service && node app.js\" \"cd microservice/product_service && node app.js\" \"cd microservice/admin_service && node app.js\" \"cd microservice/shop_service && node server.js\" \"cd microservice/danhgia_service && node server.js\" \"cd microservice/cart_service && node server.js\" \"cd microservice/order_service && nodemon server.js\" \"cd microservice/promotion_service && node server.js\" \"cd microservice/user_service && node server.js\" \"cd microservice/notification_service && nodemon server.js\" \"cd microservice/chat_service && nodemon server.js\"",
     "kafka-consumer": "cd microservice/danhgia_service && node shopRatingConsumer.js",
     "backend-with-kafka": "concurrently \"npm run backend\" \"npm run kafka-consumer\"",
     "backend-realtime-with-kafka": "concurrently \"npm run backend-realtime\" \"npm run kafka-consumer\"",
@@ -35,7 +35,10 @@
     "setup-db": "node scripts/setup-db-info.js",
     "optimize-db": "npm run setup-db",
     "production": "npm run build && npm run backend",
-    "start": "npm run backend"
+    "start": "npm run backend",
+    "test:chat": "node test-chat-integration.js",
+    "test:order-chat": "node test-order-chat-integration.js",
+    "test:integration": "node test-full-integration.js"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
@@ -55,7 +58,7 @@
     "jsonwebtoken": "^9.0.2",
     "kafkajs": "^2.2.4",
     "morgan": "^1.10.1",
-    "multer": "^2.0.2",
+    "multer": "^1.4.5-lts.1",
     "mysql2": "^3.15.1",
     "node-fetch": "^3.3.2",
     "prop-types": "15.8.1",
@@ -64,7 +67,8 @@
     "react-router-dom": "^7.9.3",
     "recharts": "^3.2.1",
     "socket.io": "^4.8.1",
-    "socket.io-client": "^4.8.1"
+    "socket.io-client": "^4.8.1",
+    "uuid": "^9.0.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

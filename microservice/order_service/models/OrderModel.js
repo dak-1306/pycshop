@@ -1,5 +1,6 @@
 import smartDB from "../../db/index.js";
 import notificationHelper from "../helpers/NotificationHelper.js";
+import chatHelper from "../helpers/ChatHelper.js";
 
 class OrderModel {
   // Tạo đơn hàng mới với transaction - tách theo người bán
@@ -693,6 +694,7 @@ class OrderModel {
 
       if (buyerRows.length > 0) {
         const buyerId = buyerRows[0].ID_NguoiMua;
+
         // Send notification asynchronously (don't wait for it to complete)
         notificationHelper
           .createOrderNotification(buyerId, orderId, newStatus)
@@ -713,6 +715,30 @@ class OrderModel {
               error.message
             );
           });
+
+        // Send chat status message asynchronously (don't wait for it to complete)
+        if (sellerId) {
+          // Chỉ gửi khi là seller cập nhật trạng thái
+          chatHelper
+            .sendOrderStatusMessage(buyerId, sellerId, orderId, newStatus)
+            .then((chatResult) => {
+              if (chatResult.success) {
+                console.log(
+                  `[ORDER_MODEL] ✅ Chat status message sent successfully for order ${orderId}`
+                );
+              } else {
+                console.log(
+                  `[ORDER_MODEL] ⚠️ Failed to send chat status message for order ${orderId}: ${chatResult.message}`
+                );
+              }
+            })
+            .catch((error) => {
+              console.error(
+                `[ORDER_MODEL] ❌ Error sending chat status message for order ${orderId}:`,
+                error.message
+              );
+            });
+        }
       }
 
       return {
@@ -791,6 +817,7 @@ class OrderModel {
             buyerName ? ` từ khách hàng ${buyerName}` : ""
           }.\nSản phẩm: ${productList}\nVui lòng xác nhận đơn hàng sớm nhất có thể.`;
 
+          // Gửi thông báo
           const result = await notificationHelper.createSellerNotification(
             seller.sellerId,
             orderId,
@@ -811,6 +838,31 @@ class OrderModel {
               }: ${result.message}`
             );
           }
+
+          // Gửi tin nhắn chat chào mừng (không chờ kết quả để không làm chậm luồng chính)
+          chatHelper
+            .sendOrderWelcomeMessage(buyerId, seller.sellerId, orderId)
+            .then((chatResult) => {
+              if (chatResult.success) {
+                console.log(
+                  `[ORDER_MODEL] ✅ Chat welcome message sent to seller ${
+                    seller.sellerName || seller.sellerId
+                  } for order ${orderId}`
+                );
+              } else {
+                console.log(
+                  `[ORDER_MODEL] ⚠️ Failed to send chat welcome message to seller ${
+                    seller.sellerName || seller.sellerId
+                  }: ${chatResult.message}`
+                );
+              }
+            })
+            .catch((error) => {
+              console.error(
+                `[ORDER_MODEL] ❌ Error sending chat welcome message to seller ${seller.sellerId}:`,
+                error.message
+              );
+            });
 
           return result;
         } catch (error) {

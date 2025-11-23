@@ -1,336 +1,357 @@
-import React from "react";
-import PropTypes from "prop-types";
-import { formatCurrency } from "../../../lib/utils";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import OrderService from "../../../services/orderService";
+import "../../../styles/components/OrderDetailModal.css";
 
-const OrderDetailModal = React.memo(
-  ({ isOpen, onClose, order, onEdit, variant = "seller" }) => {
-    if (!isOpen || !order) return null;
+const OrderDetailModal = ({ orderId, isOpen, onClose }) => {
+  const navigate = useNavigate();
+  const [orderDetail, setOrderDetail] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-    const headerGradient =
-      variant === "admin"
-        ? "from-blue-600 via-blue-700 to-indigo-600"
-        : "from-orange-500 via-orange-600 to-red-500";
+  useEffect(() => {
+    if (isOpen && orderId) {
+      loadOrderDetail();
+    }
+  }, [isOpen, orderId]);
 
-    const headerTitle =
-      variant === "admin" ? "Quản lý đơn hàng" : "Đơn hàng của bạn";
+  const loadOrderDetail = async () => {
+    setLoading(true);
+    setError(null);
 
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-3xl shadow-2xl max-w-5xl w-full h-[95vh] flex flex-col">
-          {/* Header - Compact */}
-          <div className="flex items-center justify-between py-4 px-6 border-b border-gray-100">
-            <div className="flex items-center space-x-4">
-              <div
-                className={`w-12 h-12 bg-gradient-to-br ${headerGradient} rounded-2xl flex items-center justify-center text-white`}
-              >
-                <FontAwesomeIcon
-                  icon={
-                    variant === "admin"
-                      ? ["fas", "crown"]
-                      : ["fas", "shopping-bag"]
-                  }
-                  className="w-6 h-6"
-                />
+    try {
+      const response = await OrderService.getOrderById(orderId);
+      console.log("Order detail response:", response);
+
+      if (response.success) {
+        setOrderDetail(response.data);
+      } else {
+        setError(response.message || "Không thể tải chi tiết đơn hàng");
+      }
+    } catch (error) {
+      console.error("Failed to load order detail:", error);
+      setError("Có lỗi xảy ra khi tải chi tiết đơn hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatPrice = (price) => {
+    return parseInt(price).toLocaleString("vi-VN") + "₫";
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getStatusInfo = (status) => {
+    switch (status?.toLowerCase()) {
+      case "pending":
+        return { text: "Chờ xác nhận", icon: "fa-clock", class: "pending" };
+      case "confirmed":
+        return {
+          text: "Chờ giao hàng",
+          icon: "fa-shipping-fast",
+          class: "confirmed",
+        };
+      case "shipped":
+        return { text: "Đang giao", icon: "fa-check-circle", class: "shipped" };
+      case "cancelled":
+        return { text: "Đã hủy", icon: "fa-times-circle", class: "cancelled" };
+      case "delivered":
+        return {
+          text: "Đã giao",
+          icon: "fa-check-circle",
+          class: "delivered",
+        };
+      default:
+        return {
+          text: "Chờ xác nhận",
+          icon: "fa-hourglass-half",
+          class: "pending",
+        };
+    }
+  };
+
+  const handleProductClick = (productId) => {
+    // Đóng modal trước khi navigate
+    onClose();
+    // Navigate tới trang chi tiết sản phẩm
+    navigate(`/product/${productId}`);
+  };
+
+  const handleOverlayClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  if (!isOpen) return null;
+
+  const statusInfo = orderDetail ? getStatusInfo(orderDetail.status) : null;
+
+  return (
+    <div className="order-detail-modal-overlay" onClick={handleOverlayClick}>
+      <div className="order-detail-modal">
+        <div className="modal-header">
+          <h2>
+            <i className="fas fa-receipt"></i>
+            Chi tiết đơn hàng #{orderId}
+          </h2>
+          <button className="modal-close-btn" onClick={onClose}>
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div className="modal-body">
+          {loading ? (
+            <div className="modal-loading">
+              <div className="loading-spinner">
+                <i className="fas fa-spinner fa-spin"></i>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Đơn hàng #{order.id}
-                </h2>
-                <p className="text-gray-500 text-sm">{headerTitle}</p>
-              </div>
+              <p>Đang tải chi tiết đơn hàng...</p>
             </div>
-
-            <button
-              onClick={onClose}
-              className="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-xl flex items-center justify-center transition-colors group"
-            >
-              <FontAwesomeIcon
-                icon={["fas", "times"]}
-                className="w-5 h-5 text-gray-600 group-hover:text-gray-800 transition-colors"
-              />
-            </button>
-          </div>
-
-          {/* Content - Fixed height với optimized layout */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="p-6 space-y-6">
-              {/* Status Cards - Compact */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-500 bg-opacity-20 rounded-xl flex items-center justify-center">
-                      <FontAwesomeIcon
-                        icon={["fas", "clipboard-list"]}
-                        className="w-4 h-4 text-blue-600"
-                      />
+          ) : error ? (
+            <div className="modal-error">
+              <div className="error-icon">
+                <i className="fas fa-exclamation-triangle"></i>
+              </div>
+              <p>{error}</p>
+              <button className="retry-btn" onClick={loadOrderDetail}>
+                <i className="fas fa-redo"></i>
+                Thử lại
+              </button>
+            </div>
+          ) : orderDetail ? (
+            <>
+              {/* Order Status */}
+              <div className="order-status-section">
+                <div className="status-card">
+                  <div className="status-icon">
+                    <i className={`fas ${statusInfo.icon}`}></i>
+                  </div>
+                  <div className="status-info">
+                    <h3>Trạng thái đơn hàng</h3>
+                    <div className={`status-badge status-${statusInfo.class}`}>
+                      {statusInfo.text}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800 text-sm">
-                        Trạng thái đơn hàng
-                      </h3>
-                      <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        {order.status || "Chờ xử lý"}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Info */}
+              <div className="order-info-section">
+                <h3>
+                  <i className="fas fa-info-circle"></i>
+                  Thông tin đơn hàng
+                </h3>
+                <div className="info-grid">
+                  <div className="info-item">
+                    <span className="info-label">Ngày đặt:</span>
+                    <span className="info-value">
+                      {formatDate(orderDetail.createdAt)}
+                    </span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">Phương thức thanh toán:</span>
+                    <span className="info-value">
+                      {orderDetail.paymentMethod === "COD"
+                        ? "Thanh toán khi nhận hàng"
+                        : orderDetail.paymentMethod}
+                    </span>
+                  </div>
+                  {orderDetail.shippingAddress && (
+                    <div className="info-item full-width">
+                      <span className="info-label">Địa chỉ giao hàng:</span>
+                      <span className="info-value address">
+                        {orderDetail.shippingAddress}
                       </span>
                     </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-green-500 bg-opacity-20 rounded-xl flex items-center justify-center">
-                      <FontAwesomeIcon
-                        icon={["fas", "credit-card"]}
-                        className="w-4 h-4 text-green-600"
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-800 text-sm">
-                        Thanh toán
-                      </h3>
-                      <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        {order.paymentStatus || "Chờ thanh toán"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Order Information - Compact */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                  <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <FontAwesomeIcon
-                      icon={["fas", "info-circle"]}
-                      className="w-4 h-4 text-blue-600"
-                    />
-                    Thông tin đơn hàng
-                  </h3>
-                </div>
-                <div className="p-4">
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Sản phẩm
-                      </label>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {order.productName ||
-                          order.items ||
-                          "Không có thông tin"}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Tổng tiền
-                      </label>
-                      <p className="text-sm font-bold text-green-600">
-                        {formatCurrency(order.total || order.totalAmount || 0)}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Số lượng
-                      </label>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {order.quantity || 1}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Danh mục
-                      </label>
-                      <p className="text-sm text-gray-700">
-                        {order.category || "Không có thông tin"}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Ngày tạo
-                      </label>
-                      <p className="text-sm text-gray-700">
-                        {order.createdAt
-                          ? new Date(order.createdAt).toLocaleDateString(
-                              "vi-VN"
-                            )
-                          : new Date().toLocaleDateString("vi-VN")}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Mã đơn hàng
-                      </label>
-                      <p className="text-xs text-gray-700 font-mono bg-gray-100 px-2 py-1 rounded">
-                        {order.id}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Customer Information - Compact */}
-              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                  <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <FontAwesomeIcon
-                      icon={["fas", "user"]}
-                      className="w-4 h-4 text-green-600"
-                    />
-                    Thông tin khách hàng
-                  </h3>
-                </div>
-                <div className="p-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Tên khách hàng
-                      </label>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {order.customer ||
-                          order.customerName ||
-                          "Không có thông tin"}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Email
-                      </label>
-                      <p className="text-sm text-gray-700">
-                        {order.email ||
-                          order.customerEmail ||
-                          "Không có thông tin"}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Số điện thoại
-                      </label>
-                      <p className="text-sm text-gray-700">
-                        {order.phone ||
-                          order.customerPhone ||
-                          "Không có thông tin"}
-                      </p>
-                    </div>
-                    <div className="space-y-1">
-                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                        Địa chỉ
-                      </label>
-                      <p className="text-sm text-gray-700">
-                        {order.address ||
-                          order.customerAddress ||
-                          "Không có thông tin"}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Seller Information (if admin view) - Compact */}
-              {variant === "admin" && (
-                <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-                  <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
-                    <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                      <FontAwesomeIcon
-                        icon={["fas", "store"]}
-                        className="w-4 h-4 text-purple-600"
-                      />
-                      Thông tin người bán
-                    </h3>
-                  </div>
-                  <div className="p-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                          Tên người bán
-                        </label>
-                        <p className="text-sm font-semibold text-gray-900">
-                          {order.seller ||
-                            order.sellerName ||
-                            "Không có thông tin"}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-                          Shop
-                        </label>
-                        <p className="text-sm text-gray-700">
-                          {order.shopName || "Không có thông tin"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Footer - Compact */}
-          <div className="border-t border-gray-100 py-4 px-6">
-            <div className="flex justify-between items-center">
-              <div className="text-sm text-gray-500">
-                <FontAwesomeIcon icon={["fas", "lock"]} className="mr-1" />
-                Thông tin được bảo mật
-              </div>
-              <div className="flex space-x-4">
-                <button
-                  onClick={onClose}
-                  className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-medium transition-colors"
-                >
-                  Đóng
-                </button>
-                {onEdit &&
-                  (order.status === "pending" ||
-                    order.status === "processing" ||
-                    variant === "admin") && (
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onEdit(order.id);
-                      }}
-                      className={`px-8 py-3 bg-gradient-to-r ${headerGradient} hover:shadow-lg text-white rounded-xl font-medium transition-all transform hover:scale-105 flex items-center space-x-2`}
-                    >
-                      <FontAwesomeIcon icon={["fas", "edit"]} />
-                      <span>Chỉnh sửa</span>
-                    </button>
                   )}
+                </div>
               </div>
-            </div>
-          </div>
+
+              {/* Products List */}
+              <div className="products-section">
+                <h3>
+                  <i className="fas fa-box"></i>
+                  Sản phẩm đã đặt ({orderDetail.items?.length || 0} sản phẩm)
+                </h3>
+                <div className="products-list">
+                  {orderDetail.items && orderDetail.items.length > 0 ? (
+                    orderDetail.items.map((item, index) => (
+                      <div key={index} className="product-item">
+                        <div className="product-info">
+                          <div
+                            className="product-name"
+                            onClick={() => handleProductClick(item.productId)}
+                            title="Click để xem chi tiết sản phẩm"
+                          >
+                            <i className="fas fa-external-link-alt"></i>
+                            {item.productName || `Sản phẩm #${item.productId}`}
+                          </div>
+                          <div className="product-meta">
+                            <span className="product-price">
+                              Đơn giá: {formatPrice(item.price)}
+                            </span>
+                            <span className="product-quantity">
+                              Số lượng: {item.quantity}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="product-total">
+                          {formatPrice(item.price * item.quantity)}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-products">
+                      <i className="fas fa-box-open"></i>
+                      <p>Không có sản phẩm trong đơn hàng này</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              <div className="order-summary-section">
+                <h3>
+                  <i className="fas fa-calculator"></i>
+                  Tổng kết đơn hàng
+                </h3>
+                <div className="summary-card">
+                  <div className="summary-row">
+                    <span>Tổng tiền hàng:</span>
+                    <span>
+                      {orderDetail.orderDetails?.subtotal
+                        ? formatPrice(orderDetail.orderDetails.subtotal)
+                        : orderDetail.items
+                        ? formatPrice(
+                            orderDetail.items.reduce(
+                              (sum, item) => sum + item.price * item.quantity,
+                              0
+                            )
+                          )
+                        : formatPrice(orderDetail.totalAmount)}
+                    </span>
+                  </div>
+
+                  <div className="summary-row">
+                    <span>Phí vận chuyển:</span>
+                    <span>
+                      {orderDetail.orderDetails?.shippingFee ? (
+                        orderDetail.orderDetails.shippingFee === 0 ? (
+                          <span className="free-shipping">Miễn phí</span>
+                        ) : (
+                          formatPrice(orderDetail.orderDetails.shippingFee)
+                        )
+                      ) : (
+                        <span className="free-shipping">Miễn phí</span>
+                      )}
+                    </span>
+                  </div>
+
+                  {/* Hiển thị voucher discount nếu có */}
+                  {orderDetail.voucher &&
+                    orderDetail.orderDetails?.voucherDiscount > 0 && (
+                      <div className="summary-row discount-row">
+                        <span>
+                          <i className="fas fa-ticket-alt"></i>
+                          Voucher ({orderDetail.voucher.code}) -
+                          {orderDetail.voucher.discountPercent}%:
+                        </span>
+                        <span className="discount-amount">
+                          -
+                          {formatPrice(
+                            orderDetail.orderDetails.voucherDiscount
+                          )}
+                        </span>
+                      </div>
+                    )}
+
+                  {/* Hiển thị tổng tạm tính nếu có discount
+                  {orderDetail.orderDetails?.voucherDiscount > 0 && (
+                    <div className="summary-row subtotal-row">
+                      <span>Tạm tính:</span>
+                      <span>
+                        {formatPrice(
+                          orderDetail.orderDetails.totalBeforeDiscount
+                        )}
+                      </span>
+                    </div>
+                  )} */}
+
+                  <div className="summary-row total">
+                    <span>Tổng thanh toán:</span>
+                    <span className="total-amount">
+                      {formatPrice(orderDetail.totalAmount)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Voucher info nếu có */}
+                {orderDetail.voucher && (
+                  <div className="voucher-info">
+                    <div className="voucher-card">
+                      <div className="voucher-icon">
+                        <i className="fas fa-ticket-alt"></i>
+                      </div>
+                      <div className="voucher-details">
+                        <div className="voucher-code">
+                          Đã áp dụng mã:{" "}
+                          <strong>{orderDetail.voucher.code}</strong>
+                        </div>
+                        <div className="voucher-discount">
+                          Giảm {orderDetail.voucher.discountPercent}%
+                          {orderDetail.voucher.minOrderValue > 0 &&
+                            ` (Đơn tối thiểu ${formatPrice(
+                              orderDetail.voucher.minOrderValue
+                            )})`}
+                        </div>
+                        <div className="voucher-saved">
+                          Bạn đã tiết kiệm:{" "}
+                          <span className="saved-amount">
+                            {formatPrice(
+                              orderDetail.orderDetails?.voucherDiscount || 0
+                            )}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          ) : null}
+        </div>
+
+        <div className="modal-footer">
+          <button className="btn-secondary" onClick={onClose}>
+            <i className="fas fa-times"></i>
+            Đóng
+          </button>
+          {orderDetail && (
+            <button
+              className="btn-primary"
+              onClick={() => {
+                // Có thể thêm chức năng in đơn hàng hoặc tải về
+                window.print();
+              }}
+            >
+              <i className="fas fa-print"></i>
+              In đơn hàng
+            </button>
+          )}
         </div>
       </div>
-    );
-  }
-);
-
-OrderDetailModal.displayName = "OrderDetailModal";
-
-OrderDetailModal.propTypes = {
-  isOpen: PropTypes.bool.isRequired,
-  onClose: PropTypes.func.isRequired,
-  order: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    status: PropTypes.string,
-    paymentStatus: PropTypes.string,
-    productName: PropTypes.string,
-    items: PropTypes.string,
-    total: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    totalAmount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    quantity: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    category: PropTypes.string,
-    createdAt: PropTypes.string,
-    customer: PropTypes.string,
-    customerName: PropTypes.string,
-    email: PropTypes.string,
-    customerEmail: PropTypes.string,
-    phone: PropTypes.string,
-    customerPhone: PropTypes.string,
-    address: PropTypes.string,
-    customerAddress: PropTypes.string,
-    seller: PropTypes.string,
-    sellerName: PropTypes.string,
-    shopName: PropTypes.string,
-  }),
-  onEdit: PropTypes.func,
-  variant: PropTypes.oneOf(["admin", "seller"]),
+    </div>
+  );
 };
 
 export default OrderDetailModal;

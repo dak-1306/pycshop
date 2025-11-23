@@ -1,8 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  getSellerOrders,
-  updateSellerOrderStatus,
-} from "../../lib/services/order";
+import OrderService from "../../services/orderService";
 import { useToast } from "../useToast";
 
 export const useSellerOrders = () => {
@@ -33,13 +30,7 @@ export const useSellerOrders = () => {
       setLoading(true);
       setError(null);
 
-      const params = {
-        page,
-        limit: 10,
-        status: status !== "all" ? status : undefined,
-      };
-
-      const response = await getSellerOrders(params);
+      const response = await OrderService.getSellerOrders(page, 10, status);
 
       if (response.success) {
         setOrders(response.data || []);
@@ -51,16 +42,8 @@ export const useSellerOrders = () => {
       }
     } catch (error) {
       console.error("Error loading seller orders:", error);
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Lỗi khi tải danh sách đơn hàng"
-      );
-      showError(
-        error.response?.data?.message ||
-          error.message ||
-          "Lỗi khi tải danh sách đơn hàng"
-      );
+      setError(error.message || "Lỗi khi tải danh sách đơn hàng");
+      showError(error.message || "Lỗi khi tải danh sách đơn hàng");
     } finally {
       setLoading(false);
     }
@@ -71,7 +54,7 @@ export const useSellerOrders = () => {
     try {
       setLoading(true);
 
-      const response = await updateSellerOrderStatus(orderId, newStatus);
+      const response = await OrderService.updateOrderStatus(orderId, newStatus);
 
       if (response.success) {
         // Update local state
@@ -111,47 +94,15 @@ export const useSellerOrders = () => {
   };
 
   // Handle view order detail
-  const handleViewOrder = (orderOrId) => {
-    // Nếu truyền vào là ID, tìm order từ danh sách
-    let order;
-    if (typeof orderOrId === "string" || typeof orderOrId === "number") {
-      order = orders.find(
-        (o) => (o.id || o.ID_DonHang || o.orderId) == orderOrId
-      );
-    } else {
-      order = orderOrId; // Đã là object order
-    }
-
-    console.log("[HANDLE_VIEW_ORDER]", { orderOrId, foundOrder: order });
-
-    if (order) {
-      setSelectedOrder(order);
-      setShowDetailModal(true);
-    } else {
-      console.error("Order not found:", orderOrId);
-    }
+  const handleViewOrder = (order) => {
+    setSelectedOrder(order);
+    setShowDetailModal(true);
   };
 
   // Handle edit order
-  const handleEditOrder = (orderOrId) => {
-    // Nếu truyền vào là ID, tìm order từ danh sách
-    let order;
-    if (typeof orderOrId === "string" || typeof orderOrId === "number") {
-      order = orders.find(
-        (o) => (o.id || o.ID_DonHang || o.orderId) == orderOrId
-      );
-    } else {
-      order = orderOrId; // Đã là object order
-    }
-
-    console.log("[HANDLE_EDIT_ORDER]", { orderOrId, foundOrder: order });
-
-    if (order) {
-      setSelectedOrder(order);
-      setShowEditModal(true);
-    } else {
-      console.error("Order not found:", orderOrId);
-    }
+  const handleEditOrder = (order) => {
+    setSelectedOrder(order);
+    setShowEditModal(true);
   };
 
   // Handle save order (update status)

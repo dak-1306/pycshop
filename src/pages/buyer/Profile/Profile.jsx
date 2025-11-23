@@ -5,7 +5,7 @@ import UserService from "../../../services/userService.js";
 import OrderService from "../../../services/orderService";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
-import { OrderDetailModal } from "../../../components/common/modals";
+import  OrderDetailModal  from "../../../components/common/order/OrderDetailModal.jsx";
 import "../../../styles/pages/buyer/Profile.css";
 import "../../../styles/components/OrderCard.css";
 import "../../../styles/components/OrderDetailModal.css";

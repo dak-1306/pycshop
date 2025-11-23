@@ -5,7 +5,7 @@ import { useToast } from "../../../hooks/useToast";
 import Header from "../../../components/buyers/Header";
 import Footer from "../../../components/buyers/Footer";
 import userService from "../../../services/userService.js";
-import { VoucherModal } from "../../../components/common/notifications";
+import VoucherModal from "../../../components/common/notifications/VoucherModal.jsx";
 
 const Checkout = () => {
   const navigate = useNavigate();

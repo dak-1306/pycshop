@@ -63,7 +63,7 @@ class ChatModel {
             ht.ID_HoiThoai as conversationId,
             ht.ID_NguoiBan as partnerId,
             nd.HoTen as partnerName,
-            nd.Avatar as partnerAvatar,
+            nd.AvatarUrl as partnerAvatar,
             ht.ThoiGianTao as createdAt,
             (SELECT NoiDung FROM tinnhan 
              WHERE ID_HoiThoai = ht.ID_HoiThoai 
@@ -86,7 +86,7 @@ class ChatModel {
             ht.ID_HoiThoai as conversationId,
             ht.ID_NguoiMua as partnerId,
             nd.HoTen as partnerName,
-            nd.Avatar as partnerAvatar,
+            nd.AvatarUrl as partnerAvatar,
             ht.ThoiGianTao as createdAt,
             (SELECT NoiDung FROM tinnhan 
              WHERE ID_HoiThoai = ht.ID_HoiThoai 
@@ -213,7 +213,7 @@ class ChatModel {
           tn.ThoiGianGui as sentAt,
           tn.DaXem as isRead,
           nd.HoTen as senderName,
-          nd.Avatar as senderAvatar,
+          nd.AvatarUrl as senderAvatar,
           tna.AnhUrl as imageUrl
          FROM tinnhan tn
          LEFT JOIN nguoidung nd ON tn.ID_NguoiGui = nd.ID_NguoiDung
@@ -256,7 +256,7 @@ class ChatModel {
           tn.ThoiGianGui as sentAt,
           tn.DaXem as isRead,
           nd.HoTen as senderName,
-          nd.Avatar as senderAvatar,
+          nd.AvatarUrl as senderAvatar,
           tna.AnhUrl as imageUrl,
           CASE WHEN tna.ID_TinNhan IS NOT NULL THEN 'image' ELSE 'text' END as type
          FROM tinnhan tn

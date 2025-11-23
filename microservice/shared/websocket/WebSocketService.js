@@ -39,10 +39,7 @@ class WebSocketService {
         }
 
         // Verify JWT token
-        const decoded = jwt.verify(
-          token,
-          process.env.JWT_SECRET || "your-secret-key"
-        );
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || "pycshop");
         socket.userId = decoded.userId || decoded.id;
         socket.userRole = decoded.role || "buyer";
         socket.userEmail = decoded.email;

@@ -1090,36 +1090,99 @@ function setupRoutes(app) {
 
   // Chat Service - Proxy to Chat Service (5011)
   app.use(
-    "/api/chat",
-    authMiddleware,
+    "/chat",
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Matched /chat route for ${req.method} ${req.originalUrl}`
+      );
+      next();
+    },
+    // Apply auth middleware for chat routes
+    (req, res, next) => {
+      console.log(
+        `[ROUTES] Applying auth middleware for chat route: ${req.path}`
+      );
+      authMiddleware(req, res, next);
+    },
+    // Apply headers manually
+    (req, res, next) => {
+      console.log(`[ROUTES] Setting headers for chat route: ${req.path}`);
+      // Manually set headers for proxy
+      if (req.user) {
+        req.headers["x-user-id"] = req.user.id.toString();
+        req.headers["x-user-role"] = req.user.role;
+        if (req.user.userType) {
+          req.headers["x-user-type"] = req.user.userType;
+        }
+        console.log(
+          `[ROUTES] Set headers manually for chat: x-user-id=${
+            req.user.id
+          }, x-user-role=${req.user.role}, x-user-type=${
+            req.user.userType || "undefined"
+          }`
+        );
+      }
+      next();
+    },
     createProxyMiddleware({
       target: process.env.CHAT_SERVICE_URL || "http://localhost:5011",
       changeOrigin: true,
       timeout: 30000,
       proxyTimeout: 30000,
-      pathRewrite: {
-        "^/api/chat": "/api/chat", // Keep the same path
+      pathRewrite: (path, req) => {
+        // Transform /conversations -> /api/chat/conversations
+        const newPath = `/api/chat${path}`;
+        console.log(`💬 [CHAT_PROXY] Path rewrite: ${path} -> ${newPath}`);
+        return newPath;
       },
       headers: {
         Connection: "keep-alive",
       },
       onProxyReq: (proxyReq, req, res) => {
         console.log(
-          `💬 [CHAT_PROXY] ${req.method} ${req.originalUrl} -> Chat Service`
+          `💬 [CHAT_PROXY] onProxyReq callback triggered for chat service`
+        );
+        console.log(
+          `💬 [CHAT_PROXY] ${req.method} ${req.originalUrl} -> Chat Service ${proxyReq.path}`
+        );
+        console.log(
+          `💬 [CHAT_PROXY] Target URL: ${
+            process.env.CHAT_SERVICE_URL || "http://localhost:5011"
+          }${proxyReq.path}`
         );
 
-        // Forward user info to chat service
-        if (req.user?.id) {
+        // Forward user info to chat service - Manual header setting
+        if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id.toString());
-        }
-        if (req.user?.role) {
           proxyReq.setHeader("x-user-role", req.user.role);
+          if (req.user.userType) {
+            proxyReq.setHeader("x-user-type", req.user.userType);
+          }
+          console.log("[PROXY] Set user headers for chat:", {
+            id: req.user.id,
+            role: req.user.role,
+            userType: req.user.userType || "undefined",
+          });
+        } else {
+          console.log(`[PROXY] No req.user found for this chat request`);
         }
+
+        console.log(
+          `💬 [CHAT_PROXY] Final headers being sent:`,
+          proxyReq.getHeaders()
+        );
       },
       onProxyRes: (proxyRes, req, res) => {
         console.log(
           `💬 [CHAT_PROXY] Response ${proxyRes.statusCode} from chat service for ${req.method} ${req.originalUrl}`
         );
+
+        // Ensure CORS headers are set
+        const origin = req.headers.origin;
+        if (origin) {
+          res.setHeader("Access-Control-Allow-Origin", origin);
+          res.setHeader("Access-Control-Allow-Credentials", "true");
+        }
       },
       onError: (err, req, res) => {
         console.error(`💬 [CHAT_PROXY] Error:`, err.message);

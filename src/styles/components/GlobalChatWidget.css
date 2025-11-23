@@ -530,6 +530,56 @@
   background: #a0a0a0;
 }
 
+/* Loading and Error States */
+.loading-state,
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #42b883;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  background-color: #fee;
+  border: 1px solid #fcc;
+  color: #d00;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.empty-messages {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #999;
+  font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .chat-expanded {

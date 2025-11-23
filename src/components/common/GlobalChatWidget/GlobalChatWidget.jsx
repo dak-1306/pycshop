@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useChat } from "../../../context/ChatContext";
+import { useBuyerChat } from "../../../hooks/buyer/useBuyerChat";
 import { PLACEHOLDER_IMAGES } from "../../../lib/utils/placeholderImages";
 import "../../../styles/components/GlobalChatWidget.css";
 
@@ -8,52 +9,26 @@ const GlobalChatWidget = () => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [selectedShop, setSelectedShop] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      text: "Xin chào! Tôi có thể giúp gì cho bạn?",
-      sender: "shop",
-      time: new Date().toLocaleTimeString("vi-VN", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    },
-  ]);
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
   const messagesEndRef = useRef(null);
 
-  // Mock data cho danh sách shop
-  const [shopList] = useState([
-    {
-      id: 1,
-      name: "PycShop",
-      avatar: PLACEHOLDER_IMAGES.avatar40,
-      lastMessage: "Cảm ơn bạn đã liên hệ!",
-      time: "10:30",
-      unreadCount: 2,
-      isOnline: true,
-    },
-    {
-      id: 2,
-      name: "Tech Store",
-      avatar: PLACEHOLDER_IMAGES.avatar40,
-      lastMessage: "Sản phẩm còn hàng không?",
-      time: "09:45",
-      unreadCount: 0,
-      isOnline: true,
-    },
-    {
-      id: 3,
-      name: "Fashion World",
-      avatar: PLACEHOLDER_IMAGES.avatar40,
-      lastMessage: "Khi nào có hàng mới?",
-      time: "Hôm qua",
-      unreadCount: 1,
-      isOnline: false,
-    },
-  ]);
+  // Use real chat data instead of mock data
+  const {
+    conversations,
+    activeConversation,
+    messages,
+    isLoading,
+    isSending,
+    error,
+    createConversation,
+    loadConversations,
+    sendMessage,
+    selectConversation,
+    formatTime,
+    getUnreadCount,
+  } = useBuyerChat();
 
   console.log(
     "GlobalChatWidget render - isChatOpen:",
@@ -67,43 +42,29 @@ const GlobalChatWidget = () => {
   }, [messages]);
 
   useEffect(() => {
-    // Chọn shop đầu tiên khi mở chat
-    if (isChatOpen && !selectedShop && shopList.length > 0) {
-      setSelectedShop(shopList[0]);
+    // Chọn conversation đầu tiên khi mở chat
+    if (isChatOpen && !activeConversation && conversations.length > 0) {
+      selectConversation(conversations[0]);
     }
-  }, [isChatOpen, selectedShop, shopList]);
+  }, [isChatOpen, activeConversation, conversations, selectConversation]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const handleSendMessage = () => {
-    if (newMessage.trim()) {
-      const message = {
-        id: messages.length + 1,
-        text: newMessage,
-        sender: "user",
-        time: new Date().toLocaleTimeString("vi-VN", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      setMessages([...messages, message]);
-      setNewMessage("");
+  const handleSendMessage = async () => {
+    if (!newMessage.trim() || !activeConversation || isSending) return;
 
-      // Mock shop response
-      setTimeout(() => {
-        const shopResponse = {
-          id: messages.length + 2,
-          text: "Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi sớm nhất có thể.",
-          sender: "shop",
-          time: new Date().toLocaleTimeString("vi-VN", {
-            hour: "2-digit",
-            minute: "2-digit",
-          }),
-        };
-        setMessages((prev) => [...prev, shopResponse]);
-      }, 1000);
+    try {
+      const success = await sendMessage(
+        newMessage.trim(),
+        activeConversation.id
+      );
+      if (success) {
+        setNewMessage("");
+      }
+    } catch (error) {
+      console.error("[GLOBAL_CHAT_WIDGET] Error sending message:", error);
     }
   };
 
@@ -114,8 +75,8 @@ const GlobalChatWidget = () => {
     }
   };
 
-  const handleSelectShop = (shop) => {
-    setSelectedShop(shop);
+  const handleSelectConversation = (conversation) => {
+    selectConversation(conversation);
   };
 
   const handleMinimize = () => {
@@ -131,8 +92,8 @@ const GlobalChatWidget = () => {
     setIsMinimized(false);
   };
 
-  const filteredShops = shopList.filter((shop) =>
-    shop.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredConversations = conversations.filter((conversation) =>
+    conversation.sellerName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   if (!isChatOpen) {
@@ -144,9 +105,19 @@ const GlobalChatWidget = () => {
       {isMinimized ? (
         <div className="chat-minimized" onClick={handleMaximize}>
           <img
-            src={selectedShop?.avatar || PLACEHOLDER_IMAGES.avatar40}
+            src={
+              activeConversation?.sellerAvatar ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                activeConversation?.sellerName || "Shop"
+              )}&background=6b7280&color=fff&size=40`
+            }
             alt="Shop Avatar"
             className="minimized-avatar"
+            onError={(e) => {
+              e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                activeConversation?.sellerName || "Shop"
+              )}&background=6b7280&color=fff&size=40`;
+            }}
           />
           <div className="minimized-indicator">💬</div>
         </div>
@@ -168,37 +139,66 @@ const GlobalChatWidget = () => {
             </div>
 
             <div className="shop-list">
-              {filteredShops.map((shop) => (
-                <div
-                  key={shop.id}
-                  className={`shop-item ${
-                    selectedShop?.id === shop.id ? "active" : ""
-                  }`}
-                  onClick={() => handleSelectShop(shop)}
-                >
-                  <img
-                    src={shop.avatar}
-                    alt={shop.name}
-                    className="shop-item-avatar"
-                  />
-                  <div className="shop-item-info">
-                    <div className="shop-item-name">{shop.name}</div>
-                    <div className="shop-item-preview">{shop.lastMessage}</div>
-                  </div>
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "flex-end",
-                    }}
-                  >
-                    <div className="shop-item-time">{shop.time}</div>
-                    {shop.unreadCount > 0 && (
-                      <div className="shop-item-badge">{shop.unreadCount}</div>
-                    )}
-                  </div>
+              {isLoading ? (
+                <div className="loading-state">
+                  <div className="loading-spinner"></div>
+                  <p>Đang tải tin nhắn...</p>
                 </div>
-              ))}
+              ) : filteredConversations.length > 0 ? (
+                filteredConversations.map((conversation) => (
+                  <div
+                    key={conversation.id}
+                    className={`shop-item ${
+                      activeConversation?.id === conversation.id ? "active" : ""
+                    }`}
+                    onClick={() => handleSelectConversation(conversation)}
+                  >
+                    <img
+                      src={
+                        conversation.sellerAvatar ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          conversation.sellerName
+                        )}&background=6b7280&color=fff&size=40`
+                      }
+                      alt={conversation.sellerName}
+                      className="shop-item-avatar"
+                      onError={(e) => {
+                        e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          conversation.sellerName
+                        )}&background=6b7280&color=fff&size=40`;
+                      }}
+                    />
+                    <div className="shop-item-info">
+                      <div className="shop-item-name">
+                        {conversation.shopName || conversation.sellerName}
+                      </div>
+                      <div className="shop-item-preview">
+                        {conversation.lastMessage}
+                      </div>
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "flex-end",
+                      }}
+                    >
+                      <div className="shop-item-time">
+                        {formatTime(conversation.lastMessageTime)}
+                      </div>
+                      {conversation.unreadCount > 0 && (
+                        <div className="shop-item-badge">
+                          {conversation.unreadCount}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="empty-state">
+                  <p>Chưa có cuộc trò chuyện nào</p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -207,14 +207,28 @@ const GlobalChatWidget = () => {
             <div className="chat-header">
               <div className="shop-info">
                 <img
-                  src={selectedShop?.avatar || PLACEHOLDER_IMAGES.avatar40}
+                  src={
+                    activeConversation?.sellerAvatar ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      activeConversation?.sellerName || "Shop"
+                    )}&background=6b7280&color=fff&size=40`
+                  }
                   alt="Shop Avatar"
                   className="shop-avatar"
+                  onError={(e) => {
+                    e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      activeConversation?.sellerName || "Shop"
+                    )}&background=6b7280&color=fff&size=40`;
+                  }}
                 />
                 <div className="shop-details">
-                  <h4>{selectedShop?.name || "PycShop"}</h4>
+                  <h4>
+                    {activeConversation?.shopName ||
+                      activeConversation?.sellerName ||
+                      "PycShop"}
+                  </h4>
                   <span className="online-status">
-                    {selectedShop?.isOnline
+                    {activeConversation?.isOnline
                       ? "🟢 Đang hoạt động"
                       : "⚪ Không hoạt động"}
                   </span>
@@ -239,19 +253,47 @@ const GlobalChatWidget = () => {
             </div>
 
             <div className="chat-messages">
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`message ${
-                    message.sender === "user" ? "user-message" : "shop-message"
-                  }`}
-                >
-                  <div className="message-content">
-                    <p>{message.text}</p>
-                    <span className="message-time">{message.time}</span>
-                  </div>
+              {error && (
+                <div className="error-message">
+                  <p>❌ {error}</p>
                 </div>
-              ))}
+              )}
+              {messages.length > 0 ? (
+                messages.map((message) => {
+                  // Determine if message is from current user
+                  const user = JSON.parse(localStorage.getItem("user") || "{}");
+                  const currentUserId = (
+                    user.id || user.ID_NguoiDung
+                  )?.toString();
+                  const isCurrentUser = message.senderId === currentUserId;
+
+                  return (
+                    <div
+                      key={message.id}
+                      className={`message ${
+                        isCurrentUser ? "user-message" : "shop-message"
+                      }`}
+                    >
+                      <div className="message-content">
+                        <p>{message.content}</p>
+                        <span className="message-time">
+                          {formatTime(message.timestamp)}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : activeConversation ? (
+                <div className="empty-messages">
+                  <p>
+                    Bắt đầu cuộc trò chuyện với {activeConversation.sellerName}
+                  </p>
+                </div>
+              ) : (
+                <div className="empty-messages">
+                  <p>Chọn một cuộc trò chuyện để bắt đầu</p>
+                </div>
+              )}
               <div ref={messagesEndRef} />
             </div>
 
@@ -278,7 +320,23 @@ const GlobalChatWidget = () => {
                 {/* Emoji Picker */}
                 {showEmojiPicker && (
                   <div className="emoji-picker">
-                    {["😊", "😂", "❤️", "👍", "🎉", "😢", "😍", "🔥", "👏", "🙏", "💯", "😎", "🤔", "😅", "🥰"].map((emoji, index) => (
+                    {[
+                      "😊",
+                      "😂",
+                      "❤️",
+                      "👍",
+                      "🎉",
+                      "😢",
+                      "😍",
+                      "🔥",
+                      "👏",
+                      "🙏",
+                      "💯",
+                      "😎",
+                      "🤔",
+                      "😅",
+                      "🥰",
+                    ].map((emoji, index) => (
                       <button
                         key={index}
                         className="emoji-item"
@@ -294,8 +352,8 @@ const GlobalChatWidget = () => {
                 )}
 
                 <div className="input-actions-left">
-                  <button 
-                    className="input-action-btn" 
+                  <button
+                    className="input-action-btn"
                     title="Đính kèm"
                     onClick={() => {
                       setShowAttachMenu(!showAttachMenu);
@@ -315,8 +373,8 @@ const GlobalChatWidget = () => {
                   rows="1"
                 />
                 <div className="input-actions">
-                  <button 
-                    className="input-action-btn" 
+                  <button
+                    className="input-action-btn"
                     title="Emoji"
                     onClick={() => {
                       setShowEmojiPicker(!showEmojiPicker);
@@ -330,10 +388,16 @@ const GlobalChatWidget = () => {
               <button
                 onClick={handleSendMessage}
                 className="send-btn"
-                disabled={!newMessage.trim()}
-                title="Gửi tin nhắn"
+                disabled={
+                  !newMessage.trim() || !activeConversation || isSending
+                }
+                title={isSending ? "Đang gửi..." : "Gửi tin nhắn"}
               >
-                <i className="fas fa-paper-plane"></i>
+                {isSending ? (
+                  <i className="fas fa-spinner fa-spin"></i>
+                ) : (
+                  <i className="fas fa-paper-plane"></i>
+                )}
               </button>
             </div>
           </div>

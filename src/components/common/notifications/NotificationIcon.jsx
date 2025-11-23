@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import NotificationService from "../../../services/notificationService";
 import NotificationPanel from "./NotificationPanel";
+import webSocketClient from "../../../services/webSocketClient";
 
 const NotificationIcon = () => {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -60,13 +61,39 @@ const NotificationIcon = () => {
     loadUnreadCount();
     loadRecentNotifications();
 
-    // Refresh every 30 seconds
+    // Setup WebSocket listeners for real-time notifications
+    const handleNewNotification = (data) => {
+      console.log("[NOTIFICATION_ICON] 🔔 New notification received:", data);
+      loadUnreadCount();
+      loadRecentNotifications();
+    };
+
+    const handleNotificationRead = (data) => {
+      console.log("[NOTIFICATION_ICON] ✅ Notification marked as read:", data);
+      loadUnreadCount();
+      loadRecentNotifications();
+    };
+
+    // Connect WebSocket if not connected
+    if (!webSocketClient.isSocketConnected()) {
+      webSocketClient.connect();
+    }
+
+    // Add event listeners
+    webSocketClient.on("new-notification", handleNewNotification);
+    webSocketClient.on("notification-read", handleNotificationRead);
+
+    // Refresh every 30 seconds (backup for missed WebSocket events)
     const interval = setInterval(() => {
       loadUnreadCount();
       loadRecentNotifications();
     }, 30000);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      webSocketClient.off("new-notification", handleNewNotification);
+      webSocketClient.off("notification-read", handleNotificationRead);
+    };
   }, []);
 
   const formatTime = (dateString) => {

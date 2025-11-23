@@ -20,7 +20,7 @@ class WebSocketClient {
         return false;
       }
 
-      const wsUrl = import.meta.env.VITE_WS_URL || "http://localhost:5008";
+      const wsUrl = import.meta.env.VITE_WS_URL || "http://localhost:5018";
 
       this.socket = io(wsUrl, {
         auth: {

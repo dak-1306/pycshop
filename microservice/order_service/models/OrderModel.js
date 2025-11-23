@@ -1,6 +1,7 @@
 import smartDB from "../../db/index.js";
 import notificationHelper from "../helpers/NotificationHelper.js";
 import chatHelper from "../helpers/ChatHelper.js";
+import kafkaService from "../../shared/kafka/KafkaService.js";
 
 class OrderModel {
   // Tạo đơn hàng mới với transaction - tách theo người bán
@@ -148,6 +149,28 @@ class OrderModel {
       console.log(
         `[ORDER_MODEL] Transaction committed successfully - Created ${createdOrders.length} orders`
       );
+
+      // Publish Kafka event for WebSocket notifications
+      try {
+        await kafkaService.initProducer();
+        await kafkaService.sendOrderEvent("ORDER_CREATED", {
+          buyerId: userId,
+          orders: createdOrders.map((order) => ({
+            orderId: order.orderId,
+            sellerId: order.sellerId,
+            total: order.total,
+            status: "pending",
+            itemCount: order.items.length,
+          })),
+        });
+        console.log(`[ORDER_MODEL] ✅ Kafka event published for ORDER_CREATED`);
+      } catch (kafkaError) {
+        console.error(
+          `[ORDER_MODEL] ❌ Failed to publish Kafka event:`,
+          kafkaError
+        );
+        // Don't fail the order creation if Kafka fails
+      }
 
       // Send notifications asynchronously
       createdOrders.forEach((order) => {
@@ -369,8 +392,27 @@ class OrderModel {
       );
       console.log(`[ORDER_MODEL] Updated order ${orderId} status to cancelled`);
 
-      // Send cancellation notification asynchronously
+      // Publish Kafka event for WebSocket notifications
       const buyerId = userId || order.ID_NguoiMua;
+      try {
+        await kafkaService.initProducer();
+        await kafkaService.sendOrderEvent("ORDER_CANCELLED", {
+          orderId: orderId,
+          buyerId: buyerId,
+          cancelledBy: userId ? "buyer" : "admin",
+          sellerIds: null, // Will get seller IDs if needed
+        });
+        console.log(
+          `[ORDER_MODEL] ✅ Kafka event published for ORDER_CANCELLED`
+        );
+      } catch (kafkaError) {
+        console.error(
+          `[ORDER_MODEL] ❌ Failed to publish Kafka event:`,
+          kafkaError
+        );
+      }
+
+      // Send cancellation notification asynchronously
       notificationHelper
         .createOrderNotification(buyerId, orderId, "cancelled")
         .then((result) => {
@@ -686,6 +728,25 @@ class OrderModel {
         `[ORDER_MODEL] Successfully updated order ${orderId} from ${currentStatus} to ${newStatus}`
       );
 
+      // Publish Kafka event for WebSocket notifications
+      try {
+        await kafkaService.initProducer();
+        await kafkaService.sendOrderEvent("ORDER_UPDATED", {
+          orderId: orderId,
+          oldStatus: currentStatus,
+          newStatus: newStatus,
+          sellerId: sellerId,
+          buyerId: null, // Will be filled below
+        });
+        console.log(`[ORDER_MODEL] ✅ Kafka event published for ORDER_UPDATED`);
+      } catch (kafkaError) {
+        console.error(
+          `[ORDER_MODEL] ❌ Failed to publish Kafka event:`,
+          kafkaError
+        );
+        // Don't fail the update if Kafka fails
+      }
+
       // Get buyer ID to send notification
       const [buyerRows] = await smartDB.execute(
         `SELECT ID_NguoiMua FROM donhang WHERE ID_DonHang = ?`,
@@ -694,6 +755,22 @@ class OrderModel {
 
       if (buyerRows.length > 0) {
         const buyerId = buyerRows[0].ID_NguoiMua;
+
+        // Update Kafka event with buyer ID
+        try {
+          await kafkaService.sendOrderEvent("ORDER_UPDATED", {
+            orderId: orderId,
+            oldStatus: currentStatus,
+            newStatus: newStatus,
+            sellerId: sellerId,
+            buyerId: buyerId,
+          });
+        } catch (kafkaError) {
+          console.error(
+            `[ORDER_MODEL] ❌ Failed to publish updated Kafka event:`,
+            kafkaError
+          );
+        }
 
         // Send notification asynchronously (don't wait for it to complete)
         notificationHelper

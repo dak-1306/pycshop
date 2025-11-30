@@ -107,14 +107,26 @@ class ChatController {
         content.trim()
       );
 
-      // Emit socket event (will be handled by socket handler)
-      req.app
-        .get("io")
-        ?.to(`conversation_${conversationId}`)
-        .emit("new_message", {
-          ...result.message,
+      // Emit realtime socket event to conversation room
+      const io = req.app.get("io");
+      if (io && result.message) {
+        const socketData = {
+          messageId: result.message.messageId,
           conversationId: parseInt(conversationId),
-        });
+          content: result.message.content,
+          senderId: result.message.senderId,
+          senderName: result.message.senderName,
+          senderAvatar: result.message.senderAvatar,
+          timestamp: result.message.sentAt,
+          type: "text",
+        };
+
+        console.log(
+          `[CHAT_CONTROLLER] Emitting new_message to conversation_${conversationId}:`,
+          socketData
+        );
+        io.to(`conversation_${conversationId}`).emit("new_message", socketData);
+      }
 
       res.status(201).json(result);
     } catch (error) {
@@ -160,14 +172,26 @@ class ChatController {
         imageUrl
       );
 
-      // Emit socket event
-      req.app
-        .get("io")
-        ?.to(`conversation_${conversationId}`)
-        .emit("new_message", {
-          ...result.message,
+      // Emit realtime socket event to conversation room
+      const io = req.app.get("io");
+      if (io && result.message) {
+        const socketData = {
+          messageId: result.message.messageId,
           conversationId: parseInt(conversationId),
-        });
+          content: result.message.content,
+          senderId: result.message.senderId,
+          senderName: result.message.senderName,
+          senderAvatar: result.message.senderAvatar,
+          timestamp: result.message.sentAt,
+          type: "image",
+        };
+
+        console.log(
+          `[CHAT_CONTROLLER] Emitting image new_message to conversation_${conversationId}:`,
+          socketData
+        );
+        io.to(`conversation_${conversationId}`).emit("new_message", socketData);
+      }
 
       res.status(201).json(result);
     } catch (error) {

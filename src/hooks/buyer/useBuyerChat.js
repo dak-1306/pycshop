@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import ChatService from "../../services/chatService";
-import webSocketClient from "../../services/webSocketClient";
+import chatWebSocketClient from "../../services/chatWebSocketClient";
 
 export const useBuyerChat = () => {
   const [conversations, setConversations] = useState([]);
@@ -322,20 +322,42 @@ export const useBuyerChat = () => {
     const handleNewMessage = (data) => {
       console.log("[USE_BUYER_CHAT] 💬 New message received:", data);
 
-      // Add message to current conversation if it matches
-      if (activeConversation && data.conversationId === activeConversation.id) {
-        const newMessage = {
-          id: data.messageId,
-          content: data.content,
-          senderId: data.senderId.toString(),
-          senderName: data.senderName,
-          senderAvatar: data.senderAvatar,
-          timestamp: data.timestamp,
-          status: "delivered",
-          type: data.type || "text",
-        };
+      // Get current user info to avoid duplicate messages
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const currentUserId = (user.id || user.ID_NguoiDung)?.toString();
 
-        setMessages((prev) => [...prev, newMessage]);
+      // Only add message if it's NOT from current user (to avoid duplicates)
+      if (data.senderId.toString() !== currentUserId) {
+        // Add message to current conversation if it matches
+        if (
+          activeConversation &&
+          data.conversationId === activeConversation.id
+        ) {
+          const newMessage = {
+            id: data.messageId,
+            content: data.content,
+            senderId: data.senderId.toString(),
+            senderName: data.senderName,
+            senderAvatar: data.senderAvatar,
+            timestamp: data.timestamp,
+            status: "delivered",
+            type: data.type || "text",
+          };
+
+          // Check if message already exists to prevent duplicates
+          setMessages((prev) => {
+            const exists = prev.some((msg) => msg.id === data.messageId);
+            if (exists) {
+              console.log(
+                "[USE_BUYER_CHAT] Message already exists, skipping duplicate"
+              );
+              return prev;
+            }
+            return [...prev, newMessage];
+          });
+        }
+      } else {
+        console.log("[USE_BUYER_CHAT] Skipping own message to avoid duplicate");
       }
 
       // Update last message in conversations
@@ -369,20 +391,63 @@ export const useBuyerChat = () => {
       }
     };
 
-    // Setup WebSocket listeners
-    if (webSocketClient.isSocketConnected()) {
-      webSocketClient.on("new-message", handleNewMessage);
-      webSocketClient.on("message-read", handleMessageRead);
-    } else {
-      webSocketClient.connect();
-      webSocketClient.on("new-message", handleNewMessage);
-      webSocketClient.on("message-read", handleMessageRead);
+    const handleUserOnline = (data) => {
+      console.log("[USE_BUYER_CHAT] 🟢 User online:", data);
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.sellerId?.toString() === data.userId?.toString()
+            ? { ...conv, isOnline: true }
+            : conv
+        )
+      );
+    };
+
+    const handleUserOffline = (data) => {
+      console.log("[USE_BUYER_CHAT] 🔴 User offline:", data);
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.sellerId?.toString() === data.userId?.toString()
+            ? { ...conv, isOnline: false }
+            : conv
+        )
+      );
+    };
+
+    // Connect to chat WebSocket if not connected
+    if (!chatWebSocketClient.isSocketConnected()) {
+      console.log("[USE_BUYER_CHAT] Connecting to chat WebSocket...");
+      chatWebSocketClient.connect();
     }
 
+    // Setup event listeners
+    chatWebSocketClient.on("new-message", handleNewMessage);
+    chatWebSocketClient.on("message-read", handleMessageRead);
+    chatWebSocketClient.on("user-online", handleUserOnline);
+    chatWebSocketClient.on("user-offline", handleUserOffline);
+
     return () => {
-      webSocketClient.off("new-message", handleNewMessage);
-      webSocketClient.off("message-read", handleMessageRead);
+      chatWebSocketClient.off("new-message", handleNewMessage);
+      chatWebSocketClient.off("message-read", handleMessageRead);
+      chatWebSocketClient.off("user-online", handleUserOnline);
+      chatWebSocketClient.off("user-offline", handleUserOffline);
     };
+  }, [activeConversation]);
+
+  // Join/Leave conversation rooms when active conversation changes
+  useEffect(() => {
+    if (activeConversation?.id && chatWebSocketClient.isSocketConnected()) {
+      console.log(
+        `[USE_BUYER_CHAT] Joining conversation room: ${activeConversation.id}`
+      );
+      chatWebSocketClient.joinConversation(activeConversation.id);
+
+      return () => {
+        console.log(
+          `[USE_BUYER_CHAT] Leaving conversation room: ${activeConversation.id}`
+        );
+        chatWebSocketClient.leaveConversation(activeConversation.id);
+      };
+    }
   }, [activeConversation]);
 
   return {

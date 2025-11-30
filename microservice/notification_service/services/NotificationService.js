@@ -9,10 +9,6 @@ class NotificationService {
   // Tạo thông báo chung
   async createNotification(userId, type, content, relatedId = null) {
     try {
-      console.log(
-        `[NOTIFICATION_SERVICE] Creating ${type} notification for user ${userId}`
-      );
-
       const response = await axios.post(
         `${this.baseURL}/notifications/create`,
         {
@@ -30,9 +26,6 @@ class NotificationService {
       );
 
       if (response.data.success) {
-        console.log(
-          `[NOTIFICATION_SERVICE] ✅ Notification created successfully: ${response.data.notificationId}`
-        );
         return response.data;
       } else {
         console.error(
@@ -71,10 +64,6 @@ class NotificationService {
         defaultMessages[status] ||
         `Đơn hàng #${orderId} đã được cập nhật trạng thái: ${status}`;
 
-      console.log(
-        `[NOTIFICATION_SERVICE] Creating order notification for user ${userId}, order ${orderId}, status: ${status}`
-      );
-
       const response = await axios.post(
         `${this.baseURL}/notifications/order`,
         {
@@ -92,9 +81,6 @@ class NotificationService {
       );
 
       if (response.data.success) {
-        console.log(
-          `[NOTIFICATION_SERVICE] ✅ Order notification created successfully`
-        );
         return response.data;
       } else {
         console.error(

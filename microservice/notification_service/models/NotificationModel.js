@@ -12,18 +12,10 @@ class NotificationModel {
         ID_LienQuan = null,
       } = notificationData;
 
-      console.log(
-        `[NOTIFICATION_MODEL] Creating notification for user ${ID_NguoiNhan}, type: ${Loai}, role: ${VaiTro}`
-      );
-
       const [result] = await smartDB.execute(
         `INSERT INTO thongbao (ID_NguoiNhan, Loai, VaiTro, NoiDung, ThoiGianGui)
          VALUES (?, ?, ?, ?, NOW())`,
         [ID_NguoiNhan, Loai, VaiTro, NoiDung]
-      );
-
-      console.log(
-        `[NOTIFICATION_MODEL] Created notification ID: ${result.insertId}`
       );
 
       return {
@@ -46,13 +38,6 @@ class NotificationModel {
   ) {
     try {
       const offset = (page - 1) * limit;
-
-      console.log(`[NOTIFICATION_MODEL] 🔍 Query params:`, {
-        userId,
-        page,
-        limit,
-        type,
-      });
 
       let query = `
         SELECT 
@@ -77,9 +62,6 @@ class NotificationModel {
 
       query += ` ORDER BY ThoiGianGui DESC LIMIT ? OFFSET ?`;
       params.push(limit, offset);
-
-      console.log(`[NOTIFICATION_MODEL] 📋 SQL Query:`, query);
-      console.log(`[NOTIFICATION_MODEL] 📊 Params:`, params);
 
       const [notifications] = await smartDB.execute(query, params);
 
@@ -141,10 +123,6 @@ class NotificationModel {
         };
       }
 
-      console.log(
-        `[NOTIFICATION_MODEL] Marked notification ${notificationId} as read`
-      );
-
       return {
         success: true,
         message: "Đã đánh dấu thông báo là đã đọc",
@@ -164,10 +142,6 @@ class NotificationModel {
       const [result] = await smartDB.execute(
         `UPDATE thongbao SET DaDoc = 1 WHERE ID_NguoiNhan = ? AND DaDoc = 0`,
         [userId]
-      );
-
-      console.log(
-        `[NOTIFICATION_MODEL] Marked ${result.affectedRows} notifications as read for user ${userId}`
       );
 
       return {
@@ -204,10 +178,6 @@ class NotificationModel {
           message: "Không tìm thấy thông báo hoặc bạn không có quyền xóa",
         };
       }
-
-      console.log(
-        `[NOTIFICATION_MODEL] Deleted notification ${notificationId}`
-      );
 
       return {
         success: true,

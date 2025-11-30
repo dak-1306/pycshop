@@ -22,8 +22,6 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
       "http://localhost:8080",
     ];
 
-console.log(`[NOTIFICATION_SERVICE] CORS allowed origins:`, allowedOrigins);
-
 app.use(
   cors({
     origin: allowedOrigins,
@@ -41,28 +39,6 @@ app.use(
 // Middleware
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
-
-// Request logging middleware
-app.use((req, res, next) => {
-  console.log(
-    `[NOTIFICATION_SERVICE] ⭐ INCOMING REQUEST: ${req.method} ${
-      req.path
-    } - ${new Date().toISOString()}`
-  );
-  console.log(`[NOTIFICATION_SERVICE] 📋 Full URL: ${req.originalUrl}`);
-  console.log(`[NOTIFICATION_SERVICE] 🔑 Headers:`, {
-    "x-user-id": req.headers["x-user-id"],
-    "x-user-role": req.headers["x-user-role"],
-    "content-type": req.headers["content-type"],
-    host: req.headers["host"],
-  });
-
-  if (req.method !== "GET" && Object.keys(req.body).length > 0) {
-    console.log(`[NOTIFICATION_SERVICE] 📦 Body keys:`, Object.keys(req.body));
-  }
-
-  next();
-});
 
 // Routes
 app.use("/notifications", notificationRoutes);
@@ -102,9 +78,6 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  console.log(
-    `[NOTIFICATION_SERVICE] ❌ 404 - Route not found: ${req.method} ${req.originalUrl}`
-  );
   res.status(404).json({
     success: false,
     message: `Route ${req.method} ${req.originalUrl} not found`,
@@ -116,18 +89,10 @@ async function startServer() {
   try {
     // Test database connection
     await smartDB.execute("SELECT 1");
-    console.log(
-      `[NOTIFICATION_SERVICE] ✅ Database connected: ${process.env.DB_NAME}@${process.env.DB_HOST}`
-    );
 
     // Start server
     app.listen(PORT, () => {
-      console.log(`[NOTIFICATION_SERVICE] 🔔 Server running on port ${PORT}`);
-      console.log(
-        `[NOTIFICATION_SERVICE] 📊 Environment: ${
-          process.env.NODE_ENV || "development"
-        }`
-      );
+      console.log(`[NOTIFICATION_SERVICE] 🔔 Server running`);
       console.log(
         `[NOTIFICATION_SERVICE] 🗄️ Database: ${process.env.DB_NAME}@${process.env.DB_HOST}`
       );

@@ -163,22 +163,14 @@ async function testConnection() {
   try {
     // Test master connection
     const masterConnection = await pool.getConnection();
-    console.log(
-      `✅ Master DB connected: ${dbConfig.database}@${dbConfig.host}:${dbConfig.port}`
-    );
-    console.log(
-      `🔗 Master pool: ${pool.pool.config.connectionLimit} max connections`
-    );
+
     masterConnection.release();
 
     // Test replica connection if configured
     if (replicaPool) {
       try {
         const replicaConnection = await replicaPool.getConnection();
-        console.log(`✅ Replica DB connected: ${process.env.DB_REPLICA_HOST}`);
-        console.log(
-          `🔗 Replica pool: ${replicaPool.pool.config.connectionLimit} max connections`
-        );
+
         replicaConnection.release();
       } catch (replicaError) {
         console.warn(`⚠️ Replica connection failed:`, replicaError.message);
@@ -190,7 +182,6 @@ async function testConnection() {
     const start = Date.now();
     await smartDB.execute("SELECT 1 as test");
     const duration = Date.now() - start;
-    console.log(`⚡ DB Response time: ${duration}ms`);
 
     if (duration > 100) {
       console.warn(
@@ -215,9 +206,6 @@ async function testConnection() {
 // Performance monitoring interval
 setInterval(() => {
   const stats = smartDB.getPoolStats();
-  console.log(
-    `📊 [DB-HEALTH] Master: ${stats.master.activeConnections}/${stats.master.totalConnections} active, ${stats.master.queuedRequests} queued`
-  );
 
   if (stats.replica) {
     console.log(

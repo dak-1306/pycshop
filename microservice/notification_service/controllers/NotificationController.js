@@ -8,10 +8,6 @@ class NotificationController {
       const userId = req.headers["x-user-id"] || req.user?.id;
       const { page = 1, limit = 20, type = "all" } = req.query;
 
-      console.log(
-        `[NOTIFICATION_CONTROLLER] Getting notifications for user ${userId}, page: ${page}, type: ${type}`
-      );
-
       if (!userId) {
         return res.status(401).json({
           success: false,
@@ -49,10 +45,6 @@ class NotificationController {
     try {
       const userId = req.headers["x-user-id"] || req.user?.id;
 
-      console.log(
-        `[NOTIFICATION_CONTROLLER] Getting unread count for user ${userId}`
-      );
-
       if (!userId) {
         return res.status(401).json({
           success: false,
@@ -85,10 +77,6 @@ class NotificationController {
     try {
       const userId = req.headers["x-user-id"] || req.user?.id;
       const { notificationId } = req.params;
-
-      console.log(
-        `[NOTIFICATION_CONTROLLER] Marking notification ${notificationId} as read for user ${userId}`
-      );
 
       if (!userId) {
         return res.status(401).json({
@@ -125,10 +113,6 @@ class NotificationController {
     try {
       const userId = req.headers["x-user-id"] || req.user?.id;
 
-      console.log(
-        `[NOTIFICATION_CONTROLLER] Marking all notifications as read for user ${userId}`
-      );
-
       if (!userId) {
         return res.status(401).json({
           success: false,
@@ -157,10 +141,6 @@ class NotificationController {
     try {
       const userId = req.headers["x-user-id"] || req.user?.id;
       const { notificationId } = req.params;
-
-      console.log(
-        `[NOTIFICATION_CONTROLLER] Deleting notification ${notificationId} for user ${userId}`
-      );
 
       if (!userId) {
         return res.status(401).json({
@@ -197,10 +177,6 @@ class NotificationController {
     try {
       const { userId, type, content, relatedId = null } = req.body;
 
-      console.log(
-        `[NOTIFICATION_CONTROLLER] Creating notification for user ${userId}, type: ${type}`
-      );
-
       if (!userId || !type || !content) {
         return res.status(400).json({
           success: false,
@@ -222,9 +198,6 @@ class NotificationController {
             userId: userId,
             notification: result.notification,
           });
-          console.log(
-            `[NOTIFICATION_CONTROLLER] Notification event sent to Kafka for user ${userId}`
-          );
         } catch (kafkaError) {
           console.error(
             `[NOTIFICATION_CONTROLLER] Failed to send notification event to Kafka:`,
@@ -253,10 +226,6 @@ class NotificationController {
     try {
       const { userId, orderId, status, message } = req.body;
 
-      console.log(
-        `[NOTIFICATION_CONTROLLER] Creating order notification for user ${userId}, order ${orderId}, status: ${status}`
-      );
-
       if (!userId || !orderId || !status || !message) {
         return res.status(400).json({
           success: false,
@@ -279,9 +248,6 @@ class NotificationController {
             userId: userId,
             notification: result.notification,
           });
-          console.log(
-            `[NOTIFICATION_CONTROLLER] Notification event sent to Kafka for user ${userId}`
-          );
         } catch (kafkaError) {
           console.error(
             `[NOTIFICATION_CONTROLLER] Failed to send notification event to Kafka:`,

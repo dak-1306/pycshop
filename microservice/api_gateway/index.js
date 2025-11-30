@@ -214,10 +214,6 @@ app.use((req, res, next) => {
 
 // Middleware kiểm tra auth cho các routes protected
 app.use((req, res, next) => {
-  // Debug: Log every request
-  console.log(`\n🔍 [DEBUG] ${req.method} ${req.originalUrl}`);
-  console.log(`🔍 [DEBUG] Headers:`, req.headers);
-
   // Routes không cần auth (public routes)
   const publicRoutes = [
     "/auth/login",
@@ -260,12 +256,6 @@ app.use((req, res, next) => {
   const isReviewGetRoute =
     req.originalUrl.includes("/reviews") && req.method === "GET";
 
-  // Debug logs
-  console.log(`[GATEWAY] Checking route: ${req.originalUrl}`);
-  console.log(`[GATEWAY] Public routes:`, allPublicRoutes);
-  console.log(`[GATEWAY] Is public route:`, isPublicRoute);
-  console.log(`[GATEWAY] Is review GET route:`, isReviewGetRoute);
-
   // Kiểm tra nếu là shop route với ID (GET /shops/123)
   const isShopByIdRoute =
     /^\/shops\/\d+$/.test(req.originalUrl) && req.method === "GET";
@@ -276,9 +266,7 @@ app.use((req, res, next) => {
   }
 
   // Áp dụng auth middleware cho protected routes
-  console.log(
-    `[GATEWAY] Protected route: ${req.originalUrl} - Checking token...`
-  );
+
   authMiddleware(req, res, next);
 });
 
@@ -291,8 +279,6 @@ app.all(/^\/api\/products\/\d+\/reviews/, (req, res) => {
   // Proxy to review service
   const reviewServiceUrl = "http://localhost:5005";
   const targetUrl = `${reviewServiceUrl}${req.originalUrl}`;
-
-  console.log(`[GATEWAY] Proxying to: ${targetUrl}`);
 
   // For GET requests, proxy directly
   if (req.method === "GET") {
@@ -369,8 +355,6 @@ app.all(/^\/api\/reviews/, (req, res) => {
   const reviewServiceUrl = "http://localhost:5005";
   const targetUrl = `${reviewServiceUrl}${req.originalUrl}`;
 
-  console.log(`[GATEWAY] Proxying to: ${targetUrl}`);
-
   // For GET requests, proxy directly
   if (req.method === "GET") {
     const requestOptions = {
@@ -407,8 +391,6 @@ app.all(/^\/api\/reviews/, (req, res) => {
     body += chunk.toString();
   });
   req.on("end", () => {
-    console.log(`[GATEWAY] Received body:`, body);
-
     const requestOptions = {
       method: req.method,
       headers: {
@@ -428,7 +410,6 @@ app.all(/^\/api\/reviews/, (req, res) => {
     fetch(targetUrl, requestOptions)
       .then(async (response) => {
         const data = await response.json();
-        console.log(`[GATEWAY] Review service response:`, response.status);
         res.status(response.status).json(data);
       })
       .catch((error) => {
@@ -440,13 +421,7 @@ app.all(/^\/api\/reviews/, (req, res) => {
 
 // Handle users route specifically (route to admin service) - BEFORE setupRoutes
 app.all("/users", authMiddleware, (req, res) => {
-  console.log(
-    `[GATEWAY] 🎯 Users route matched: ${req.method} ${req.originalUrl}`
-  );
-  console.log(`[GATEWAY] User for users:`, req.user);
-
   const targetUrl = `http://localhost:5006${req.originalUrl}`;
-  console.log(`[GATEWAY] Proxying users to: ${targetUrl}`);
 
   const requestOptions = {
     method: req.method,

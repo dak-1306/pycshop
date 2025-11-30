@@ -38,8 +38,6 @@ const corsOptions = {
   optionsSuccessStatus: 200,
 };
 
-console.log("🔒 [PRODUCT] CORS allowed origins:", allowedOrigins);
-
 // Middleware
 app.use(cors(corsOptions));
 app.use(express.json({ limit: "50mb" })); // Tăng giới hạn JSON payload
@@ -48,15 +46,6 @@ app.use(morgan("dev"));
 
 // Serve static files (uploads)
 app.use("/uploads", express.static("uploads"));
-
-// Request logging
-app.use((req, res, next) => {
-  console.log(`📦 [PRODUCT] ${req.method} ${req.originalUrl}`);
-  if (req.query && Object.keys(req.query).length > 0) {
-    console.log(`📋 [PRODUCT] Query params:`, req.query);
-  }
-  next();
-});
 
 // Health check
 app.get("/health", (req, res) => {
@@ -94,18 +83,5 @@ app.use((err, req, res, next) => {
 // Start server
 const PORT = process.env.PORT || 5002;
 app.listen(PORT, () => {
-  console.log(`📦 Product Service running at http://localhost:${PORT}`);
-  console.log(`🔍 Available endpoints:`);
-  console.log(`   GET  /health                 - Health check`);
-  console.log(`   GET  /categories             - Get all categories`);
-  console.log(`   GET  /?page=1&limit=20       - Get products with pagination`);
-  console.log(`   GET  /?category=1            - Get products by category`);
-  console.log(`   GET  /search?q=keyword       - Search products`);
-  console.log(`   GET  /:id                    - Get product by ID`);
-  console.log(`🏪 Seller endpoints:`);
-  console.log(`   GET  /seller/categories      - Get categories`);
-  console.log(`   GET  /seller/products        - Get seller products`);
-  console.log(`   POST /seller/products        - Add product`);
-  console.log(`   PUT  /seller/products/:id    - Update product`);
-  console.log(`   DELETE /seller/products/:id  - Delete product`);
+  console.log(`📦 Product Service running`);
 });

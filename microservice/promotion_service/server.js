@@ -20,19 +20,6 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging
-app.use((req, res, next) => {
-  console.log(
-    `[PROMOTION_SERVICE] ${req.method} ${
-      req.path
-    } - ${new Date().toISOString()}`
-  );
-  if (req.body && Object.keys(req.body).length > 0) {
-    console.log(`[PROMOTION_SERVICE] Request body:`, req.body);
-  }
-  next();
-});
-
 // Health check
 app.get("/health", (req, res) => {
   res.json({

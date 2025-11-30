@@ -9,12 +9,6 @@ class PromotionController {
       const userId =
         req.headers["x-user-id"] || req.user?.id || req.user?.userId; // From API Gateway
 
-      console.log(`[PROMOTION_CONTROLLER] Request headers:`, {
-        "x-user-id": req.headers["x-user-id"],
-        "x-user-role": req.headers["x-user-role"],
-        "x-user-type": req.headers["x-user-type"],
-      });
-
       // Validate orderValue
       if (!orderValue || isNaN(orderValue) || orderValue <= 0) {
         return res.status(400).json({
@@ -22,10 +16,6 @@ class PromotionController {
           message: "Giá trị đơn hàng không hợp lệ",
         });
       }
-
-      console.log(
-        `[PROMOTION_CONTROLLER] Getting vouchers for user ${userId}, order value: ${orderValue}`
-      );
 
       const vouchers = await PromotionModel.getAvailableVouchers(
         parseFloat(orderValue),

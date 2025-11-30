@@ -93,15 +93,6 @@ async function startServer() {
     // Start server
     app.listen(PORT, () => {
       console.log(`[NOTIFICATION_SERVICE] 🔔 Server running`);
-      console.log(
-        `[NOTIFICATION_SERVICE] 🗄️ Database: ${process.env.DB_NAME}@${process.env.DB_HOST}`
-      );
-      console.log(
-        `[NOTIFICATION_SERVICE] 🌐 Health check: http://localhost:${PORT}/notifications/health`
-      );
-      console.log(
-        `[NOTIFICATION_SERVICE] 🔗 API endpoint: http://localhost:${PORT}/notifications`
-      );
     });
   } catch (error) {
     console.error(`[NOTIFICATION_SERVICE] ❌ Failed to start server:`, error);

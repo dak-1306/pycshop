@@ -45,7 +45,6 @@ const authMiddleware = (req, res, next) => {
     // Thêm thông tin user vào request
     req.user = decoded;
 
-    console.log(`✅ [AUTH] Token verified for user ID: ${decoded.id}`);
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {

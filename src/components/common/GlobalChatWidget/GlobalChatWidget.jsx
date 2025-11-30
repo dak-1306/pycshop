@@ -41,6 +41,14 @@ const GlobalChatWidget = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Load conversations when chat opens
+  useEffect(() => {
+    if (isChatOpen) {
+      console.log("[GLOBAL_CHAT_WIDGET] Loading conversations...");
+      loadConversations();
+    }
+  }, [isChatOpen, loadConversations]);
+
   useEffect(() => {
     // Chọn conversation đầu tiên khi mở chat
     if (isChatOpen && !activeConversation && conversations.length > 0) {
@@ -91,6 +99,11 @@ const GlobalChatWidget = () => {
     closeChat();
     setIsMinimized(false);
   };
+
+  // GlobalChatWidget should be available to all users
+  // Both buyers and sellers can initiate conversations as buyers when purchasing
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const userRole = user.role || user.VaiTro;
 
   const filteredConversations = conversations.filter((conversation) =>
     conversation.sellerName.toLowerCase().includes(searchQuery.toLowerCase())

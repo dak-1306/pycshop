@@ -5,11 +5,6 @@ function setupRoutes(app) {
   console.log("[ROUTES] Setting up proxy routes...");
   // Auth Service - Manual Proxy Approach
   app.use("/auth", (req, res, next) => {
-    console.log(
-      `[ROUTES] Manual auth proxy for ${req.method} ${req.originalUrl}`
-    );
-    console.log(`[ROUTES] req.user:`, req.user);
-
     // Skip auth middleware for login/register routes
     const publicRoutes = [
       "/auth/login",
@@ -21,11 +16,6 @@ function setupRoutes(app) {
     const isPublicRoute = publicRoutes.some(
       (route) =>
         req.originalUrl === route || req.originalUrl.startsWith(route + "?")
-    );
-
-    console.log(
-      `[ROUTES] Checking if ${req.originalUrl} is public route:`,
-      isPublicRoute
     );
 
     if (!isPublicRoute && !req.user) {
@@ -61,8 +51,6 @@ function setupRoutes(app) {
       const targetPath = req.url.replace(/^\//, ""); // Remove leading slash
       const targetUrl = `http://localhost:5001/${targetPath}`;
 
-      console.log(`🔥 [MANUAL_AUTH_PROXY] Forwarding to: ${targetUrl}`);
-
       // Prepare headers - copy from original request
       const headers = {
         ...req.headers,
@@ -82,16 +70,11 @@ function setupRoutes(app) {
       // Add body for POST/PUT requests
       if (req.bodyString) {
         requestOptions.body = req.bodyString;
-        console.log(`🔥 [MANUAL_AUTH_PROXY] Body: ${req.bodyString}`);
       }
 
       // Make request to auth service
       const response = await fetch(targetUrl, requestOptions);
       const data = await response.json();
-
-      console.log(
-        `🔥 [MANUAL_AUTH_PROXY] Response ${response.status} from auth service`
-      );
 
       // Set CORS headers
       const origin = req.headers.origin;
@@ -116,10 +99,6 @@ function setupRoutes(app) {
   app.use(
     "/admin",
     (req, res, next) => {
-      console.log(
-        `[ROUTES] Matched /admin route for ${req.method} ${req.originalUrl}`
-      );
-      console.log(`[ROUTES] req.user:`, req.user);
       next();
     },
     authMiddleware, // Apply auth middleware for all admin routes
@@ -138,27 +117,11 @@ function setupRoutes(app) {
           if (req.user.userType) {
             proxyReq.setHeader("x-user-type", req.user.userType);
           }
-
-          console.log(
-            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${
-              req.user.role
-            }, userType: ${req.user.userType || "undefined"}`
-          );
         } else {
           console.log(`[PROXY] No req.user found for this admin request`);
         }
-
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.ADMIN_SERVICE_URL || "http://localhost:5006"
-          }${proxyReq.path}`
-        );
       },
       onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Admin Service`
-        );
-
         // Ensure CORS headers are set
         const origin = req.headers.origin;
         if (origin) {
@@ -181,9 +144,6 @@ function setupRoutes(app) {
   app.use(
     "/uploads",
     (req, res, next) => {
-      console.log(
-        `[ROUTES] Matched /uploads route for ${req.method} ${req.originalUrl}`
-      );
       next();
     },
     createProxyMiddleware({
@@ -191,16 +151,9 @@ function setupRoutes(app) {
       changeOrigin: true,
       // Keep /uploads prefix
       pathRewrite: (path, req) => {
-        console.log(`[PROXY] Uploads path rewrite: ${path} -> ${path}`);
         return path;
       },
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(
-          `[PROXY] Forwarding uploads ${req.method} ${req.url} to ${
-            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
-          }${proxyReq.path}`
-        );
-      },
+
       onProxyRes: (proxyRes, req, res) => {
         console.log(
           `[PROXY] Response ${proxyRes.statusCode} from Product Service (uploads)`
@@ -221,27 +174,14 @@ function setupRoutes(app) {
   app.use(
     "/products",
     (req, res, next) => {
-      console.log(
-        `[ROUTES] Matched /products route for ${req.method} ${req.originalUrl}`
-      );
       next();
     },
     createProxyMiddleware({
       target: process.env.PRODUCT_SERVICE_URL || "http://localhost:5002",
       changeOrigin: true,
       pathRewrite: { "^/products": "" },
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
-          }${proxyReq.path}`
-        );
-      },
-      onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Product Service`
-        );
-      },
+      onProxyReq: (proxyReq, req, res) => {},
+      onProxyRes: (proxyRes, req, res) => {},
       onError: (err, req, res) => {
         console.error(`[PROXY] Product Service Error:`, err.message);
         if (!res.headersSent) {
@@ -261,9 +201,6 @@ function setupRoutes(app) {
       if (req.originalUrl.includes("/reviews")) {
         return next(); // Pass to review service route
       }
-      console.log(
-        `[ROUTES] Matched /api/products route for ${req.method} ${req.originalUrl}`
-      );
       next();
     },
     createProxyMiddleware({
@@ -274,18 +211,8 @@ function setupRoutes(app) {
         return !pathname.includes("/reviews");
       },
       pathRewrite: { "^/api/products": "" },
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
-          }${proxyReq.path}`
-        );
-      },
-      onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Product Service (/api/products)`
-        );
-      },
+      onProxyReq: (proxyReq, req, res) => {},
+      onProxyRes: (proxyRes, req, res) => {},
       onError: (err, req, res) => {
         console.error(
           `[PROXY] Product Service (/api/products) Error:`,
@@ -304,12 +231,6 @@ function setupRoutes(app) {
   app.use(
     "/seller",
     (req, res, next) => {
-      console.log(
-        `[ROUTES] Matched /seller route for ${req.method} ${req.originalUrl}`
-      );
-      console.log(
-        `[ROUTES] Original URL: ${req.originalUrl}, Target path: ${req.url}`
-      );
       next();
     },
     createProxyMiddleware({
@@ -318,31 +239,11 @@ function setupRoutes(app) {
       // Keep /seller prefix - product service expects it
       pathRewrite: (path, req) => {
         const newPath = `/seller${path}`;
-        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
         return newPath;
       },
       timeout: 60000, // 60 second timeout
-      onProxyReq: (proxyReq, req, res) => {
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
-          }${proxyReq.path}`
-        );
-        console.log(
-          `[PROXY] Original URL: ${req.originalUrl} -> Target: ${proxyReq.path}`
-        );
-        console.log(`[PROXY] Headers:`, proxyReq.getHeaders());
-        console.log(
-          `[PROXY] Target URL: ${
-            process.env.PRODUCT_SERVICE_URL || "http://localhost:5002"
-          }${proxyReq.path}`
-        );
-      },
-      onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Seller Service`
-        );
-      },
+      onProxyReq: (proxyReq, req, res) => {},
+      onProxyRes: (proxyRes, req, res) => {},
       onError: (err, req, res) => {
         console.error(`[PROXY] Seller Service Error:`, err.message);
         if (!res.headersSent) {
@@ -358,30 +259,19 @@ function setupRoutes(app) {
   app.use(
     "/cart",
     (req, res, next) => {
-      console.log(
-        `[ROUTES] Matched /cart route for ${req.method} ${req.originalUrl}`
-      );
-      console.log(`[ROUTES] req.user:`, req.user);
       next();
     },
     // apply auth middle manual
     (req, res, next) => {
-      console.log(
-        `[ROUTES] Applying auth middleware for cart route: ${req.path}`
-      );
       authMiddleware(req, res, next);
     },
     //apply header manual
     (req, res, next) => {
-      console.log(`[ROUTES] Setting headers for cart route: ${req.path}`);
       // Manually set headers for proxy
       if (req.user) {
         req.headers["x-user-id"] = req.user.id;
         req.headers["x-user-role"] = req.user.role;
         req.headers["x-user-type"] = req.user.userType;
-        console.log(
-          `[ROUTES] Set headers manually: x-user-id=${req.user.id}, x-user-role=${req.user.role}, x-user-type=${req.user.userType}`
-        );
       }
       next();
     },
@@ -391,37 +281,19 @@ function setupRoutes(app) {
       changeOrigin: true,
       pathRewrite: (path, req) => {
         const newPath = `/api/cart${path}`;
-        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
         return newPath;
       },
       onProxyReq: (proxyReq, req, res) => {
-        console.log(`[PROXY] onProxyReq callback triggered for cart service`);
-
         // Truyền thông tin user từ API Gateway xuống cart service
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id.toString());
           proxyReq.setHeader("x-user-role", req.user.role);
           proxyReq.setHeader("x-user-type", req.user.userType);
-          console.log("[PROXY] Set user headers:", {
-            id: req.user.id,
-            role: req.user.role,
-            userType: req.user.userType,
-          });
         } else {
           console.log(`[PROXY] No req.user found for this cart request`);
         }
-
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.CART_SERVICE_URL || "http://localhost:5004"
-          }${proxyReq.path}`
-        );
       },
       onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Cart Service`
-        );
-
         // Ensure CORS headers are set
         const origin = req.headers.origin;
         if (origin) {
@@ -443,18 +315,11 @@ function setupRoutes(app) {
   // Order Service Routes - Manual Proxy to avoid timeout issues
   app.use("/orders", authMiddleware, async (req, res) => {
     try {
-      console.log(
-        `[ROUTES] Manual order proxy for ${req.method} ${req.originalUrl}`
-      );
-      console.log(`[ROUTES] User info:`, req.user);
-
       // Build target URL - remove /orders prefix since Order Service expects it
       const targetPath = req.url; // This will be like "/", "/test", "/123" etc.
       const targetUrl = `${
         process.env.ORDER_SERVICE_URL || "http://localhost:5007"
       }/orders${targetPath}`;
-
-      console.log(`🔥 [MANUAL_ORDER_PROXY] Forwarding to: ${targetUrl}`);
 
       // Prepare headers - copy from original request
       const headers = {
@@ -476,18 +341,11 @@ function setupRoutes(app) {
       // Add body for POST/PUT requests
       if (req.body && (req.method === "POST" || req.method === "PUT")) {
         requestOptions.body = JSON.stringify(req.body);
-        console.log(
-          `🔥 [MANUAL_ORDER_PROXY] Body: ${JSON.stringify(req.body)}`
-        );
       }
 
       // Make request to order service
       const response = await fetch(targetUrl, requestOptions);
       const data = await response.json();
-
-      console.log(
-        `🔥 [MANUAL_ORDER_PROXY] Response ${response.status} from order service`
-      );
 
       // Set CORS headers
       const origin = req.headers.origin;
@@ -540,13 +398,6 @@ function setupRoutes(app) {
         req.originalUrl.startsWith(route)
       );
 
-      console.log(`[ROUTES] Promotion route analysis:`, {
-        requiresAuth,
-        isPublicRoute,
-        isInternalRoute,
-        hasUser: !!req.user,
-      });
-
       // Apply auth middleware for admin routes
       if (requiresAuth && !req.user) {
         return res.status(401).json({
@@ -561,9 +412,6 @@ function setupRoutes(app) {
         req.headers["x-user-id"] = req.user.id.toString();
         req.headers["x-user-role"] = req.user.role;
         req.headers["x-user-type"] = req.user.userType;
-        console.log(
-          `[ROUTES] Set headers for promotions: x-user-id=${req.user.id}, x-user-role=${req.user.role}`
-        );
       }
       next();
     },
@@ -573,37 +421,17 @@ function setupRoutes(app) {
       changeOrigin: true,
       pathRewrite: (path, req) => {
         const newPath = `/api/promotions${path}`;
-        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
         return newPath;
       },
       onProxyReq: (proxyReq, req, res) => {
-        console.log(`[PROXY] onProxyReq callback for promotion service`);
-        console.log(`[PROXY] Original URL: ${req.originalUrl}`);
-        console.log(`[PROXY] Proxy path: ${proxyReq.path}`);
-
         // Forward user info to promotion service
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id.toString());
           proxyReq.setHeader("x-user-role", req.user.role);
           proxyReq.setHeader("x-user-type", req.user.userType);
-          console.log("[PROXY] Set user headers for promotion:", {
-            id: req.user.id,
-            role: req.user.role,
-            userType: req.user.userType,
-          });
         }
-
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.PROMOTION_SERVICE_URL || "http://localhost:5009"
-          }${proxyReq.path}`
-        );
       },
       onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Promotion Service`
-        );
-
         // Ensure CORS headers
         const origin = req.headers.origin;
         if (origin) {
@@ -644,16 +472,10 @@ function setupRoutes(app) {
         req.path.match(/^\/shop\/\d+$/) // /shop/:shopId pattern
       ) {
         // /id/:shopId pattern
-        console.log(
-          `[ROUTES] Skipping auth for public shop route: ${req.path}`
-        );
         return next();
       }
 
       // Apply auth middleware for protected routes
-      console.log(
-        `[ROUTES] Applying auth middleware for shop route: ${req.path}`
-      );
       authMiddleware(req, res, next);
     },
     // Debug middleware to check req.user before proxy
@@ -671,14 +493,6 @@ function setupRoutes(app) {
         if (req.user.userType) {
           req.headers["x-user-type"] = req.user.userType;
         }
-
-        console.log(
-          `[DEBUG] Set headers manually: x-user-id=${
-            req.user.id
-          }, x-user-role=${req.user.role}, x-user-type=${
-            req.user.userType || "undefined"
-          }`
-        );
       }
       next();
     },
@@ -689,20 +503,9 @@ function setupRoutes(app) {
       pathRewrite: (path, req) => {
         // Remove /shops prefix and keep the rest
         const newPath = req.originalUrl;
-        console.log(`[PROXY] Path rewrite: ${path} -> ${newPath}`);
         return newPath;
       },
       onProxyReq: (proxyReq, req, res) => {
-        console.log(
-          `[PROXY] onProxyReq callback for shop service - URL: ${req.url}`
-        );
-        console.log(`[PROXY] req.user exists:`, !!req.user);
-        console.log(`[PROXY] req.user details:`, req.user);
-        console.log(
-          `[PROXY] Forwarding ${req.method} ${req.url} to ${
-            process.env.SHOP_SERVICE_URL || "http://localhost:5003"
-          }${proxyReq.path}`
-        );
         // Truyền thông tin user từ API Gateway xuống shop service
         if (req.user) {
           proxyReq.setHeader("x-user-id", req.user.id);
@@ -712,18 +515,11 @@ function setupRoutes(app) {
           if (req.user.userType) {
             proxyReq.setHeader("x-user-type", req.user.userType);
           }
-          console.log(
-            `[PROXY] Adding user headers for user ID: ${req.user.id}, role: ${req.user.role}`
-          );
         } else {
           console.log(`[PROXY] No req.user found for shop request`);
         }
       },
       onProxyRes: (proxyRes, req, res) => {
-        console.log(
-          `[PROXY] Response ${proxyRes.statusCode} from Shop Service`
-        );
-
         // Ensure CORS headers are set
         const origin = req.headers.origin;
         if (origin) {
@@ -746,9 +542,6 @@ function setupRoutes(app) {
   app.use(
     "/admin",
     (req, res, next) => {
-      console.log(
-        `[ROUTES] Matched /admin route for ${req.method} ${req.originalUrl}`
-      );
       next();
     },
     createProxyMiddleware({

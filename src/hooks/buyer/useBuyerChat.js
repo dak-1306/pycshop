@@ -40,8 +40,8 @@ export const useBuyerChat = () => {
     setError(null);
 
     try {
-      console.log("[USE_BUYER_CHAT] Loading conversations...");
-      const response = await ChatService.getConversations();
+      console.log("[USE_BUYER_CHAT] Loading conversations for buyer context...");
+      const response = await ChatService.getConversations('buyer');
 
       if (response.success) {
         // Transform backend data to frontend format

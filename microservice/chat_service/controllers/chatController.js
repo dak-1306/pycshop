@@ -46,6 +46,7 @@ class ChatController {
     try {
       const userId = req.headers["x-user-id"];
       const userRole = req.headers["x-user-role"];
+      const context = req.query.context; // 'seller' hoặc 'buyer'
 
       if (!userId) {
         return res.status(401).json({
@@ -55,12 +56,13 @@ class ChatController {
       }
 
       console.log(
-        `[CHAT_CONTROLLER] Getting conversations for user ${userId} with role ${userRole}`
+        `[CHAT_CONTROLLER] Getting conversations for user ${userId} with role ${userRole} in context ${context}`
       );
 
       const result = await ChatModel.getUserConversations(
         parseInt(userId),
-        userRole
+        userRole,
+        context
       );
 
       res.json(result);

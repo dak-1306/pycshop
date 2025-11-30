@@ -16,8 +16,8 @@ export const useMessages = () => {
     setError(null);
 
     try {
-      console.log("[USE_MESSAGES] Loading conversations...");
-      const response = await ChatService.getConversations();
+      console.log("[USE_MESSAGES] Loading conversations for seller context...");
+      const response = await ChatService.getConversations('seller');
 
       if (response.success) {
         // Transform backend data to frontend format

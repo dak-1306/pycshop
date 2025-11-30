@@ -39,20 +39,24 @@ class ChatService {
   }
 
   // Lấy danh sách hội thoại
-  static async getConversations() {
+  static async getConversations(context = null) {
     try {
       const token = localStorage.getItem("token");
       const user = JSON.parse(localStorage.getItem("user") || "{}");
       const userId = user.id || user.ID_NguoiDung;
-      const userRole = user.LoaiNguoiDung || user.userType || "buyer";
+      const userRole = user.role || user.LoaiNguoiDung || user.userType || "buyer";
 
       if (!token || !userId) {
         throw new Error("No authentication token or user ID found");
       }
 
-      console.log(`[CHAT_SERVICE] Getting conversations for ${userRole}`);
+      console.log(`[CHAT_SERVICE] Getting conversations for ${userRole} in context ${context || 'auto'}`);
 
-      const response = await axios.get(`${API_BASE_URL}/chat/conversations`, {
+      const url = context 
+        ? `${API_BASE_URL}/chat/conversations?context=${context}`
+        : `${API_BASE_URL}/chat/conversations`;
+
+      const response = await axios.get(url, {
         headers: {
           Authorization: `Bearer ${token}`,
           "x-user-id": userId,

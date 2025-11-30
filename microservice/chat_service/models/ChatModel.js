@@ -49,38 +49,16 @@ class ChatModel {
   }
 
   // Lấy danh sách hội thoại của user
-  static async getUserConversations(userId, userRole) {
+  static async getUserConversations(userId, userRole, context = null) {
     try {
       console.log(
-        `[CHAT_MODEL] Getting conversations for user ${userId} with role ${userRole}`
+        `[CHAT_MODEL] Getting conversations for user ${userId} with role ${userRole} in context ${context || 'auto'}`
       );
 
       let query, params;
 
-      if (userRole === "buyer") {
-        query = `
-          SELECT 
-            ht.ID_HoiThoai as conversationId,
-            ht.ID_NguoiBan as partnerId,
-            nd.HoTen as partnerName,
-            nd.AvatarUrl as partnerAvatar,
-            ht.ThoiGianTao as createdAt,
-            (SELECT NoiDung FROM tinnhan 
-             WHERE ID_HoiThoai = ht.ID_HoiThoai 
-             ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessage,
-            (SELECT ThoiGianGui FROM tinnhan 
-             WHERE ID_HoiThoai = ht.ID_HoiThoai 
-             ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessageTime,
-            (SELECT COUNT(*) FROM tinnhan 
-             WHERE ID_HoiThoai = ht.ID_HoiThoai 
-             AND ID_NguoiGui != ? AND DaXem = 0) as unreadCount
-          FROM hoithoai ht
-          LEFT JOIN nguoidung nd ON ht.ID_NguoiBan = nd.ID_NguoiDung
-          WHERE ht.ID_NguoiMua = ?
-          ORDER BY ht.ThoiGianTao DESC
-        `;
-        params = [userId, userId];
-      } else {
+      if (context === 'seller') {
+        // Seller interface: Show only conversations where user is seller
         query = `
           SELECT 
             ht.ID_HoiThoai as conversationId,
@@ -88,6 +66,7 @@ class ChatModel {
             nd.HoTen as partnerName,
             nd.AvatarUrl as partnerAvatar,
             ht.ThoiGianTao as createdAt,
+            'seller' as userRoleInConversation,
             (SELECT NoiDung FROM tinnhan 
              WHERE ID_HoiThoai = ht.ID_HoiThoai 
              ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessage,
@@ -100,9 +79,83 @@ class ChatModel {
           FROM hoithoai ht
           LEFT JOIN nguoidung nd ON ht.ID_NguoiMua = nd.ID_NguoiDung
           WHERE ht.ID_NguoiBan = ?
-          ORDER BY ht.ThoiGianTao DESC
+          ORDER BY lastMessageTime DESC, createdAt DESC
         `;
         params = [userId, userId];
+      } else if (context === 'buyer') {
+        // Buyer interface: Show only conversations where user is buyer
+        query = `
+          SELECT 
+            ht.ID_HoiThoai as conversationId,
+            ht.ID_NguoiBan as partnerId,
+            nd.HoTen as partnerName,
+            nd.AvatarUrl as partnerAvatar,
+            ht.ThoiGianTao as createdAt,
+            'buyer' as userRoleInConversation,
+            (SELECT NoiDung FROM tinnhan 
+             WHERE ID_HoiThoai = ht.ID_HoiThoai 
+             ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessage,
+            (SELECT ThoiGianGui FROM tinnhan 
+             WHERE ID_HoiThoai = ht.ID_HoiThoai 
+             ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessageTime,
+            (SELECT COUNT(*) FROM tinnhan 
+             WHERE ID_HoiThoai = ht.ID_HoiThoai 
+             AND ID_NguoiGui != ? AND DaXem = 0) as unreadCount
+          FROM hoithoai ht
+          LEFT JOIN nguoidung nd ON ht.ID_NguoiBan = nd.ID_NguoiDung
+          WHERE ht.ID_NguoiMua = ?
+          ORDER BY lastMessageTime DESC, createdAt DESC
+        `;
+        params = [userId, userId];
+      } else {
+        // Legacy/Auto mode: Show all conversations (for backward compatibility)
+        query = `
+          (
+            SELECT 
+              ht.ID_HoiThoai as conversationId,
+              ht.ID_NguoiBan as partnerId,
+              nd.HoTen as partnerName,
+              nd.AvatarUrl as partnerAvatar,
+              ht.ThoiGianTao as createdAt,
+              'buyer' as userRoleInConversation,
+              (SELECT NoiDung FROM tinnhan 
+               WHERE ID_HoiThoai = ht.ID_HoiThoai 
+               ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessage,
+              (SELECT ThoiGianGui FROM tinnhan 
+               WHERE ID_HoiThoai = ht.ID_HoiThoai 
+               ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessageTime,
+              (SELECT COUNT(*) FROM tinnhan 
+               WHERE ID_HoiThoai = ht.ID_HoiThoai 
+               AND ID_NguoiGui != ? AND DaXem = 0) as unreadCount
+            FROM hoithoai ht
+            LEFT JOIN nguoidung nd ON ht.ID_NguoiBan = nd.ID_NguoiDung
+            WHERE ht.ID_NguoiMua = ?
+          )
+          UNION
+          (
+            SELECT 
+              ht.ID_HoiThoai as conversationId,
+              ht.ID_NguoiMua as partnerId,
+              nd.HoTen as partnerName,
+              nd.AvatarUrl as partnerAvatar,
+              ht.ThoiGianTao as createdAt,
+              'seller' as userRoleInConversation,
+              (SELECT NoiDung FROM tinnhan 
+               WHERE ID_HoiThoai = ht.ID_HoiThoai 
+               ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessage,
+              (SELECT ThoiGianGui FROM tinnhan 
+               WHERE ID_HoiThoai = ht.ID_HoiThoai 
+               ORDER BY ThoiGianGui DESC LIMIT 1) as lastMessageTime,
+              (SELECT COUNT(*) FROM tinnhan 
+               WHERE ID_HoiThoai = ht.ID_HoiThoai 
+               AND ID_NguoiGui != ? AND DaXem = 0) as unreadCount
+            FROM hoithoai ht
+            LEFT JOIN nguoidung nd ON ht.ID_NguoiMua = nd.ID_NguoiDung
+            WHERE ht.ID_NguoiBan = ?
+          )
+          ORDER BY lastMessageTime DESC, createdAt DESC
+        `;
+        params = [userId, userId, userId, userId];
       }
 
       const [rows] = await smartDB.executeRead(query, params);
@@ -122,6 +175,7 @@ class ChatModel {
           lastMessage: row.lastMessage,
           lastMessageTime: row.lastMessageTime,
           unreadCount: parseInt(row.unreadCount) || 0,
+          userRoleInConversation: row.userRoleInConversation, // 'buyer' or 'seller'
         })),
       };
     } catch (error) {

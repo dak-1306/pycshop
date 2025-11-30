@@ -121,6 +121,7 @@ app.use((req, res, next) => {
     req.url.startsWith("/seller") ||
     req.url.startsWith("/shops") ||
     req.url.startsWith("/cart") ||
+    req.url.startsWith("/chat") || // Skip for chat service
     req.url.startsWith("/api/reviews") ||
     req.url.includes("/reviews") ||
     req.url.startsWith("/api/users") // Skip for user service (upload avatar)

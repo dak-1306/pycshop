@@ -920,8 +920,8 @@ function setupRoutes(app) {
     createProxyMiddleware({
       target: process.env.CHAT_SERVICE_URL || "http://localhost:5011",
       changeOrigin: true,
-      timeout: 30000,
-      proxyTimeout: 30000,
+      timeout: 60000,
+      proxyTimeout: 60000,
       pathRewrite: (path, req) => {
         // Transform /conversations -> /api/chat/conversations
         const newPath = `/api/chat${path}`;

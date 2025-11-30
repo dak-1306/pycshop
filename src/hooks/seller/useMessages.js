@@ -17,7 +17,7 @@ export const useMessages = () => {
 
     try {
       console.log("[USE_MESSAGES] Loading conversations for seller context...");
-      const response = await ChatService.getConversations('seller');
+      const response = await ChatService.getConversations("seller");
 
       if (response.success) {
         // Transform backend data to frontend format
@@ -67,7 +67,7 @@ export const useMessages = () => {
             senderId: msg.senderId.toString(),
             senderName: msg.senderName,
             senderAvatar: msg.senderAvatar,
-            timestamp: msg.timestamp,
+            timestamp: msg.sentAt,
             status: msg.isRead ? "read" : "delivered",
             type: msg.type || "text",
           })) || [];
@@ -109,25 +109,29 @@ export const useMessages = () => {
         messageText
       );
 
+      console.log("[USE_MESSAGES] Send message response:", response);
+
       if (response.success) {
+        // Get current user info for the new message
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const currentUserId = (user.id || user.ID_NguoiDung)?.toString();
+        const currentUserName = user.HoTen || user.name || "User";
+
         // Transform and add new message to current conversation
+        const messageData = response.message || response.data || response;
+
         const newMessage = {
-          id: response.messageId || response.data?.messageId,
+          id: messageData.messageId || response.messageId,
           content: messageText,
-          senderId: (
-            response.senderId ||
-            response.data?.senderId ||
-            response.userId
-          )?.toString(),
-          senderName: response.senderName || response.data?.senderName,
-          senderAvatar: response.senderAvatar || response.data?.senderAvatar,
-          timestamp:
-            response.timestamp ||
-            response.data?.timestamp ||
-            new Date().toISOString(),
+          senderId: (messageData.senderId || currentUserId)?.toString(),
+          senderName: messageData.senderName || currentUserName,
+          senderAvatar: messageData.senderAvatar || user.AvatarUrl || null,
+          timestamp: messageData.sentAt || new Date().toISOString(),
           status: "delivered",
           type: "text",
         };
+
+        console.log("[USE_MESSAGES] New message created:", newMessage);
 
         setMessages((prev) => [...prev, newMessage]);
 

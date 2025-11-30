@@ -134,28 +134,34 @@ const MessageThread = ({
             {/* Messages for this date */}
             <div className="space-y-3">
               {dateMessages.map((message, index) => {
-                const isFromSeller = message.senderId === currentSellerId;
+                // Check if message is from current seller (should be on right side)
+                const isFromCurrentUser =
+                  message.senderId?.toString() === currentSellerId?.toString();
                 const prevMessage = index > 0 ? dateMessages[index - 1] : null;
                 const showAvatar =
                   !prevMessage || prevMessage.senderId !== message.senderId;
+
+                console.log(
+                  `[MessageThread] Message ${message.id}: senderId=${message.senderId}, currentSellerId=${currentSellerId}, isFromCurrentUser=${isFromCurrentUser}`
+                );
 
                 return (
                   <div
                     key={message.id}
                     className={`flex ${
-                      isFromSeller ? "justify-end" : "justify-start"
+                      isFromCurrentUser ? "justify-end" : "justify-start"
                     } ${showAvatar ? "mt-4" : "mt-1"}`}
                   >
                     <div
                       className={`flex max-w-xs lg:max-w-lg ${
-                        isFromSeller ? "flex-row-reverse" : "flex-row"
+                        isFromCurrentUser ? "flex-row-reverse" : "flex-row"
                       }`}
                     >
                       {/* Avatar */}
                       {showAvatar && (
                         <div
                           className={`flex-shrink-0 ${
-                            isFromSeller ? "ml-3" : "mr-3"
+                            isFromCurrentUser ? "ml-3" : "mr-3"
                           } self-end`}
                         >
                           <img
@@ -179,12 +185,16 @@ const MessageThread = ({
                       {/* Message bubble */}
                       <div
                         className={`${
-                          showAvatar ? "" : isFromSeller ? "mr-11" : "ml-11"
+                          showAvatar
+                            ? ""
+                            : isFromCurrentUser
+                            ? "mr-11"
+                            : "ml-11"
                         }`}
                       >
                         <div
                           className={`px-3 py-2 rounded-lg relative ${
-                            isFromSeller
+                            isFromCurrentUser
                               ? "bg-blue-500 text-white"
                               : "bg-white text-gray-900 border border-gray-200"
                           }`}
@@ -196,15 +206,15 @@ const MessageThread = ({
 
                         <div
                           className={`flex items-center mt-1 ${
-                            isFromSeller ? "justify-end" : "justify-start"
+                            isFromCurrentUser ? "justify-end" : "justify-start"
                           }`}
                         >
                           <span className="text-xs text-gray-500">
                             {formatTime(message.timestamp)}
                           </span>
 
-                          {/* Read status for seller messages */}
-                          {isFromSeller && (
+                          {/* Read status for current user messages */}
+                          {isFromCurrentUser && (
                             <div className="ml-2">
                               {message.status === "delivered" && (
                                 <FontAwesomeIcon

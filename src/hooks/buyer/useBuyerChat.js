@@ -40,8 +40,10 @@ export const useBuyerChat = () => {
     setError(null);
 
     try {
-      console.log("[USE_BUYER_CHAT] Loading conversations for buyer context...");
-      const response = await ChatService.getConversations('buyer');
+      console.log(
+        "[USE_BUYER_CHAT] Loading conversations for buyer context..."
+      );
+      const response = await ChatService.getConversations("buyer");
 
       if (response.success) {
         // Transform backend data to frontend format
@@ -134,18 +136,29 @@ export const useBuyerChat = () => {
         messageText
       );
 
+      console.log("[USE_BUYER_CHAT] Send message response:", response);
+
       if (response.success) {
+        // Get current user info for the new message
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const currentUserId = (user.id || user.ID_NguoiDung)?.toString();
+        const currentUserName = user.HoTen || user.name || "User";
+
         // Transform and add new message to current conversation
+        const messageData = response.message || response.data || response;
+
         const newMessage = {
-          id: response.data.messageId,
+          id: messageData.messageId || response.messageId,
           content: messageText,
-          senderId: response.data.senderId.toString(),
-          senderName: response.data.senderName,
-          senderAvatar: response.data.senderAvatar,
-          timestamp: response.data.timestamp,
+          senderId: (messageData.senderId || currentUserId)?.toString(),
+          senderName: messageData.senderName || currentUserName,
+          senderAvatar: messageData.senderAvatar || user.AvatarUrl || null,
+          timestamp: messageData.sentAt || new Date().toISOString(),
           status: "delivered",
           type: "text",
         };
+
+        console.log("[USE_BUYER_CHAT] New message created:", newMessage);
 
         setMessages((prev) => [...prev, newMessage]);
 
@@ -191,14 +204,21 @@ export const useBuyerChat = () => {
       const response = await ChatService.sendImage(conversationId, imageFile);
 
       if (response.success) {
+        // Get current user info for the new message
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const currentUserId = (user.id || user.ID_NguoiDung)?.toString();
+        const currentUserName = user.HoTen || user.name || "User";
+
         // Transform and add new message to current conversation
+        const messageData = response.message || response.data || response;
+
         const newMessage = {
-          id: response.data.messageId,
-          content: response.data.imageUrl,
-          senderId: response.data.senderId.toString(),
-          senderName: response.data.senderName,
-          senderAvatar: response.data.senderAvatar,
-          timestamp: response.data.timestamp,
+          id: messageData.messageId || response.messageId,
+          content: messageData.imageUrl || messageData.content,
+          senderId: (messageData.senderId || currentUserId)?.toString(),
+          senderName: messageData.senderName || currentUserName,
+          senderAvatar: messageData.senderAvatar || user.AvatarUrl || null,
+          timestamp: messageData.sentAt || new Date().toISOString(),
           status: "delivered",
           type: "image",
         };

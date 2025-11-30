@@ -11,6 +11,9 @@ const SellerMessages = () => {
   const { user } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 
+  console.log("[SELLER_MESSAGES] Current user:", user);
+  console.log("[SELLER_MESSAGES] User ID:", user?.id || user?.ID_NguoiDung);
+
   const {
     conversations,
     messages,
@@ -23,6 +26,9 @@ const SellerMessages = () => {
     sendMessage,
     markAsRead,
   } = useMessages();
+
+  console.log("[SELLER_MESSAGES] Messages:", messages);
+  console.log("[SELLER_MESSAGES] Active conversation:", activeConversation);
 
   // Load conversations on component mount
   useEffect(() => {
@@ -286,7 +292,7 @@ const SellerMessages = () => {
               >
                 <MessageThread
                   messages={messages}
-                  currentSellerId={user?.id}
+                  currentSellerId={(user?.id || user?.ID_NguoiDung)?.toString()}
                   formatTime={formatTime}
                   isLoading={isLoading}
                   hasError={hasError}

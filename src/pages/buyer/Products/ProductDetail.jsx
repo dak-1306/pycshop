@@ -405,8 +405,6 @@ const ProductDetail = () => {
         <div className="pd-breadcrumb">
           <span onClick={() => navigate("/")}>Trang chủ</span>
           <span className="pd-breadcrumb-separator">&gt;</span>
-          <span onClick={() => navigate("/products")}>Sản phẩm</span>
-          <span className="pd-breadcrumb-separator">&gt;</span>
           <span>{product.name}</span>
         </div>
 

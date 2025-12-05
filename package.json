@@ -38,7 +38,19 @@
     "start": "npm run backend",
     "test:chat": "node test-chat-integration.js",
     "test:order-chat": "node test-order-chat-integration.js",
-    "test:integration": "node test-full-integration.js"
+    "test:integration": "node test-full-integration.js",
+    "dev:chat": "vite --mode development --config vite.config.chat.js",
+    "build:chat": "vite build --mode production --config vite.config.chat.js",
+    "build:analyze": "vite build --mode analyze && npx vite-bundle-analyzer dist",
+    "test": "vitest",
+    "test:backend": "mocha microservice/**/*.test.js --timeout 5000",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:api": "newman run tests/api/pycshop.postman_collection.json",
+    "test:realtime": "node tests/realtime/websocket-test.js",
+    "test:performance": "artillery run tests/performance/load-test.yml",
+    "test:websocket": "node tests/performance/websocket-stress.js",
+    "lighthouse": "lighthouse http://localhost:5173 --output html --output-path ./reports/lighthouse.html"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.1.0",
